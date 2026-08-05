@@ -11,7 +11,6 @@
   --color-text-muted: #64748B;
   --color-border: #E2E8F0;
   --color-dark: #323232;
-  --color-dark-border: #323238;
   --color-light-bg: #F4F4F4;
   --color-footer-bg: #EFEFEF;
 
@@ -245,6 +244,11 @@ button { font: inherit; }
   color: #292929;
   text-decoration: none;
 }
+.nav__link-flip {
+  display: inline-block;
+  position: relative;
+}
+.nav__link-face--back { display: none; }
 .nav__cta {
   margin: 16px 4px 0;
   justify-content: center;
@@ -266,8 +270,25 @@ button { font: inherit; }
     transition: none;
   }
   .nav__link { padding: 0; border-bottom: none; }
-  .nav__link:hover { color: var(--color-primary); }
   .nav__cta { margin: 0; }
+
+  .nav__link-flip { perspective: 400px; }
+  .nav__link-face {
+    display: block;
+    backface-visibility: hidden;
+    transition: transform .5s cubic-bezier(.25, 1, .38, 1);
+  }
+  .nav__link-face--front { transform: rotateX(0deg); }
+  .nav__link-face--back {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: var(--color-primary);
+    transform: rotateX(90deg);
+  }
+  .nav__link:hover .nav__link-face--front { transform: rotateX(-90deg); }
+  .nav__link:hover .nav__link-face--back { transform: rotateX(0deg); }
 }
 
 /* ===========================================================
@@ -416,7 +437,7 @@ button { font: inherit; }
 }
 .service__blob {
   background: #F15200;
-  opacity: .55;
+  opacity: .08;
 }
 .service__blob--1 { width: 320px; height: 320px; right: -150px; top: -70px; }
 .service__blob--2 { width: 320px; height: 320px; left: -170px; top: 160px; }
@@ -475,7 +496,6 @@ button { font: inherit; }
 .service__mockup img {
   width: 100%;
   border-radius: 12px;
-  border: 2px solid var(--color-dark-border);
 }
 
 /* ===========================================================
@@ -668,6 +688,7 @@ button { font: inherit; }
   flex-direction: column;
   gap: 24px;
   max-width: 704px;
+  margin-inline: auto;
 }
 .field { display: flex; flex-direction: column; gap: 8px; }
 .field__label {
@@ -729,3 +750,26 @@ button { font: inherit; }
 }
 .site-footer__link:hover { text-decoration: underline; }
 .site-footer__copy { font-size: 14px; color: #000; }
+
+/* ===========================================================
+   Scroll reveal (fade + rise on entering viewport)
+   =========================================================== */
+.js-reveal .reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity .8s cubic-bezier(.25, 1, .38, 1), transform .8s cubic-bezier(.25, 1, .38, 1);
+  will-change: opacity, transform;
+}
+.js-reveal .reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.js-reveal .news__item.reveal:nth-child(2) { transition-delay: .12s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .js-reveal .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

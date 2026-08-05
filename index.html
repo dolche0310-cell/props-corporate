@@ -17,11 +17,36 @@
     <a href="#top" class="logo">MiAI</a>
 
     <nav class="nav" id="site-nav">
-      <a href="#about" class="nav__link">About</a>
-      <a href="#service" class="nav__link">Service</a>
-      <a href="#news" class="nav__link">News</a>
-      <a href="#team" class="nav__link">Team</a>
-      <a href="#company" class="nav__link">Company</a>
+      <a href="#about" class="nav__link">
+        <span class="nav__link-flip">
+          <span class="nav__link-face nav__link-face--front">About</span>
+          <span class="nav__link-face nav__link-face--back" aria-hidden="true">About</span>
+        </span>
+      </a>
+      <a href="#service" class="nav__link">
+        <span class="nav__link-flip">
+          <span class="nav__link-face nav__link-face--front">Service</span>
+          <span class="nav__link-face nav__link-face--back" aria-hidden="true">Service</span>
+        </span>
+      </a>
+      <a href="#news" class="nav__link">
+        <span class="nav__link-flip">
+          <span class="nav__link-face nav__link-face--front">News</span>
+          <span class="nav__link-face nav__link-face--back" aria-hidden="true">News</span>
+        </span>
+      </a>
+      <a href="#team" class="nav__link">
+        <span class="nav__link-flip">
+          <span class="nav__link-face nav__link-face--front">Team</span>
+          <span class="nav__link-face nav__link-face--back" aria-hidden="true">Team</span>
+        </span>
+      </a>
+      <a href="#company" class="nav__link">
+        <span class="nav__link-flip">
+          <span class="nav__link-face nav__link-face--front">Company</span>
+          <span class="nav__link-face nav__link-face--back" aria-hidden="true">Company</span>
+        </span>
+      </a>
       <a href="#contact" class="btn btn--primary btn--sm nav__cta">Contact</a>
     </nav>
 
@@ -38,7 +63,7 @@
     <span class="hero__dots" aria-hidden="true"></span>
     <span class="hero__blob hero__blob--1" aria-hidden="true"></span>
     <span class="hero__blob hero__blob--2" aria-hidden="true"></span>
-    <div class="wrap">
+    <div class="wrap reveal">
       <h1 class="hero__title">
         <span class="hero__highlight">産業のAIシフト</span><span class="hero__rest">を<span class="hero__word">支援する</span></span>
       </h1>
@@ -50,12 +75,12 @@
   <section class="about" id="about">
     <span class="about__blob" aria-hidden="true"></span>
     <div class="wrap">
-      <div class="section-label section-label--light">
+      <div class="section-label section-label--light reveal">
         <span class="section-label__bg" aria-hidden="true">About</span>
         <span class="section-label__caption">私たちについて</span>
       </div>
 
-      <div class="about__card">
+      <div class="about__card reveal">
         <p class="about__body">MiAI株式会社は「人の力を最大化するソフトウェアをつくる」という想いのもと2023年6月に設立されました。ChatGPT等の普及によりAIが当たり前のように使われるようになってきた令和の時代に、人事・営業・カスタマーサポートなどの「企業と人のコミュニケーション」をサポートする AI 技術の開発を進めています。</p>
         <p class="about__wordmark" aria-hidden="true">MiAI</p>
       </div>
@@ -65,7 +90,7 @@
   <!-- Service -->
   <section class="service" id="service">
     <div class="wrap">
-      <div class="service__panel">
+      <div class="service__panel reveal">
         <span class="service__blob service__blob--1" aria-hidden="true"></span>
         <span class="service__blob service__blob--2" aria-hidden="true"></span>
 
@@ -95,13 +120,13 @@
   <!-- News -->
   <section class="news" id="news">
     <div class="wrap">
-      <div class="section-label section-label--light">
+      <div class="section-label section-label--light reveal">
         <span class="section-label__bg" aria-hidden="true">News</span>
         <span class="section-label__caption">お知らせ</span>
       </div>
 
       <div class="news__list">
-        <article class="news__item">
+        <article class="news__item reveal">
           <div class="news__thumb">
             <img src="assets/images/news-1.png" alt="株式会社日比谷花壇がAI面接サービス「MiAI面接」を導入">
           </div>
@@ -110,7 +135,7 @@
           <p class="news__excerpt">プロップス株式会社（本社：東京都中央区、代表取締役 松元勇人）は、株式会社日比谷花壇（本社：東京都港区、代表取締役社長 宮島 浩彰）がAI面接サービス「MiAI面接」を正式導入したことをお知らせします...</p>
         </article>
 
-        <article class="news__item">
+        <article class="news__item reveal">
           <div class="news__thumb">
             <img src="assets/images/news-2.png" alt="AIで採用を加速する。MiAI面接を正式リリース">
           </div>
@@ -126,12 +151,12 @@
   <section class="team" id="team">
     <span class="team__dots" aria-hidden="true"></span>
     <div class="wrap">
-      <div class="section-label section-label--light">
+      <div class="section-label section-label--light reveal">
         <span class="section-label__bg" aria-hidden="true">Team</span>
         <span class="section-label__caption">代表紹介</span>
       </div>
 
-      <div class="team__card">
+      <div class="team__card reveal">
         <div class="team__photo">
           <img src="assets/images/portrait.png" alt="代表取締役 松元 勇人">
         </div>
@@ -147,12 +172,12 @@
   <!-- Company -->
   <section class="company" id="company">
     <div class="wrap">
-      <div class="section-label section-label--muted">
+      <div class="section-label section-label--muted reveal">
         <span class="section-label__bg" aria-hidden="true">Company</span>
         <span class="section-label__caption">会社概要</span>
       </div>
 
-      <dl class="company__table">
+      <dl class="company__table reveal">
         <div class="company__row">
           <dt>会社名</dt>
           <dd>プロップス株式会社</dd>
@@ -182,12 +207,12 @@
     <span class="contact__dots contact__dots--1" aria-hidden="true"></span>
     <span class="contact__dots contact__dots--2" aria-hidden="true"></span>
     <div class="wrap">
-      <div class="section-label section-label--dark">
+      <div class="section-label section-label--dark reveal">
         <span class="section-label__bg" aria-hidden="true">Contact</span>
         <span class="section-label__caption">お問い合わせ</span>
       </div>
 
-      <form class="contact__form" id="contact-form" novalidate>
+      <form class="contact__form reveal" id="contact-form" novalidate>
         <div class="field">
           <span class="field__label">お名前 <span class="badge">必須</span></span>
           <label class="sr-only" for="field-name">お名前</label>
