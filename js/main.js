@@ -58,8 +58,8 @@
       heroDotsEl.innerHTML = '';
 
       var isDesktop = window.matchMedia('(min-width: 768px)').matches;
-      var size = isDesktop ? 630 : 380;
-      var spacing = isDesktop ? 26 : 20;
+      var size = isDesktop ? 760 : 460;
+      var spacing = isDesktop ? 19 : 14;
       var centerX = size * 0.30;
       var centerY = size * 0.65;
       // Match the old mask's "closest-side" radius so the cluster keeps
@@ -76,20 +76,33 @@
           if (dist > radius) continue;
 
           var falloff = Math.max(0, 1 - Math.pow(dist / radius, 1.6));
+
+          // Outer element: grid position + the one-shot scatter->gather
+          // snap (transition-driven).
           var dot = document.createElement('span');
           dot.className = 'hero__dot';
           dot.style.left = x + 'px';
           dot.style.top = y + 'px';
-          dot.style.opacity = (falloff * 0.75).toFixed(2);
+          dot.style.opacity = (falloff * 0.85).toFixed(2);
 
-          // Each dot starts scattered from its true grid slot in its own
-          // random direction; scrolling snaps every dot back to (0, 0) at
-          // once via the .is-gathered transition below.
           var angle = Math.random() * Math.PI * 2;
-          var travel = 40 + Math.random() * 90;
+          var travel = 50 + Math.random() * 110;
           dot.style.setProperty('--dx', (Math.cos(angle) * travel).toFixed(1) + 'px');
           dot.style.setProperty('--dy', (Math.sin(angle) * travel).toFixed(1) + 'px');
 
+          // Inner element: continuous small, randomized wiggle that keeps
+          // running before AND after the big snap, so the cluster never
+          // looks fully static.
+          var core = document.createElement('span');
+          core.className = 'hero__dot-core';
+          var wAngle = Math.random() * Math.PI * 2;
+          var wTravel = 4 + Math.random() * 9;
+          core.style.setProperty('--wx', (Math.cos(wAngle) * wTravel).toFixed(1) + 'px');
+          core.style.setProperty('--wy', (Math.sin(wAngle) * wTravel).toFixed(1) + 'px');
+          core.style.animationDuration = (2.2 + Math.random() * 3).toFixed(2) + 's';
+          core.style.animationDelay = (-Math.random() * 5).toFixed(2) + 's';
+
+          dot.appendChild(core);
           frag.appendChild(dot);
         }
       }
