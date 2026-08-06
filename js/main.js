@@ -66,6 +66,7 @@
 
   var serviceScroller = document.getElementById('service-scroller');
   var servicePin = document.querySelector('.service__pin');
+  var serviceTextList = document.getElementById('service-text-list');
   var serviceItems = document.querySelectorAll('.service__text-item');
   var serviceImages = document.querySelectorAll('.service__mockup-img');
 
@@ -93,6 +94,7 @@
 
       if (!serviceDesktopMq.matches) {
         setServiceActive(0);
+        if (serviceTextList) serviceTextList.style.transform = '';
         return;
       }
 
@@ -108,6 +110,14 @@
       var progress = Math.min(1, Math.max(0, scrolledIntoPin / totalRange));
       var index = Math.min(serviceItems.length - 1, Math.floor(progress * serviceItems.length));
       setServiceActive(index);
+
+      // The text list slides up continuously with scroll progress (not a
+      // discrete jump), one "slot" (the first item's height) per item.
+      if (serviceTextList && serviceItems.length > 1) {
+        var slotHeight = serviceItems[0].offsetHeight;
+        var maxOffset = slotHeight * (serviceItems.length - 1);
+        serviceTextList.style.transform = 'translateY(' + (-progress * maxOffset) + 'px)';
+      }
     };
 
     window.addEventListener('scroll', function () {

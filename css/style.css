@@ -465,7 +465,7 @@ button { font: inherit; }
 .service__pin,
 .service__pin-grid { display: block; }
 
-.service__text-track {
+.service__text-list {
   display: flex;
   flex-direction: column;
 }
@@ -478,7 +478,9 @@ button { font: inherit; }
 @media (min-width: 768px) {
   /* Desktop: the whole dark panel stays pinned in place (its own natural
      height, no extra empty space) while a tall invisible scroller provides
-     the scroll distance used to switch between item 01 and 02. */
+     the scroll distance used to switch between item 01 and 02. The image
+     crossfades in place; the text list instead slides upward inside a
+     fixed-height, clipped window so it reads like ordinary scrolling. */
   .service__scroller {
     position: relative;
     height: 260vh;
@@ -495,18 +497,21 @@ button { font: inherit; }
     gap: 60px;
   }
 
-  .service__text-track { position: relative; min-height: 300px; }
-  .service__text-item {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    opacity: 0;
-    transition: opacity .6s ease;
-    pointer-events: none;
+  .service__text-track {
+    position: relative;
+    height: 340px;
+    overflow: hidden;
   }
-  .service__text-item.is-active { opacity: 1; pointer-events: auto; }
+  .service__text-list {
+    display: block;
+    will-change: transform;
+  }
+  .service__text-item {
+    min-height: 340px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
   .service__text-item + .service__text-item {
     margin-top: 0;
     padding-top: 0;
