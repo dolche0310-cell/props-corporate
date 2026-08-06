@@ -476,17 +476,18 @@ button { font: inherit; }
 }
 
 @media (min-width: 768px) {
-  /* Desktop: the pin-grid (text + image) stays pinned in place while a tall
-     scroller provides the scroll distance used to switch between items. */
+  /* Desktop: the whole dark panel stays pinned in place (its own natural
+     height, no extra empty space) while a tall invisible scroller provides
+     the scroll distance used to switch between item 01 and 02. */
   .service__scroller {
     position: relative;
-    height: 190vh;
+    height: 260vh;
   }
   .service__pin {
     position: sticky;
     top: calc(var(--header-h) + 24px);
-    overflow: hidden;
   }
+
   .service__pin-grid {
     display: grid;
     grid-template-columns: 1fr 44%;

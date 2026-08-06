@@ -65,10 +65,11 @@
   }
 
   var serviceScroller = document.getElementById('service-scroller');
+  var servicePin = document.querySelector('.service__pin');
   var serviceItems = document.querySelectorAll('.service__text-item');
   var serviceImages = document.querySelectorAll('.service__mockup-img');
 
-  if (serviceScroller && serviceItems.length) {
+  if (serviceScroller && servicePin && serviceItems.length) {
     var serviceDesktopMq = window.matchMedia('(min-width: 768px)');
     var serviceTicking = false;
 
@@ -82,6 +83,11 @@
       });
     };
 
+    var getStickyTopOffset = function () {
+      var headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 96;
+      return headerH + 24;
+    };
+
     var updateServiceProgress = function () {
       serviceTicking = false;
 
@@ -90,15 +96,16 @@
         return;
       }
 
-      var rect = serviceScroller.getBoundingClientRect();
-      var scrollableRange = rect.height - window.innerHeight;
+      var scrollerRect = serviceScroller.getBoundingClientRect();
+      var totalRange = serviceScroller.offsetHeight - servicePin.offsetHeight;
 
-      if (scrollableRange <= 0) {
+      if (totalRange <= 0) {
         setServiceActive(0);
         return;
       }
 
-      var progress = Math.min(1, Math.max(0, -rect.top / scrollableRange));
+      var scrolledIntoPin = getStickyTopOffset() - scrollerRect.top;
+      var progress = Math.min(1, Math.max(0, scrolledIntoPin / totalRange));
       var index = Math.min(serviceItems.length - 1, Math.floor(progress * serviceItems.length));
       setServiceActive(index);
     };
