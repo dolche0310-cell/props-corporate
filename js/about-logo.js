@@ -7,7 +7,7 @@
   var ctx = canvas.getContext('2d');
   var reducedMotionMq = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-  var DISPLAY_W = 400;
+  var DISPLAY_W = 200;
   var DISPLAY_H = Math.round(DISPLAY_W * (69 / 170));
   var DPR = Math.min(window.devicePixelRatio || 1, 2);
 

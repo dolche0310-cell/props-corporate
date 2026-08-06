@@ -482,13 +482,11 @@ button { font: inherit; }
 }
 .about__logo-canvas {
   display: inline-block;
-  width: 100%;
-  max-width: 147px;
-  height: auto;
+  /* Sized directly by js/about-logo.js (DISPLAY_W/H inline styles) so
+     the canvas's own aspect ratio is always preserved. */
 }
 @media (min-width: 768px) {
   .about__logo { margin: 0; flex-shrink: 0; }
-  .about__logo-canvas { max-width: 240px; }
 }
 
 /* ===========================================================
