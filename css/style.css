@@ -661,7 +661,7 @@ button { font: inherit; }
   }
   .service__layer--1 {
     right: 0;
-    bottom: 2%;
+    top: 30%;
     width: 50%;
     aspect-ratio: 4 / 3;
     z-index: 2;

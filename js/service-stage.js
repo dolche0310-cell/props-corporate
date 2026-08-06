@@ -7,8 +7,6 @@
   var layerEls = Array.prototype.slice.call(stage.querySelectorAll('.service__layer'));
   if (!layerEls.length) return;
 
-  var panel = stage.closest('.service__panel') || stage;
-
   var reducedMotionMq = window.matchMedia('(prefers-reduced-motion: reduce)');
   var fineHoverMq = window.matchMedia('(hover: hover) and (pointer: fine)');
   var desktopMq = window.matchMedia('(min-width: 768px)');
@@ -31,13 +29,13 @@
     };
   });
 
-  var pointerX = 0; // normalized -1..1 across the panel
+  var pointerX = 0; // normalized -1..1 across the stage, only while hovered
   var pointerY = 0;
   var rafId = null;
   var isRunning = false;
 
   function onPointerMove(e) {
-    var rect = panel.getBoundingClientRect();
+    var rect = stage.getBoundingClientRect();
     var cx = rect.left + rect.width / 2;
     var cy = rect.top + rect.height / 2;
     pointerX = Math.max(-1, Math.min(1, (e.clientX - cx) / (rect.width / 2)));
@@ -106,11 +104,13 @@
 
   function syncPointerListeners() {
     if (fineHoverMq.matches && desktopMq.matches) {
-      window.addEventListener('mousemove', onPointerMove, { passive: true });
-      panel.addEventListener('mouseleave', onPointerLeave);
+      // Only track the cursor while it's actually over the images —
+      // the rest of the panel (text, etc.) shouldn't nudge the layers.
+      stage.addEventListener('mousemove', onPointerMove, { passive: true });
+      stage.addEventListener('mouseleave', onPointerLeave);
     } else {
-      window.removeEventListener('mousemove', onPointerMove);
-      panel.removeEventListener('mouseleave', onPointerLeave);
+      stage.removeEventListener('mousemove', onPointerMove);
+      stage.removeEventListener('mouseleave', onPointerLeave);
       onPointerLeave();
     }
   }
