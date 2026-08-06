@@ -82,9 +82,14 @@
         'rotate(' + rotate.toFixed(2) + 'deg) ' +
         'rotateX(' + tiltX.toFixed(2) + 'deg) rotateY(' + tiltY.toFixed(2) + 'deg)';
       layer.el.style.opacity = opacity.toFixed(3);
+      // Whichever layer is currently forward (closer to its own localT 0)
+      // must win the stacking order outright — using the shared progress
+      // value (rather than each layer's own localT) avoids the two
+      // layers tying at the extremes, which previously let DOM order
+      // (image 02 last) always win regardless of which was enlarged.
       layer.el.style.zIndex = layer.isFirst
-        ? String(Math.round(30 - localT * 15))
-        : String(Math.round(15 + localT * 15));
+        ? String(Math.round(20 - progress * 20))
+        : String(Math.round(progress * 20));
     });
 
     rafId = requestAnimationFrame(frame);

@@ -662,7 +662,7 @@ button { font: inherit; }
   .service__layer--1 {
     right: 0;
     top: 30%;
-    width: 50%;
+    width: 60%;
     aspect-ratio: 4 / 3;
     z-index: 2;
     transform: translate3d(0, 0, -30px) rotate(-1deg);
