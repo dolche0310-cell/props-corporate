@@ -449,20 +449,34 @@ button { font: inherit; }
     padding: 56px 64px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 40px;
+    gap: 56px;
   }
 }
-.about__body {
+.about__text {
   position: relative;
   z-index: 1;
+}
+@media (min-width: 768px) {
+  .about__text { flex: 1; }
+}
+.about__heading {
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.8;
+  color: var(--color-text);
+  margin: 0 0 12px;
+}
+@media (min-width: 768px) {
+  .about__heading { font-size: 24px; margin: 0 0 16px; }
+}
+.about__body {
   font-size: 15px;
   line-height: 1.8;
   color: var(--color-text);
   max-width: 46rem;
 }
 @media (min-width: 768px) {
-  .about__body { font-size: 16px; }
+  .about__body { font-size: 18px; }
 }
 .about__wordmark {
   font-family: var(--font-logo);
@@ -470,15 +484,15 @@ button { font: inherit; }
   font-size: 52px;
   letter-spacing: .06em;
   color: var(--color-ink);
-  margin: 20px 0 0;
-  text-align: right;
+  margin: 0 0 20px;
+  text-align: center;
 }
 @media (min-width: 768px) {
-  .about__wordmark { font-size: 80px; margin: 0; flex-shrink: 0; }
+  .about__wordmark { font-size: 60px; margin: 0; flex-shrink: 0; text-align: left; }
 }
 .about__logo {
-  margin: 20px 0 0;
-  text-align: right;
+  margin: 0 0 20px;
+  text-align: center;
 }
 .about__logo-canvas {
   display: inline-block;
@@ -486,7 +500,7 @@ button { font: inherit; }
      the canvas's own aspect ratio is always preserved. */
 }
 @media (min-width: 768px) {
-  .about__logo { margin: 0; flex-shrink: 0; }
+  .about__logo { margin: 0; flex-shrink: 0; text-align: left; }
 }
 
 /* ===========================================================
