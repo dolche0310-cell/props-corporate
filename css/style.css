@@ -483,12 +483,12 @@ button { font: inherit; }
 .about__logo-canvas {
   display: inline-block;
   width: 100%;
-  max-width: 220px;
+  max-width: 147px;
   height: auto;
 }
 @media (min-width: 768px) {
   .about__logo { margin: 0; flex-shrink: 0; }
-  .about__logo-canvas { max-width: 360px; }
+  .about__logo-canvas { max-width: 240px; }
 }
 
 /* ===========================================================
