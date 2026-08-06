@@ -1,6 +1,27 @@
 (function () {
   'use strict';
 
+  var reducedMotionMq = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  // Page-load intro: a solid curtain covers the viewport from first paint
+  // (pure CSS, no JS needed for that part) and, shortly after this script
+  // runs, softly opens while the hero content streams in from the left.
+  var introOverlay = document.getElementById('intro-overlay');
+  if (introOverlay) {
+    if (reducedMotionMq.matches) {
+      introOverlay.remove();
+      document.body.classList.add('intro-revealed');
+    } else {
+      setTimeout(function () {
+        document.body.classList.add('intro-revealed');
+        introOverlay.classList.add('is-hiding');
+      }, 220);
+      introOverlay.addEventListener('transitionend', function (e) {
+        if (e.propertyName === 'opacity') introOverlay.remove();
+      });
+    }
+  }
+
   var hamburgerBtn = document.getElementById('hamburger-btn');
   var nav = document.getElementById('site-nav');
 
@@ -49,7 +70,6 @@
   }
 
   var heroDotsEl = document.getElementById('hero-dots');
-  var reducedMotionMq = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   if (heroDotsEl && !reducedMotionMq.matches) {
     var heroDotsGathered = false;
