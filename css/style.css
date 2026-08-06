@@ -73,7 +73,7 @@ button { font: inherit; }
   position: fixed;
   inset: 0;
   z-index: 300;
-  background: #DCE0E6;
+  background: #fff;
   --intro-r: 0%;
   -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent 0%, transparent var(--intro-r), #000 calc(var(--intro-r) + 3%), #000 100%);
   mask-image: radial-gradient(circle at 50% 50%, transparent 0%, transparent var(--intro-r), #000 calc(var(--intro-r) + 3%), #000 100%);
