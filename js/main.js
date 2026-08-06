@@ -54,60 +54,95 @@
   if (heroDotsEl && !reducedMotionMq.matches) {
     var heroDotsGathered = false;
 
+    // Builds a point cloud on the surface of two interlocked tori (like
+    // two chain-link rings, one lying flat, one standing perpendicular
+    // through the other's hole). Each dot gets a "gathered" target
+    // (--tx/--ty/--tz, its fixed point on the torus) and a "scattered"
+    // start (--dx/--dy/--dz, a random offset) - the CSS transition on
+    // .hero__dot morphs between the two.
     var buildHeroDots = function () {
       heroDotsEl.innerHTML = '';
 
       var isDesktop = window.matchMedia('(min-width: 768px)').matches;
       var size = isDesktop ? 760 : 460;
-      var spacing = isDesktop ? 19 : 14;
-      var centerX = size * 0.30;
-      var centerY = size * 0.65;
-      // Match the old mask's "closest-side" radius so the cluster keeps
-      // the same circular footprint as before.
-      var radius = Math.min(centerX, centerY, size - centerX, size - centerY);
+      var numU = isDesktop ? 42 : 24;
+      var numV = isDesktop ? 14 : 10;
+
+      var R = size * 0.19;   // major radius (ring size)
+      var r = R * 0.22;      // tube radius (donut thickness) - kept slim so each hole stays visible
+      var D = R * 0.88;      // offset between the two torus centers: close to R so the rings sit
+                              // mostly side by side, only hooking through each other at one edge
+
+      var tiltEl = document.createElement('div');
+      tiltEl.className = 'hero__dots-tilt';
+      var spinEl = document.createElement('div');
+      spinEl.className = 'hero__dots-spin';
 
       var frag = document.createDocumentFragment();
 
-      for (var y = spacing / 2; y < size; y += spacing) {
-        for (var x = spacing / 2; x < size; x += spacing) {
-          var dx = x - centerX;
-          var dy = y - centerY;
-          var dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist > radius) continue;
+      [0, 1].forEach(function (torusIndex) {
+        for (var iu = 0; iu < numU; iu++) {
+          for (var iv = 0; iv < numV; iv++) {
+            var u = (iu / numU) * Math.PI * 2 + (Math.random() - 0.5) * (Math.PI * 2 / numU) * 0.7;
+            var v = (iv / numV) * Math.PI * 2 + (Math.random() - 0.5) * (Math.PI * 2 / numV) * 0.8;
+            var rr = r * (0.82 + Math.random() * 0.36);
+            var ring = R + rr * Math.cos(v);
 
-          var falloff = Math.max(0, 1 - Math.pow(dist / radius, 1.6));
+            var tx, ty, tz;
+            if (torusIndex === 0) {
+              // Lies flat in the XY plane (axis along Z).
+              tx = -D + ring * Math.cos(u);
+              ty = ring * Math.sin(u);
+              tz = rr * Math.sin(v);
+            } else {
+              // Perpendicular ring, lying in the XZ plane (axis along Y),
+              // passing through the first ring's hole.
+              tx = D + ring * Math.cos(u);
+              ty = rr * Math.sin(v);
+              tz = ring * Math.sin(u);
+            }
 
-          // Outer element: grid position + the one-shot scatter->gather
-          // snap (transition-driven).
-          var dot = document.createElement('span');
-          dot.className = 'hero__dot';
-          dot.style.left = x + 'px';
-          dot.style.top = y + 'px';
-          dot.style.opacity = (falloff * 0.95).toFixed(2);
+            // Static "baked" shading from the tube's local angle so the
+            // surface reads as round even though it's rendered as flat dots.
+            var shade = 0.55 + 0.45 * (Math.cos(v) * 0.5 + 0.5);
+            var opacity = Math.min(0.95, Math.max(0.12, shade * (0.75 + Math.random() * 0.2)));
 
-          var angle = Math.random() * Math.PI * 2;
-          var travel = 50 + Math.random() * 110;
-          dot.style.setProperty('--dx', (Math.cos(angle) * travel).toFixed(1) + 'px');
-          dot.style.setProperty('--dy', (Math.sin(angle) * travel).toFixed(1) + 'px');
+            var dot = document.createElement('span');
+            dot.className = 'hero__dot';
+            dot.style.opacity = opacity.toFixed(2);
+            dot.style.setProperty('--tx', tx.toFixed(1) + 'px');
+            dot.style.setProperty('--ty', ty.toFixed(1) + 'px');
+            dot.style.setProperty('--tz', tz.toFixed(1) + 'px');
 
-          // Inner element: continuous small, randomized wiggle that keeps
-          // running before AND after the big snap, so the cluster never
-          // looks fully static.
-          var core = document.createElement('span');
-          core.className = 'hero__dot-core';
-          var wAngle = Math.random() * Math.PI * 2;
-          var wTravel = 4 + Math.random() * 9;
-          core.style.setProperty('--wx', (Math.cos(wAngle) * wTravel).toFixed(1) + 'px');
-          core.style.setProperty('--wy', (Math.sin(wAngle) * wTravel).toFixed(1) + 'px');
-          core.style.animationDuration = (2.2 + Math.random() * 3).toFixed(2) + 's';
-          core.style.animationDelay = (-Math.random() * 5).toFixed(2) + 's';
+            // Scattered start position: a random point spread across the
+            // whole cluster volume ("無秩序に広がった" chaos), well clear
+            // of the eventual torus target.
+            var angle = Math.random() * Math.PI * 2;
+            var travel = size * 0.15 + Math.random() * size * 0.35;
+            dot.style.setProperty('--dx', (Math.cos(angle) * travel).toFixed(1) + 'px');
+            dot.style.setProperty('--dy', (Math.sin(angle) * travel).toFixed(1) + 'px');
+            dot.style.setProperty('--dz', ((Math.random() - 0.5) * size * 0.25).toFixed(1) + 'px');
 
-          dot.appendChild(core);
-          frag.appendChild(dot);
+            // Continuous small, randomized wiggle that keeps the
+            // still-scattered dots feeling alive before the big gather.
+            var core = document.createElement('span');
+            core.className = 'hero__dot-core';
+            var wAngle = Math.random() * Math.PI * 2;
+            var wTravel = 4 + Math.random() * 9;
+            core.style.setProperty('--wx', (Math.cos(wAngle) * wTravel).toFixed(1) + 'px');
+            core.style.setProperty('--wy', (Math.sin(wAngle) * wTravel).toFixed(1) + 'px');
+            core.style.animationDuration = (2.2 + Math.random() * 3).toFixed(2) + 's';
+            core.style.animationDelay = (-Math.random() * 5).toFixed(2) + 's';
+
+            dot.appendChild(core);
+            frag.appendChild(dot);
+          }
         }
-      }
+      });
 
-      heroDotsEl.appendChild(frag);
+      spinEl.appendChild(frag);
+      tiltEl.appendChild(spinEl);
+      heroDotsEl.appendChild(tiltEl);
       // If the user already scrolled (e.g. rebuilding on a breakpoint
       // change), keep the cluster gathered instead of re-scattering it.
       if (heroDotsGathered) heroDotsEl.classList.add('is-gathered');

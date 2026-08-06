@@ -315,22 +315,53 @@ button { font: inherit; }
   -webkit-mask-image: none;
   mask-image: none;
   opacity: 1;
+  perspective: 780px;
 }
 @media (min-width: 768px) {
-  .hero__dots { width: 760px; height: 760px; top: -60px; right: -20px; }
+  .hero__dots { width: 760px; height: 760px; top: -60px; right: -20px; perspective: 1100px; }
 }
-/* Outer element: pure positioning + the one-shot scatter->gather snap. */
+/* Fixed viewing angle so the torus holes and the way the two rings link
+   through each other are actually legible, not a flat top-down view. */
+.hero__dots-tilt {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: rotateX(24deg) rotateZ(-6deg);
+}
+/* Continuous slow turntable spin, only once the shape has formed — this
+   is what sells the cluster as a solid 3D object rather than a flat
+   projection. */
+.hero__dots-spin {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+#hero-dots.is-gathered .hero__dots-spin {
+  animation: hero-torus-spin 34s linear infinite;
+}
+/* Starts at 45deg (not 0) - the angle where both rings read clearly as
+   circles at once, rather than one face-on and one edge-on. */
+@keyframes hero-torus-spin {
+  from { transform: rotateY(45deg); }
+  to   { transform: rotateY(405deg); }
+}
+/* Outer element: pure positioning + the scatter->gather move into place
+   on the surface of the two linked tori. */
 .hero__dot {
   position: absolute;
-  transform: translate(var(--dx, 0), var(--dy, 0));
-  transition: transform .55s cubic-bezier(.34, 1.4, .4, 1);
+  left: 50%;
+  top: 50%;
+  transform-style: preserve-3d;
+  transform: translate3d(var(--dx, 0), var(--dy, 0), var(--dz, 0));
+  transition: transform 2.4s cubic-bezier(.16, 1, .3, 1);
   will-change: transform;
 }
 #hero-dots.is-gathered .hero__dot {
-  transform: translate(0, 0);
+  transform: translate3d(var(--tx, 0), var(--ty, 0), var(--tz, 0));
 }
-/* Inner element: the visible dot, with its own small continuous wiggle
-   that keeps running before and after the outer snap. */
+/* Inner element: the visible dot. Its own small continuous wiggle only
+   runs pre-gather (chaotic phase); once the torus shape locks in, the
+   shared spin above is the only motion so the surface reads as solid. */
 .hero__dot-core {
   position: absolute;
   width: 4.5px;
@@ -341,13 +372,18 @@ button { font: inherit; }
   animation: hero-dot-wiggle ease-in-out infinite;
   will-change: transform;
 }
+#hero-dots.is-gathered .hero__dot-core {
+  animation: none;
+  transform: translate(0, 0);
+}
 @keyframes hero-dot-wiggle {
   0%, 100% { transform: translate(0, 0); }
   50% { transform: translate(var(--wx, 0), var(--wy, 0)); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .hero__dot { transform: translate(0, 0); transition: none; }
+  .hero__dot { transform: translate3d(0, 0, 0); transition: none; }
   .hero__dot-core { animation: none; }
+  #hero-dots.is-gathered .hero__dots-spin { animation: none; }
 }
 .hero__blob--1 { width: 380px; height: 380px; left: -150px; top: 30px; background: radial-gradient(circle, #FDDCC2 0%, #FDDCC2 15%, rgba(253, 220, 194, 0) 65%); opacity: .8; }
 .hero__blob--2 { width: 380px; height: 380px; right: -150px; top: 190px; background: radial-gradient(circle, #FFD9BC 0%, #FFD9BC 15%, rgba(255, 217, 188, 0) 65%); opacity: .8; }
