@@ -326,15 +326,16 @@ button { font: inherit; }
   margin: -1.5px 0 0 -1.5px;
   border-radius: 50%;
   background: #cfcfd1;
-  animation: hero-dot-drift ease-in-out infinite;
+  transform: translate(var(--dx, 0), var(--dy, 0));
+  transition: transform .55s cubic-bezier(.34, 1.4, .4, 1);
   will-change: transform;
 }
-@keyframes hero-dot-drift {
-  0%, 100% { transform: translate(0, 0); }
-  50% { transform: translate(var(--dx, 0), var(--dy, 0)); }
+/* Dots start scattered on load; scrolling a little snaps them together. */
+#hero-dots.is-gathered .hero__dot {
+  transform: translate(0, 0);
 }
 @media (prefers-reduced-motion: reduce) {
-  .hero__dot { animation: none; }
+  .hero__dot { transform: translate(0, 0); transition: none; }
 }
 .hero__blob--1 { width: 320px; height: 320px; left: -140px; top: 40px; background: radial-gradient(circle, #FEF4EE 0%, rgba(254, 244, 238, 0) 65%); }
 .hero__blob--2 { width: 320px; height: 320px; right: -140px; top: 200px; background: radial-gradient(circle, #FFEFE7 0%, rgba(255, 239, 231, 0) 65%); }

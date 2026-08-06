@@ -52,6 +52,8 @@
   var reducedMotionMq = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   if (heroDotsEl && !reducedMotionMq.matches) {
+    var heroDotsGathered = false;
+
     var buildHeroDots = function () {
       heroDotsEl.innerHTML = '';
 
@@ -80,27 +82,36 @@
           dot.style.top = y + 'px';
           dot.style.opacity = (falloff * 0.75).toFixed(2);
 
-          // Each dot drifts outward in its own random direction and back,
-          // on its own timing, so the cluster reads as scattering and
-          // re-gathering rather than one rigid shape.
+          // Each dot starts scattered from its true grid slot in its own
+          // random direction; scrolling snaps every dot back to (0, 0) at
+          // once via the .is-gathered transition below.
           var angle = Math.random() * Math.PI * 2;
-          var travel = 10 + Math.random() * 26;
+          var travel = 40 + Math.random() * 90;
           dot.style.setProperty('--dx', (Math.cos(angle) * travel).toFixed(1) + 'px');
           dot.style.setProperty('--dy', (Math.sin(angle) * travel).toFixed(1) + 'px');
-          dot.style.animationDuration = (1.6 + Math.random() * 2).toFixed(2) + 's';
-          dot.style.animationDelay = (-Math.random() * 3.5).toFixed(2) + 's';
 
           frag.appendChild(dot);
         }
       }
 
       heroDotsEl.appendChild(frag);
+      // If the user already scrolled (e.g. rebuilding on a breakpoint
+      // change), keep the cluster gathered instead of re-scattering it.
+      if (heroDotsGathered) heroDotsEl.classList.add('is-gathered');
     };
 
     buildHeroDots();
 
     var heroDotsResizeMq = window.matchMedia('(min-width: 768px)');
     heroDotsResizeMq.addEventListener('change', buildHeroDots);
+
+    var gatherHeroDots = function () {
+      if (heroDotsGathered || window.scrollY < 8) return;
+      heroDotsGathered = true;
+      heroDotsEl.classList.add('is-gathered');
+      window.removeEventListener('scroll', gatherHeroDots);
+    };
+    window.addEventListener('scroll', gatherHeroDots, { passive: true });
   }
 
   var revealEls = document.querySelectorAll('.reveal');
