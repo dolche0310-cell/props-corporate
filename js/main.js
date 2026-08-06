@@ -15,7 +15,7 @@
       setTimeout(function () {
         document.body.classList.add('intro-revealed');
         introOverlay.classList.add('is-hiding');
-      }, 220);
+      }, 350);
       introOverlay.addEventListener('transitionend', function (e) {
         if (e.propertyName === 'opacity') introOverlay.remove();
       });
