@@ -63,4 +63,54 @@
 
     revealEls.forEach(function (el) { io.observe(el); });
   }
+
+  var serviceScroller = document.getElementById('service-scroller');
+  var serviceItems = document.querySelectorAll('.service__text-item');
+  var serviceImages = document.querySelectorAll('.service__mockup-img');
+
+  if (serviceScroller && serviceItems.length) {
+    var serviceDesktopMq = window.matchMedia('(min-width: 768px)');
+    var serviceTicking = false;
+
+    var setServiceActive = function (index) {
+      var indexStr = String(index);
+      serviceItems.forEach(function (el) {
+        el.classList.toggle('is-active', el.dataset.serviceItem === indexStr);
+      });
+      serviceImages.forEach(function (img) {
+        img.classList.toggle('is-active', img.dataset.serviceImage === indexStr);
+      });
+    };
+
+    var updateServiceProgress = function () {
+      serviceTicking = false;
+
+      if (!serviceDesktopMq.matches) {
+        setServiceActive(0);
+        return;
+      }
+
+      var rect = serviceScroller.getBoundingClientRect();
+      var scrollableRange = rect.height - window.innerHeight;
+
+      if (scrollableRange <= 0) {
+        setServiceActive(0);
+        return;
+      }
+
+      var progress = Math.min(1, Math.max(0, -rect.top / scrollableRange));
+      var index = Math.min(serviceItems.length - 1, Math.floor(progress * serviceItems.length));
+      setServiceActive(index);
+    };
+
+    window.addEventListener('scroll', function () {
+      if (!serviceTicking) {
+        serviceTicking = true;
+        requestAnimationFrame(updateServiceProgress);
+      }
+    }, { passive: true });
+
+    window.addEventListener('resize', updateServiceProgress);
+    updateServiceProgress();
+  }
 })();

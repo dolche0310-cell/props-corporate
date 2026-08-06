@@ -272,23 +272,25 @@ button { font: inherit; }
   .nav__link { padding: 0; border-bottom: none; }
   .nav__cta { margin: 0; }
 
-  .nav__link-flip { perspective: 400px; }
+  .nav__link-flip { perspective: 900px; }
   .nav__link-face {
     display: block;
     backface-visibility: hidden;
-    transition: transform .5s cubic-bezier(.25, 1, .38, 1);
+    transform-style: preserve-3d;
+    will-change: transform;
+    transition: transform .6s cubic-bezier(.65, 0, .35, 1);
   }
-  .nav__link-face--front { transform: rotateX(0deg); }
+  .nav__link-face--front { transform: rotateX(0deg) translateZ(0); }
   .nav__link-face--back {
     display: block;
     position: absolute;
     top: 0;
     left: 0;
     color: var(--color-primary);
-    transform: rotateX(90deg);
+    transform: rotateX(90deg) translateZ(0);
   }
-  .nav__link:hover .nav__link-face--front { transform: rotateX(-90deg); }
-  .nav__link:hover .nav__link-face--back { transform: rotateX(0deg); }
+  .nav__link:hover .nav__link-face--front { transform: rotateX(-90deg) translateZ(0); }
+  .nav__link:hover .nav__link-face--back { transform: rotateX(0deg) translateZ(0); }
 }
 
 /* ===========================================================
@@ -298,9 +300,13 @@ button { font: inherit; }
   position: relative;
   overflow: hidden;
   padding: 48px 0 44px;
+  min-height: 700px;
+  display: flex;
+  align-items: center;
 }
+.hero > .wrap { width: 100%; }
 @media (min-width: 768px) {
-  .hero { padding: 88px 0 84px; }
+  .hero { padding: 88px 0 84px; min-height: 600px; }
 }
 .hero__dots {
   top: -60px;
@@ -449,19 +455,64 @@ button { font: inherit; }
 .service__content {
   position: relative;
   margin-top: 28px;
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
 }
 @media (min-width: 768px) {
-  .service__content {
-    flex-direction: row;
+  .service__content { margin-top: 36px; }
+}
+
+/* Mobile: plain stacked flow, no pinning */
+.service__scroller,
+.service__pin,
+.service__pin-grid { display: block; }
+
+.service__text-track {
+  display: flex;
+  flex-direction: column;
+}
+.service__text-item + .service__text-item {
+  margin-top: 40px;
+  padding-top: 40px;
+  border-top: 1px solid rgba(255, 255, 255, .08);
+}
+
+@media (min-width: 768px) {
+  /* Desktop: the pin-grid (text + image) stays pinned in place while a tall
+     scroller provides the scroll distance used to switch between items. */
+  .service__scroller {
+    position: relative;
+    height: 190vh;
+  }
+  .service__pin {
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+    overflow: hidden;
+  }
+  .service__pin-grid {
+    display: grid;
+    grid-template-columns: 1fr 44%;
     align-items: center;
-    justify-content: space-between;
     gap: 60px;
-    margin-top: 36px;
+  }
+
+  .service__text-track { position: relative; min-height: 300px; }
+  .service__text-item {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity .6s ease;
+    pointer-events: none;
+  }
+  .service__text-item.is-active { opacity: 1; pointer-events: auto; }
+  .service__text-item + .service__text-item {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
   }
 }
+
 .service__num {
   display: block;
   font-weight: 700;
@@ -489,13 +540,35 @@ button { font: inherit; }
 @media (min-width: 768px) {
   .service__desc { font-size: 15px; }
 }
-.service__mockup { order: -1; }
-@media (min-width: 768px) {
-  .service__mockup { order: 0; flex-shrink: 0; width: 44%; max-width: 506px; }
-}
-.service__mockup img {
+
+/* Mobile: each item shows its own inline image; desktop uses the pinned crossfade instead */
+.service__mockup-mobile { margin-top: 24px; }
+.service__mockup-mobile img {
   width: 100%;
   border-radius: 12px;
+}
+.service__mockup-wrap { display: none; }
+
+@media (min-width: 768px) {
+  .service__mockup-mobile { display: none; }
+  .service__mockup-wrap { display: block; }
+  .service__mockup-frame {
+    position: relative;
+    aspect-ratio: 3 / 2;
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, .04);
+  }
+  .service__mockup-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity .7s ease;
+  }
+  .service__mockup-img.is-active { opacity: 1; }
 }
 
 /* ===========================================================
