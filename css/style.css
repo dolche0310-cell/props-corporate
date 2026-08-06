@@ -64,18 +64,23 @@ button { font: inherit; }
    show it), then softly opens shortly after main.js runs while the
    hero content streams in from the left.
    =========================================================== */
+@property --intro-r {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 0%;
+}
 .intro-overlay {
   position: fixed;
   inset: 0;
   z-index: 300;
   background: #DCE0E6;
-  opacity: 1;
-  transform: scale(1);
-  transition: opacity 2.2s cubic-bezier(.65, 0, .35, 1), transform 2.2s cubic-bezier(.65, 0, .35, 1);
+  --intro-r: 0%;
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent 0%, transparent var(--intro-r), #000 calc(var(--intro-r) + 3%), #000 100%);
+  mask-image: radial-gradient(circle at 50% 50%, transparent 0%, transparent var(--intro-r), #000 calc(var(--intro-r) + 3%), #000 100%);
+  transition: --intro-r 2.2s cubic-bezier(.65, 0, .35, 1);
 }
 .intro-overlay.is-hiding {
-  opacity: 0;
-  transform: scale(1.06);
+  --intro-r: 150%;
   pointer-events: none;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -211,15 +216,17 @@ button { font: inherit; }
   justify-content: space-between;
 }
 .logo {
-  font-family: var(--font-logo);
-  font-weight: 700;
-  font-size: 26px;
-  letter-spacing: .06em;
-  color: var(--color-ink);
+  display: inline-flex;
+  align-items: center;
   text-decoration: none;
 }
+.logo__mark {
+  display: block;
+  height: 24px;
+  width: auto;
+}
 @media (min-width: 768px) {
-  .logo { font-size: 38px; }
+  .logo__mark { height: 34px; }
 }
 
 .hamburger {

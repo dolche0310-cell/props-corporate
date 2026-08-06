@@ -5,20 +5,28 @@
 
   // Page-load intro: a solid curtain covers the viewport from first paint
   // (pure CSS, no JS needed for that part) and, shortly after this script
-  // runs, softly opens while the hero content streams in from the left.
+  // runs, a circular hole grows from its center (via an animated mask)
+  // while the hero content streams in from the left.
   var introOverlay = document.getElementById('intro-overlay');
   if (introOverlay) {
     if (reducedMotionMq.matches) {
       introOverlay.remove();
       document.body.classList.add('intro-revealed');
     } else {
+      var removeIntroOverlay = function () {
+        if (introOverlay.parentNode) introOverlay.remove();
+      };
       setTimeout(function () {
         document.body.classList.add('intro-revealed');
         introOverlay.classList.add('is-hiding');
       }, 350);
       introOverlay.addEventListener('transitionend', function (e) {
-        if (e.propertyName === 'opacity') introOverlay.remove();
+        if (e.propertyName === '--intro-r') removeIntroOverlay();
       });
+      // Safety net for browsers that don't animate the custom property
+      // (no @property support) - the mask still jumps to its open state
+      // instantly in that case, so just clean up the node on a timer.
+      setTimeout(removeIntroOverlay, 2900);
     }
   }
 
