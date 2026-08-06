@@ -48,6 +48,61 @@
     });
   }
 
+  var heroDotsEl = document.getElementById('hero-dots');
+  var reducedMotionMq = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  if (heroDotsEl && !reducedMotionMq.matches) {
+    var buildHeroDots = function () {
+      heroDotsEl.innerHTML = '';
+
+      var isDesktop = window.matchMedia('(min-width: 768px)').matches;
+      var size = isDesktop ? 630 : 380;
+      var spacing = isDesktop ? 26 : 20;
+      var centerX = size * 0.30;
+      var centerY = size * 0.65;
+      // Match the old mask's "closest-side" radius so the cluster keeps
+      // the same circular footprint as before.
+      var radius = Math.min(centerX, centerY, size - centerX, size - centerY);
+
+      var frag = document.createDocumentFragment();
+
+      for (var y = spacing / 2; y < size; y += spacing) {
+        for (var x = spacing / 2; x < size; x += spacing) {
+          var dx = x - centerX;
+          var dy = y - centerY;
+          var dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist > radius) continue;
+
+          var falloff = Math.max(0, 1 - Math.pow(dist / radius, 1.6));
+          var dot = document.createElement('span');
+          dot.className = 'hero__dot';
+          dot.style.left = x + 'px';
+          dot.style.top = y + 'px';
+          dot.style.opacity = (falloff * 0.75).toFixed(2);
+
+          // Each dot drifts outward in its own random direction and back,
+          // on its own timing, so the cluster reads as scattering and
+          // re-gathering rather than one rigid shape.
+          var angle = Math.random() * Math.PI * 2;
+          var travel = 10 + Math.random() * 26;
+          dot.style.setProperty('--dx', (Math.cos(angle) * travel).toFixed(1) + 'px');
+          dot.style.setProperty('--dy', (Math.sin(angle) * travel).toFixed(1) + 'px');
+          dot.style.animationDuration = (4 + Math.random() * 5).toFixed(2) + 's';
+          dot.style.animationDelay = (-Math.random() * 8).toFixed(2) + 's';
+
+          frag.appendChild(dot);
+        }
+      }
+
+      heroDotsEl.appendChild(frag);
+    };
+
+    buildHeroDots();
+
+    var heroDotsResizeMq = window.matchMedia('(min-width: 768px)');
+    heroDotsResizeMq.addEventListener('change', buildHeroDots);
+  }
+
   var revealEls = document.querySelectorAll('.reveal');
   if (revealEls.length && 'IntersectionObserver' in window) {
     document.documentElement.classList.add('js-reveal');
