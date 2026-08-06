@@ -326,6 +326,33 @@ button { font: inherit; }
   .hero__blob--2 { width: 508px; height: 508px; right: -220px; top: 260px; }
 }
 
+/* Slow ambient motion: the glows drift like floating light, the dot
+   cluster gently breathes in and out. */
+@keyframes hero-float-1 {
+  0%   { transform: translate(0, 0) scale(1); }
+  30%  { transform: translate(4%, -6%) scale(1.08); }
+  60%  { transform: translate(-3%, 4%) scale(0.96); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+@keyframes hero-float-2 {
+  0%   { transform: translate(0, 0) scale(1); }
+  35%  { transform: translate(-5%, 5%) scale(0.94); }
+  70%  { transform: translate(4%, -3%) scale(1.07); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+@keyframes hero-dots-breathe {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.18); }
+}
+
+.hero__blob--1 { animation: hero-float-1 24s ease-in-out infinite; }
+.hero__blob--2 { animation: hero-float-2 29s ease-in-out infinite; }
+.hero__dots { animation: hero-dots-breathe 15s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__blob--1, .hero__blob--2, .hero__dots { animation: none; }
+}
+
 .hero__title {
   position: relative;
   font-weight: 700;
