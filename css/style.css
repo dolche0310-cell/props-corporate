@@ -476,6 +476,20 @@ button { font: inherit; }
 @media (min-width: 768px) {
   .about__wordmark { font-size: 80px; margin: 0; flex-shrink: 0; }
 }
+.about__logo {
+  margin: 20px 0 0;
+  text-align: right;
+}
+.about__logo-canvas {
+  display: inline-block;
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+}
+@media (min-width: 768px) {
+  .about__logo { margin: 0; flex-shrink: 0; }
+  .about__logo-canvas { max-width: 360px; }
+}
 
 /* ===========================================================
    Service

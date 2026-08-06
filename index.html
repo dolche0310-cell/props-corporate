@@ -82,7 +82,10 @@
 
       <div class="about__card reveal">
         <p class="about__body">MiAI株式会社は「人の力を最大化するソフトウェアをつくる」という想いのもと2023年6月に設立されました。ChatGPT等の普及によりAIが当たり前のように使われるようになってきた令和の時代に、人事・営業・カスタマーサポートなどの「企業と人のコミュニケーション」をサポートする AI 技術の開発を進めています。</p>
-        <p class="about__wordmark" aria-hidden="true">MiAI</p>
+        <div class="about__logo">
+          <canvas id="about-logo-canvas" class="about__logo-canvas" role="img" aria-label="MiAI"></canvas>
+          <noscript><p class="about__wordmark">MiAI</p></noscript>
+        </div>
       </div>
     </div>
   </section>
@@ -283,5 +286,6 @@
 </footer>
 
 <script src="js/main.js"></script>
+<script src="js/about-logo.js"></script>
 </body>
 </html>

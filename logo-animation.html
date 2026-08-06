@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MiAI ロゴ成り立ちアニメーション（プレビュー）</title>
+<style>
+  :root {
+    --color-primary: #ED5303;
+    --color-ink: #040404;
+    --glow-1: #FDDCC2;
+    --glow-2: #FFD9BC;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    min-height: 100%;
+    background: linear-gradient(to bottom, #FFEFE7 0%, #fff 55%);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  }
+  .stage {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+    padding: 56px 40px 44px;
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 30px 80px rgba(4,4,4,0.08), 0 4px 16px rgba(4,4,4,0.04);
+    overflow: hidden;
+  }
+  .card::before,
+  .card::after {
+    content: "";
+    position: absolute;
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    filter: blur(10px);
+    opacity: .55;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .card::before { background: radial-gradient(circle, var(--glow-1) 0%, rgba(253,220,194,0) 70%); left: -110px; top: -90px; }
+  .card::after { background: radial-gradient(circle, var(--glow-2) 0%, rgba(255,217,188,0) 70%); right: -110px; bottom: -90px; }
+
+  .canvas-wrap { position: relative; z-index: 1; }
+  #logo-canvas { display: block; width: 100%; max-width: 560px; height: auto; }
+
+  .controls { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  #replay-btn {
+    appearance: none;
+    border: 1px solid #E2E8F0;
+    background: #fff;
+    color: var(--color-ink);
+    font-size: 13px;
+    letter-spacing: .04em;
+    padding: 9px 20px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: border-color .2s ease, color .2s ease;
+  }
+  #replay-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+
+</style>
+</head>
+<body>
+  <main class="stage">
+    <div class="card">
+      <div class="canvas-wrap">
+        <canvas id="logo-canvas" aria-label="MiAI ロゴ成り立ちアニメーション"></canvas>
+      </div>
+      <div class="controls">
+        <button id="replay-btn" type="button">もう一度見る</button>
+      </div>
+    </div>
+  </main>
+
+<script>
+(function () {
+  'use strict';
+
+  var canvas = document.getElementById('logo-canvas');
+  var ctx = canvas.getContext('2d');
+  var replayBtn = document.getElementById('replay-btn');
+  var reducedMotionMq = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  var DISPLAY_W = 560;
+  var DISPLAY_H = Math.round(DISPLAY_W * (69 / 170));
+  var DPR = Math.min(window.devicePixelRatio || 1, 2);
+
+  canvas.width = DISPLAY_W * DPR;
+  canvas.height = DISPLAY_H * DPR;
+  canvas.style.width = DISPLAY_W + 'px';
+  canvas.style.height = DISPLAY_H + 'px';
+  ctx.scale(DPR, DPR);
+
+  var img = new Image();
+  img.src = 'data:image/png;base64,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';
+
+  var DURATION = 3000;
+  var PHASE_A_END = 1300; // approach
+  var PHASE_B_END = 1550; // meet / sizing each other up
+  var PHASE_C_END = 2500; // resolve into logo shape
+  var FADE_IN = 250;
+
+  var dots = [];
+  var rafId = null;
+  var startTime = null;
+
+  function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+  function easeInOutCubic(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+
+  function buildDots() {
+    var sample = document.createElement('canvas');
+    sample.width = DISPLAY_W;
+    sample.height = DISPLAY_H;
+    var sctx = sample.getContext('2d');
+    sctx.clearRect(0, 0, DISPLAY_W, DISPLAY_H);
+    sctx.drawImage(img, 0, 0, DISPLAY_W, DISPLAY_H);
+    var data = sctx.getImageData(0, 0, DISPLAY_W, DISPLAY_H).data;
+
+    var spacing = 3;
+    var centerX = DISPLAY_W / 2;
+    var centerY = DISPLAY_H / 2;
+    var list = [];
+
+    for (var y = spacing / 2; y < DISPLAY_H; y += spacing) {
+      for (var x = spacing / 2; x < DISPLAY_W; x += spacing) {
+        var px = Math.min(DISPLAY_W - 1, Math.floor(x));
+        var py = Math.min(DISPLAY_H - 1, Math.floor(y));
+        var alpha = data[(py * DISPLAY_W + px) * 4 + 3];
+        if (alpha < 140) continue;
+
+        var side = x < centerX ? -1 : 1;
+        var edgeMargin = 70 + Math.random() * 90;
+        var startX = side < 0 ? -edgeMargin : DISPLAY_W + edgeMargin;
+        var startY = y + (Math.random() - 0.5) * DISPLAY_H * 1.4 * side * -1 * 0 + (Math.random() - 0.5) * 160;
+
+        var mingleRadius = 26 + Math.random() * 46;
+        var mingleAngle = Math.random() * Math.PI * 2;
+        var mingleX = centerX + Math.cos(mingleAngle) * mingleRadius * (DISPLAY_W / DISPLAY_H) * 0.5;
+        var mingleY = centerY + Math.sin(mingleAngle) * mingleRadius;
+
+        list.push({
+          startX: startX,
+          startY: startY,
+          mingleX: mingleX,
+          mingleY: mingleY,
+          targetX: x,
+          targetY: y,
+          jitterAngle: Math.random() * Math.PI * 2,
+          jitterAmp: 5 + Math.random() * 9,
+          jitterFreq: 1.4 + Math.random() * 1.4,
+          stagger: Math.random(),
+          radius: 1.15 + Math.random() * 0.55,
+          approachCurve: (Math.random() - 0.5) * 70
+        });
+      }
+    }
+    dots = list;
+  }
+
+  function drawFrame(elapsed) {
+    ctx.clearRect(0, 0, DISPLAY_W, DISPLAY_H);
+
+    var showLogo = false, logoOpacity = 0, glowT = 0;
+
+    if (elapsed >= PHASE_C_END) {
+      var dT = clamp01((elapsed - PHASE_C_END) / (DURATION - PHASE_C_END));
+      showLogo = true;
+      logoOpacity = easeOutCubic(dT);
+      glowT = dT;
+    }
+
+    ctx.save();
+    for (var i = 0; i < dots.length; i++) {
+      var d = dots[i];
+      var x, y, opacity;
+
+      if (elapsed <= PHASE_A_END) {
+        var t = clamp01(elapsed / PHASE_A_END);
+        var e = easeOutCubic(t);
+        var midX = (d.startX + d.mingleX) / 2 + d.approachCurve;
+        x = lerp(lerp(d.startX, midX, e), lerp(midX, d.mingleX, e), e);
+        y = lerp(d.startY, d.mingleY, e);
+        opacity = clamp01(elapsed / FADE_IN);
+      } else if (elapsed <= PHASE_B_END) {
+        var t2 = (elapsed - PHASE_A_END) / (PHASE_B_END - PHASE_A_END);
+        var decay = 1 - t2;
+        var jitter = Math.sin(t2 * Math.PI * 2 * d.jitterFreq) * decay * d.jitterAmp;
+        x = d.mingleX + Math.cos(d.jitterAngle) * jitter;
+        y = d.mingleY + Math.sin(d.jitterAngle) * jitter;
+        opacity = 1;
+      } else if (elapsed <= PHASE_C_END) {
+        var dotStart = PHASE_B_END + d.stagger * 150;
+        var dotDur = Math.max(1, PHASE_C_END - dotStart);
+        var t3 = clamp01((elapsed - dotStart) / dotDur);
+        var e3 = easeInOutCubic(t3);
+        x = lerp(d.mingleX, d.targetX, e3);
+        y = lerp(d.mingleY, d.targetY, e3);
+        opacity = 1;
+      } else {
+        var t4 = clamp01((elapsed - PHASE_C_END) / (DURATION - PHASE_C_END));
+        x = d.targetX;
+        y = d.targetY;
+        opacity = lerp(1, 0.22, t4);
+      }
+
+      ctx.globalAlpha = opacity;
+      ctx.fillStyle = '#040404';
+      ctx.beginPath();
+      ctx.arc(x, y, d.radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+
+    if (glowT > 0) {
+      ctx.save();
+      var glowScale = lerp(0.7, 1.5, glowT);
+      var glowOpacity = (1 - glowT) * 0.55;
+      var gx = DISPLAY_W / 2, gy = DISPLAY_H / 2;
+      var gr = Math.max(DISPLAY_W, DISPLAY_H) * 0.55 * glowScale;
+      var grad = ctx.createRadialGradient(gx, gy, 0, gx, gy, gr);
+      grad.addColorStop(0, 'rgba(237, 83, 3, ' + glowOpacity + ')');
+      grad.addColorStop(1, 'rgba(237, 83, 3, 0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, DISPLAY_W, DISPLAY_H);
+      ctx.restore();
+    }
+
+    if (showLogo) {
+      ctx.save();
+      ctx.globalAlpha = logoOpacity;
+      ctx.drawImage(img, 0, 0, DISPLAY_W, DISPLAY_H);
+      ctx.restore();
+    }
+  }
+
+  function drawFinalStateOnly() {
+    ctx.clearRect(0, 0, DISPLAY_W, DISPLAY_H);
+    ctx.drawImage(img, 0, 0, DISPLAY_W, DISPLAY_H);
+  }
+
+  function tick(now) {
+    if (startTime === null) startTime = now;
+    var elapsed = now - startTime;
+    drawFrame(Math.min(elapsed, DURATION));
+    if (elapsed < DURATION) {
+      rafId = requestAnimationFrame(tick);
+    } else {
+      rafId = null;
+    }
+  }
+
+  function play() {
+    if (rafId) cancelAnimationFrame(rafId);
+    startTime = null;
+    rafId = requestAnimationFrame(tick);
+  }
+
+  img.onload = function () {
+    buildDots();
+    if (reducedMotionMq.matches) {
+      drawFinalStateOnly();
+    } else {
+      play();
+    }
+  };
+
+  replayBtn.addEventListener('click', function () {
+    if (reducedMotionMq.matches) {
+      drawFinalStateOnly();
+      return;
+    }
+    play();
+  });
+})();
+</script>
+</body>
+</html>
