@@ -132,10 +132,13 @@
                   </div>
                 </div>
 
-                <div class="service__mockup-wrap">
-                  <div class="service__mockup-frame">
-                    <img src="assets/images/service-mockup.png" alt="" class="service__mockup-img is-active" data-service-image="0">
-                    <img src="assets/images/service-02.png" alt="" class="service__mockup-img" data-service-image="1">
+                <div class="service__stage" id="service-stage">
+                  <span class="service__stage-glass" aria-hidden="true"></span>
+                  <div class="service__layer service__layer--0" data-service-image="0" data-depth="0.55" data-rotate="1">
+                    <img src="assets/images/service-mockup.png" alt="MiAI面接のサービス画面イメージ">
+                  </div>
+                  <div class="service__layer service__layer--1" data-service-image="1" data-depth="1" data-rotate="-1">
+                    <img src="assets/images/service-02.png" alt="法人向けAI活用支援・AI開発のイメージ">
                   </div>
                 </div>
               </div>
@@ -287,5 +290,6 @@
 
 <script src="js/main.js"></script>
 <script src="js/about-logo.js"></script>
+<script src="js/service-stage.js"></script>
 </body>
 </html>

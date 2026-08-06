@@ -147,7 +147,11 @@
   var servicePin = document.querySelector('.service__pin');
   var serviceTextList = document.getElementById('service-text-list');
   var serviceItems = document.querySelectorAll('.service__text-item');
-  var serviceImages = document.querySelectorAll('.service__mockup-img');
+
+  // Exposed for js/service-stage.js, which drives the floating image
+  // layers off the same scroll progress without needing to duplicate
+  // this section's sticky-pin geometry.
+  window.__miaiServiceProgress = 0;
 
   if (serviceScroller && servicePin && serviceItems.length) {
     var serviceDesktopMq = window.matchMedia('(min-width: 768px)');
@@ -157,9 +161,6 @@
       var indexStr = String(index);
       serviceItems.forEach(function (el) {
         el.classList.toggle('is-active', el.dataset.serviceItem === indexStr);
-      });
-      serviceImages.forEach(function (img) {
-        img.classList.toggle('is-active', img.dataset.serviceImage === indexStr);
       });
     };
 
@@ -174,6 +175,7 @@
       if (!serviceDesktopMq.matches) {
         setServiceActive(0);
         if (serviceTextList) serviceTextList.style.transform = '';
+        window.__miaiServiceProgress = 0;
         return;
       }
 
@@ -182,6 +184,7 @@
 
       if (totalRange <= 0) {
         setServiceActive(0);
+        window.__miaiServiceProgress = 0;
         return;
       }
 
@@ -189,6 +192,7 @@
       var progress = Math.min(1, Math.max(0, scrolledIntoPin / totalRange));
       var index = Math.min(serviceItems.length - 1, Math.floor(progress * serviceItems.length));
       setServiceActive(index);
+      window.__miaiServiceProgress = progress;
 
       // The text list slides up continuously with scroll progress (not a
       // discrete jump), one "slot" (the first item's height) per item.
