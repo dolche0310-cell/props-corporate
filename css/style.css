@@ -298,7 +298,6 @@ button { font: inherit; }
    =========================================================== */
 .hero {
   position: relative;
-  overflow: hidden;
   padding: 48px 0 44px;
   min-height: 700px;
   display: flex;
@@ -313,8 +312,8 @@ button { font: inherit; }
   right: -100px;
   width: 380px;
   height: 380px;
-  -webkit-mask-image: radial-gradient(circle at 30% 65%, #000 0%, #000 35%, transparent 72%);
-  mask-image: radial-gradient(circle at 30% 65%, #000 0%, #000 35%, transparent 72%);
+  -webkit-mask-image: radial-gradient(circle closest-side at 30% 65%, #000 0%, #000 45%, transparent 100%);
+  mask-image: radial-gradient(circle closest-side at 30% 65%, #000 0%, #000 45%, transparent 100%);
   transform-origin: 30% 65%;
 }
 @media (min-width: 768px) {
@@ -349,8 +348,8 @@ button { font: inherit; }
   50%      { transform: scale(1.15); }
 }
 
-.hero__blob--1 { animation: hero-float-1 28s ease-in-out infinite; }
-.hero__blob--2 { animation: hero-float-2 34s ease-in-out infinite; }
+.hero__blob--1 { animation: hero-float-1 13s ease-in-out infinite; }
+.hero__blob--2 { animation: hero-float-2 16s ease-in-out infinite; }
 .hero__dots { animation: hero-dots-breathe 15s ease-in-out infinite; }
 
 @media (prefers-reduced-motion: reduce) {
