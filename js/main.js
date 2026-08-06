@@ -83,7 +83,7 @@
           dot.className = 'hero__dot';
           dot.style.left = x + 'px';
           dot.style.top = y + 'px';
-          dot.style.opacity = (falloff * 0.85).toFixed(2);
+          dot.style.opacity = (falloff * 0.95).toFixed(2);
 
           var angle = Math.random() * Math.PI * 2;
           var travel = 50 + Math.random() * 110;
