@@ -624,26 +624,16 @@ button { font: inherit; }
 @media (min-width: 768px) {
   .service__mockup-mobile { display: none; }
 
-  /* A quiet, spacious 3D stage: two photo layers float, overlap off-grid,
-     and sit in front of a soft glass panel. JS (service-stage.js) drives
-     continuous scroll-morph + inertial mouse parallax on top of this
-     resting composition; without JS the offset overlap alone already
-     reads as an intentional, non-gridded layout. */
+  /* A quiet, spacious 3D stage: two photo layers float and overlap
+     off-grid. JS (service-stage.js) drives continuous scroll-morph +
+     inertial mouse parallax on top of this resting composition;
+     without JS the offset overlap alone already reads as an
+     intentional, non-gridded layout. */
   .service__stage {
     display: block;
     position: relative;
     height: 420px;
     perspective: 1400px;
-  }
-  .service__stage-glass {
-    position: absolute;
-    inset: 6% 12%;
-    border-radius: 28px;
-    background: rgba(255, 255, 255, .035);
-    border: 1px solid rgba(255, 255, 255, .08);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    pointer-events: none;
   }
   .service__layer {
     position: absolute;

@@ -65,9 +65,11 @@
 
       // Continuous scroll-driven morph: localT goes 0 -> 1 as this layer's
       // item recedes from "current" to "next", with no hard cut between
-      // the two states.
+      // the two states. The forward layer (localT near 0) overshoots well
+      // past its resting scale — large enough to cover the other layer
+      // as it swells forward — then settles back down as it recedes.
       var localT = layer.isFirst ? progress : 1 - progress;
-      var scale = 1 - localT * 0.16;
+      var scale = 1.38 - localT * 0.62;
       var driftX = layer.mouseX + localT * (layer.isFirst ? -22 : 22);
       var driftY = layer.mouseY - localT * 46;
       var z = layer.baseZ - localT * 60;
