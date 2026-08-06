@@ -87,8 +87,8 @@
           var travel = 10 + Math.random() * 26;
           dot.style.setProperty('--dx', (Math.cos(angle) * travel).toFixed(1) + 'px');
           dot.style.setProperty('--dy', (Math.sin(angle) * travel).toFixed(1) + 'px');
-          dot.style.animationDuration = (4 + Math.random() * 5).toFixed(2) + 's';
-          dot.style.animationDelay = (-Math.random() * 8).toFixed(2) + 's';
+          dot.style.animationDuration = (1.6 + Math.random() * 2).toFixed(2) + 's';
+          dot.style.animationDelay = (-Math.random() * 3.5).toFixed(2) + 's';
 
           frag.appendChild(dot);
         }
