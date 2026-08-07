@@ -208,15 +208,21 @@
 
   var aboutHeadingInner = document.getElementById('about-heading-inner');
   if (aboutHeadingInner && !reducedMotionMq.matches && 'IntersectionObserver' in window) {
+    // Observe the outer heading, not the inner span itself: the span
+    // starts translated fully outside its parent's overflow:hidden box
+    // (that's the mask effect), and an ancestor's clipping counts
+    // against the observed element's intersection area - so watching
+    // the span directly would keep its ratio at 0 forever.
+    var headingTarget = aboutHeadingInner.parentElement;
     var headingIo = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
         if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
+          aboutHeadingInner.classList.add('is-visible');
           headingIo.unobserve(entry.target);
         }
       });
     }, { threshold: 0.28 });
-    headingIo.observe(aboutHeadingInner);
+    headingIo.observe(headingTarget);
   } else if (aboutHeadingInner) {
     aboutHeadingInner.classList.add('is-visible');
   }
