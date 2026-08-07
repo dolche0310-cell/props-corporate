@@ -283,6 +283,38 @@ button { font: inherit; }
 .nav__cta {
   margin: 16px 4px 0;
   justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+  color: var(--color-ink);
+  border: 1.5px solid var(--color-ink);
+  border-radius: 30px;
+  transition: color .3s ease, border-color .3s ease;
+}
+.nav__cta-label {
+  position: relative;
+  z-index: 1;
+}
+.nav__cta::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 18%;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  transform: scale(0);
+  transition: transform .45s cubic-bezier(.22, 1, .36, 1);
+  will-change: transform;
+}
+.nav__cta:hover {
+  color: #fff;
+  border-color: var(--color-primary);
+}
+.nav__cta:hover::before {
+  transform: scale(16);
 }
 
 @media (min-width: 768px) {
