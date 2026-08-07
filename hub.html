@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="robots" content="noindex, nofollow" />
-<title>[INTERNAL] props-corporate Branding Design / Implementation Prototype</title>
+<title>props Branding Design / Implementation Prototype</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@500;600&display=swap" rel="stylesheet" />
@@ -45,8 +45,6 @@
   /* h1 が主役。他の要素はすべて小さく静かに。
      余白は3段階: 大96(チャンク間)/ 中56(ブロック間)/ 小8〜14 */
   h1 {
-    display: flex;
-    align-items: flex-start;
     font-family: "Inter", sans-serif;
     font-weight: 600;
     font-size: 30px;
@@ -54,10 +52,6 @@
     letter-spacing: 0.03em;
     margin-bottom: 96px;
   }
-  /* 改行位置はHTML側の <br>(Figmaと同じ "Design /" の直後)で固定する。
-     幅指定で折り返すとボックスが682px(Figmaのテキストボックス幅)まで広がり、
-     実際の文字末尾とInternalバッジの間が空いて見えるため、
-     ボックスは最長行(1行目)に張り付かせる。 */
   h1 .thin { font-weight: 500; color: var(--ink-2); }
 
   /* --- 2案グリッド --- */
@@ -314,13 +308,10 @@
     .wrap { padding: 88px 24px 112px; }
     .carousel { grid-template-columns: 1fr; } /* 狭幅は縦積み(はみ出し防止) */
     h1 {
-      flex-wrap: wrap; /* バッジが入りきらない幅では次行へ逃がす */
       font-size: 24px;
       line-height: 1.35;
       margin-bottom: 64px;
     }
-    /* 後段の .internal-tag(基本ルール)に負けないよう h1 を前置して詳細度を上げる */
-    h1 .internal-tag { margin-left: 0; margin-top: 14px; }
     .modal .box { padding: 44px 32px 40px; }
   }
   @media (prefers-reduced-motion: reduce) {
@@ -331,35 +322,12 @@
     .modal.is-open .box { opacity: 1; transform: none; }
   }
 
-  /* 内部レビュー確認用の印。Figma(1:459/1:460)実測: グレー帯(#42423F)+白文字・
-     角丸2px・115×22。タイトル1行目の文字末尾に18px空けて続ける
-     (Figmaはテキストボックス右端基準の9pxだが、実際の文字末尾からは
-     150px以上空いて見えるため、文字に寄せた18pxにしている)。
-     天地は1行目(36px)の中央 = (36-22)/2 ≒ 8px。 */
-  .internal-tag {
-    flex: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 115px;
-    height: 22px;
-    margin-left: 18px;
-    margin-top: 8px;
-    background: #42423f;
-    border-radius: 2px;
-    color: #fff;
-    font-family: "Inter", sans-serif;
-    font-weight: 500;
-    font-size: 13px;
-    letter-spacing: 1px;
-    line-height: 1;
-  }
 </style>
 </head>
 <body>
   <div class="wrap">
     <header class="stage stage-1">
-      <h1><span class="h1-text">props-corporate Branding Design <span class="thin">/<br>Implementation Prototype</span></span><span class="internal-tag">Internal</span></h1>
+      <h1>props Branding Design <span class="thin">/ Implementation Prototype</span></h1>
     </header>
 
     <!-- ============ Corporate Website Design(A案 / B案) ============ -->
