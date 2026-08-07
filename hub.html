@@ -186,6 +186,11 @@
   .links__off .arrow { display: inline-flex; }
   .links__off .arrow svg { display: block; }
 
+  /* B案は Design concept を出していないぶん、そのままだと主リンク群が
+     A案より上に来てしまう。方針テキストの下に同じ高さ(10 + 18 + 56)を
+     確保して、TOP / ABOUT US の位置を2枚で揃える。 */
+  .card-b .policy { margin-bottom: 84px; }
+
   /* --- 以降のセクション(枠のみ・素材待ち) --- */
   .logos { margin-top: 96px; }
   /* セクション見出しは完全に同一ルールを共有:
@@ -377,9 +382,6 @@
         <section class="card card-b">
           <p class="name">Design B</p>
           <p class="policy">モノクローム × フォトグラフィック</p>
-          <button class="concept-link" type="button" data-concept="b" aria-haspopup="dialog">
-            Design concept
-          </button>
           <div class="links">
             <span class="links__off" aria-disabled="true">TOP <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
             <span class="links__off" aria-disabled="true">ABOUT US <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
