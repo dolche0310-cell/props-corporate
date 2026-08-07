@@ -238,8 +238,10 @@ body {
 /* ===========================================================
    Hero
    =========================================================== */
-/* Figma DESIGN B(39:23141)のヒーロー。1440×651のキャンバス(フレーム座標 y=123〜774)に
-   45°回転した正方形の写真3枚を置き、その上に見出しを重ねる。
+/* Figma DESIGN B(39:23141)のヒーロー。node 41:46593実測(mask groupの子フレーム
+   106:44356 / 106:44361の絶対座標)に基づく、菱形2枚(ocean/city)構成。
+   1440×775のキャンバス(フレーム座標 y=88〜863、ヘッダー下端〜Aboutラベル直前)に
+   45°回転した正方形の写真を置き、その上に見出しを重ねる。
    キャンバスの縦横比を固定し、位置・サイズをすべて%で指定することで
    幅が変わっても構図が崩れない(1440基準の比率がそのまま保たれる)。 */
 .v2-hero { padding: 20px 0 0; }
@@ -253,8 +255,8 @@ body {
 }
 .v2-hero__stage {
   position: relative;
-  aspect-ratio: 1440 / 651;
-  /* 左右の菱形はフレーム外へはみ出す(Figmaもフレームで切れている)。
+  aspect-ratio: 1440 / 775;
+  /* 菱形はフレーム外へはみ出す(Figmaもフレームで切れている)。
      クリップしないと横スクロールが出る。 */
   overflow: hidden;
 }
@@ -262,28 +264,21 @@ body {
   position: absolute;
   /* 45°回転した正方形 = 菱形。マスクSVGの代わりにclip-pathで描く */
   clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  background: #eee;
 }
-/* 写真は枠に対する実寸・オフセット(%)で置く。object-fitではなく実寸指定なのは、
-   Figmaのトリミング位置(mask-position)をそのまま再現するため。 */
-.v2-hero__dia img {
-  position: absolute;
-  display: block;
-  max-width: none;
-}
-/* width は1440基準、height は651基準の%。stageの縦横比が固定なので両者は同じpxになる */
-.v2-hero__dia--1 { left: -3.4028%; top: 9.2166%; width: 41.0515%; height: 90.8051%; }
-.v2-hero__dia--1 img { left: -11.5030%; top: -52.2717%; width: 287.7457%; height: 191.8305%; }
-.v2-hero__dia--2 { left: 42.8472%; top: 32.7189%; width: 27.2521%; height: 60.2811%; }
-.v2-hero__dia--2 img { left: -1.8070%; top: -4.7670%; width: 106.3022%; height: 106.0071%; }
-.v2-hero__dia--3 { left: 61.1410%; top: 0; width: 44.1368%; height: 97.6298%; }
-.v2-hero__dia--3 img { left: -155.0871%; top: -38.3776%; width: 264.9219%; height: 176.6707%; }
+.v2-hero__dia img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* node 106:44356 (x=-49,y=-184,w=1019,h=1019) 実測。canvas top はヘッダー下端
+   (root y=88)基準なのでyは -184-88=-272 として%化 */
+.v2-hero__dia--ocean { left: -3.4028%; top: -35.0968%; width: 70.7639%; height: 131.4839%; }
+/* node 106:44361 (x=883,y=227,w=635.57,h=635.57) 実測。y=227-88=139 */
+.v2-hero__dia--city  { left: 61.3194%; top: 17.9355%; width: 44.1368%; height: 82.0090%; }
 
 /* SP: Figmaに該当フレームが無いため、見出しを写真の上に重ねず縦に積む */
 .v2-hero__content { padding: 24px 0 0; }
 @media (min-width: 768px) {
   .v2-hero__content {
     position: absolute;
-    top: 12.9032%; /* Figma: 見出し y=207 - キャンバス上端 123 = 84px / 651 */
+    top: 19.0968%; /* Figma: 見出し y=236 - キャンバス上端 88 = 148 / 775 */
     left: 0;
     right: 0;
     padding: 0;
