@@ -834,10 +834,15 @@ body.intro-revealed .hero__intro-item {
 /* Mobile: each item shows its own inline image; desktop uses the
    floating 3D stage instead */
 .service__mockup-mobile { margin-top: 24px; }
-.service__mockup-mobile img {
+.service__mockup-mobile img,
+.service__mockup-mobile video {
+  display: block;
   width: 100%;
   border-radius: 12px;
 }
+/* ループ動画は暗い映像なので、poster が出るまでの一瞬に白が挟まらないよう
+   要素自体にも下地の暗色を敷いておく */
+.service__loop-video { background: #05070a; }
 .service__stage { display: none; }
 
 @media (min-width: 768px) {
@@ -864,7 +869,10 @@ body.intro-revealed .hero__intro-item {
     will-change: transform, opacity;
     transition: box-shadow .4s ease;
   }
-  .service__layer img {
+  /* 面の中身が img でも video でも、枠(aspect-ratio 4/3)は変えずに
+     cover で埋める。動画は 16:9 なので左右がトリミングされる。 */
+  .service__layer img,
+  .service__layer video {
     display: block;
     width: 100%;
     height: 100%;

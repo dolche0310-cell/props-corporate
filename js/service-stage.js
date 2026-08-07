@@ -1,13 +1,22 @@
 (function () {
   'use strict';
 
+  var reducedMotionMq = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  // ループ動画は装飾。動きを減らす設定なら再生せず、poster の静止画で見せる。
+  // stage の有無より先に処理する(SP側の動画は stage の外にあるため)。
+  if (reducedMotionMq.matches) {
+    Array.prototype.forEach.call(
+      document.querySelectorAll('.service__loop-video'),
+      function (v) { v.autoplay = false; v.pause(); }
+    );
+  }
+
   var stage = document.getElementById('service-stage');
   if (!stage) return;
 
   var layerEls = Array.prototype.slice.call(stage.querySelectorAll('.service__layer'));
   if (!layerEls.length) return;
-
-  var reducedMotionMq = window.matchMedia('(prefers-reduced-motion: reduce)');
   var fineHoverMq = window.matchMedia('(hover: hover) and (pointer: fine)');
   var desktopMq = window.matchMedia('(min-width: 768px)');
 

@@ -142,7 +142,9 @@
                         <img src="assets/images/arrow-icon.svg" alt="" class="btn__icon">
                       </a>
                       <div class="service__mockup-mobile">
-                        <img src="assets/images/service-mockup.png" alt="MiAI面接のサービス画面イメージ">
+                        <video class="service__loop-video" src="assets/videos/service-01.mp4"
+                               poster="assets/images/service-mockup.png"
+                               autoplay loop muted playsinline preload="metadata" aria-hidden="true"></video>
                       </div>
                     </div>
 
@@ -158,8 +160,12 @@
                 </div>
 
                 <div class="service__stage" id="service-stage">
+                  <!-- 01 の面は動画。枠(4/3)と service-stage.js のパララックスはそのままで、
+                       中身だけ差し替えている。読み込み前は poster の静止画が出る。 -->
                   <div class="service__layer service__layer--0" data-service-image="0" data-depth="0.55" data-rotate="1">
-                    <img src="assets/images/service-mockup.png" alt="MiAI面接のサービス画面イメージ">
+                    <video class="service__loop-video" src="assets/videos/service-01.mp4"
+                           poster="assets/images/service-mockup.png"
+                           autoplay loop muted playsinline preload="metadata" aria-hidden="true"></video>
                   </div>
                   <div class="service__layer service__layer--1" data-service-image="1" data-depth="1" data-rotate="-1">
                     <img src="assets/images/service-02.png" alt="法人向けAI活用支援・AI開発のイメージ">
