@@ -595,10 +595,19 @@ body.intro-revealed .hero__intro-item {
 
 .about__card {
   position: relative;
-  background: #fff;
+  /* Frosted glass (Figma 180-22767): translucent panel + blur so the
+     blob glow behind it softens through, plus a soft shadow and a
+     thin light-catching edge. */
+  background: rgba(255, 255, 255, .55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, .6);
   border-radius: 16px;
   padding: 32px 24px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
+  box-shadow:
+    0 24px 48px -16px rgba(15, 23, 42, .14),
+    0 2px 8px rgba(15, 23, 42, .04),
+    inset 0 1px 0 rgba(255, 255, 255, .6);
 }
 @media (min-width: 768px) {
   .about__card {
