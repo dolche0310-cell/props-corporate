@@ -29,6 +29,11 @@
     markPaths.forEach(function (path) {
       path.style.strokeDashoffset = '0';
     });
+    // Construction guides (circles + tangent) fade out once the mark
+    // has finished filling in, same moment the grid starts its own fade.
+    setTimeout(function () {
+      svg.classList.add('is-complete');
+    }, 2000);
   }
 
   if (!('IntersectionObserver' in window)) {

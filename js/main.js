@@ -206,6 +206,21 @@
     revealEls.forEach(function (el) { io.observe(el); });
   }
 
+  var aboutHeadingInner = document.getElementById('about-heading-inner');
+  if (aboutHeadingInner && !reducedMotionMq.matches && 'IntersectionObserver' in window) {
+    var headingIo = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          headingIo.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.28 });
+    headingIo.observe(aboutHeadingInner);
+  } else if (aboutHeadingInner) {
+    aboutHeadingInner.classList.add('is-visible');
+  }
+
   var serviceScroller = document.getElementById('service-scroller');
   var servicePin = document.querySelector('.service__pin');
   var serviceTextList = document.getElementById('service-text-list');

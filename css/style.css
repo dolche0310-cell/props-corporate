@@ -578,9 +578,27 @@ body.intro-revealed .hero__intro-item {
   line-height: 1.8;
   color: var(--color-text);
   margin: 0 0 12px;
+  overflow: hidden; /* the mask the text slides up through */
 }
 @media (min-width: 768px) {
   .about__heading { font-size: 24px; margin: 0 0 16px; }
+}
+/* Slides up from below while the heading's own overflow:hidden clips
+   it, so it reads as being pushed up out of a mask rather than a
+   plain fade. One-shot, triggered on scroll (see js/main.js). */
+.about__heading-inner {
+  display: block;
+  transform: translateY(100%);
+  opacity: 0;
+  transition: transform .8s cubic-bezier(.16, 1, .3, 1), opacity .8s ease;
+  will-change: transform, opacity;
+}
+.about__heading-inner.is-visible {
+  transform: translateY(0);
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .about__heading-inner { transform: none; opacity: 1; transition: none; }
 }
 .about__body {
   font-size: 15px;
@@ -642,12 +660,22 @@ body.intro-revealed .hero__intro-item {
   opacity: 1;
   transform: scale(1);
 }
+/* Construction guides are done their job once the mark is filled in -
+   fade them out alongside the grid instead of leaving them on screen. */
+#about-logo-svg.is-complete .logo-anim__circle {
+  opacity: 0;
+  transition: opacity .2s ease;
+}
 
 .logo-anim__tangent {
   transition: stroke-dashoffset .4s ease .8s;
   will-change: stroke-dashoffset;
 }
 #about-logo-svg.is-playing .logo-anim__tangent { stroke-dashoffset: 0; }
+#about-logo-svg.is-complete .logo-anim__tangent {
+  opacity: 0;
+  transition: opacity .2s ease;
+}
 
 .logo-anim__mark path {
   fill: var(--color-ink);
