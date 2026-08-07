@@ -166,6 +166,39 @@
   }
   .links a:hover::after { transform: scaleX(1); transition-duration: 0.35s; }
 
+  /* 遷移先がまだ無い案のリンク。字面は主リンクと揃えたまま、色だけ落として
+     「今は押せない」ことを示す。下線もホバー移動も付けない。 */
+  .links__off {
+    align-self: flex-start;
+    font-family: "Inter", sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.08em;
+    color: var(--ink-2);
+    opacity: 0.42;
+    padding: 2px 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: default;
+    user-select: none;
+  }
+  .links__off .arrow { display: inline-flex; }
+  .links__off .arrow svg { display: block; }
+
+  /* 案名の右に添える小さな状態表示 */
+  .name__wip {
+    display: inline-block;
+    font-size: 9.5px;
+    letter-spacing: 0.08em;
+    color: var(--ink-2);
+    border: 1px solid rgba(17, 17, 18, 0.18);
+    border-radius: 2px;
+    padding: 2px 6px;
+    margin-left: 10px;
+    vertical-align: 1px;
+  }
+
   /* --- 以降のセクション(枠のみ・素材待ち) --- */
   .logos { margin-top: 96px; }
   /* セクション見出しは完全に同一ルールを共有:
@@ -351,15 +384,18 @@
           </div>
         </section>
 
+        <!-- B案はデザイン差し替え中のため一旦ブランク扱い。
+             遷移先を出さないので <a> ではなく非対話の <span> にしてある
+             (pointer-events で殺すのと違い、タブ移動でも拾われない)。 -->
         <section class="card card-b">
-          <p class="name">Design B</p>
+          <p class="name">Design B<span class="name__wip">準備中</span></p>
           <p class="policy">モノクローム × フォトグラフィック</p>
           <button class="concept-link" type="button" data-concept="b" aria-haspopup="dialog">
             Design concept
           </button>
           <div class="links">
-            <a href="v2.html">TOP <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
-            <a href="v2.html#about">ABOUT US <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
+            <span class="links__off" aria-disabled="true">TOP <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
+            <span class="links__off" aria-disabled="true">ABOUT US <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
           </div>
         </section>
 
