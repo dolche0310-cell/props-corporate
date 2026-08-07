@@ -60,11 +60,11 @@
   h1 .thin { font-weight: 500; color: var(--ink-2); }
 
   /* --- 2案グリッド --- */
-  /* Figma(1:7 carousel)は3カラムのまま2枚を配置している。下の .logo-grid と
-     同じ 3fr グリッドを共有することで、カード幅とパネル幅が縦に揃う。 */
+  /* Figma(1:7 carousel)実測: 498px × 2枚 + gap20 = 1016(=.wrap の内寸)。
+     2案前提なので左右いっぱいに伸ばす。下の .logo-grid(3列)とは列数が異なる。 */
   .carousel {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 20px;
   }
   /* カードは静止(浮遊・影なし。リンクのホバーのみ) */
@@ -278,7 +278,7 @@
   body.modal-open { overflow: hidden; }
 
   @media (max-width: 900px) {
-    .carousel,
+    /* .carousel は既定で2列なのでそのまま。3列の .logo-grid だけ落とす */
     .logo-grid { grid-template-columns: repeat(2, 1fr); }
   }
   @media (max-width: 760px) {
