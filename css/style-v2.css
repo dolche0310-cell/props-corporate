@@ -238,61 +238,83 @@ body {
 /* ===========================================================
    Hero
    =========================================================== */
+/* Figma DESIGN B(39:23141)のヒーロー。1440×651のキャンバス(フレーム座標 y=123〜774)に
+   45°回転した正方形の写真3枚を置き、その上に見出しを重ねる。
+   キャンバスの縦横比を固定し、位置・サイズをすべて%で指定することで
+   幅が変わっても構図が崩れない(1440基準の比率がそのまま保たれる)。 */
 .v2-hero { padding: 20px 0 0; }
 @media (min-width: 768px) {
-  .v2-hero { padding: 32px 0 0; }
+  .v2-hero { padding: 32px 0 0; } /* Figma: ヘッダー下端〜キャンバス上端 */
 }
-.v2-hero__card {
+.v2-hero__inner {
   position: relative;
-  border-radius: 20px;
+  max-width: var(--v2-wrap-max); /* 他セクションと同じ1440で頭打ち */
+  margin-inline: auto;
+}
+.v2-hero__stage {
+  position: relative;
+  aspect-ratio: 1440 / 651;
+  /* 左右の菱形はフレーム外へはみ出す(Figmaもフレームで切れている)。
+     クリップしないと横スクロールが出る。 */
   overflow: hidden;
-  background: var(--v2-dark-1);
-  min-height: 420px;
-  display: flex;
-  align-items: flex-end;
 }
-@media (min-width: 768px) {
-  .v2-hero__card { border-radius: 28px; min-height: 586px; }
-}
-.v2-hero__photo {
+.v2-hero__dia {
   position: absolute;
-  inset: 0;
-  background-image: url('../assets/images/v2/hero-photo.png');
-  background-size: cover;
-  background-position: center;
-  -webkit-mask-image: linear-gradient(115deg, transparent 0%, rgba(0, 0, 0, .35) 32%, rgba(0, 0, 0, .85) 60%, #000 85%);
-  mask-image: linear-gradient(115deg, transparent 0%, rgba(0, 0, 0, .35) 32%, rgba(0, 0, 0, .85) 60%, #000 85%);
+  /* 45°回転した正方形 = 菱形。マスクSVGの代わりにclip-pathで描く */
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
 }
-.v2-hero__content {
-  position: relative;
-  z-index: 1;
-  padding: 32px 24px 32px;
+/* 写真は枠に対する実寸・オフセット(%)で置く。object-fitではなく実寸指定なのは、
+   Figmaのトリミング位置(mask-position)をそのまま再現するため。 */
+.v2-hero__dia img {
+  position: absolute;
+  display: block;
+  max-width: none;
 }
+/* width は1440基準、height は651基準の%。stageの縦横比が固定なので両者は同じpxになる */
+.v2-hero__dia--1 { left: -3.4028%; top: 9.2166%; width: 41.0515%; height: 90.8051%; }
+.v2-hero__dia--1 img { left: -11.5030%; top: -52.2717%; width: 287.7457%; height: 191.8305%; }
+.v2-hero__dia--2 { left: 42.8472%; top: 32.7189%; width: 27.2521%; height: 60.2811%; }
+.v2-hero__dia--2 img { left: -1.8070%; top: -4.7670%; width: 106.3022%; height: 106.0071%; }
+.v2-hero__dia--3 { left: 61.1410%; top: 0; width: 44.1368%; height: 97.6298%; }
+.v2-hero__dia--3 img { left: -155.0871%; top: -38.3776%; width: 264.9219%; height: 176.6707%; }
+
+/* SP: Figmaに該当フレームが無いため、見出しを写真の上に重ねず縦に積む */
+.v2-hero__content { padding: 24px 0 0; }
 @media (min-width: 768px) {
-  .v2-hero__content { padding: 0 0 64px 66px; max-width: 800px; }
+  .v2-hero__content {
+    position: absolute;
+    top: 12.9032%; /* Figma: 見出し y=207 - キャンバス上端 123 = 84px / 651 */
+    left: 0;
+    right: 0;
+    padding: 0;
+    z-index: 1;
+  }
 }
 .v2-hero__title {
   font-family: var(--v2-font-jp);
   font-weight: 700;
   font-size: 30px;
-  line-height: 1.35;
-  color: #fff;
-  text-shadow: 0 4px 4px rgba(0, 0, 0, .29);
-  margin: 0 0 16px;
+  line-height: 1.3;
+  color: #363636;
+  /* 写真に重なる部分の可読性を確保する白の淡いにじみ(Figma実測) */
+  text-shadow: 0 4px 4px rgba(255, 255, 255, .34);
+  /* 見出し⇄リード文の間隔は .v2-hero__desc の margin-top で取る。
+     上の Reset に `.v2-hero h1 { margin: 0 }` があり、詳細度で必ず負けるため。 */
+  margin: 0;
 }
 @media (min-width: 768px) {
-  .v2-hero__title { font-size: 54px; margin-bottom: 20px; }
+  .v2-hero__title { font-size: 54px; }
 }
 .v2-hero__desc {
   font-family: var(--v2-font-jp);
   font-size: 14px;
   line-height: 1.7;
-  color: #fff;
-  text-shadow: 0 4px 4px rgba(0, 0, 0, .29);
-  margin: 0;
+  color: #4d4d4d;
+  text-shadow: 0 4px 4px rgba(255, 255, 255, .29);
+  margin: 16px 0 0;
 }
 @media (min-width: 768px) {
-  .v2-hero__desc { font-size: 18px; }
+  .v2-hero__desc { font-size: 18px; margin-top: 32px; } /* Figma: 見出し下端277 → リード文309 */
 }
 
 /* ===========================================================
