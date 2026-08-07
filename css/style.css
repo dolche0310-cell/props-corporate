@@ -17,6 +17,7 @@
   --font-jp: 'LINE Seed JP', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Noto Sans JP', sans-serif;
   --font-logo: 'Belanosima', var(--font-jp);
   --font-en: 'Inter', var(--font-jp);
+  --font-display: 'Abril Fatface', serif;
 
   --header-h: 64px;
   --wrap-max: 1440px;
@@ -140,18 +141,19 @@ button { font: inherit; }
 }
 .section-label__bg {
   display: block;
-  font-family: var(--font-jp);
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-weight: 400;
   font-size: 72px;
-  letter-spacing: -0.02em;
-  line-height: 1;
+  letter-spacing: normal;
+  line-height: 1.8;
   color: transparent;
   user-select: none;
-  /* Two clipped-to-text layers: a left-to-right fade fill, and a thin
-     diagonal shine that sweeps across once on reveal (background-clip
-     keeps both confined to the glyphs themselves, no extra markup). */
+  /* Two clipped-to-text layers: the Figma fill (a top-to-bottom fade)
+     and a thin diagonal shine that sweeps across once on reveal
+     (background-clip keeps both confined to the glyphs themselves,
+     no extra markup). */
   background-image:
-    linear-gradient(100deg, var(--color-primary) 0%, rgba(237, 83, 3, 0) 62%),
+    linear-gradient(to bottom, #FFDFCF, #fff),
     linear-gradient(100deg, transparent 44%, rgba(255, 255, 255, .6) 50%, transparent 56%);
   background-repeat: no-repeat, no-repeat;
   background-size: 100% 100%, 220% 100%;
@@ -177,20 +179,20 @@ button { font: inherit; }
 }
 .section-label__caption {
   position: absolute;
-  left: 4px;
-  top: 74%;
-  transform: translateY(-50%);
+  left: 8px;
+  top: 60.8%;
+  font-family: var(--font-jp);
   font-size: 16px;
   font-weight: 800;
   color: var(--color-primary);
 }
 @media (min-width: 768px) {
-  .section-label__caption { font-size: 20px; left: 2px; }
+  .section-label__caption { font-size: 20px; }
 }
 
 .section-label--dark .section-label__bg {
   background-image:
-    linear-gradient(100deg, #cfcfcf 0%, rgba(207, 207, 207, 0) 62%),
+    linear-gradient(to bottom, #5A5A5A, var(--color-dark)),
     linear-gradient(100deg, transparent 44%, rgba(255, 255, 255, .6) 50%, transparent 56%);
   background-repeat: no-repeat, no-repeat;
   background-size: 100% 100%, 220% 100%;
@@ -202,7 +204,7 @@ button { font: inherit; }
 
 .section-label--muted .section-label__bg {
   background-image:
-    linear-gradient(100deg, #b7b7b7 0%, rgba(183, 183, 183, 0) 62%),
+    linear-gradient(to bottom, #E1E1E1, var(--color-light-bg)),
     linear-gradient(100deg, transparent 44%, rgba(255, 255, 255, .6) 50%, transparent 56%);
   background-repeat: no-repeat, no-repeat;
   background-size: 100% 100%, 220% 100%;
