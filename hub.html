@@ -186,19 +186,6 @@
   .links__off .arrow { display: inline-flex; }
   .links__off .arrow svg { display: block; }
 
-  /* 案名の右に添える小さな状態表示 */
-  .name__wip {
-    display: inline-block;
-    font-size: 9.5px;
-    letter-spacing: 0.08em;
-    color: var(--ink-2);
-    border: 1px solid rgba(17, 17, 18, 0.18);
-    border-radius: 2px;
-    padding: 2px 6px;
-    margin-left: 10px;
-    vertical-align: 1px;
-  }
-
   /* --- 以降のセクション(枠のみ・素材待ち) --- */
   .logos { margin-top: 96px; }
   /* セクション見出しは完全に同一ルールを共有:
@@ -388,7 +375,7 @@
              遷移先を出さないので <a> ではなく非対話の <span> にしてある
              (pointer-events で殺すのと違い、タブ移動でも拾われない)。 -->
         <section class="card card-b">
-          <p class="name">Design B<span class="name__wip">準備中</span></p>
+          <p class="name">Design B</p>
           <p class="policy">モノクローム × フォトグラフィック</p>
           <button class="concept-link" type="button" data-concept="b" aria-haspopup="dialog">
             Design concept
