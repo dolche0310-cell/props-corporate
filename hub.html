@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>[INTERNAL] props-corporate Branding Design / Implementation Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@500;600&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  :root {
+    --ink: #111112;
+    --ink-2: #6b6b70;
+    --pane: #fafafa;
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  body {
+    background: #ffffff;
+    font-family: "Noto Sans JP", sans-serif;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 128px 32px 160px;
+  }
+
+  /* --- 段階的な出現(タイトル → カード → 以降のセクション) --- */
+  .stage {
+    opacity: 0;
+    transform: translateY(14px);
+    animation: rise 0.8s var(--ease-out-expo) both;
+  }
+  .stage-1 { animation-delay: 0s; }
+  .stage-2 { animation-delay: 0.09s; }
+  .stage-3 { animation-delay: 0.18s; }
+  @keyframes rise {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* --- タイトル --- */
+  /* h1 が主役。他の要素はすべて小さく静かに。
+     余白は3段階: 大96(チャンク間)/ 中56(ブロック間)/ 小8〜14 */
+  h1 {
+    display: flex;
+    align-items: flex-start;
+    font-family: "Inter", sans-serif;
+    font-weight: 600;
+    font-size: 30px;
+    line-height: 36px; /* Figma(1:4)実測。1行=36px */
+    letter-spacing: 0.03em;
+    margin-bottom: 96px;
+  }
+  /* Figma(1:4)のテキストボックス幅682px。この幅だと "Branding Design /" の
+     直後で折り返し、2行目が "Implementation Prototype" になる(Figmaと同じ改行位置)。 */
+  .h1-text { max-width: 682px; }
+  h1 .thin { font-weight: 500; color: var(--ink-2); }
+
+  /* --- 2案グリッド --- */
+  /* Figma(1:7 carousel)は3カラムのまま2枚を配置している。下の .logo-grid と
+     同じ 3fr グリッドを共有することで、カード幅とパネル幅が縦に揃う。 */
+  .carousel {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  /* カードは静止(浮遊・影なし。リンクのホバーのみ) */
+  .card {
+    display: flex;
+    flex-direction: column;
+    background: var(--pane);
+    border-radius: 12px;
+    padding: 44px 32px 40px;
+    /* Figma実測272px。中身の高さはフォント読み込み状況で揺れ、その差が
+       セクション位置のズレとして下へ波及するため明示する
+       (.logo-grid .pane の height:272px と同じ考え方)。 */
+    min-height: 272px;
+  }
+  .card .name {
+    font-family: "Inter", sans-serif;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    margin-bottom: 14px; /* 小 */
+  }
+  .card .policy {
+    font-size: 13.5px;
+    letter-spacing: 0.03em;
+    margin-bottom: 10px; /* 小: 方針⇄Design concept は同じ束 */
+  }
+  /* 副リンク: 小さく淡く。主リンク群とは中余白で分離 */
+  .concept-link {
+    display: inline-flex;
+    align-self: flex-start; /* flex列の中で伸びないよう=下線をテキスト幅に */
+    align-items: center;
+    font-family: "Inter", sans-serif;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--ink);
+    background: none;
+    border: 0;
+    padding: 2px 0;
+    cursor: pointer;
+    position: relative;
+    margin-bottom: 56px; /* 中: 副⇄主リンク群の分離 */
+    transition: color 0.6s var(--ease-out-expo);
+  }
+  .concept-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    width: 100%;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.45; /* 常時は淡めの下線(リンクと分かる) */
+    transform: scaleX(1);
+    transform-origin: left;
+    transition: transform 0.6s var(--ease-out-expo), opacity 0.6s var(--ease-out-expo);
+  }
+  .concept-link:hover { transition-duration: 0.35s; }
+  .concept-link:hover::after { opacity: 0.9; transition-duration: 0.35s; }
+
+  /* 主リンク: スミで明快。矢印とテキストは一体(gap 8・塊で動く) */
+  .links { display: flex; flex-direction: column; gap: 10px; /* 小: 塊に見せる */ }
+  .links a {
+    position: relative;
+    align-self: flex-start;
+    font-family: "Inter", sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    color: var(--ink);
+    padding: 2px 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transform: translateX(0);
+    transition: transform 0.6s var(--ease-out-expo); /* 戻り */
+  }
+  .links a .arrow { display: inline-flex; }
+  .links a .arrow svg { display: block; }
+  .links a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 100%;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.6s var(--ease-out-expo); /* 戻り */
+  }
+  .links a:hover {
+    transform: translateX(3px); /* テキスト+矢印が一体で右へ */
+    transition-duration: 0.35s; /* 入り */
+  }
+  .links a:hover::after { transform: scaleX(1); transition-duration: 0.35s; }
+
+  /* --- 以降のセクション(枠のみ・素材待ち) --- */
+  .logos { margin-top: 96px; }
+  /* セクション見出しは完全に同一ルールを共有:
+     サイズ・太さ・字間・左位置・見出し→中身の余白 28px */
+  .designs h2,
+  .logos h2 {
+    /* 日本語を含む見出しが将来入る想定で Noto Sans JP をフォールバックに置く。
+       欧字は先頭のInterが当たるので字面は変わらない。 */
+    font-family: "Inter", "Noto Sans JP", sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    /* 未指定だと日本語を含む行だけ行高が18pxになり、セクションが3px高くなる */
+    line-height: 15px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+  .logo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .logo-grid .pane {
+    display: block;
+    position: relative;
+    overflow: hidden;
+    background: var(--pane);
+    border-radius: 12px;
+    height: 272px;
+    text-decoration: none;
+  }
+
+  /* --- Design concept モーダル --- */
+  .modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    place-items: center;
+    padding: 32px;
+    visibility: hidden;
+  }
+  .modal.is-open { visibility: visible; }
+  .modal .overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(17, 17, 18, 0.28);
+    opacity: 0;
+    transition: opacity 0.45s ease;
+  }
+  .modal.is-open .overlay { opacity: 1; }
+  .modal .box {
+    position: relative;
+    background: #fff;
+    border-radius: 14px;
+    max-width: 560px;
+    width: 100%;
+    /* 3段落のコンセプト文(=現状の最長)が900px高の画面でスクロールなしに
+       収まる高さ。これを超える長文が入った場合だけ内部スクロールに落ちる。 */
+    max-height: min(84vh, 680px);
+    overflow: auto;
+    padding: 56px 56px 52px;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s var(--ease-out-expo), transform 0.5s var(--ease-out-expo);
+  }
+  .modal.is-open .box { opacity: 1; transform: translateY(0); }
+  .modal .m-name {
+    font-family: "Inter", sans-serif;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    margin-bottom: 10px;
+  }
+  .modal .m-policy {
+    font-size: 12.5px;
+    letter-spacing: 0.04em;
+    color: var(--ink-2);
+    margin-bottom: 32px;
+  }
+  .modal h3 {
+    font-weight: 700;
+    font-size: 21px;
+    letter-spacing: 0.06em;
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+  .modal .m-body p {
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    line-height: 2.1;
+  }
+  .modal .m-body p + p { margin-top: 16.8px; }
+  .modal .close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    color: var(--ink);
+  }
+  .modal .close svg { width: 14px; height: 14px; }
+  .modal .close:hover { opacity: 0.55; }
+  body.modal-open { overflow: hidden; }
+
+  @media (max-width: 900px) {
+    .carousel,
+    .logo-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 760px) {
+    .wrap { padding: 88px 24px 112px; }
+    .carousel { grid-template-columns: 1fr; } /* 狭幅は縦積み(はみ出し防止) */
+    h1 {
+      flex-wrap: wrap; /* バッジが入りきらない幅では次行へ逃がす */
+      font-size: 24px;
+      line-height: 1.35;
+      margin-bottom: 64px;
+    }
+    .h1-text { max-width: none; } /* 折り返しは画面幅任せ */
+    /* 後段の .internal-tag(基本ルール)に負けないよう h1 を前置して詳細度を上げる */
+    h1 .internal-tag { margin-left: 0; margin-top: 14px; }
+    .modal .box { padding: 44px 32px 40px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .stage { animation: none; opacity: 1; transform: none; }
+    .links a, .links a::after, .concept-link, .concept-link::after { transition: none; }
+    .links a:hover { transform: none; }
+    .modal .overlay, .modal .box { transition: none; }
+    .modal.is-open .box { opacity: 1; transform: none; }
+  }
+
+  /* 内部レビュー確認用の印。Figma(1:459/1:460)実測: グレー帯(#42423F)+白文字・
+     角丸2px・115×22。h1テキストボックス(682px)の右に9px空けて、1行目と
+     天地中央で並ぶ(rect y=136 - h1 y=128 = 8px)。 */
+  .internal-tag {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 115px;
+    height: 22px;
+    margin-left: 9px;
+    margin-top: 8px;
+    background: #42423f;
+    border-radius: 2px;
+    color: #fff;
+    font-family: "Inter", sans-serif;
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: 1px;
+    line-height: 1;
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="stage stage-1">
+      <h1><span class="h1-text">props-corporate Branding Design <span class="thin">/ Implementation Prototype</span></span><span class="internal-tag">Internal</span></h1>
+    </header>
+
+    <!-- ============ Corporate Website Design(A案 / B案) ============ -->
+    <section class="designs stage stage-2" aria-label="Corporate Website Design">
+      <h2>Corporate Website Design</h2>
+      <div class="carousel">
+
+        <section class="card card-a">
+          <p class="name">Design A</p>
+          <p class="policy">ウォームグラデーション × ラウンド</p>
+          <button class="concept-link" type="button" data-concept="a" aria-haspopup="dialog">
+            Design concept
+          </button>
+          <div class="links">
+            <a href="index.html">TOP <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
+            <a href="index.html#about">ABOUT US <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
+          </div>
+        </section>
+
+        <section class="card card-b">
+          <p class="name">Design B</p>
+          <p class="policy">モノクローム × フォトグラフィック</p>
+          <button class="concept-link" type="button" data-concept="b" aria-haspopup="dialog">
+            Design concept
+          </button>
+          <div class="links">
+            <a href="v2.html">TOP <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
+            <a href="v2.html#about">ABOUT US <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
+          </div>
+        </section>
+
+      </div>
+    </section>
+
+    <!-- ============ Corporate Logomark / Logotype(素材待ち) ============
+         Figma 1:59。中身が未確定のため空パネルのみ。 -->
+    <section class="logos stage stage-3" aria-label="Corporate Logomark / Logotype">
+      <h2>Corporate Logomark / Logotype</h2>
+      <div class="logo-grid">
+        <div class="pane pane-empty"></div>
+        <div class="pane pane-empty"></div>
+        <div class="pane pane-empty"></div>
+      </div>
+    </section>
+
+    <!-- ============ Product Site Design(素材待ち) ============
+         Figma 1:77。中身が未確定のため空パネルのみ。 -->
+    <section class="logos stage stage-3" aria-label="Product Site Design">
+      <h2>Product Site Design</h2>
+      <div class="logo-grid">
+        <div class="pane pane-empty"></div>
+        <div class="pane pane-empty"></div>
+        <div class="pane pane-empty"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============ Design concept モーダル ============ -->
+  <div class="modal" id="concept-modal" role="dialog" aria-modal="true" aria-labelledby="concept-title" hidden>
+    <div class="overlay" data-close></div>
+    <div class="box">
+      <button class="close" type="button" data-close aria-label="閉じる">
+        <svg viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      </button>
+      <p class="m-name" id="concept-name"></p>
+      <p class="m-policy" id="concept-policy"></p>
+      <h3 id="concept-title"></h3>
+      <div class="m-body" id="concept-body"></div>
+    </div>
+  </div>
+
+  <script>
+  (() => {
+    "use strict";
+
+    /* ================================================
+       コンセプト文(※ドラフト・差し替え可)
+       2案ぶんをこの1箇所にまとめて記述。
+       body は配列1要素 = 1段落。
+    ================================================ */
+    const CONCEPTS = {
+      a: {
+        name: "Design A",
+        policy: "ウォームグラデーション × ラウンド",
+        title: "AIシフトを、あたたかい光として。",
+        body: [
+          "産業のAIシフトという、多くの企業にとってまだ輪郭のはっきりしないテーマ。それを冷たい技術ではなく、人に寄り添う光として描きました。白をベースに、コーポレートカラーのオレンジ(#ED5303)から淡いコーラルへ溶けるグラデーションを大きく置いています。",
+          "角を落としたカード、ゆるやかな円——形はすべて丸みを基調にしました。「企業と人のコミュニケーション」を支える会社として、鋭さよりも受け止める柔らかさを優先しています。事業内容のセクションだけを濃色へ反転させ、プロダクトの存在感を一点で際立たせました。",
+          "立ち上がりは、白いカーテンが円状に開いて本文が現れる演出。ロゴは粒子が集まって形になるアニメーションで、「人の力を最大化する」という思想を動きで語ります。",
+        ],
+      },
+      b: {
+        name: "Design B",
+        policy: "モノクローム × フォトグラフィック",
+        title: "語るのは、写真と余白。",
+        body: [
+          "装飾を削ぎ落とし、白・黒・グレーだけで構成したエディトリアルな設計です。色で印象づける代わりに、写真と余白、タイポグラフィの強弱で伝えます。AIという抽象的な技術を扱うからこそ、そこに写る「人」と「現場」を主役に据えました。",
+          "画面を大きく使った写真、黒へ反転する事業内容セクション、罫線で整理された会社概要。要素ごとに面のコントラストを切り替えることで、スクロールに一定のリズムが生まれます。派手な動きに頼らず、構造そのものでページを読ませる構成です。",
+          "落ち着いたトーンは、BtoBの意思決定者に向けた誠実さの表明でもあります。技術と実績を、静かに、過不足なく提示する——そういう佇まいを目指しました。",
+        ],
+      },
+    };
+
+    const modal = document.getElementById("concept-modal");
+    const nameEl = document.getElementById("concept-name");
+    const policyEl = document.getElementById("concept-policy");
+    const titleEl = document.getElementById("concept-title");
+    const bodyEl = document.getElementById("concept-body");
+    let lastFocus = null;
+
+    const open = (key) => {
+      const c = CONCEPTS[key];
+      if (!c) return;
+      nameEl.textContent = c.name;
+      policyEl.textContent = c.policy;
+      titleEl.textContent = c.title;
+      bodyEl.innerHTML = "";
+      c.body.forEach((t) => {
+        const p = document.createElement("p");
+        p.textContent = t;
+        bodyEl.appendChild(p);
+      });
+      lastFocus = document.activeElement;
+      modal.hidden = false;
+      requestAnimationFrame(() => modal.classList.add("is-open"));
+      /* rAFが凍結する環境向けの保険 */
+      setTimeout(() => modal.classList.add("is-open"), 60);
+      document.body.classList.add("modal-open");
+      modal.querySelector(".close").focus();
+    };
+
+    const close = () => {
+      modal.classList.remove("is-open");
+      document.body.classList.remove("modal-open");
+      const done = () => { modal.hidden = true; };
+      const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduced) done(); else setTimeout(done, 480);
+      if (lastFocus) lastFocus.focus();
+    };
+
+    document.querySelectorAll(".concept-link").forEach((b) =>
+      b.addEventListener("click", () => open(b.dataset.concept))
+    );
+    modal.querySelectorAll("[data-close]").forEach((el) =>
+      el.addEventListener("click", close)
+    );
+    document.addEventListener("keydown", (e) => {
+      if (modal.hidden) return;
+      if (e.key === "Escape") close();
+      /* フォーカストラップ: モーダル内のフォーカス可能要素で循環 */
+      if (e.key === "Tab") {
+        const f = [...modal.querySelectorAll("button, a, [tabindex]")].filter(
+          (el) => !el.disabled && el.offsetParent !== null
+        );
+        if (!f.length) return;
+        const first = f[0], last = f[f.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault(); last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault(); first.focus();
+        }
+      }
+    });
+  })();
+  </script>
+</body>
+</html>
