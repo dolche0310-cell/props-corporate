@@ -54,9 +54,10 @@
     letter-spacing: 0.03em;
     margin-bottom: 96px;
   }
-  /* Figma(1:4)のテキストボックス幅682px。この幅だと "Branding Design /" の
-     直後で折り返し、2行目が "Implementation Prototype" になる(Figmaと同じ改行位置)。 */
-  .h1-text { max-width: 682px; }
+  /* 改行位置はHTML側の <br>(Figmaと同じ "Design /" の直後)で固定する。
+     幅指定で折り返すとボックスが682px(Figmaのテキストボックス幅)まで広がり、
+     実際の文字末尾とInternalバッジの間が空いて見えるため、
+     ボックスは最長行(1行目)に張り付かせる。 */
   h1 .thin { font-weight: 500; color: var(--ink-2); }
 
   /* --- 2案グリッド --- */
@@ -290,7 +291,6 @@
       line-height: 1.35;
       margin-bottom: 64px;
     }
-    .h1-text { max-width: none; } /* 折り返しは画面幅任せ */
     /* 後段の .internal-tag(基本ルール)に負けないよう h1 を前置して詳細度を上げる */
     h1 .internal-tag { margin-left: 0; margin-top: 14px; }
     .modal .box { padding: 44px 32px 40px; }
@@ -304,8 +304,10 @@
   }
 
   /* 内部レビュー確認用の印。Figma(1:459/1:460)実測: グレー帯(#42423F)+白文字・
-     角丸2px・115×22。h1テキストボックス(682px)の右に9px空けて、1行目と
-     天地中央で並ぶ(rect y=136 - h1 y=128 = 8px)。 */
+     角丸2px・115×22。タイトル1行目の文字末尾に18px空けて続ける
+     (Figmaはテキストボックス右端基準の9pxだが、実際の文字末尾からは
+     150px以上空いて見えるため、文字に寄せた18pxにしている)。
+     天地は1行目(36px)の中央 = (36-22)/2 ≒ 8px。 */
   .internal-tag {
     flex: none;
     display: inline-flex;
@@ -313,7 +315,7 @@
     justify-content: center;
     width: 115px;
     height: 22px;
-    margin-left: 9px;
+    margin-left: 18px;
     margin-top: 8px;
     background: #42423f;
     border-radius: 2px;
@@ -329,7 +331,7 @@
 <body>
   <div class="wrap">
     <header class="stage stage-1">
-      <h1><span class="h1-text">props-corporate Branding Design <span class="thin">/ Implementation Prototype</span></span><span class="internal-tag">Internal</span></h1>
+      <h1><span class="h1-text">props-corporate Branding Design <span class="thin">/<br>Implementation Prototype</span></span><span class="internal-tag">Internal</span></h1>
     </header>
 
     <!-- ============ Corporate Website Design(A案 / B案) ============ -->
