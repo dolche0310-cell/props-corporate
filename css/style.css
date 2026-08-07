@@ -607,13 +607,77 @@ body.intro-revealed .hero__intro-item {
   margin: 0 0 20px;
   text-align: center;
 }
-.about__logo-canvas {
+.about__logo-svg {
   display: inline-block;
-  /* Sized directly by js/about-logo.js (DISPLAY_W/H inline styles) so
-     the canvas's own aspect ratio is always preserved. */
+  width: 200px;
+  height: auto;
+  overflow: visible;
 }
 @media (min-width: 768px) {
   .about__logo { margin: 0; flex-shrink: 0; text-align: left; }
+}
+
+/* Logo construction reveal: grid -> two guide circles -> tangent line ->
+   full outline draws in -> outline becomes a solid fill -> grid fades out.
+   Every phase is a plain CSS transition gated by a single .is-playing
+   class (added once, on first scroll into view); each element's own
+   transition-delay is what actually staggers the sequence. */
+.logo-anim__grid {
+  opacity: 1;
+  transition: opacity .2s ease 2s;
+}
+#about-logo-svg.is-playing .logo-anim__grid { opacity: 0; }
+
+.logo-anim__circle {
+  opacity: 0;
+  transform: scale(.6);
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: opacity .4s ease, transform .4s ease;
+  will-change: transform, opacity;
+}
+.logo-anim__circle--1 { transition-delay: 0s; }
+.logo-anim__circle--2 { transition-delay: .4s; }
+#about-logo-svg.is-playing .logo-anim__circle {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.logo-anim__tangent {
+  transition: stroke-dashoffset .4s ease .8s;
+  will-change: stroke-dashoffset;
+}
+#about-logo-svg.is-playing .logo-anim__tangent { stroke-dashoffset: 0; }
+
+.logo-anim__mark path {
+  fill: var(--color-ink);
+  fill-opacity: 0;
+  stroke: #9a9a9a;
+  stroke-width: 1.2;
+  stroke-opacity: 1;
+  /* stroke-dasharray/dashoffset are set inline by JS once each path's
+     real length is known (getTotalLength), so the outline draws evenly. */
+  transition:
+    stroke-dashoffset .4s ease 1.2s,
+    fill-opacity .4s ease 1.6s,
+    stroke-opacity .4s ease 1.6s;
+  will-change: stroke-dashoffset, fill-opacity, stroke-opacity;
+}
+/* stroke-dashoffset's end value (0) is set inline by JS at play-time
+   instead of here - an inline style always wins over a class selector,
+   so a CSS override here would never actually take effect. */
+#about-logo-svg.is-playing .logo-anim__mark path {
+  fill-opacity: 1;
+  stroke-opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-anim__grid, .logo-anim__circle, .logo-anim__tangent { display: none; }
+  .logo-anim__mark path {
+    fill-opacity: 1;
+    stroke-opacity: 0;
+    transition: none;
+  }
 }
 
 /* ===========================================================
