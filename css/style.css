@@ -610,15 +610,36 @@ button { font: inherit; }
 .hero__rest { margin-left: 6px; display: inline-block; }
 .hero__word { white-space: nowrap; }
 
+/* Figma 206:24159。同じ大きさで2行流していたリード文を、
+   「状況説明(細く小さく)」と「掲げるコピー(太く大きく)」の2段に割って
+   メリハリを付ける。行高・色は実測どおり(1.7 / #040404 = --color-ink)。 */
 .hero__desc {
   position: relative;
-  font-size: 14px;
   line-height: 1.7;
-  color: #333;
+  color: var(--color-ink);
   max-width: 42rem;
 }
+.hero__lead {
+  font-size: 14px;
+  margin-bottom: 6.66px; /* Figma: 上段⇄下段ブロックの gap */
+}
+.hero__catch {
+  display: flex;
+  flex-direction: column;
+  gap: 4.16px; /* Figma: コピー2行の gap */
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: 0.02em; /* Figma: 32pxに対して0.64px */
+  /* Figma実測512px。2行目の右寄せはこの幅を基準に効くので、
+     広い画面でも字下げ量が間延びしないよう頭打ちにする。 */
+  max-width: 512px;
+}
+/* 2行目だけ右端に寄せる。1行目より短くないので、結果として
+   一文字ぶんほど字下げされた見え方になる。 */
+.hero__catch-end { text-align: right; }
 @media (min-width: 768px) {
-  .hero__desc { font-size: 18px; }
+  .hero__lead { font-size: 20px; }
+  .hero__catch { font-size: 32px; }
 }
 
 /* Streams in from the left as the intro curtain opens (see
