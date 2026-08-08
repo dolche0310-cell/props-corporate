@@ -69,10 +69,10 @@
     background: var(--pane);
     border-radius: 12px;
     padding: 44px 32px 40px;
-    /* Figma実測272px。中身の高さはフォント読み込み状況で揺れ、その差が
-       セクション位置のズレとして下へ波及するため明示する
-       (.logo-grid .pane の height:272px と同じ考え方)。 */
-    min-height: 272px;
+    /* ABOUT US を外して1行になったぶん低くする。フォント読み込みで中身の
+       高さが揺れてもセクション位置が波及しないよう、実測の自然高で固定
+       (44 + 名前29 + 色名20 + 間42 + TOP27 + 40 = 202)。 */
+    min-height: 202px;
   }
   .card .name {
     font-family: "Inter", sans-serif;
@@ -96,10 +96,7 @@
   .card .policy {
     font-size: 13.5px;
     letter-spacing: 0.03em;
-    /* Design concept を出さなくなったので、方針テキストがそのまま
-       主リンク群と向き合う。かつて 10(小) + リンク18 + 56(中) で
-       取っていた間隔をここでまとめて確保し、位置は従来のまま保つ。 */
-    margin-bottom: 84px;
+    margin-bottom: 42px; /* 中: 色名⇄TOP の分離(旧84の半分に詰めた) */
   }
   /* 色名の右のカラーコード。小さく淡く(参考実装の .cv-hex と同じ扱い) */
   .card .policy .hex {
@@ -182,16 +179,15 @@
   }
   .links a:hover::after { transform: scaleX(1); transition-duration: 0.35s; }
 
-  /* 遷移先がまだ無い案のリンク。字面は主リンクと揃えたまま、色だけ落として
-     「今は押せない」ことを示す。下線もホバー移動も付けない。 */
+  /* 遷移先がまだ無い案のリンク。字面も色も主リンクと同じ黒で揃える
+     (押せないことは <a> でない=カーソル・下線・ホバー移動が無いことで伝える)。 */
   .links__off {
     align-self: flex-start;
     font-family: "Inter", sans-serif;
     font-weight: 600;
     font-size: 15px;
     letter-spacing: 0.08em;
-    color: var(--ink-2);
-    opacity: 0.42;
+    color: var(--ink);
     padding: 2px 0;
     display: inline-flex;
     align-items: center;
@@ -358,7 +354,6 @@
           <p class="policy">レッドオレンジ <span class="hex">#ED551B</span></p>
           <div class="links">
             <a href="index.html">TOP <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
-            <a href="index.html#about">ABOUT US <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
           </div>
         </section>
 
@@ -367,7 +362,6 @@
           <p class="policy">ファイア <span class="hex">#DD571C</span></p>
           <div class="links">
             <span class="links__off" aria-disabled="true">TOP <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
-            <span class="links__off" aria-disabled="true">ABOUT US <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
           </div>
         </section>
 
@@ -376,7 +370,6 @@
           <p class="policy">ダークブラック <span class="hex">#0A0A0A</span></p>
           <div class="links">
             <span class="links__off" aria-disabled="true">TOP <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
-            <span class="links__off" aria-disabled="true">ABOUT US <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
           </div>
         </section>
 
