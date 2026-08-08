@@ -287,12 +287,28 @@
       });
     };
 
-    // Matches .service__pin's CSS: top: 50vh (the translateY(-50%) that
+    // Matches .service__pin's CSS: top: 50svh (the translateY(-50%) that
     // visually centers it is a post-layout transform and doesn't change
     // where the sticky trigger itself sits, so this stays in sync with
-    // just the raw 50vh value).
+    // just the raw 50svh value). svh (not plain vh/innerHeight) is used
+    // deliberately: on browsers with a dynamic toolbar (mobile Chrome,
+    // some ChromeOS/Android builds), window.innerHeight shifts as the
+    // toolbar shows/hides mid-scroll, desyncing this progress calc from
+    // the CSS sticky offset and letting the pinned panel render at the
+    // wrong scroll position - overlapping the section above it.
+    var stableViewportH = null;
+    var measureStableViewportH = function () {
+      var probe = document.createElement('div');
+      probe.style.cssText = 'position:fixed;top:0;left:0;width:0;height:100svh;visibility:hidden;pointer-events:none;';
+      document.body.appendChild(probe);
+      stableViewportH = probe.getBoundingClientRect().height;
+      document.body.removeChild(probe);
+    };
+    measureStableViewportH();
+    window.addEventListener('resize', measureStableViewportH);
+
     var getStickyTopOffset = function () {
-      return window.innerHeight / 2;
+      return stableViewportH / 2;
     };
 
     var updateServiceProgress = function () {

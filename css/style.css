@@ -786,10 +786,7 @@ body.intro-revealed .hero__intro-item {
 /* ===========================================================
    Service
    =========================================================== */
-.service { padding: 0 0 56px; }
-@media (min-width: 768px) {
-  .service { padding-bottom: 96px; }
-}
+.service { padding: 0; }
 .service__panel {
   position: relative;
   background: var(--color-dark);
@@ -842,11 +839,18 @@ body.intro-revealed .hero__intro-item {
      fixed-height, clipped window so it reads like ordinary scrolling. */
   .service__scroller {
     position: relative;
-    height: 260vh;
+    /* The pin engages as soon as this element's natural top would
+       scroll above the sticky offset (top: 50svh on .service__pin) -
+       without this buffer that happens while the About section above
+       is still on screen, so the incoming dark panel stacks over its
+       tail end and hides it. Pushing the scroller down by the same
+       50svh delays pinning until About has fully scrolled away. */
+    margin-top: 50svh;
+    height: 150svh;
   }
   .service__pin {
     position: sticky;
-    top: 50vh;
+    top: 50svh;
     transform: translateY(-50%);
   }
 
@@ -976,9 +980,9 @@ body.intro-revealed .hero__intro-item {
 /* ===========================================================
    News
    =========================================================== */
-.news { padding: 56px 0; }
+.news { padding: 0 0 56px; }
 @media (min-width: 768px) {
-  .news { padding: 96px 0; }
+  .news { padding: 0 0 96px; }
 }
 .news__list {
   display: grid;
