@@ -90,7 +90,9 @@
     height: 10px;
     border-radius: 50%;
     background: var(--dot);
-    margin-left: 10px;
+    /* 見た目の間隔はこの値 + 案名から続く字間(0.24em ≒ 2.6px)。
+       詰めすぎないよう margin 側だけ 10 -> 6 にしている。 */
+    margin-left: 6px;
     vertical-align: -1px;
   }
   .card .policy {
