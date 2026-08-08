@@ -846,7 +846,8 @@ body.intro-revealed .hero__intro-item {
   }
   .service__pin {
     position: sticky;
-    top: calc(var(--header-h) + 24px);
+    top: 50vh;
+    transform: translateY(-50%);
   }
 
   .service__pin-grid {

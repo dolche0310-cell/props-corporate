@@ -287,9 +287,12 @@
       });
     };
 
+    // Matches .service__pin's CSS: top: 50vh (the translateY(-50%) that
+    // visually centers it is a post-layout transform and doesn't change
+    // where the sticky trigger itself sits, so this stays in sync with
+    // just the raw 50vh value).
     var getStickyTopOffset = function () {
-      var headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-h')) || 96;
-      return headerH + 24;
+      return window.innerHeight / 2;
     };
 
     var updateServiceProgress = function () {
