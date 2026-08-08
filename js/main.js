@@ -60,6 +60,45 @@
     });
   }
 
+  // Header: hides on scroll down, reveals on scroll up (coralcap.co-style).
+  // A small threshold ignores tiny/jittery scroll deltas so it doesn't
+  // flicker, and it always stays visible near the top of the page and
+  // while the mobile nav is open.
+  var siteHeader = document.getElementById('site-header');
+  if (siteHeader) {
+    var lastScrollY = window.scrollY;
+    var headerTicking = false;
+    var SCROLL_THRESHOLD = 6;
+
+    var updateHeaderVisibility = function () {
+      headerTicking = false;
+      var currentY = window.scrollY;
+      var delta = currentY - lastScrollY;
+
+      if (nav && nav.classList.contains('is-open')) {
+        lastScrollY = currentY;
+        return;
+      }
+
+      if (currentY <= siteHeader.offsetHeight) {
+        siteHeader.classList.remove('is-hidden');
+      } else if (delta > SCROLL_THRESHOLD) {
+        siteHeader.classList.add('is-hidden');
+        lastScrollY = currentY;
+      } else if (delta < -SCROLL_THRESHOLD) {
+        siteHeader.classList.remove('is-hidden');
+        lastScrollY = currentY;
+      }
+    };
+
+    window.addEventListener('scroll', function () {
+      if (!headerTicking) {
+        headerTicking = true;
+        requestAnimationFrame(updateHeaderVisibility);
+      }
+    }, { passive: true });
+  }
+
   var form = document.getElementById('contact-form');
   var note = document.getElementById('contact-note');
 

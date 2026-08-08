@@ -251,6 +251,15 @@ button { font: inherit; }
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(0, 0, 0, .04);
+  transition: transform .4s cubic-bezier(.22, 1, .36, 1), opacity .4s ease;
+  will-change: transform, opacity;
+}
+.site-header.is-hidden {
+  transform: translateY(-100%);
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .site-header { transition: none; }
 }
 .site-header__inner {
   height: var(--header-h);
@@ -1049,7 +1058,7 @@ body.intro-revealed .hero__intro-item {
 .team__photo {
   border-radius: 8px;
   overflow: hidden;
-  background: #F1F5F9;
+  background: var(--color-light-bg);
   aspect-ratio: 302 / 212;
 }
 @media (min-width: 768px) {
