@@ -184,24 +184,6 @@
   }
   .links a:hover::after { transform: scaleX(1); transition-duration: 0.35s; }
 
-  /* 遷移先がまだ無い案のリンク。字面も色も主リンクと同じ黒で揃える
-     (押せないことは <a> でない=カーソル・下線・ホバー移動が無いことで伝える)。 */
-  .links__off {
-    align-self: flex-start;
-    font-family: "Inter", sans-serif;
-    font-weight: 600;
-    font-size: 15px;
-    letter-spacing: 0.08em;
-    color: var(--ink);
-    padding: 2px 0;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    cursor: default;
-    user-select: none;
-  }
-  .links__off .arrow { display: inline-flex; }
-  .links__off .arrow svg { display: block; }
 
   /* --- 以降のセクション(枠のみ・素材待ち) --- */
   .logos { margin-top: 96px; }
@@ -350,15 +332,14 @@
     <section class="designs stage stage-2" aria-label="Corporate Website Design">
       <h2>Corporate Website Design</h2>
       <!-- A案のカラーバリエーション3枚(参考: proto-review の C-1〜C-4 比較UI)。
-           名前の右の●が各案の色。遷移できるのは現行実装の A-1 のみで、
-           A-2 / A-3 は実ページが無いため非対話の <span>(タブ移動でも拾われない)。 -->
+           名前の右の●が各案の色。3枚とも専用ページへ遷移する。 -->
       <div class="carousel">
 
         <section class="card">
           <p class="name">Design A-1<span class="name__dot" style="--dot:#ED551B" aria-hidden="true"></span></p>
           <p class="policy">Red-orange <span class="hex">#ED551B</span></p>
           <div class="links">
-            <a href="index.html">TOP <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
+            <a href="Red-orange.html">TOP <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
           </div>
         </section>
 
@@ -366,15 +347,15 @@
           <p class="name">Design A-2<span class="name__dot" style="--dot:#DD571C" aria-hidden="true"></span></p>
           <p class="policy">Fire <span class="hex">#DD571C</span></p>
           <div class="links">
-            <span class="links__off" aria-disabled="true">TOP <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
+            <a href="fire.html">TOP <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
           </div>
         </section>
 
         <section class="card">
-          <p class="name">Design A-3<span class="name__dot" style="--dot:#0A0A0A" aria-hidden="true"></span></p>
-          <p class="policy">Dark black <span class="hex">#0A0A0A</span></p>
+          <p class="name">Design A-3<span class="name__dot" style="--dot:#0D0D0D" aria-hidden="true"></span></p>
+          <p class="policy">Dark black <span class="hex">#0D0D0D</span></p>
           <div class="links">
-            <span class="links__off" aria-disabled="true">TOP <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
+            <a href="darkblack.html">TOP <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
           </div>
         </section>
 
