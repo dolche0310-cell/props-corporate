@@ -835,7 +835,7 @@ body.intro-revealed .hero__intro-item {
 
   .service__text-track {
     position: relative;
-    height: 340px;
+    height: 420px;
     overflow: hidden;
   }
   .service__text-list {
@@ -843,7 +843,7 @@ body.intro-revealed .hero__intro-item {
     will-change: transform;
   }
   .service__text-item {
-    min-height: 340px;
+    min-height: 420px;
     display: flex;
     flex-direction: column;
     justify-content: center;
