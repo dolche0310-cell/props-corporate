@@ -96,6 +96,9 @@
     vertical-align: -1px;
   }
   .card .policy {
+    /* 色名が欧字になったので、カード内の他の欧字(案名・TOP・カラーコード)と
+       同じ Inter に揃える。日本語が入った場合の保険で Noto Sans JP を後置。 */
+    font-family: "Inter", "Noto Sans JP", sans-serif;
     font-size: 13.5px;
     letter-spacing: 0.03em;
     margin-bottom: 42px; /* 中: 色名⇄TOP の分離(旧84の半分に詰めた) */
@@ -353,7 +356,7 @@
 
         <section class="card">
           <p class="name">Design A-1<span class="name__dot" style="--dot:#ED551B" aria-hidden="true"></span></p>
-          <p class="policy">レッドオレンジ <span class="hex">#ED551B</span></p>
+          <p class="policy">Red-orange <span class="hex">#ED551B</span></p>
           <div class="links">
             <a href="index.html">TOP <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
           </div>
@@ -361,7 +364,7 @@
 
         <section class="card">
           <p class="name">Design A-2<span class="name__dot" style="--dot:#DD571C" aria-hidden="true"></span></p>
-          <p class="policy">ファイア <span class="hex">#DD571C</span></p>
+          <p class="policy">Fire <span class="hex">#DD571C</span></p>
           <div class="links">
             <span class="links__off" aria-disabled="true">TOP <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
           </div>
@@ -369,7 +372,7 @@
 
         <section class="card">
           <p class="name">Design A-3<span class="name__dot" style="--dot:#0A0A0A" aria-hidden="true"></span></p>
-          <p class="policy">ダークブラック <span class="hex">#0A0A0A</span></p>
+          <p class="policy">Dark black <span class="hex">#0A0A0A</span></p>
           <div class="links">
             <span class="links__off" aria-disabled="true">TOP <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
           </div>
