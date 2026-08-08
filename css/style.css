@@ -1159,28 +1159,25 @@ body.intro-revealed .hero__intro-item {
   align-items: center;
   gap: 8px;
 }
-.badge {
-  background: var(--color-primary);
-  color: #fff;
-  font-size: 11px;
+.field__required {
+  color: var(--color-primary);
+  font-size: 15px;
   font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 4px;
   line-height: 1;
 }
 .field input,
 .field textarea {
   width: 100%;
-  border: 1px solid var(--color-border);
+  border: none;
   border-radius: 8px;
   padding: 14px 16px;
   font-size: 14px;
   font-family: inherit;
-  color: var(--color-text);
-  background: #fff;
+  color: #fff;
+  background: rgba(255, 255, 255, .08);
 }
 .field input::placeholder,
-.field textarea::placeholder { color: var(--color-text-muted); }
+.field textarea::placeholder { color: #898989; }
 .field input:focus,
 .field textarea:focus {
   outline: 2px solid var(--color-primary);

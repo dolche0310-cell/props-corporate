@@ -219,9 +219,7 @@
       </div>
 
       <div class="team__card reveal">
-        <div class="team__photo">
-          <img src="assets/images/portrait.png" alt="代表取締役 松元 勇人">
-        </div>
+        <div class="team__photo"></div>
         <div class="team__info">
           <p class="team__role">代表取締役</p>
           <h3 class="team__name">松元 勇人</h3>
@@ -276,7 +274,7 @@
 
       <form class="contact__form reveal" id="contact-form" novalidate>
         <div class="field">
-          <span class="field__label">お名前 <span class="badge">必須</span></span>
+          <span class="field__label">お名前 <span class="field__required">*</span></span>
           <label class="sr-only" for="field-name">お名前</label>
           <input type="text" id="field-name" name="name" placeholder="例）山田 太郎" autocomplete="name" required>
         </div>
@@ -288,7 +286,7 @@
         </div>
 
         <div class="field">
-          <span class="field__label">メールアドレス <span class="badge">必須</span></span>
+          <span class="field__label">メールアドレス <span class="field__required">*</span></span>
           <label class="sr-only" for="field-email">メールアドレス</label>
           <input type="email" id="field-email" name="email" placeholder="例）example@props.ne.jp" autocomplete="email" required>
         </div>
@@ -300,12 +298,12 @@
         </div>
 
         <div class="field">
-          <span class="field__label">お問い合わせ内容 <span class="badge">必須</span></span>
+          <span class="field__label">お問い合わせ内容 <span class="field__required">*</span></span>
           <label class="sr-only" for="field-message">お問い合わせ内容</label>
           <textarea id="field-message" name="message" rows="5" placeholder="お問い合わせ内容をご記入ください" required></textarea>
         </div>
 
-        <button type="submit" class="btn btn--primary contact__submit">送信する</button>
+        <button type="submit" class="btn btn--outline contact__submit">送信する</button>
         <p class="contact__note" id="contact-note" role="status" aria-live="polite" hidden>お問い合わせありがとうございます。内容を確認のうえご連絡いたします。</p>
       </form>
     </div>
