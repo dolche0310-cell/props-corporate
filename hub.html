@@ -54,12 +54,12 @@
   }
   h1 .thin { font-weight: 500; color: var(--ink-2); }
 
-  /* --- 2案グリッド --- */
-  /* Figma(1:7 carousel)実測: 498px × 2枚 + gap20 = 1016(=.wrap の内寸)。
-     2案前提なので左右いっぱいに伸ばす。下の .logo-grid(3列)とは列数が異なる。 */
+  /* --- 3案グリッド --- */
+  /* A案のカラバリ3枚を、下の .logo-grid と同じ3列で左右いっぱいに並べる
+     (325.33px × 3 + gap20 × 2 = 1016 = .wrap の内寸)。 */
   .carousel {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 20px;
   }
   /* カードは静止(浮遊・影なし。リンクのホバーのみ) */
@@ -83,6 +83,16 @@
     color: var(--ink-2);
     margin-bottom: 14px; /* 小 */
   }
+  /* 案名の右に添える色見本の●。色はカードごとに --dot で渡す */
+  .card .name__dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--dot);
+    margin-left: 10px;
+    vertical-align: -1px;
+  }
   .card .policy {
     font-size: 13.5px;
     letter-spacing: 0.03em;
@@ -90,6 +100,15 @@
        主リンク群と向き合う。かつて 10(小) + リンク18 + 56(中) で
        取っていた間隔をここでまとめて確保し、位置は従来のまま保つ。 */
     margin-bottom: 84px;
+  }
+  /* 色名の右のカラーコード。小さく淡く(参考実装の .cv-hex と同じ扱い) */
+  .card .policy .hex {
+    font-family: "Inter", sans-serif;
+    font-weight: 500;
+    font-size: 11.5px;
+    letter-spacing: 0.08em;
+    color: var(--ink-2);
+    margin-left: 4px;
   }
   /* 副リンク: 小さく淡く。主リンク群とは中余白で分離 */
   .concept-link {
@@ -182,11 +201,6 @@
   }
   .links__off .arrow { display: inline-flex; }
   .links__off .arrow svg { display: block; }
-
-  /* B案はブランク扱いなので方針テキストも出さない。空のままだと行ボックスが
-     生まれず主リンク群が上がってしまうため、zero-width space で1行ぶんの
-     高さだけ確保する(px直書きと違い、font-size/line-height に自動で追従)。 */
-  .policy--blank::before { content: "\200B"; }
 
   /* --- 以降のセクション(枠のみ・素材待ち) --- */
   .logos { margin-top: 96px; }
@@ -301,7 +315,8 @@
   body.modal-open { overflow: hidden; }
 
   @media (max-width: 900px) {
-    /* .carousel は既定で2列なのでそのまま。3列の .logo-grid だけ落とす */
+    /* 3列が収まらない幅は両グリッドとも2列に落とす */
+    .carousel,
     .logo-grid { grid-template-columns: repeat(2, 1fr); }
   }
   @media (max-width: 760px) {
@@ -333,23 +348,32 @@
     <!-- ============ Corporate Website Design(A案 / B案) ============ -->
     <section class="designs stage stage-2" aria-label="Corporate Website Design">
       <h2>Corporate Website Design</h2>
+      <!-- A案のカラーバリエーション3枚(参考: proto-review の C-1〜C-4 比較UI)。
+           名前の右の●が各案の色。遷移できるのは現行実装の A-1 のみで、
+           A-2 / A-3 は実ページが無いため非対話の <span>(タブ移動でも拾われない)。 -->
       <div class="carousel">
 
-        <section class="card card-a">
-          <p class="name">Design A</p>
-          <p class="policy">ウォームグラデーション × ラウンド</p>
+        <section class="card">
+          <p class="name">Design A-1<span class="name__dot" style="--dot:#ED551B" aria-hidden="true"></span></p>
+          <p class="policy">レッドオレンジ <span class="hex">#ED551B</span></p>
           <div class="links">
             <a href="index.html">TOP <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
             <a href="index.html#about">ABOUT US <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
           </div>
         </section>
 
-        <!-- B案はデザイン差し替え中のため一旦ブランク扱い。
-             遷移先を出さないので <a> ではなく非対話の <span> にしてある
-             (pointer-events で殺すのと違い、タブ移動でも拾われない)。 -->
-        <section class="card card-b">
-          <p class="name">Design B</p>
-          <p class="policy policy--blank" aria-hidden="true"></p>
+        <section class="card">
+          <p class="name">Design A-2<span class="name__dot" style="--dot:#DD571C" aria-hidden="true"></span></p>
+          <p class="policy">ファイア <span class="hex">#DD571C</span></p>
+          <div class="links">
+            <span class="links__off" aria-disabled="true">TOP <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
+            <span class="links__off" aria-disabled="true">ABOUT US <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
+          </div>
+        </section>
+
+        <section class="card">
+          <p class="name">Design A-3<span class="name__dot" style="--dot:#0A0A0A" aria-hidden="true"></span></p>
+          <p class="policy">ダークブラック <span class="hex">#0A0A0A</span></p>
           <div class="links">
             <span class="links__off" aria-disabled="true">TOP <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
             <span class="links__off" aria-disabled="true">ABOUT US <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
