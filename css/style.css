@@ -1185,7 +1185,41 @@ body.intro-revealed .hero__intro-item {
 }
 .field textarea { resize: vertical; min-height: 160px; }
 
-.contact__submit { align-self: center; margin-top: 4px; padding: 14px 44px; }
+/* Same circular-reveal hover as the header's Contact button (.nav__cta):
+   a ::before circle seeded near the left-center scales in on hover. */
+.contact__submit {
+  align-self: center;
+  margin-top: 4px;
+  padding: 14px 44px;
+  position: relative;
+  overflow: hidden;
+  transition: color .3s ease, border-color .3s ease;
+}
+.contact__submit-label {
+  position: relative;
+  z-index: 1;
+}
+.contact__submit::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 18%;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  transform: scale(0);
+  transition: transform .45s cubic-bezier(.22, 1, .36, 1);
+  will-change: transform;
+}
+.contact__submit:hover {
+  background: transparent;
+  border-color: var(--color-primary);
+}
+.contact__submit:hover::before {
+  transform: scale(16);
+}
 .contact__note { color: #fff; font-size: 14px; margin-top: -8px; }
 
 /* ===========================================================
