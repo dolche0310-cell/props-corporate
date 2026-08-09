@@ -18,8 +18,9 @@
   --font-logo: 'Belanosima', var(--font-jp);
   --font-en: 'Inter', var(--font-jp);
   --font-display: 'Abril Fatface', serif;
-  --font-alata: 'Alata', var(--font-en);
+  --font-alata: 'Alata', 'Yu Gothic', 'Hiragino Kaku Gothic ProN', sans-serif;
   --font-gugi: 'Gugi', var(--font-en);
+  --font-yugothic: 'Yu Gothic', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
 
   --header-h: 64px;
   --wrap-max: 1440px;
@@ -252,7 +253,7 @@ button { font: inherit; }
 .label__heading {
   display: block;
   margin: 0;
-  font-family: var(--font-jp);
+  font-family: var(--font-alata);
   font-weight: 400;
   font-size: 28px;
   line-height: 1.8;
@@ -307,6 +308,42 @@ button { font: inherit; }
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+/* Figma 237:27488。デスクトップは左右に余白を持つ、浮いた角丸ピル型の
+   ヘッダーに。モバイルは既存のハンバーガーメニュー構成のまま。 */
+@media (min-width: 768px) {
+  .site-header--brushup {
+    top: 20px;
+    background: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-bottom: none;
+  }
+  .site-header--brushup .site-header__inner {
+    max-width: 1348px;
+    height: 90px;
+    padding: 0 44px;
+    background: rgba(255, 255, 255, .8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 70px;
+    box-shadow: 0 3px 3px rgba(229, 229, 229, .25);
+  }
+  .site-header--brushup .nav { gap: 40px; }
+  .site-header--brushup .nav__link,
+  .site-header--brushup .nav__cta-label {
+    font-family: var(--font-alata);
+    font-size: 15px;
+  }
+  .site-header--brushup .nav__link { color: #191919; }
+  .site-header--brushup .nav__cta {
+    background: var(--color-primary);
+    color: #fff;
+    border: none;
+  }
+  .site-header--brushup .nav__cta::before { display: none; }
+  .site-header--brushup .nav__cta:hover { color: #fff; opacity: .88; }
 }
 .logo {
   display: inline-flex;
@@ -529,6 +566,8 @@ button { font: inherit; }
 @media (min-width: 768px) {
   .hero__motif { left: 19%; top: -70px; width: 115%; max-width: 1660px; }
 }
+/* ドットアニメーションは削除 */
+.hero--brushup .hero__dots { display: none; }
 .hero__dots {
   top: -90px;
   right: -140px;
@@ -661,6 +700,10 @@ button { font: inherit; }
 .hero__rest { margin-left: 6px; display: inline-block; }
 .hero__word { white-space: nowrap; }
 
+/* Figma 232:27380。タイトルはAlata、"AIShift"のみGugi。 */
+.hero--brushup .hero__title { font-family: var(--font-alata); }
+.hero--brushup .hero__ai { font-family: var(--font-gugi); }
+
 /* Figma 215:22653 (DESIGN A_brushup)。ハイライトは日本語全体ではなく
    英字の "AIShift" のみを囲むピル形状に。 */
 .hero__highlight--pill {
@@ -677,7 +720,7 @@ button { font: inherit; }
 /* Figma 215:22653。リード文はすべて同サイズ(24px)の2行で、
    字下げやウェイト差はなし。 */
 .hero__desc--brushup {
-  font-family: var(--font-jp);
+  font-family: var(--font-alata);
   font-size: 18px;
   line-height: 1.7;
   letter-spacing: .06em;
@@ -688,6 +731,7 @@ button { font: inherit; }
   .hero__desc--brushup { font-size: 24px; letter-spacing: .12em; }
 }
 .hero__desc--brushup p { margin: 0; }
+.hero__desc--brushup .hero__ai { font-family: var(--font-gugi); }
 
 /* Figma 206:24159。同じ大きさで2行流していたリード文を、
    「状況説明(細く小さく)」と「掲げるコピー(太く大きく)」の2段に割って
@@ -834,6 +878,16 @@ body.intro-revealed .hero__intro-item {
 /* Figma 215:22674。字間を実測値(4%)に合わせる。 */
 .about--brushup .about__heading,
 .about--brushup .about__body { letter-spacing: .04em; }
+.about--brushup .about__body { font-family: var(--font-yugothic); }
+/* Figma 215:22674: Rectangle 13 (カード背景)は hidden。白背景は不要。 */
+.about--brushup .about__card {
+  background: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
 .about__wordmark {
   font-family: var(--font-logo);
   font-weight: 700;
@@ -1056,11 +1110,108 @@ body.intro-revealed .hero__intro-item {
   .service__desc { font-size: 15px; }
 }
 
-/* Figma 215:23964 (Frame147)。連番バッジは無く、タイトルは24px。 */
-.service--brushup .service__num { display: none; }
-.service--brushup .service__title { font-weight: 700; }
+/* Figma 237:27426。パララックスの2枚重ねステージ・番号バッジ・スクロール
+   固定演出をやめ、静的な1カラム(モバイル)/2カラム(デスクトップ)の
+   リストに。装飾ブロブ2つと、パネル下端で欠けるマーケー見出しを追加。 */
+.service--brushup .service__blob {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+.service--brushup .service__blob--1 {
+  width: 508px; height: 508px; right: -160px; top: -180px;
+  background: radial-gradient(circle, rgba(255,255,255,.07) 0%, rgba(255,255,255,0) 70%);
+}
+.service--brushup .service__blob--2 {
+  width: 508px; height: 508px; left: -220px; top: 160px;
+  background: radial-gradient(circle, rgba(255,255,255,.05) 0%, rgba(255,255,255,0) 70%);
+}
+.service--brushup .label { position: relative; z-index: 1; }
+.service--brushup .service__list {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  margin-top: 32px;
+}
+@media (min-width: 768px) {
+  .service--brushup .service__list { gap: 64px; margin-top: 40px; }
+}
+.service--brushup .service__row {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+@media (min-width: 768px) {
+  .service--brushup .service__row { flex-direction: row; align-items: center; gap: 60px; }
+}
+.service--brushup .service__text { max-width: 512px; }
+.service--brushup .service__title {
+  font-family: var(--font-yugothic);
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1.4;
+  color: #EFEFEF;
+  margin: 0 0 14px;
+}
 @media (min-width: 768px) {
   .service--brushup .service__title { font-size: 24px; }
+}
+.service--brushup .service__desc {
+  font-family: var(--font-yugothic);
+  font-size: 14px;
+  line-height: 1.7;
+  color: #C0C0C0;
+  margin: 0 0 24px;
+}
+@media (min-width: 768px) {
+  .service--brushup .service__desc { font-size: 15px; }
+}
+.service--brushup .service__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--font-yugothic);
+  font-size: 14px;
+  color: #EFEFEF;
+  text-decoration: none;
+}
+.service--brushup .service__link-icon { width: 12px; height: 8px; }
+.service--brushup .service__image {
+  flex-shrink: 0;
+  border-radius: 18px;
+  overflow: hidden;
+  aspect-ratio: 471 / 265;
+}
+@media (min-width: 768px) {
+  .service--brushup .service__image { width: 44%; }
+}
+.service--brushup .service__image img,
+.service--brushup .service__image video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.service--brushup .service__marquee {
+  position: relative;
+  z-index: 0;
+  margin: 40px -20px -40px;
+  font-family: var(--font-alata);
+  font-size: clamp(40px, 11vw, 96px);
+  letter-spacing: .12em;
+  line-height: 1.7;
+  white-space: nowrap;
+  overflow: hidden;
+  background: linear-gradient(90deg, #3D3430, rgba(255, 239, 231, .23) 50%, #4B4B4B);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+@media (min-width: 768px) {
+  .service--brushup .service__marquee { margin: 56px -92px -64px; }
 }
 
 /* Mobile: each item shows its own inline image; desktop uses the
@@ -1217,7 +1368,7 @@ body.intro-revealed .hero__intro-item {
   flex-direction: row;
   align-items: baseline;
   gap: 6px;
-  font-family: var(--font-jp);
+  font-family: var(--font-yugothic);
   font-weight: 500;
   color: #191919;
   margin: 0;
@@ -1230,7 +1381,7 @@ body.intro-revealed .hero__intro-item {
 .news__date-day { font-size: 20px; }
 .news__list--rows .news__body { flex: 1; min-width: 0; }
 .news__list--rows .news__title {
-  font-family: var(--font-jp);
+  font-family: var(--font-yugothic);
   font-weight: 700;
   font-size: 15px;
   line-height: 1.625;
@@ -1244,6 +1395,7 @@ body.intro-revealed .hero__intro-item {
   .news__list--rows .news__title { font-size: 16px; }
 }
 .news__list--rows .news__excerpt {
+  font-family: var(--font-yugothic);
   font-size: 13px;
   line-height: 1.63;
   color: #191919;
@@ -1322,18 +1474,21 @@ body.intro-revealed .hero__intro-item {
 /* Figma 215:23852 (representative-card)。フォントサイズ・行間・字間を実測値に。 */
 .team--brushup .team__card { background: rgba(255, 255, 255, .5); }
 .team--brushup .team__role {
+  font-family: var(--font-yugothic);
   font-weight: 500;
   font-size: 16px;
   letter-spacing: .06em;
   margin: 0 0 8px;
 }
 .team--brushup .team__name {
+  font-family: var(--font-yugothic);
   font-size: 24px;
   line-height: 34px;
   letter-spacing: .06em;
   margin: 0 0 20px;
 }
 .team--brushup .team__bio {
+  font-family: var(--font-yugothic);
   font-size: 15px;
   line-height: 1.8;
 }
@@ -1376,14 +1531,52 @@ body.intro-revealed .hero__intro-item {
   .company__row dd { font-size: 15px; }
 }
 
-/* Figma 215:23864。項目名に字間を、テーブル背景に白カードを。 */
+/* Figma 237:27463。項目名に字間を、テーブル背景に白カードを。
+   本社オフィス写真を円形マスクでパネル右上に配置。 */
+.company--brushup .company__row dt,
+.company--brushup .company__row dd { font-family: var(--font-yugothic); }
 .company--brushup .company__row dt { letter-spacing: .06em; }
 .company--brushup .company__table {
+  position: relative;
+  z-index: 1;
   background: #fff;
   border-radius: 16px;
   padding: 8px 32px;
 }
 .company--brushup .company__row:first-child { border-top: none; }
+
+.company--brushup .company__panel {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  padding: 40px 20px;
+}
+@media (min-width: 768px) {
+  .company--brushup .company__panel { padding: 91px 92px 92px; }
+}
+.company--brushup .company__photo {
+  display: none;
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 50%;
+  overflow: hidden;
+  right: -160px;
+  top: -200px;
+  width: 620px;
+  height: 620px;
+}
+@media (min-width: 1024px) {
+  .company--brushup .company__photo { display: block; }
+}
+.company--brushup .company__photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 70% 40%;
+}
+.company--brushup .label { position: relative; z-index: 1; }
 
 /* ===========================================================
    Contact
@@ -1412,7 +1605,7 @@ body.intro-revealed .hero__intro-item {
   .contact__card { padding: 60px 100px; }
 }
 .contact__heading {
-  font-family: var(--font-en);
+  font-family: var(--font-alata);
   font-size: 24px;
   font-weight: 400;
   letter-spacing: 1.2px;
@@ -1439,6 +1632,9 @@ body.intro-revealed .hero__intro-item {
   align-items: center;
   gap: 8px;
 }
+.contact--card .field__label,
+.contact--card .field input,
+.contact--card .field textarea { font-family: var(--font-yugothic); }
 .field__required {
   color: var(--color-primary);
   font-size: 15px;
