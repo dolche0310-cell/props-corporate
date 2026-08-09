@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>レイヤー積層アイコンアニメーション（プレビュー）</title>
+<style>
+  :root {
+    --color-primary: #ED5303;
+    --color-ink: #040404;
+    --glow-1: #FDDCC2;
+    --glow-2: #FFD9BC;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    min-height: 100%;
+    background: linear-gradient(to bottom, #FFEFE7 0%, #fff 55%);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  }
+  .stage {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+    padding: 56px 40px 44px;
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 30px 80px rgba(4,4,4,0.08), 0 4px 16px rgba(4,4,4,0.04);
+    overflow: hidden;
+  }
+  .card::before,
+  .card::after {
+    content: "";
+    position: absolute;
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    filter: blur(10px);
+    opacity: .55;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .card::before { background: radial-gradient(circle, var(--glow-1) 0%, rgba(253,220,194,0) 70%); left: -110px; top: -90px; }
+  .card::after { background: radial-gradient(circle, var(--glow-2) 0%, rgba(255,217,188,0) 70%); right: -110px; bottom: -90px; }
+
+  .icon-wrap { position: relative; z-index: 1; }
+
+  /* --- icon canvas: macOS-style rounded square backdrop --- */
+  .icon-canvas {
+    position: relative;
+    width: 340px;
+    height: 340px;
+    border-radius: 76px;
+    background: radial-gradient(120% 120% at 25% 15%, #2a2c33 0%, #0c0d10 55%, #050506 100%);
+    box-shadow:
+      0 40px 70px rgba(4,4,4,0.35),
+      0 8px 20px rgba(4,4,4,0.25),
+      inset 0 1px 0 rgba(255,255,255,0.06);
+    overflow: hidden;
+  }
+
+  .icon-canvas .sheen {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0) 40%);
+    pointer-events: none;
+  }
+
+  /* --- glass depth layers --- */
+  .layer {
+    position: absolute;
+    border-radius: 46px;
+    background: linear-gradient(155deg, rgba(255,255,255,0.30) 0%, rgba(226,232,246,0.16) 100%);
+    border: 1px solid rgba(255,255,255,0.28);
+    box-shadow: 0 18px 30px rgba(0,0,0,0.28);
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    transform: translate(28px, -28px) scale(0.82);
+  }
+
+  .layer-1 { width: 76%; height: 76%; left: 6%;  top: 30%; }
+  .layer-2 { width: 82%; height: 82%; left: 11%; top: 20%; }
+  .layer-3 { width: 88%; height: 88%; left: 16%; top: 10%; }
+
+  /* --- front content: the finished illustration --- */
+  .layer-content {
+    width: 84%;
+    left: 8%;
+    top: 6%;
+    border-radius: 40px;
+    background: #F1F3F9;
+    box-shadow: 0 22px 40px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+  }
+  .layer-content img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 40px;
+  }
+
+  @keyframes layerIn {
+    0%   { opacity: 0; transform: translate(30px, -30px) scale(0.8); }
+    60%  { opacity: 1; transform: translate(-2px, 2px) scale(1.015); }
+    100% { opacity: 1; transform: translate(0, 0) scale(1); }
+  }
+
+  @keyframes contentIn {
+    0%   { opacity: 0; transform: translate(18px, -14px) scale(0.9); }
+    65%  { opacity: 1; transform: translate(-2px, 1px) scale(1.02); }
+    100% { opacity: 1; transform: translate(0, 0) scale(1); }
+  }
+
+  .icon-canvas.play .layer-1 { animation: layerIn 620ms cubic-bezier(.22,.68,.32,1) 200ms forwards; }
+  .icon-canvas.play .layer-2 { animation: layerIn 620ms cubic-bezier(.22,.68,.32,1) 620ms forwards; }
+  .icon-canvas.play .layer-3 { animation: layerIn 620ms cubic-bezier(.22,.68,.32,1) 1040ms forwards; }
+  .icon-canvas.play .layer-content { animation: contentIn 760ms cubic-bezier(.22,.68,.32,1) 1560ms forwards; }
+
+  .controls { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  #replay-btn {
+    appearance: none;
+    border: 1px solid #E2E8F0;
+    background: #fff;
+    color: var(--color-ink);
+    font-size: 13px;
+    letter-spacing: .04em;
+    padding: 9px 20px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: border-color .2s ease, color .2s ease;
+  }
+  #replay-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+</style>
+</head>
+<body>
+  <main class="stage">
+    <div class="card">
+      <div class="icon-wrap">
+        <div class="icon-canvas" id="icon-canvas">
+          <div class="sheen"></div>
+          <div class="layer layer-1"></div>
+          <div class="layer layer-2"></div>
+          <div class="layer layer-3"></div>
+          <div class="layer layer-content">
+            <img src="assets/images/icon-illustration.png" alt="AI活用支援イメージイラスト">
+          </div>
+        </div>
+      </div>
+      <div class="controls">
+        <button id="replay-btn" type="button">もう一度見る</button>
+      </div>
+    </div>
+  </main>
+
+<script>
+(function () {
+  'use strict';
+  var canvas = document.getElementById('icon-canvas');
+  var replayBtn = document.getElementById('replay-btn');
+  var reducedMotionMq = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function play() {
+    if (reducedMotionMq.matches) {
+      canvas.classList.remove('play');
+      return;
+    }
+    canvas.classList.remove('play');
+    // force reflow so the animation restarts from the beginning
+    void canvas.offsetWidth;
+    canvas.classList.add('play');
+  }
+
+  window.addEventListener('load', play);
+  replayBtn.addEventListener('click', play);
+})();
+</script>
+</body>
+</html>
