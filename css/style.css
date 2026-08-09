@@ -1177,7 +1177,32 @@ body.intro-revealed .hero__intro-item {
   margin-top: 32px;
 }
 @media (min-width: 768px) {
-  .service--brushup .service__list { gap: 64px; margin-top: 40px; }
+  .service--brushup .service__list {
+    display: block;
+    min-height: 460px;
+    margin-top: 40px;
+  }
+}
+/* デスクトップ: 背景(パネル)は service__pin で固定したまま、
+   2アイテムをふわっとクロスフェードで切り替える(main.js の
+   setServiceActive が is-active を付け替える)。 */
+@media (min-width: 768px) {
+  .service--brushup .service__text-item {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 1s ease, transform 1s ease;
+    pointer-events: none;
+  }
+  .service--brushup .service__text-item.is-active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .service--brushup .service__text-item { transition: opacity .01s linear; transform: none; }
+  }
 }
 .service--brushup .service__row {
   display: flex;
@@ -1185,7 +1210,7 @@ body.intro-revealed .hero__intro-item {
   gap: 24px;
 }
 @media (min-width: 768px) {
-  .service--brushup .service__row { flex-direction: row; align-items: center; gap: 60px; }
+  .service--brushup .service__row { flex-direction: row; align-items: center; gap: 60px; height: 100%; }
 }
 .service--brushup .service__text { max-width: 512px; }
 .service--brushup .service__title {
@@ -1239,19 +1264,37 @@ body.intro-revealed .hero__intro-item {
   position: relative;
   z-index: 0;
   margin: 40px -20px -40px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+@media (min-width: 768px) {
+  .service--brushup .service__marquee { margin: 56px -92px -64px; }
+}
+/* 右から左へ常にゆっくり流れるマーケー。同じ文言を2回並べて
+   -50%まで送ることで、繋ぎ目のない無限ループにしている。 */
+.service--brushup .service__marquee-track {
+  display: inline-flex;
+  width: max-content;
+  animation: service-marquee 34s linear infinite;
+}
+.service--brushup .service__marquee-track span {
+  flex-shrink: 0;
+  padding-right: .5em;
   font-family: var(--font-alata);
   font-size: clamp(40px, 11vw, 96px);
   letter-spacing: .12em;
   line-height: 1.7;
-  white-space: nowrap;
-  overflow: hidden;
   background: linear-gradient(90deg, #3D3430, rgba(255, 239, 231, .23) 50%, #4B4B4B);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
-@media (min-width: 768px) {
-  .service--brushup .service__marquee { margin: 56px -92px -64px; }
+@keyframes service-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .service--brushup .service__marquee-track { animation: none; }
 }
 
 /* Mobile: each item shows its own inline image; desktop uses the
