@@ -207,6 +207,8 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
   }
+  /* Figma 246:26439。4案なので4列、パネルは正方(1016 - gap20×3 = 956 / 4 = 239)。 */
+  .logo-grid--4 { grid-template-columns: repeat(4, 1fr); }
   .logo-grid .pane {
     display: block;
     position: relative;
@@ -215,6 +217,32 @@
     border-radius: 12px;
     height: 272px;
     text-decoration: none;
+  }
+  .logo-grid--4 .pane { height: auto; aspect-ratio: 1; }
+
+  /* ロゴは幅だけ指定し、高さはSVGのviewBox比に任せる(案ごとに縦横比が違う)。
+     幅はパネル239px基準の実測値を % で渡す(--mark-w)。
+     セレクタを .logo-grid 起点にしているのは、上の
+     `.logo-grid .pane { display: block }` に詳細度で勝つため。 */
+  .logo-grid .pane-logo {
+    display: grid;
+    place-items: center;
+  }
+  .pane-logo img {
+    display: block;
+    width: var(--mark-w);
+    height: auto;
+    /* 待機時から微拡大しておき、ホバーでゆっくり寄る(参考実装と同じ挙動) */
+    --mark-scale: 1;
+    transform: scale(var(--mark-scale));
+    transition: transform 0.5s cubic-bezier(0.47, 0.16, 0.24, 1);
+  }
+  @media (hover: hover) {
+    .pane-logo:hover img { --mark-scale: 1.08; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pane-logo img { transition: none; }
+    .pane-logo:hover img { --mark-scale: 1; }
   }
 
   /* --- Design concept モーダル --- */
@@ -298,9 +326,10 @@
   body.modal-open { overflow: hidden; }
 
   @media (max-width: 900px) {
-    /* 3列が収まらない幅は両グリッドとも2列に落とす */
+    /* 3列/4列が収まらない幅は、どちらのグリッドも2列に落とす */
     .carousel,
-    .logo-grid { grid-template-columns: repeat(2, 1fr); }
+    .logo-grid,
+    .logo-grid--4 { grid-template-columns: repeat(2, 1fr); }
   }
   @media (max-width: 760px) {
     .wrap { padding: 88px 24px 112px; }
@@ -362,14 +391,24 @@
       </div>
     </section>
 
-    <!-- ============ Corporate Logomark / Logotype(素材待ち) ============
-         Figma 1:59。中身が未確定のため空パネルのみ。 -->
+    <!-- ============ Corporate Logomark / Logotype ============
+         Figma 246:26437。4案を正方パネル(239px)×4列で並べる。
+         各パネルはアイソレーション図解のページへ遷移する。 -->
     <section class="logos stage stage-3" aria-label="Corporate Logomark / Logotype">
       <h2>Corporate Logomark / Logotype</h2>
-      <div class="logo-grid">
-        <div class="pane pane-empty"></div>
-        <div class="pane pane-empty"></div>
-        <div class="pane pane-empty"></div>
+      <div class="logo-grid logo-grid--4">
+        <a class="pane pane-logo" href="logo-a.html">
+          <img src="assets/logos/mark-a.svg" alt="ロゴマーク案A" style="--mark-w:41.02%">
+        </a>
+        <a class="pane pane-logo" href="logo-b.html">
+          <img src="assets/logos/mark-b.svg" alt="ロゴマーク案B" style="--mark-w:36.82%">
+        </a>
+        <a class="pane pane-logo" href="logo-c.html">
+          <img src="assets/logos/mark-c.svg" alt="ロゴマーク案C" style="--mark-w:58.73%">
+        </a>
+        <a class="pane pane-logo" href="logo-d.html">
+          <img src="assets/logos/mark-d.svg" alt="ロゴマーク案D" style="--mark-w:64.54%">
+        </a>
       </div>
     </section>
 
