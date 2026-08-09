@@ -1155,6 +1155,17 @@ body.intro-revealed .hero__intro-item {
    リストに。装飾ブロブ2つと、パネル下端で欠けるマーケー見出しを追加。
    テキスト506px+画像642pxを .wrap の余白の上にさらに広いパネル余白を
    重ねると収まらないため、パネル左右の余白だけ詰めて幅を確保する。 */
+/* グレーの背景は .wrap の余白を無視して画面幅いっぱいに敷く
+   (角丸カードではなく、他の全幅セクションと同じ full-bleed 背景)。 */
+.service--brushup .service__panel {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  border-radius: 0;
+}
 @media (min-width: 768px) {
   .service--brushup .service__panel { padding-inline: 40px; }
 }
@@ -1292,7 +1303,7 @@ body.intro-revealed .hero__intro-item {
   white-space: nowrap;
 }
 @media (min-width: 768px) {
-  .service--brushup .service__marquee { margin: 56px -92px -64px; }
+  .service--brushup .service__marquee { margin: 56px -40px -64px; }
 }
 /* 右から左へ常にゆっくり流れるマーケー。同じ文言を2回並べて
    -50%まで送ることで、繋ぎ目のない無限ループにしている。 */
