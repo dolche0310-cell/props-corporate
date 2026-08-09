@@ -1268,11 +1268,11 @@ body.intro-revealed .hero__intro-item {
 
 /* Figma 237:27426。パララックスの2枚重ねステージ・番号バッジ・スクロール
    固定演出をやめ、静的な1カラム(モバイル)/2カラム(デスクトップ)の
-   リストに。装飾ブロブ2つと、パネル下端で欠けるマーケー見出しを追加。
-   テキスト506px+画像642pxを .wrap の余白の上にさらに広いパネル余白を
-   重ねると収まらないため、パネル左右の余白だけ詰めて幅を確保する。 */
+   リストに。装飾ブロブ2つと、パネル下端で欠けるマーケー見出しを追加。 */
 /* グレーの背景は .wrap の余白を無視して画面幅いっぱいに敷く
-   (角丸カードではなく、他の全幅セクションと同じ full-bleed 背景)。 */
+   (角丸カードではなく、他の全幅セクションと同じ full-bleed 背景)。
+   左右のパディングは .wrap と同じ clamp() にして、News など他の
+   セクションとコンテンツの左右端(幅)が揃うようにする。 */
 .service--brushup .service__panel {
   width: 100vw;
   position: relative;
@@ -1281,9 +1281,7 @@ body.intro-revealed .hero__intro-item {
   margin-left: -50vw;
   margin-right: -50vw;
   border-radius: 0;
-}
-@media (min-width: 768px) {
-  .service--brushup .service__panel { padding-inline: 40px; }
+  padding-inline: clamp(20px, 6.4vw, 92px);
 }
 .service--brushup .service__blob {
   position: absolute;
@@ -1794,10 +1792,14 @@ body.intro-revealed .hero__intro-item {
   padding: 40px 20px;
 }
 @media (min-width: 768px) {
-  .company--brushup .company__panel { padding: 91px 92px 92px; }
+  .company--brushup .company__panel { padding: 78px 92px 78px; }
 }
 @media (min-width: 1024px) {
-  .company--brushup .company__panel { min-height: 564px; }
+  /* min-height だとテーブルの内容次第でパネルが伸び、写真(inset:0で
+     パネルと同じ高さになる)が縦に間延びしてしまう。Figma実測の
+     フレーム比(1442:813)で高さを固定し、写真とグレー背景の高さを
+     常に一致させる。 */
+  .company--brushup .company__panel { height: auto; aspect-ratio: 1442 / 813; }
 }
 .company--brushup .company__photo {
   display: none;
