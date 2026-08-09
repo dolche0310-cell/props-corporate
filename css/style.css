@@ -1806,7 +1806,11 @@ body.intro-revealed .hero__intro-item {
   pointer-events: none;
   inset: 0;
   overflow: hidden;
-  clip-path: circle(560px at 79.3% 41.9%);
+  /* Figma実測: ハードエッジの円クリップではなく、写真がパネル地に
+     溶けるように滲むグラデーションマスク。内側55%までは不透明、
+     そこから外側に向けて透明へフェードする。 */
+  -webkit-mask-image: radial-gradient(circle 560px at 79.3% 41.9%, #000 0%, #000 45%, transparent 100%);
+  mask-image: radial-gradient(circle 560px at 79.3% 41.9%, #000 0%, #000 45%, transparent 100%);
 }
 @media (min-width: 1024px) {
   .company--brushup .company__photo { display: block; }
