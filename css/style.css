@@ -18,6 +18,8 @@
   --font-logo: 'Belanosima', var(--font-jp);
   --font-en: 'Inter', var(--font-jp);
   --font-display: 'Abril Fatface', serif;
+  --font-alata: 'Alata', var(--font-en);
+  --font-gugi: 'Gugi', var(--font-en);
 
   --header-h: 64px;
   --wrap-max: 1440px;
@@ -230,6 +232,38 @@ button { font: inherit; }
     background-position: 0 0, -120% 0;
   }
 }
+
+/* ===========================================================
+   Label (Figma 215:22653)。全セクション共通の見出しコンポーネント。
+   小さな英字キャプション + 直下に大見出し、の2行構成。
+   マージンなしで行間(1.8)がそのまま行間隔になる。
+   =========================================================== */
+.label { display: block; }
+.label__eyebrow {
+  display: block;
+  margin: 0;
+  font-family: var(--font-alata);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.8;
+  letter-spacing: .05em;
+  color: #6D6D6D;
+}
+.label__heading {
+  display: block;
+  margin: 0;
+  font-family: var(--font-jp);
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 1.8;
+  letter-spacing: .05em;
+  color: #191919;
+}
+@media (min-width: 768px) {
+  .label__eyebrow { font-size: 24px; }
+  .label__heading { font-size: 45px; }
+}
+.label--on-dark .label__heading { color: #EFEFEF; }
 
 /* ===========================================================
    Decorative dot pattern / blurred blobs (shared)
@@ -478,6 +512,23 @@ button { font: inherit; }
 @media (min-width: 768px) {
   .hero { padding: 88px 0 84px; min-height: 600px; }
 }
+/* Figma 232:27373 (image 27 [Vectorized])。淡いブロブ形状のベクター素材を
+   ヒーロー〜About にまたがる背景モチーフとして敷く。実測位置(x:279/1440,
+   y はヒーロー天面基準)をパーセントで再現。 */
+.hero__motif {
+  position: absolute;
+  left: 14%;
+  top: -40px;
+  width: 125%;
+  max-width: 1100px;
+  aspect-ratio: 1651.86 / 1599.47;
+  pointer-events: none;
+  z-index: -1;
+  opacity: .9;
+}
+@media (min-width: 768px) {
+  .hero__motif { left: 19%; top: -70px; width: 115%; max-width: 1660px; }
+}
 .hero__dots {
   top: -90px;
   right: -140px;
@@ -609,6 +660,34 @@ button { font: inherit; }
 }
 .hero__rest { margin-left: 6px; display: inline-block; }
 .hero__word { white-space: nowrap; }
+
+/* Figma 215:22653 (DESIGN A_brushup)。ハイライトは日本語全体ではなく
+   英字の "AIShift" のみを囲むピル形状に。 */
+.hero__highlight--pill {
+  border-radius: 999px;
+  padding: 4px 22px;
+  font-family: var(--font-gugi);
+  font-weight: 400;
+  letter-spacing: .04em;
+}
+@media (min-width: 768px) {
+  .hero__highlight--pill { padding: 6px 32px; }
+}
+
+/* Figma 215:22653。リード文はすべて同サイズ(24px)の2行で、
+   字下げやウェイト差はなし。 */
+.hero__desc--brushup {
+  font-family: var(--font-jp);
+  font-size: 18px;
+  line-height: 1.7;
+  letter-spacing: .06em;
+  color: var(--color-ink);
+  max-width: 44rem;
+}
+@media (min-width: 768px) {
+  .hero__desc--brushup { font-size: 24px; letter-spacing: .12em; }
+}
+.hero__desc--brushup p { margin: 0; }
 
 /* Figma 206:24159。同じ大きさで2行流していたリード文を、
    「状況説明(細く小さく)」と「掲げるコピー(太く大きく)」の2段に割って
@@ -752,6 +831,9 @@ body.intro-revealed .hero__intro-item {
 @media (min-width: 768px) {
   .about__body { font-size: 18px; }
 }
+/* Figma 215:22674。字間を実測値(4%)に合わせる。 */
+.about--brushup .about__heading,
+.about--brushup .about__body { letter-spacing: .04em; }
 .about__wordmark {
   font-family: var(--font-logo);
   font-weight: 700;
@@ -974,6 +1056,13 @@ body.intro-revealed .hero__intro-item {
   .service__desc { font-size: 15px; }
 }
 
+/* Figma 215:23964 (Frame147)。連番バッジは無く、タイトルは24px。 */
+.service--brushup .service__num { display: none; }
+.service--brushup .service__title { font-weight: 700; }
+@media (min-width: 768px) {
+  .service--brushup .service__title { font-size: 24px; }
+}
+
 /* Mobile: each item shows its own inline image; desktop uses the
    floating 3D stage instead */
 .service__mockup-mobile { margin-top: 24px; }
@@ -1104,6 +1193,74 @@ body.intro-revealed .hero__intro-item {
   overflow: hidden;
 }
 
+/* Figma 215:22653 (news frame)。カード積みではなく、区切り線付きの
+   1カラムリスト。日付を左カラムに固定し、サムネイルは記事にある場合のみ
+   右側へ。マージン・行間はFigma実測値どおり。 */
+.news__list--rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-top: 1px solid #EBEBEB;
+}
+.news__list--rows .news__item {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px 0;
+  border-bottom: 1px solid #EBEBEB;
+}
+@media (min-width: 768px) {
+  .news__list--rows .news__item { flex-direction: row; align-items: flex-start; gap: 32px; padding: 38px 0; }
+}
+.news__list--rows .news__date {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 6px;
+  font-family: var(--font-jp);
+  font-weight: 500;
+  color: #191919;
+  margin: 0;
+  flex-shrink: 0;
+}
+@media (min-width: 768px) {
+  .news__list--rows .news__date { flex-direction: column; align-items: flex-start; gap: 4px; width: 70px; }
+}
+.news__date-year { font-size: 14px; }
+.news__date-day { font-size: 20px; }
+.news__list--rows .news__body { flex: 1; min-width: 0; }
+.news__list--rows .news__title {
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.625;
+  letter-spacing: .06em;
+  color: #191919;
+  margin: 0 0 12px;
+  -webkit-line-clamp: unset;
+  display: block;
+}
+@media (min-width: 768px) {
+  .news__list--rows .news__title { font-size: 16px; }
+}
+.news__list--rows .news__excerpt {
+  font-size: 13px;
+  line-height: 1.63;
+  color: #191919;
+  -webkit-line-clamp: 2;
+}
+@media (min-width: 768px) {
+  .news__list--rows .news__excerpt { font-size: 14px; }
+}
+.news__list--rows .news__thumb {
+  margin: 0;
+  aspect-ratio: 320 / 168;
+  background: #fff;
+}
+@media (min-width: 768px) {
+  .news__list--rows .news__thumb { width: 320px; flex-shrink: 0; order: 3; }
+}
+
 /* ===========================================================
    Team
    =========================================================== */
@@ -1161,6 +1318,25 @@ body.intro-revealed .hero__intro-item {
   color: var(--color-text-heading);
   margin: 0 0 16px;
 }
+
+/* Figma 215:23852 (representative-card)。フォントサイズ・行間・字間を実測値に。 */
+.team--brushup .team__card { background: rgba(255, 255, 255, .5); }
+.team--brushup .team__role {
+  font-weight: 500;
+  font-size: 16px;
+  letter-spacing: .06em;
+  margin: 0 0 8px;
+}
+.team--brushup .team__name {
+  font-size: 24px;
+  line-height: 34px;
+  letter-spacing: .06em;
+  margin: 0 0 20px;
+}
+.team--brushup .team__bio {
+  font-size: 15px;
+  line-height: 1.8;
+}
 .team__bio {
   font-size: 14px;
   line-height: 1.8;
@@ -1200,6 +1376,15 @@ body.intro-revealed .hero__intro-item {
   .company__row dd { font-size: 15px; }
 }
 
+/* Figma 215:23864。項目名に字間を、テーブル背景に白カードを。 */
+.company--brushup .company__row dt { letter-spacing: .06em; }
+.company--brushup .company__table {
+  background: #fff;
+  border-radius: 16px;
+  padding: 8px 32px;
+}
+.company--brushup .company__row:first-child { border-top: none; }
+
 /* ===========================================================
    Contact
    =========================================================== */
@@ -1211,6 +1396,31 @@ body.intro-revealed .hero__intro-item {
 }
 @media (min-width: 768px) {
   .contact { padding: 96px 0; }
+}
+
+/* Figma 215:22653 (DESIGN A_brushup)。セクション地は明るいまま、
+   フォームを角丸のダークカードに収める構成。 */
+.contact--card { background: var(--color-bg, #fff); }
+.contact__card {
+  max-width: 904px;
+  margin-inline: auto;
+  background: #323232;
+  border-radius: 24px;
+  padding: 40px clamp(24px, 6vw, 100px) 48px;
+}
+@media (min-width: 768px) {
+  .contact__card { padding: 60px 100px; }
+}
+.contact__heading {
+  font-family: var(--font-en);
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: 1.2px;
+  color: #efefef;
+  margin: 0 0 32px;
+}
+@media (min-width: 768px) {
+  .contact__heading { margin-bottom: 40px; }
 }
 .contact__form {
   position: relative;

@@ -7,7 +7,7 @@
 <meta name="description" content="MiAI株式会社は「人の力を最大化するソフトウェアをつくる」という想いのもと、企業と人のコミュニケーションをサポートするAI技術を開発しています。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Belanosima:wght@600;700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Alata&family=Belanosima:wght@600;700&family=Gugi&family=Inter:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 <style>
   :root { --color-primary: #D24A0F; }
@@ -68,32 +68,29 @@
 
   <!-- KV / Hero -->
   <section class="hero" id="hero">
+    <img class="hero__motif" src="assets/images/hero-motif.svg" alt="" aria-hidden="true">
     <span class="hero__dots" id="hero-dots" aria-hidden="true"></span>
     <span class="hero__blob hero__blob--1" aria-hidden="true"></span>
     <span class="hero__blob hero__blob--2" aria-hidden="true"></span>
     <div class="wrap">
       <h1 class="hero__title">
-        <span class="hero__highlight hero__intro-item hero__intro-item--1">産業のAIシフト</span><span class="hero__rest hero__intro-item hero__intro-item--2">を<span class="hero__word">支援する</span></span>
+        <span class="hero__intro-item hero__intro-item--1">産業の<span class="hero__highlight hero__highlight--pill">AIShift</span></span><span class="hero__rest hero__intro-item hero__intro-item--2">を支援する</span>
       </h1>
-      <!-- Figma 206:24159。上段の説明文は静かに、下段のコピーだけ太く大きく。
-           2行目の右寄せがそのまま字下げに見える(Figmaの text-right)。 -->
-      <div class="hero__desc hero__intro-item hero__intro-item--3">
-        <p class="hero__lead">企業と人のコミュニケーションをAIで変革し</p>
-        <p class="hero__catch">
-          <span>誰もが自分にあった選択肢に</span>
-          <span class="hero__catch-end">スムーズに出会える社会の実現</span>
-        </p>
+      <!-- Figma 232:27385。2行とも同サイズ(24px/letter-spacing .12em)。 -->
+      <div class="hero__desc hero__desc--brushup hero__intro-item hero__intro-item--3">
+        <p>企業と人のコミュニケーションをAIで変革し、</p>
+        <p>誰もが自分にあった選択肢にスムーズに出会える社会の実現</p>
       </div>
     </div>
   </section>
 
   <!-- About -->
-  <section class="about" id="about">
+  <section class="about about--brushup" id="about">
     <span class="about__blob" aria-hidden="true"></span>
     <div class="wrap">
-      <div class="section-label section-label--light reveal">
-        <span class="section-label__bg" aria-hidden="true">About</span>
-        <span class="section-label__caption">私たちについて</span>
+      <div class="label reveal">
+        <span class="label__eyebrow">About</span>
+        <span class="label__heading">私たちについて</span>
       </div>
 
       <div class="about__card reveal">
@@ -127,15 +124,15 @@
   </section>
 
   <!-- Service -->
-  <section class="service" id="service">
+  <section class="service service--brushup" id="service">
     <div class="wrap">
       <div class="service__scroller" id="service-scroller">
         <div class="service__pin">
           <div class="service__panel reveal">
 
-            <div class="section-label section-label--dark reveal">
-              <span class="section-label__bg" aria-hidden="true">Service</span>
-              <span class="section-label__caption">事業内容</span>
+            <div class="label label--on-dark reveal">
+              <span class="label__eyebrow">Service</span>
+              <span class="label__heading">事業内容</span>
             </div>
 
             <div class="service__content">
@@ -191,40 +188,41 @@
   <!-- News -->
   <section class="news" id="news">
     <div class="wrap">
-      <div class="section-label section-label--light reveal">
-        <span class="section-label__bg" aria-hidden="true">News</span>
-        <span class="section-label__caption">お知らせ</span>
+      <div class="label reveal">
+        <span class="label__eyebrow">News</span>
+        <span class="label__heading">お知らせ</span>
       </div>
 
-      <div class="news__list">
+      <div class="news__list news__list--rows">
         <article class="news__item reveal">
+          <time class="news__date" datetime="2026-04-02"><span class="news__date-year">2026</span><span class="news__date-day">04.02</span></time>
+          <div class="news__body">
+            <h3 class="news__title">株式会社日比谷花壇がAI面接サービス「MiAI面接」を導入。&quot;人の温度&quot;を守りながら全国採用の公平性と効率性を両立。</h3>
+            <p class="news__excerpt">プロップス株式会社（本社：東京都中央区、代表取締役 松元勇人）は、株式会社日比谷花壇（本社：東京都港区、代表取締役社長 宮島 浩彰）がAI面接サービス「MiAI面接」を正式導入したことをお知らせします...</p>
+          </div>
           <div class="news__thumb">
             <img src="assets/images/news-1.png" alt="株式会社日比谷花壇がAI面接サービス「MiAI面接」を導入">
           </div>
-          <time class="news__date" datetime="2026-04-02">2026/4/2</time>
-          <h3 class="news__title">株式会社日比谷花壇がAI面接サービス「MiAI面接」を導入。&quot;人の温度&quot;を守りながら全国採用の公平性と効率性を両立。</h3>
-          <p class="news__excerpt">プロップス株式会社（本社：東京都中央区、代表取締役 松元勇人）は、株式会社日比谷花壇（本社：東京都港区、代表取締役社長 宮島 浩彰）がAI面接サービス「MiAI面接」を正式導入したことをお知らせします...</p>
         </article>
 
         <article class="news__item reveal">
-          <div class="news__thumb">
-            <img src="assets/images/news-2.png" alt="AIで採用を加速する。MiAI面接を正式リリース">
+          <time class="news__date" datetime="2025-07-21"><span class="news__date-year">2025</span><span class="news__date-day">07.21</span></time>
+          <div class="news__body">
+            <h3 class="news__title">AI で採用を加速する。ノーコードで自社向けにカスタマイズできる AI 面接官「MiAI面接」を正式リリース</h3>
+            <p class="news__excerpt">採用初期のリードタイムを90%以上削減。24時間365日対応で、企業ごとに求職者一人一人に合わせた面接対話体験を提供。最新の生成 AI を活用し採用体験にイノベーションを。採用市場の激化と労働人口減少...</p>
           </div>
-          <time class="news__date" datetime="2025-07-21">2025/7/21</time>
-          <h3 class="news__title">AI で採用を加速する。ノーコードで自社向けにカスタマイズできる AI 面接官「MiAI面接」を正式リリース</h3>
-          <p class="news__excerpt">採用初期のリードタイムを90%以上削減。24時間365日対応で、企業ごとに求職者一人一人に合わせた面接対話体験を提供。最新の生成 AI を活用し採用体験にイノベーションを。採用市場の激化と労働人口減少...</p>
         </article>
       </div>
     </div>
   </section>
 
   <!-- Team -->
-  <section class="team" id="team">
+  <section class="team team--brushup" id="team">
     <span class="team__dots" aria-hidden="true"></span>
     <div class="wrap">
-      <div class="section-label section-label--light reveal">
-        <span class="section-label__bg" aria-hidden="true">Team</span>
-        <span class="section-label__caption">代表紹介</span>
+      <div class="label reveal">
+        <span class="label__eyebrow">Team</span>
+        <span class="label__heading">代表紹介</span>
       </div>
 
       <div class="team__card reveal">
@@ -239,11 +237,11 @@
   </section>
 
   <!-- Company -->
-  <section class="company" id="company">
+  <section class="company company--brushup" id="company">
     <div class="wrap">
-      <div class="section-label section-label--muted reveal">
-        <span class="section-label__bg" aria-hidden="true">Company</span>
-        <span class="section-label__caption">会社概要</span>
+      <div class="label reveal">
+        <span class="label__eyebrow">Company</span>
+        <span class="label__heading">会社概要</span>
       </div>
 
       <dl class="company__table reveal">
@@ -272,14 +270,11 @@
   </section>
 
   <!-- Contact -->
-  <section class="contact" id="contact">
+  <section class="contact contact--card" id="contact">
     <div class="wrap">
-      <div class="section-label section-label--dark reveal">
-        <span class="section-label__bg" aria-hidden="true">Contact</span>
-        <span class="section-label__caption">お問い合わせ</span>
-      </div>
-
-      <form class="contact__form reveal" id="contact-form" novalidate>
+      <div class="contact__card reveal">
+        <h2 class="contact__heading">Contact us</h2>
+        <form class="contact__form" id="contact-form" novalidate>
         <div class="field">
           <span class="field__label">お名前 <span class="field__required">*</span></span>
           <label class="sr-only" for="field-name">お名前</label>
@@ -310,9 +305,10 @@
           <textarea id="field-message" name="message" rows="5" placeholder="お問い合わせ内容をご記入ください" required></textarea>
         </div>
 
-        <button type="submit" class="btn btn--outline contact__submit"><span class="contact__submit-label">送信する</span></button>
-        <p class="contact__note" id="contact-note" role="status" aria-live="polite" hidden>お問い合わせありがとうございます。内容を確認のうえご連絡いたします。</p>
-      </form>
+          <button type="submit" class="btn btn--outline contact__submit"><span class="contact__submit-label">送信する</span></button>
+          <p class="contact__note" id="contact-note" role="status" aria-live="polite" hidden>お問い合わせありがとうございます。内容を確認のうえご連絡いたします。</p>
+        </form>
+      </div>
     </div>
   </section>
 
