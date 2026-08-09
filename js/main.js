@@ -17,8 +17,8 @@
       // .intro-overlay--logo in style.css, ~2.4s) before the circular
       // wipe starts; other pages open the wipe almost immediately.
       var hasLogoIntro = introOverlay.classList.contains('intro-overlay--logo');
-      var revealDelay = hasLogoIntro ? 2400 : 350;
-      var safetyDelay = hasLogoIntro ? 5000 : 2900;
+      var revealDelay = hasLogoIntro ? 3200 : 350;
+      var safetyDelay = hasLogoIntro ? 5800 : 2900;
 
       var removeIntroOverlay = function () {
         if (introOverlay.parentNode) introOverlay.remove();

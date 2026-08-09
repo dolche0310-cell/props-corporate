@@ -92,11 +92,14 @@ button { font: inherit; }
 }
 
 /* ===========================================================
-   Intro logo sequence (Design A variants only)。白画面にロゴが
-   現れ→iの点だけオレンジに残り他は薄くなる→点だけになる→
-   点が図形(img-04)に育ち回転しながらオレンジの光が広がる、という
-   1本のクロスフェード。全体 2400ms で、そのあと --intro-r の
-   円形ワイプでキービジュアルへ引き継ぐ。 */
+   Intro logo sequence (Design A variants only)。
+   ロゴ表示 → 点以外がふんわりフェードアウト → 点が連続的に
+   拡大しながらimg-04の輪に育って回転 → 輪がそのままオレンジの
+   光に溶けていく、を一続きのモーションで。個別カットの
+   クロスフェードではなく、常にどこかが動き続けるようキーフレーム
+   の停止(プラトー)を最小限にして繋げている。
+   全体 3200ms で、そのあと --intro-r の円形ワイプでキービジュアル
+   へ引き継ぐ。 */
 .intro-overlay--logo .intro-logo {
   position: absolute;
   inset: 0;
@@ -104,11 +107,35 @@ button { font: inherit; }
   align-items: center;
   justify-content: center;
 }
+.intro-overlay--logo .intro-logo__stage {
+  position: relative;
+  width: min(72vw, 380px);
+  aspect-ratio: 1447 / 914;
+}
 .intro-overlay--logo .intro-logo__frame {
   position: absolute;
-  width: min(72vw, 380px);
-  height: auto;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   opacity: 0;
+}
+/* ロゴの「i」の点と同じ位置(実測: 中心 48.9%/53.7%、半径 幅の2.3%)に
+   置いた本物のDOM要素。この点自体が拡大し続け、途中でimg-04の輪に
+   クロスフェードすることで「点が育って輪になる」動きを連続させる。 */
+.intro-overlay--logo .intro-logo__dot {
+  position: absolute;
+  left: 48.9%;
+  top: 53.7%;
+  width: 4.6%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  /* ロゴ画像(intro-logo-02/03.png)に焼き込まれた点と同じ色に固定。
+     --color-primary はダーク/ファイア等のバリエーションで変わるため
+     ここでは使わない(バトンタッチの瞬間に色が変わって見えてしまう)。 */
+  background: #F17321;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(1);
+  animation: intro-dot-grow 3.2s cubic-bezier(.3, 0, .2, 1) forwards;
 }
 .intro-overlay--logo .intro-logo__blob-wrap {
   position: absolute;
@@ -116,58 +143,58 @@ button { font: inherit; }
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: intro-blob-spin 7s linear infinite;
-  animation-delay: 1.65s;
+  animation: intro-blob-spin 8s linear infinite;
+  animation-delay: 1.7s;
 }
 .intro-overlay--logo .intro-logo__glow {
   position: absolute;
-  width: min(80vw, 460px);
-  height: min(80vw, 460px);
+  width: 120%;
+  aspect-ratio: 1;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(237, 83, 3, .45) 0%, rgba(237, 83, 3, 0) 70%);
+  background: radial-gradient(circle, rgba(241, 115, 33, .55) 0%, rgba(241, 115, 33, 0) 70%);
   opacity: 0;
-  animation: intro-glow-spread 2.4s ease forwards;
+  transform: scale(.6);
+  animation: intro-glow-spread 3.2s cubic-bezier(.3, 0, .2, 1) forwards;
 }
-.intro-overlay--logo .intro-logo__frame--1 { animation: intro-frame-1 2.4s ease forwards; }
-.intro-overlay--logo .intro-logo__frame--2 { animation: intro-frame-2 2.4s ease forwards; }
-.intro-overlay--logo .intro-logo__frame--3 { animation: intro-frame-3 2.4s ease forwards; }
-.intro-overlay--logo .intro-logo__frame--4 { animation: intro-frame-4 2.4s ease forwards; }
-.intro-overlay--logo .intro-logo__frame--5 { animation: intro-frame-5 2.4s ease forwards; }
+.intro-overlay--logo .intro-logo__frame--1 { animation: intro-frame-1 3.2s cubic-bezier(.4, 0, .2, 1) forwards; }
+.intro-overlay--logo .intro-logo__frame--2 { animation: intro-frame-2 3.2s cubic-bezier(.4, 0, .2, 1) forwards; }
+.intro-overlay--logo .intro-logo__frame--4 { animation: intro-frame-4 3.2s cubic-bezier(.4, 0, .2, 1) forwards; }
 
 @keyframes intro-frame-1 {
   0%   { opacity: 0; }
-  6%   { opacity: 1; }
-  25%  { opacity: 1; }
-  37%  { opacity: 0; }
+  8%   { opacity: 1; }
+  22%  { opacity: 1; }
+  42%  { opacity: 0; }
   100% { opacity: 0; }
 }
 @keyframes intro-frame-2 {
-  0%, 25% { opacity: 0; }
-  37%     { opacity: 1; }
-  52%     { opacity: 1; }
-  62%     { opacity: 0; }
-  100%    { opacity: 0; }
+  0%   { opacity: 0; }
+  22%  { opacity: 0; }
+  42%  { opacity: 1; }
+  58%  { opacity: 1; }
+  78%  { opacity: 0; }
+  100% { opacity: 0; }
 }
-@keyframes intro-frame-3 {
-  0%, 52% { opacity: 0; transform: scale(1); }
-  62%     { opacity: 1; transform: scale(1); }
-  69%     { opacity: 1; transform: scale(1); }
-  87%     { opacity: 0; transform: scale(1.5); }
-  100%    { opacity: 0; transform: scale(1.5); }
+/* 点: 42%あたりでふわっと現れ、以後ずっと同じイージングで拡大し
+   続ける(停止区間なし)。76%を過ぎたところで輪(frame4)へ
+   クロスフェードして退場する。 */
+@keyframes intro-dot-grow {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(.6); }
+  42%  { opacity: 0; transform: translate(-50%, -50%) scale(.6); }
+  55%  { opacity: 1; transform: translate(-50%, -50%) scale(2.2); }
+  76%  { opacity: 1; transform: translate(-50%, -50%) scale(9); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(13); }
 }
 @keyframes intro-frame-4 {
-  0%, 69% { opacity: 0; transform: scale(.7); }
-  87%     { opacity: 1; transform: scale(1); }
-  95%     { opacity: 1; transform: scale(1); }
-  100%    { opacity: 0; transform: scale(1); }
-}
-@keyframes intro-frame-5 {
-  0%, 95% { opacity: 0; }
-  100%    { opacity: 1; }
+  0%   { opacity: 0; transform: scale(.55); }
+  68%  { opacity: 0; transform: scale(.72); }
+  84%  { opacity: 1; transform: scale(1); }
+  100% { opacity: .55; transform: scale(1.08); }
 }
 @keyframes intro-glow-spread {
-  0%, 69% { opacity: 0; transform: scale(.6); }
-  100%    { opacity: 1; transform: scale(1.25); }
+  0%   { opacity: 0; transform: scale(.6); }
+  70%  { opacity: 0; transform: scale(.75); }
+  100% { opacity: 1; transform: scale(1.3); }
 }
 @keyframes intro-blob-spin {
   from { transform: rotate(0deg); }
@@ -176,6 +203,7 @@ button { font: inherit; }
 @media (prefers-reduced-motion: reduce) {
   .intro-overlay--logo .intro-logo__blob-wrap,
   .intro-overlay--logo .intro-logo__frame,
+  .intro-overlay--logo .intro-logo__dot,
   .intro-overlay--logo .intro-logo__glow { animation: none; }
 }
 
