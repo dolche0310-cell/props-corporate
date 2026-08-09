@@ -1152,7 +1152,12 @@ body.intro-revealed .hero__intro-item {
 
 /* Figma 237:27426。パララックスの2枚重ねステージ・番号バッジ・スクロール
    固定演出をやめ、静的な1カラム(モバイル)/2カラム(デスクトップ)の
-   リストに。装飾ブロブ2つと、パネル下端で欠けるマーケー見出しを追加。 */
+   リストに。装飾ブロブ2つと、パネル下端で欠けるマーケー見出しを追加。
+   テキスト506px+画像642pxを .wrap の余白の上にさらに広いパネル余白を
+   重ねると収まらないため、パネル左右の余白だけ詰めて幅を確保する。 */
+@media (min-width: 768px) {
+  .service--brushup .service__panel { padding-inline: 40px; }
+}
 .service--brushup .service__blob {
   position: absolute;
   border-radius: 50%;
@@ -1190,6 +1195,7 @@ body.intro-revealed .hero__intro-item {
   .service--brushup .service__text-item {
     position: absolute;
     inset: 0;
+    max-width: none;
     opacity: 0;
     transform: translateY(14px);
     transition: opacity 1s ease, transform 1s ease;
@@ -1210,9 +1216,20 @@ body.intro-revealed .hero__intro-item {
   gap: 24px;
 }
 @media (min-width: 768px) {
-  .service--brushup .service__row { flex-direction: row; align-items: center; gap: 60px; height: 100%; }
+  .service--brushup .service__row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+    height: 100%;
+  }
 }
-.service--brushup .service__text { max-width: 512px; }
+.service--brushup .service__text { max-width: 506px; }
+@media (min-width: 768px) {
+  /* 506px/642pxはFigma実測値。パネル内で両方その幅を確保できない
+     ビューポートでは、比率(506:642)を保ったまま一緒に縮む。 */
+  .service--brushup .service__text { flex: 1 1 506px; max-width: 506px; min-width: 0; }
+}
 .service--brushup .service__title {
   font-family: var(--font-yugothic);
   font-weight: 500;
@@ -1249,9 +1266,16 @@ body.intro-revealed .hero__intro-item {
   border-radius: 18px;
   overflow: hidden;
   aspect-ratio: 471 / 265;
+  width: 100%;
 }
 @media (min-width: 768px) {
-  .service--brushup .service__image { width: 44%; }
+  .service--brushup .service__image {
+    flex: 1.269 1 642px;
+    max-width: 642px;
+    min-width: 0;
+    width: auto;
+    aspect-ratio: 642 / 361;
+  }
 }
 .service--brushup .service__image img,
 .service--brushup .service__image video {
