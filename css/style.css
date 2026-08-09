@@ -875,19 +875,61 @@ body.intro-revealed .hero__intro-item {
 @media (min-width: 768px) {
   .about__body { font-size: 18px; }
 }
-/* Figma 215:22674。字間を実測値(4%)に合わせる。 */
-.about--brushup .about__heading,
-.about--brushup .about__body { letter-spacing: .04em; }
-.about--brushup .about__body { font-family: var(--font-yugothic); }
-/* Figma 215:22674: Rectangle 13 (カード背景)は hidden。白背景は不要。 */
+/* Figma 240:27507。パネル地(#F4F4F4)・ブロブ位置・見出し/本文の色や
+   字間・行間・ロゴ〜テキストのgapまで実測値に合わせる。 */
+.about--brushup .about__panel {
+  position: relative;
+  overflow: hidden;
+  background: #F4F4F4;
+  border-radius: 8px;
+  padding: 40px 20px;
+}
+@media (min-width: 768px) {
+  .about--brushup .about__panel { padding: 90px 92px; }
+}
+.about--brushup .about__blob {
+  left: 8px;
+  top: 40px;
+  width: 260px;
+  height: 264px;
+}
+@media (min-width: 768px) {
+  .about--brushup .about__blob { left: 120px; top: 250px; width: 659px; height: 669px; }
+}
 .about--brushup .about__card {
+  position: relative;
+  z-index: 1;
   background: none;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   border: none;
   box-shadow: none;
   padding: 0;
+  margin-top: 16px;
 }
+@media (min-width: 768px) {
+  .about--brushup .about__card {
+    margin-top: 25px;
+    gap: 108px;
+    padding: 0 113px 0 114px;
+  }
+}
+.about--brushup .about__heading,
+.about--brushup .about__body { color: #191919; }
+.about--brushup .about__heading {
+  letter-spacing: .96px;
+  margin-bottom: 12px;
+}
+@media (min-width: 768px) {
+  .about--brushup .about__heading { margin-bottom: 26px; }
+}
+.about--brushup .about__body {
+  font-family: var(--font-yugothic);
+  line-height: 1.7;
+  letter-spacing: 0;
+}
+.about--brushup .about__tracked { letter-spacing: .96px; }
+.about--brushup .about__logo-svg { width: 178px; }
 .about__wordmark {
   font-family: var(--font-logo);
   font-weight: 700;
