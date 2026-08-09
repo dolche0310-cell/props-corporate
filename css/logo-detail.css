@@ -1,18 +1,20 @@
 /* ===========================================================
    ロゴ詳細(アイソレーション図解)
-   ハブ(hub.html)と同じ字面・同じ静けさに揃える。
-   参考: proto-review の logo-detail(lg2-*)。図解の構成と
-   「線が引かれてから中身が入る」順序を踏襲している。
+   proto-review(Cuolega)の css/logo-detail.css をそのまま採用。
+   レイアウト・文言・挙動を合わせる指示のため、構造には手を入れず、
+   アクセント色(ティール #00A9AD)だけ props のオレンジ #ED551B に置換している。
    =========================================================== */
+/* ============ Logomark / Logotype 詳細ページ(logo-detail-1/2/3 共通) ============
+   ハブ(index.html)の .wrap / トークンを踏襲し、そのままFigma実測値と揃える。 */
 * { box-sizing: border-box; margin: 0; }
 :root {
   --ink: #111112;
   --ink-2: #6b6b70;
   --pane: #fafafa;
-  --guide: #c9c9ce;      /* 破線・寸法線 */
-  --guide-strong: #8a8a90; /* ラベル・矢印 */
-  --accent: #ED551B;
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  /* 構築図解専用: 単調な等速/単純ease-outではなく、
+     すっと加速してふっと減速する抑揚のある動き */
+  --ld-ease: cubic-bezier(0.83, 0, 0.17, 1);
 }
 body {
   background: #ffffff;
@@ -23,177 +25,288 @@ body {
 .wrap {
   max-width: 1080px;
   margin: 0 auto;
-  padding: 96px 32px 140px;
+  padding: 128px 32px 160px;
 }
-
-/* --- 戻り導線 + タイトル --- */
-.ld-back {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-family: "Inter", sans-serif;
-  font-weight: 600;
-  font-size: 12px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-2);
-  text-decoration: none;
-  margin-bottom: 28px;
-  transition: color 0.35s var(--ease-out-expo);
-}
-.ld-back:hover { color: var(--ink); }
-.ld-back svg { display: block; transform: rotate(180deg); }
 
 .ld-title {
-  font-family: "Inter", "Noto Sans JP", sans-serif;
+  font-family: "Inter", sans-serif;
   font-weight: 600;
-  font-size: 26px;
+  font-size: 30px;
   letter-spacing: 0.03em;
-  line-height: 1.35;
-  margin-bottom: 56px;
+  color: var(--ink);
+  margin-bottom: 96px;
 }
-.ld-title .thin { font-weight: 500; color: var(--ink-2); }
 
-/* --- カード --- */
+.ld-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
 .ld-card {
   background: var(--pane);
   border-radius: 12px;
-  padding: 48px 32px;
-  margin-bottom: 20px;
-}
-.ld-card__label {
-  font-family: "Inter", "Noto Sans JP", sans-serif;
-  font-weight: 600;
-  font-size: 11px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--ink-2);
-  margin-bottom: 32px;
-}
-
-/* --- ロックアップ(マーク + ワードマーク) --- */
-.ld-lockup {
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Figmaの指定が無いので、マーク高に対する比率で置いている(--gap-ratio) */
-  gap: calc(var(--mark-h, 96px) * var(--gap-ratio, 0.5));
-  min-height: 180px;
 }
-.ld-lockup__mark { height: var(--mark-h, 96px); width: auto; display: block; }
-.ld-lockup__word { height: calc(var(--mark-h, 96px) * 0.62); width: auto; display: block; }
+.ld-card img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.ld-card--lockup { height: 227px; }
+.ld-card--guide { height: 482px; position: relative; }
 
-/* --- 図解の描画領域 ---
-   viewBox は正方形に近いので、カード幅いっぱいに広げると
-   高さも同じだけ伸びて間延びする。作図が読める大きさで頭打ちにする。 */
-.ld-guide { display: block; width: 100%; height: auto; overflow: visible; }
+@media (max-width: 900px) {
+  .ld-card--lockup img { max-width: 90%; }
+}
+
+/* ============ 使用ガイド:アイソレーション(クリアスペース)構築図解 ============
+   JSが .ld-guide-mount 内にSVGを組み立てて描画する。
+   線の表示・非表示・タイミング(--d)はすべてJSが要素に直接設定し、
+   ここでは keyframes と「is-play後にanimationを適用する」だけを定義する。
+   noscriptは.ld-card--guideの兄弟要素として置き、JS無効時のみ表示。 */
 .ld-guide-mount {
-  max-width: 460px;
-  margin-inline: auto;
-  min-height: 320px;
+  position: absolute;
+  inset: 28px;
+}
+.ld-guide-mount svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.ld-card--guide > noscript {
+  display: block;
+  width: 100%;
+}
+.ld-card--guide > noscript img {
+  display: block;
+  max-width: 90%;
+  height: auto;
+  margin: 0 auto;
 }
 
-/* 図解のパーツ。色と太さはここで一括管理し、JSは形だけ作る */
-.lg-box {
+/* ガイド線はFigma準拠のグレー(太さ1px・ハイフン状破線は不変)。
+   vector-effect:non-scaling-stroke でロゴごとに異なるviewBoxスケールに
+   左右されず、3ページとも同じ太さ・破線間隔になるようにする。 */
+.ld-g-line,
+.ld-g-box,
+.ld-g-diagonal {
   fill: none;
-  stroke: var(--guide);
+  stroke: rgba(17, 17, 18, 0.3);
   stroke-width: 1;
-  stroke-dasharray: 5 4;
+  stroke-linecap: butt;
+  stroke-dasharray: 4 3;
+  vector-effect: non-scaling-stroke;
 }
-.lg-box--clear { stroke: var(--guide-strong); }
-.lg-dim { stroke: var(--guide-strong); stroke-width: 1; }
-.lg-head { fill: var(--guide-strong); }
-.lg-label {
+/* 1X/X測定矢印は破線でなく実線(色・太さは他の線と同じ) */
+.ld-g-arrow-line {
+  fill: none;
+  stroke: rgba(17, 17, 18, 0.3);
+  stroke-width: 1;
+  stroke-linecap: butt;
+  stroke-dasharray: none;
+  vector-effect: non-scaling-stroke;
+}
+.ld-g-arrow-head { fill: rgba(17, 17, 18, 0.3); stroke: none; }
+.ld-g-label {
   font-family: "Inter", sans-serif;
-  font-weight: 600;
   font-size: 11px;
-  letter-spacing: 0.08em;
-  fill: var(--guide-strong);
+  letter-spacing: 0.02em;
+  fill: rgba(17, 17, 18, 0.3);
 }
-.lg-label--accent { fill: var(--accent); }
 
-/* --- 最小サイズ --- */
-.ld-min {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+/* ワードマーク: アウトライン(#ED551B)描画 → 本来の色(黒)で塗りが入って完成(freee風)。
+   O/Aのような穴あき文字は「stroke専用(サブパス分割済み)」と
+   「fill専用(未分割・fill-ruleで中抜きが正しく出る)」を別々のpathとして
+   重ね、アウトライン描画完了後にfillがフェードインしつつstrokeがフェード
+   アウトすることで完成させる(fill用pathにstrokeを付けると穴が塗り
+   潰れて黒い塊になるため、必ずこの2要素構成にすること)。 */
+.ld-g-word-stroke {
+  fill: none;
+  stroke: #ED551B;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  stroke-opacity: 1;
 }
-.ld-min__item {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  background: #fff;
-  border-radius: 8px;
-  padding: 24px;
+.ld-g-word-fill {
+  stroke: none;
+  fill-opacity: 0;
 }
-.ld-min__art { display: grid; place-items: center; width: 72px; flex: none; }
-.ld-min__art img { display: block; width: auto; }
-.ld-min__meta { min-width: 0; }
-.ld-min__val {
+/* マーク記号(ラスター)はベクター無しのためワイプで近似出現 */
+.ld-g-icon-clip-rect { fill: #fff; }
+
+/* ---- 再生("is-play"付与後、JSが初期の非表示状態を仕込んだ要素にのみ効く) ---- */
+.ld-guide-mount.is-play [data-ld-draw] {
+  animation-name: ldDraw;
+  animation-timing-function: var(--ld-ease);
+  animation-fill-mode: forwards;
+  animation-delay: var(--d, 0s);
+  animation-duration: var(--dur, 0.9s);
+}
+.ld-guide-mount.is-play [data-ld-fade] {
+  animation-name: ldFade;
+  animation-timing-function: var(--ld-ease);
+  animation-fill-mode: forwards;
+  animation-delay: var(--d, 0s);
+  animation-duration: var(--dur, 0.5s);
+}
+.ld-guide-mount.is-play [data-ld-rise] {
+  animation-name: ldRise;
+  animation-timing-function: var(--ld-ease);
+  animation-fill-mode: forwards;
+  animation-delay: var(--d, 0s);
+  animation-duration: var(--dur, 0.55s);
+}
+/* ワードマーク1文字: アウトライン描画(既存ldDrawと同じdashoffset技法)→
+   完了後に塗りが入ってstrokeが消える、の2つを同一要素に同時適用する。
+   animation-*系は同じ要素に別ルールで指定すると後勝ち(上書き)になり
+   1つ目が消えてしまうため、カンマ区切りの多重アニメーションとして
+   1つのルールにまとめる(--d-draw/--dur-draw と --d-fill/--dur-fill を
+   それぞれ別のカスタムプロパティ名で持たせる)。 */
+.ld-guide-mount.is-play [data-ld-word-draw] {
+  animation-name: ldDraw, ldWordFill;
+  animation-timing-function: var(--ld-ease), var(--ld-ease);
+  animation-fill-mode: forwards, forwards;
+  animation-delay: var(--d-draw, 0s), var(--d-fill, 0.45s);
+  animation-duration: var(--dur-draw, 0.45s), var(--dur-fill, 0.35s);
+}
+/* 塗り専用path(ld-g-word-fill): strokeを持たないため上のルールと違い
+   ldWordFillのみを単独適用してfill-opacityをフェードインさせる。 */
+.ld-guide-mount.is-play [data-ld-word-fill] {
+  animation-name: ldWordFill;
+  animation-timing-function: var(--ld-ease);
+  animation-fill-mode: forwards;
+  animation-delay: var(--d-fill, 0.45s);
+  animation-duration: var(--dur-fill, 0.35s);
+}
+/* マーク記号(ラスター)のワイプ出現(clipPathのwidthを0→実寸へ) */
+.ld-guide-mount.is-play [data-ld-wipe] {
+  animation-name: ldWipe;
+  animation-timing-function: var(--ld-ease);
+  animation-fill-mode: forwards;
+  animation-delay: var(--d, 0s);
+  animation-duration: var(--dur, 0.6s);
+}
+
+@keyframes ldDraw { to { stroke-dashoffset: 0; } }
+@keyframes ldFade { to { opacity: 1; } }
+@keyframes ldRise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes ldWordFill { to { fill-opacity: 1; stroke-opacity: 0; } }
+/* --iconw は必ず単位付き(px)で渡すこと。CSSのwidthは単位なしの数値を
+   無効値として捨てるため、単位を欠くとワイプが一切効かずマークが消える。 */
+@keyframes ldWipe { to { width: var(--iconw, 0px); } }
+
+/* ============ ブランドガイドライン図解 v2(logo-guide-v2.js が構築) ============
+   線種・モーションの考え方は v1(.ld-g-*)を踏襲。v1はB/C案でまだ使用中のため
+   併存させ、こちらは .lg2-* 名前空間で独立させている。 */
+.lg2-mount { display: block; width: 100%; }
+.lg2-mount svg { display: block; width: 100%; height: auto; overflow: visible; }
+
+.lg2-box {
+  fill: none;
+  stroke: rgba(17, 17, 18, 0.3);
+  stroke-width: 1;
+  stroke-linecap: butt;
+  stroke-dasharray: 4 3;
+  vector-effect: non-scaling-stroke;
+}
+.lg2-box-faint { stroke: rgba(17, 17, 18, 0.22); }
+
+/* 寸法線(X / 1X)はアクセント色の実線 */
+.lg2-dim {
+  fill: none;
+  stroke: #ED551B;
+  stroke-width: 1;
+  stroke-linecap: butt;
+  vector-effect: non-scaling-stroke;
+}
+.lg2-dim-head { fill: #ED551B; stroke: none; }
+
+/* マーク単体カードのX計測用引き出し線(Figma 585:12333)。
+   マークの外形端から寸法線へ伸ばす延長線。色は寸法線と同じティールにしつつ、
+   実線の寸法線と役割を区別するため細かい点線にする。 */
+.lg2-leader {
+  fill: none;
+  stroke: #ED551B;
+  stroke-width: 1;
+  stroke-linecap: butt;
+  stroke-dasharray: 1.5 3;
+  vector-effect: non-scaling-stroke;
+}
+
+/* 8mm / 24px は角括弧のグレー */
+.lg2-bracket {
+  fill: none;
+  stroke: rgba(17, 17, 18, 0.45);
+  stroke-width: 1;
+  stroke-linecap: butt;
+  stroke-linejoin: miter;
+  vector-effect: non-scaling-stroke;
+}
+
+.lg2-label {
   font-family: "Inter", sans-serif;
-  font-weight: 600;
-  font-size: 18px;
-  letter-spacing: 0.04em;
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  fill: rgba(17, 17, 18, 0.75);
 }
-.ld-min__cap { font-size: 12px; color: var(--ink-2); margin-top: 2px; }
+.lg2-label-sm { font-size: 13px; }
 
-.ld-note {
-  font-size: 12px;
-  line-height: 1.9;
-  color: var(--ink-2);
-  margin-top: 24px;
+/* ワードマーク: アウトライン(#ED551B)描画 → 本来の色で塗りが入って完成。
+   穴あき文字はサブパスに分割したものをstrokeに使うため、塗りは別pathが持つ。 */
+.lg2-word-stroke {
+  fill: none;
+  stroke: #ED551B;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
 }
+[data-lg2-word-fill] { fill-opacity: 0; }
 
-/* ===========================================================
-   描画アニメーション
-   線は stroke-dashoffset を送って「引かれる」ように出し、
-   面(マーク本体・ラベル)は線が引き終わってからフェードで入る。
-   JS が --lg-delay / --lg-len を各要素に書き込む。
-   =========================================================== */
-[data-lg-draw] {
-  stroke-dasharray: var(--lg-len);
-  stroke-dashoffset: var(--lg-len);
+/* ---- 再生(is-play 付与後、JSが初期状態を仕込んだ要素にのみ効く) ---- */
+.lg2-mount.is-play [data-lg2-draw] {
+  animation: lg2Draw var(--dur, 0.8s) var(--ld-ease) var(--d, 0s) both;
 }
-[data-lg-fade] { opacity: 0; }
-.is-play [data-lg-draw] {
-  animation: lg-draw 0.9s var(--ease-out-expo) var(--lg-delay, 0s) both;
+.lg2-mount.is-play [data-lg2-fade] {
+  animation: lg2Fade var(--dur, 0.45s) var(--ld-ease) var(--d, 0s) both;
 }
-.is-play [data-lg-fade] {
-  animation: lg-fade 0.6s ease var(--lg-delay, 0s) both;
-}
-@keyframes lg-draw { to { stroke-dashoffset: 0; } }
-@keyframes lg-fade { to { opacity: 1; } }
-
-/* 破線は dashoffset で「引く」ことができない(dasharray が破線パターン
-   そのものなので)。そこで実線を1本引き切ってから消し、入れ替わりで
-   同じ位置の破線を出す2枚重ねにしている(JSが両方を作る)。
-   実線を消さないと破線の隙間から下の実線が見えて、ただの実線になる。 */
-.is-play .lg-box--draw {
+/* 描画と線の消灯は同一要素の多重アニメーション(別ルールにすると後勝ちで
+   片方が消えるため、必ずカンマ併記で1ルールにまとめる) */
+.lg2-mount.is-play [data-lg2-word-stroke] {
   animation:
-    lg-draw 0.9s var(--ease-out-expo) var(--lg-delay, 0s) both,
-    lg-hide 0.35s ease calc(var(--lg-delay, 0s) + 0.9s) both;
+    lg2Draw var(--dur-draw, 0.5s) var(--ld-ease) var(--d-draw, 0s) both,
+    lg2StrokeOut var(--dur-fade, 0.4s) var(--ld-ease) var(--d-fade, 0s) both;
 }
-.lg-box--dashed-final { opacity: 0; }
-.is-play .lg-box--dashed-final {
-  animation: lg-fade 0.35s ease var(--lg-delay, 0s) both;
-}
-@keyframes lg-hide { to { opacity: 0; } }
-
-@media (max-width: 760px) {
-  .wrap { padding: 64px 20px 96px; }
-  .ld-title { font-size: 20px; margin-bottom: 40px; }
-  .ld-card { padding: 32px 20px; }
-  .ld-min { grid-template-columns: 1fr; }
+.lg2-mount.is-play [data-lg2-word-fill] {
+  animation: lg2WordFill var(--dur, 0.4s) var(--ld-ease) var(--d, 0s) both;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  [data-lg-draw] { stroke-dashoffset: 0; }
-  [data-lg-fade] { opacity: 1; }
-  .lg-box--dashed-final { opacity: 1; }
-  /* 完成状態は「破線が出ている」姿。実線側は最初から隠す */
-  .lg-box--draw { opacity: 0; }
-  .is-play [data-lg-draw],
-  .is-play [data-lg-fade],
-  .is-play .lg-box--draw,
-  .is-play .lg-box--dashed-final { animation: none; }
+@keyframes lg2Draw { to { stroke-dashoffset: 0; } }
+@keyframes lg2Fade { to { opacity: 1; } }
+@keyframes lg2StrokeOut { to { stroke-opacity: 0; } }
+@keyframes lg2WordFill { to { fill-opacity: 1; } }
+
+/* ロックアップ静止カード v2: マーク+ワードマークを実SVGで組み、
+   間隔はFigma実測比(A=マーク高の0.4倍)をemで表現する */
+.ld-card--guide-v2 { padding: 40px 44px; }
+.ld-lockup { display: flex; align-items: center; }
+.ld-lockup-mark { height: 72px; width: auto; }
+.ld-lockup-word { height: 72px; width: auto; margin-left: calc(72px * var(--lockup-gap, 0.4)); }
+
+/* 斜めガイド十字線(現行サイト踏襲の追加要素)。破線ボックスと同じ線質。 */
+.lg2-diag {
+  fill: none;
+  stroke: rgba(17, 17, 18, 0.3);
+  stroke-width: 1;
+  stroke-linecap: butt;
+  stroke-dasharray: 4 3;
+  vector-effect: non-scaling-stroke;
 }
