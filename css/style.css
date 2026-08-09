@@ -91,6 +91,94 @@ button { font: inherit; }
   .intro-overlay { display: none; }
 }
 
+/* ===========================================================
+   Intro logo sequence (Design A variants only)。白画面にロゴが
+   現れ→iの点だけオレンジに残り他は薄くなる→点だけになる→
+   点が図形(img-04)に育ち回転しながらオレンジの光が広がる、という
+   1本のクロスフェード。全体 2400ms で、そのあと --intro-r の
+   円形ワイプでキービジュアルへ引き継ぐ。 */
+.intro-overlay--logo .intro-logo {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.intro-overlay--logo .intro-logo__frame {
+  position: absolute;
+  width: min(72vw, 380px);
+  height: auto;
+  opacity: 0;
+}
+.intro-overlay--logo .intro-logo__blob-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: intro-blob-spin 7s linear infinite;
+  animation-delay: 1.65s;
+}
+.intro-overlay--logo .intro-logo__glow {
+  position: absolute;
+  width: min(80vw, 460px);
+  height: min(80vw, 460px);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(237, 83, 3, .45) 0%, rgba(237, 83, 3, 0) 70%);
+  opacity: 0;
+  animation: intro-glow-spread 2.4s ease forwards;
+}
+.intro-overlay--logo .intro-logo__frame--1 { animation: intro-frame-1 2.4s ease forwards; }
+.intro-overlay--logo .intro-logo__frame--2 { animation: intro-frame-2 2.4s ease forwards; }
+.intro-overlay--logo .intro-logo__frame--3 { animation: intro-frame-3 2.4s ease forwards; }
+.intro-overlay--logo .intro-logo__frame--4 { animation: intro-frame-4 2.4s ease forwards; }
+.intro-overlay--logo .intro-logo__frame--5 { animation: intro-frame-5 2.4s ease forwards; }
+
+@keyframes intro-frame-1 {
+  0%   { opacity: 0; }
+  6%   { opacity: 1; }
+  25%  { opacity: 1; }
+  37%  { opacity: 0; }
+  100% { opacity: 0; }
+}
+@keyframes intro-frame-2 {
+  0%, 25% { opacity: 0; }
+  37%     { opacity: 1; }
+  52%     { opacity: 1; }
+  62%     { opacity: 0; }
+  100%    { opacity: 0; }
+}
+@keyframes intro-frame-3 {
+  0%, 52% { opacity: 0; transform: scale(1); }
+  62%     { opacity: 1; transform: scale(1); }
+  69%     { opacity: 1; transform: scale(1); }
+  87%     { opacity: 0; transform: scale(1.5); }
+  100%    { opacity: 0; transform: scale(1.5); }
+}
+@keyframes intro-frame-4 {
+  0%, 69% { opacity: 0; transform: scale(.7); }
+  87%     { opacity: 1; transform: scale(1); }
+  95%     { opacity: 1; transform: scale(1); }
+  100%    { opacity: 0; transform: scale(1); }
+}
+@keyframes intro-frame-5 {
+  0%, 95% { opacity: 0; }
+  100%    { opacity: 1; }
+}
+@keyframes intro-glow-spread {
+  0%, 69% { opacity: 0; transform: scale(.6); }
+  100%    { opacity: 1; transform: scale(1.25); }
+}
+@keyframes intro-blob-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .intro-overlay--logo .intro-logo__blob-wrap,
+  .intro-overlay--logo .intro-logo__frame,
+  .intro-overlay--logo .intro-logo__glow { animation: none; }
+}
+
 .wrap {
   max-width: var(--wrap-max);
   margin-inline: auto;

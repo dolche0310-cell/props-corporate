@@ -13,20 +13,27 @@
       introOverlay.remove();
       document.body.classList.add('intro-revealed');
     } else {
+      // Design A variants play a logo crossfade sequence (see
+      // .intro-overlay--logo in style.css, ~2.4s) before the circular
+      // wipe starts; other pages open the wipe almost immediately.
+      var hasLogoIntro = introOverlay.classList.contains('intro-overlay--logo');
+      var revealDelay = hasLogoIntro ? 2400 : 350;
+      var safetyDelay = hasLogoIntro ? 5000 : 2900;
+
       var removeIntroOverlay = function () {
         if (introOverlay.parentNode) introOverlay.remove();
       };
       setTimeout(function () {
         document.body.classList.add('intro-revealed');
         introOverlay.classList.add('is-hiding');
-      }, 350);
+      }, revealDelay);
       introOverlay.addEventListener('transitionend', function (e) {
         if (e.propertyName === '--intro-r') removeIntroOverlay();
       });
       // Safety net for browsers that don't animate the custom property
       // (no @property support) - the mask still jumps to its open state
       // instantly in that case, so just clean up the node on a timer.
-      setTimeout(removeIntroOverlay, 2900);
+      setTimeout(removeIntroOverlay, safetyDelay);
     }
   }
 
