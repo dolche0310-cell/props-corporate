@@ -2061,3 +2061,110 @@ body.intro-revealed .hero__intro-item {
 .kv-pill > svg { position: absolute; display: block; }
 .kv-pill__ai    { left: .8598em; top: .2493em; width: 1.0123em; height: .9277em; }
 .kv-pill__shift { left: 2.5363em; top: .2378em; width: 2.5966em; height: .9358em; }
+
+/* ===========================================================
+   About(Figma 240:27506)
+   1253x522 のフレームをそのまま再現する。中の要素は Figma の
+   絶対座標で置き、flex/grid の均等2カラムには組み替えない。
+   フレーム全体をページ内で中央に置き、要素は個別にセンタリングしない。
+
+   スケール単位は --u(=設計1px)。em を使うと要素自身の font-size に
+   依存して座標が壊れるため、font-size 非依存の長さで統一している。
+   =========================================================== */
+.about--figma { position: relative; padding: 0; overflow: visible; }
+.about--figma .abt-frame {
+  width: min(1253px, 100%);
+  margin-inline: auto;
+  container-type: inline-size;
+}
+.about--figma .abt {
+  position: relative;
+  /* 1cqw = コンテナ幅の1%。1253px設計なので 100/1253 cqw = 設計1px */
+  --u: 0.0798084cqw;
+  height: calc(var(--u) * 522);
+}
+@supports not (container-type: inline-size) {
+  .about--figma .abt { --u: 1px; }
+}
+.about--figma .abt > *,
+.about--figma .abt__main > * { position: absolute; margin: 0; }
+
+/* About(215:23951): x=0 y=41 / Alata 24px / lh1.8 / ls1.2px / #6D6D6D */
+.about--figma .abt__en {
+  left: 0;
+  top: calc(var(--u) * 41);
+  font-family: var(--font-alata);
+  font-weight: 400;
+  font-size: calc(var(--u) * 24);
+  line-height: 1.8;
+  letter-spacing: calc(var(--u) * 1.2);
+  color: #6D6D6D;
+}
+/* 私たちについて(215:22684): x=0 y=84 / 45px / lh1.8 / ls2.25px / #191919 */
+.about--figma .abt__ja {
+  left: 0;
+  top: calc(var(--u) * 84);
+  font-family: var(--font-jp);
+  font-weight: 400;
+  font-size: calc(var(--u) * 45);
+  line-height: 1.8;
+  letter-spacing: calc(var(--u) * 2.25);
+  color: #191919;
+}
+/* メインコンテンツ(215:22674): x=0 y=190 / 1253x332 */
+.about--figma .abt__main {
+  left: 0;
+  top: calc(var(--u) * 190);
+  width: calc(var(--u) * 1253);
+  height: calc(var(--u) * 332);
+}
+/* MiAIロゴ(215:23950): main内 x=0 y=107 / 266.312x96.985 */
+.about--figma .abt__logo {
+  left: 0;
+  top: calc(var(--u) * 107);
+  width: calc(var(--u) * 266.312);
+  height: calc(var(--u) * 96.985);
+  display: block;
+}
+/* キャッチ(215:22676): main内 x=420 y=64 / w740 / LINE Seed JP 24px
+   lh1.8 / ls0.96px / #191919 */
+.about--figma .abt__catch {
+  left: calc(var(--u) * 420);
+  top: calc(var(--u) * 64);
+  width: calc(var(--u) * 740);
+  font-family: var(--font-jp);
+  font-weight: 400;
+  font-size: calc(var(--u) * 24);
+  line-height: 1.8;
+  letter-spacing: calc(var(--u) * 0.96);
+  color: #191919;
+}
+/* 本文(215:22677): main内 x=420 y=133 / w740 / 18px / lh1.7 / #191919 */
+.about--figma .abt__body {
+  left: calc(var(--u) * 420);
+  top: calc(var(--u) * 133);
+  width: calc(var(--u) * 740);
+  font-family: 'Yu Gothic Medium', 'Yu Gothic', var(--font-jp);
+  font-weight: 500;
+  font-size: calc(var(--u) * 18);
+  line-height: 1.7;
+  color: #191919;
+}
+/* Figma 240:27506 に無い装飾は出さない(旧Aboutのブロブ等) */
+.about--figma .about__blob { display: none; }
+
+/* SP: Desktopの座標再現を崩さないよう、切り替えは別クエリに分離する */
+@media (max-width: 900px) {
+  .about--figma .abt { height: auto; padding: 40px 0 56px; }
+  .about--figma .abt > *,
+  .about--figma .abt__main > * {
+    position: static;
+    width: auto;
+    height: auto;
+  }
+  .about--figma .abt__en { display: block; font-size: 18px; letter-spacing: .05em; }
+  .about--figma .abt__ja { font-size: 30px; letter-spacing: .05em; margin-bottom: 32px; }
+  .about--figma .abt__logo { width: 180px; height: auto; margin-bottom: 28px; }
+  .about--figma .abt__catch { font-size: 18px; letter-spacing: .04em; margin-bottom: 16px; }
+  .about--figma .abt__body { font-size: 15px; }
+}
