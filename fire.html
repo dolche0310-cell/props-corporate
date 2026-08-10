@@ -143,8 +143,10 @@
                     <h3 class="service__title">MiAI面接 カスタマイズ AI 面接官の提供</h3>
                     <p class="service__desc">ノーコードで自社向けにカスタマイズできる AI 面接官「MiAI(ミアイ)面接」を開発しています。企業ごとの採用方針に合わせてAI面接を設計可能。自然な対話と高UXで誰でもスムーズに面接完了。24時間対応・同時実施ができ、即時で評価レポートを出力します。</p>
                     <a class="service__link" href="https://miai.jp/" target="_blank" rel="noopener">
-                      サービスサイトはこちら
-                      <img src="assets/images/arrow-icon.svg" alt="" class="service__link-icon">
+                      <span class="service__link-label">サービスサイトはこちら</span>
+                      <!-- Figma 262:29133。矢印ではなく 12x8 の角丸矩形を
+                           3px ずらして重ねた別窓アイコン -->
+                      <span class="service__link-icon" aria-hidden="true"><span></span><span></span></span>
                     </a>
                   </div>
                   <!-- 01 の面はループ動画。枠(.service__image)は変えず中身だけ差し替える。
