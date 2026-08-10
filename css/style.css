@@ -853,64 +853,25 @@ button { font: inherit; }
   }
 }
 
-/* ===== AIShift レタリング切り替え(Figma 254:27435/27446/27457/27468) =====
-   ピル内のテキストを、Figmaの4種のレタリングSVGを重ねた
-   .ai-switch に差し替えている。カプセル自体(寸法・角丸・色・余白の合計)は
-   一切変えない。 */
-/* SVG差し替え時は Gugi 用の光学補正(--pill-shift-*)が不要になるので、
-   合計を変えずに左右・上下均等へ戻す */
-.hero__highlight--pill.hero__highlight--svg { padding: 4px 22px; }
-@media (min-width: 768px) {
-  .hero__highlight--pill.hero__highlight--svg { padding: 6px 32px; }
-}
-/* 旧テキスト "AIShift"(Gugi 54px)の実測ボックス 188.25x70.2 を em で固定。
-   これでカプセル幅・高さが従来と1pxも変わらない。
-   (188.25/54 = 3.486em、高さは line-height と同じ 1.3em) */
-.ai-switch {
-  position: relative;
-  display: inline-block;
-  width: 3.486em;
-  height: 1.3em;
-  vertical-align: top; /* 行ボックス(=1.3em)と同高なので top で完全一致 */
-}
-/* 4種を同一座標に重ね、opacity/scale/blur で切り替える。
-   共通viewBox(248x66)に各案を光学中央で配置してあるので、
-   切り替わっても位置はガタつかない。 */
-.ai-switch__v {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  transform: scale(1.015);
-  filter: blur(1.5px);
-  transition:
-    opacity .28s cubic-bezier(.22, 1, .36, 1),
-    transform .28s cubic-bezier(.22, 1, .36, 1),
-    filter .28s cubic-bezier(.22, 1, .36, 1);
-  will-change: opacity, transform, filter;
-}
-.ai-switch__v.is-active { opacity: 1; transform: none; filter: none; }
-.ai-switch__v.is-out { opacity: 0; transform: scale(.985); filter: blur(1.5px); }
-@media (prefers-reduced-motion: reduce) {
-  /* JS側もreduced時はループを始めない。最初の1種を静止表示 */
-  .ai-switch__v { transition: none; transform: none; filter: none; }
-}
 
 /* Figma 215:22653。リード文はすべて同サイズ(24px)の2行で、
    字下げやウェイト差はなし。 */
-.hero__desc--brushup {
+/* セレクタを .hero--brushup 起点にしているのは、後段の
+   `.hero__desc { max-width: 42rem }` と同詳細度だと source order で負け、
+   幅が672pxに落ちて2行目が折り返し3行になってしまうため。 */
+.hero--brushup .hero__desc--brushup {
   font-family: var(--font-alata);
   font-size: 18px;
   line-height: 1.7;
   letter-spacing: .06em;
   color: var(--color-ink);
-  max-width: 44rem;
+  max-width: 721px; /* Figma 232:27385 実測 */
 }
 @media (min-width: 768px) {
-  .hero__desc--brushup { font-size: 24px; letter-spacing: .12em; }
+  .hero--brushup .hero__desc--brushup { font-size: 24px; letter-spacing: .12em; }
 }
-.hero__desc--brushup p { margin: 0; text-wrap: balance; }
+/* balance は2行目を早折りして3行に見せてしまうため使わない(Figmaは2行) */
+.hero__desc--brushup p { margin: 0; }
 /* Figma 232:27385。"AI" は前後の和文と同じ Alata 24px。違うのは字間だけで、
    和文が tracking 2.88px(=.12em)なのに対し "AI" は 0。書体は継承させる。 */
 .hero__desc--brushup .hero__ai { letter-spacing: 0; }
@@ -2058,3 +2019,45 @@ body.intro-revealed .hero__intro-item {
     transition: none;
   }
 }
+
+/* ===========================================================
+   kv_title(Figma 232:27380)のピクセル再現
+   760x86 の枠に、Figmaの絶対座標をそのまま em(=値/54px)で置く。
+   フォントサイズだけを縮めれば全要素が同率で縮むので、
+   SPでも比率が崩れない(min() で 54px を上限に画面幅へ追従)。
+   =========================================================== */
+.hero--brushup .kv-title {
+  position: relative;
+  width: 14.0741em;   /* 760px */
+  height: 1.5926em;   /* 86px */
+  font-size: min(54px, calc((100vw - 48px) / 14.0741));
+  font-family: var(--font-alata);
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: 0;
+  color: var(--color-ink); /* #040404 */
+  margin: 0;
+}
+/* 産業の(232:27383): x=19 y=12。「の」だけ 50px・字間7px */
+.kv-title__prefix { position: absolute; left: .3519em; top: .2222em; white-space: nowrap; }
+/* を支援する(234:23891): x=518 y=11.672。「を」だけ 50px */
+.kv-title__suffix { position: absolute; left: 9.5926em; top: .2162em; white-space: nowrap; }
+.kv-title .kv-sm { font-size: .9259em; }            /* 50px */
+.kv-title__prefix .kv-sm { letter-spacing: .14em; } /* 7px @50px */
+/* カプセル(232:27381): x=185 y=8.672, 325x78, r=200, #F16E36。
+   幅は固定。auto / fit-content / shrink にしない(中身が消えても縮ませない) */
+.kv-pill {
+  position: absolute;
+  left: 3.4259em;
+  top: .1606em;
+  width: 6.0185em;    /* 325px */
+  height: 1.4444em;   /* 78px */
+  background: #F16E36;
+  border-radius: 3.7037em; /* 200px */
+}
+/* AI(254:27424): カプセル内 x=46.43 y=13.46, 54.664x50.096
+   Shift(254:27428): カプセル内 x=136.96 y=12.84, 140.215x50.531
+   均等配置にせず、Figmaの座標をそのまま置く */
+.kv-pill > svg { position: absolute; display: block; }
+.kv-pill__ai    { left: .8598em; top: .2493em; width: 1.0123em; height: .9277em; }
+.kv-pill__shift { left: 2.5363em; top: .2378em; width: 2.5966em; height: .9358em; }
