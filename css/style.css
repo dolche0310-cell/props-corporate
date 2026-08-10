@@ -660,6 +660,9 @@ button { font: inherit; }
   min-height: 700px;
   display: flex;
   align-items: center;
+  /* ブロブ/モチーフが下のセクション(About)や画面右へはみ出していたので
+     自セクション内に収める。clip なので position:sticky 等に影響しない。 */
+  overflow: clip;
 }
 .hero > .wrap { width: 100%; }
 @media (min-width: 768px) {
@@ -2219,6 +2222,9 @@ body.intro-revealed .hero__intro-item {
    白カードのテーブル(257:27658 x69 y274 680x425 pad24)。
    =========================================================== */
 .company--figma { padding: 0; background: transparent; }
+/* 写真がフレーム外(画面右端まで)へ出るので、ここでクリップして
+   横スクロールを出さない。left側の座標系は保たれる。 */
+.company--figma .cmp-frame { overflow: hidden; }
 .company--figma .cmp-frame {
   width: min(1442px, 100%);
   margin-inline: auto;
@@ -2228,8 +2234,8 @@ body.intro-revealed .hero__intro-item {
   position: relative;
   --u: 0.0693481cqw; /* 100/1442 */
   height: calc(var(--u) * 813);
-  overflow: hidden;
-  border-radius: calc(var(--u) * 8); /* Rectangle 14 */
+  /* 写真を画面右端まで出すためクリップしない(角丸も右側は使わない) */
+  overflow: visible;
   background: #fff;
 }
 @supports not (container-type: inline-size) {
@@ -2241,7 +2247,10 @@ body.intro-revealed .hero__intro-item {
 .company--figma .cmp__photo {
   position: absolute;
   left: calc(var(--u) * 563);
-  right: 0;
+  /* フレームは 1442px で頭打ち。right:0 だと広い画面で枠の外に白が残るので、
+     フレーム右外の余白ぶんだけ負のrightで伸ばして画面右端に到達させる。
+     100vw ではなくルート幅基準にして、スクロールバー分の過剰はみ出しを防ぐ。 */
+  right: min(0px, calc((var(--vw, 100vw) - 100%) / -2));
   top: 0;
   bottom: 0;
   overflow: hidden;
