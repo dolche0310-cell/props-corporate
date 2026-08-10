@@ -310,3 +310,18 @@ body {
   stroke-dasharray: 4 3;
   vector-effect: non-scaling-stroke;
 }
+
+/* ===========================================================
+   props 側の上書き
+   =========================================================== */
+/* 参考サイトのSVGは <svg> に width/height 属性を持つため、
+   `.ld-card img { height: auto }` でも実寸(≒72px)で出ていた。
+   props のSVGは viewBox だけで拡縮できるよう属性を外してあるので、
+   height:auto だと潰れる。詳細度を上げて明示的に高さを与える。
+   Figma(246:26696)ではマークとロゴタイプが同じ高さなので、両方同値。 */
+.ld-card .ld-lockup-mark,
+.ld-card .ld-lockup-word {
+  height: 72px;
+  width: auto;
+  max-width: none;
+}
