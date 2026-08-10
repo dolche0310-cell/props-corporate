@@ -2168,3 +2168,168 @@ body.intro-revealed .hero__intro-item {
   .about--figma .abt__catch { font-size: 18px; letter-spacing: .04em; margin-bottom: 16px; }
   .about--figma .abt__body { font-size: 15px; }
 }
+
+/* ===========================================================
+   FV(Figma 215:22653)の座標再現
+   ヘッダー下端(137px)を基準に kv_title y=350.33 / リード y=471.33、
+   次セクション(240:27506)が y=818 なのでFV領域の高さは 681px。
+   x はフレーム左端基準で kv_title=67 / リード=86。
+   縦センター寄せのflexをやめ、Figmaの絶対座標で置く。
+   =========================================================== */
+@media (min-width: 768px) {
+  .hero--brushup {
+    display: block;
+    padding: 0;
+    min-height: 0;
+  }
+  /* Figmaのヘッダーは137px、実装ヘッダーは110px。ページ絶対座標
+     (kv_title y=350.33 / リード y=471.33 / 次セクション y=818)を
+     合わせるため、top は「Figma y - ヒーロー開始Y(実測90)」で置く。 */
+  .hero--brushup > .wrap {
+    position: relative;
+    max-width: 1440px;
+    height: 728px; /* 818 - 90(ヒーロー開始のページY実測) */
+    padding-inline: 0;
+  }
+  .hero--brushup .kv-title {
+    position: absolute;
+    left: 67px;    /* 232:27380 x */
+    top: 260.3px;  /* 350.33 - 90 */
+    margin: 0;
+  }
+  .hero--brushup .hero__desc--brushup {
+    position: absolute;
+    left: 86px;    /* 232:27385 x */
+    top: 381.3px;  /* 471.33 - 90 */
+    margin: 0;
+    width: 721px;
+    max-width: none;
+  }
+}
+/* 1440px未満では左座標が相対的に大きすぎるので、フレームごと縮める
+   のではなく wrap の余白内に収める(タイトル自身は min() で縮む) */
+@media (min-width: 768px) and (max-width: 1439px) {
+  .hero--brushup > .wrap { max-width: 100%; }
+}
+
+/* ===========================================================
+   Company(Figma 232:27395)
+   1442x813 のフレームを About と同じ --u(=設計1px)方式で再現。
+   全面写真(232:27398 をフレームでクロップ書き出し) + 左上ラベル +
+   白カードのテーブル(257:27658 x69 y274 680x425 pad24)。
+   =========================================================== */
+.company--figma { padding: 0; background: transparent; }
+.company--figma .cmp-frame {
+  width: min(1442px, 100%);
+  margin-inline: auto;
+  container-type: inline-size;
+}
+.company--figma .cmp {
+  position: relative;
+  --u: 0.0693481cqw; /* 100/1442 */
+  height: calc(var(--u) * 813);
+  overflow: hidden;
+  border-radius: calc(var(--u) * 8); /* Rectangle 14 */
+  background: #fff;
+}
+@supports not (container-type: inline-size) {
+  .company--figma .cmp { --u: 1px; }
+}
+/* 写真はフレーム寸で書き出してあるので全面に敷くだけ */
+.company--figma .cmp__photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* ラベル(215:23995 x92 y91)。en 24/1.8 が43.2高なので ja は自然に y43 に乗る */
+.company--figma .cmp__label {
+  position: absolute;
+  left: calc(var(--u) * 92);
+  top: calc(var(--u) * 91);
+}
+.company--figma .cmp__en {
+  display: block;
+  font-family: var(--font-alata);
+  font-weight: 400;
+  font-size: calc(var(--u) * 24);
+  line-height: 1.8;
+  letter-spacing: calc(var(--u) * 1.2);
+  color: #6D6D6D;
+}
+.company--figma .cmp__ja {
+  margin: 0;
+  font-family: var(--font-jp);
+  font-weight: 400;
+  font-size: calc(var(--u) * 45);
+  line-height: 1.8;
+  letter-spacing: calc(var(--u) * 2.25);
+  color: #191919;
+}
+/* 白カード(257:27658 x69 y274 680x425 pad24) */
+.company--figma .cmp__card {
+  position: absolute;
+  left: calc(var(--u) * 69);
+  top: calc(var(--u) * 274);
+  width: calc(var(--u) * 680);
+  height: calc(var(--u) * 425);
+  padding: calc(var(--u) * 24);
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.company--figma .cmp__table {
+  margin: 0;
+  width: calc(var(--u) * 632);
+  color: #191919;
+}
+/* 行(72高 = 24pad + 内容 + 24pad)。区切りは #EBEBEB、最終行は無し */
+.company--figma .cmp__row {
+  display: flex;
+  align-items: center;
+  padding-block: calc(var(--u) * 24);
+  border-bottom: 1px solid #EBEBEB;
+}
+.company--figma .cmp__row:last-child { border-bottom: none; }
+.company--figma .cmp__row dt {
+  flex: 0 0 calc(var(--u) * 238);
+  font-family: var(--font-yugothic);
+  font-weight: 700;
+  font-size: calc(var(--u) * 16);
+  letter-spacing: calc(var(--u) * 0.96);
+  line-height: normal;
+}
+.company--figma .cmp__row dd {
+  margin: 0;
+  width: calc(var(--u) * 363);
+  font-family: var(--font-yugothic);
+  font-weight: 500;
+  font-size: calc(var(--u) * 14);
+  line-height: 1.7;
+}
+/* SP: 写真を上に、ラベル+表を下に縦積み(Desktop座標系はそのまま温存) */
+@media (max-width: 767px) {
+  .company--figma .cmp { height: auto; border-radius: 0; }
+  .company--figma .cmp__photo {
+    position: static;
+    aspect-ratio: 1440 / 813;
+    height: auto;
+  }
+  .company--figma .cmp__label,
+  .company--figma .cmp__card {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: 0;
+  }
+  .company--figma .cmp__label { margin: 32px 20px 20px; }
+  .company--figma .cmp__en { font-size: 18px; letter-spacing: .05em; }
+  .company--figma .cmp__ja { font-size: 30px; letter-spacing: .05em; }
+  .company--figma .cmp__card { margin: 0 20px 40px; display: block; }
+  .company--figma .cmp__table { width: auto; }
+  .company--figma .cmp__row { flex-direction: column; align-items: flex-start; gap: 4px; padding-block: 16px; }
+  .company--figma .cmp__row dt { flex: none; font-size: 14px; }
+  .company--figma .cmp__row dd { width: auto; font-size: 13px; }
+}
