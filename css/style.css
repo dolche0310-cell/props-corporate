@@ -1616,10 +1616,10 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .65s; }
   font-size: clamp(40px, 11vw, 96px);
   letter-spacing: .12em;
   line-height: 1.7;
-  background: linear-gradient(90deg, #3D3430, rgba(255, 239, 231, .23) 50%, #4B4B4B);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  /* Figma(253:27115)は #3D3430 → rgba(255,239,231,.23) → #4B4B4B の
+     グラデーションだが、左端と中間に暖色が入って橙が混ざって見えるため、
+     指示によりグラデーションをやめて中立グレー1色にしている。 */
+  color: #4B4B4B;
 }
 @keyframes service-marquee {
   from { transform: translateX(0); }
