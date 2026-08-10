@@ -2597,7 +2597,7 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .65s; }
 /* ドットは kv-dot-in で出すので、dash アニメの対象から外す
    (同詳細度・後方だと kv-dot-in を上書きして opacity:0 のままになる) */
 .kv-pill.is-drawing .kv-draw:not(.kv-draw--dot) {
-  animation: kv-draw var(--u, 250ms) cubic-bezier(.4, 0, .2, 1) var(--t, 0ms) both;
+  animation: kv-draw var(--u, 250ms) cubic-bezier(.65, 0, .35, 1) var(--t, 0ms) both;
 }
 @keyframes kv-draw { to { stroke-dashoffset: 0 } }
 
@@ -2606,7 +2606,7 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .65s; }
 .kv-pen__line { opacity: 0; }
 .kv-pill.is-drawing .kv-pen__line:not(.kv-draw--dot) {
   animation:
-    kv-draw var(--u, 250ms) cubic-bezier(.4, 0, .2, 1) var(--t, 0ms) both,
+    kv-draw var(--u, 250ms) cubic-bezier(.65, 0, .35, 1) var(--t, 0ms) both,
     kv-pen-show var(--u, 250ms) linear var(--t, 0ms) both,
     kv-pen-hide 130ms ease calc(var(--t, 0ms) + var(--u, 250ms)) both;
 }
