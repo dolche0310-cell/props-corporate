@@ -446,14 +446,26 @@ button { font: inherit; }
     border-radius: 70px;
     box-shadow: 0 3px 3px rgba(229, 229, 229, .25);
   }
+  /* グローバルナビ: Figma header 215:23933 / nav-links 215:23942。
+     Belanosima 16px / tracking .8px / #191919 の大文字。間隔は 40px。
+     NEWS だけ Figma 上で Alata が指定されている(215:23945)。 */
   .site-header--brushup .nav { gap: 40px; }
   .site-header--brushup .nav__link,
   .site-header--brushup .nav__cta-label {
-    font-family: var(--font-alata);
-    font-size: 15px;
+    font-family: var(--font-logo);
+    font-size: 16px;
+    font-weight: 400;
+    letter-spacing: .8px;
+    text-transform: uppercase;
   }
+  .site-header--brushup .nav__link--news,
+  .site-header--brushup .nav__link--news .nav__link-face { font-family: var(--font-alata); }
   .site-header--brushup .nav__link { color: #191919; }
+  /* CONTACT は 114x28 のピル。色は各案の --color-primary に従う */
   .site-header--brushup .nav__cta {
+    height: 28px;
+    padding: 0 20px;
+    border-radius: 30px;
     background: var(--color-primary);
     color: #fff;
     border: none;
