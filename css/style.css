@@ -2484,3 +2484,62 @@ body.intro-revealed .hero__intro-item {
   .dg-dot { display: none }
   .dg-stage.is-play * { animation: none !important }
 }
+
+/* ===========================================================
+   FV「AI Shift」ラインドロー描画
+   完成Vectorは不変。JSが作るセンターラインを mask に使い、
+   その軌跡から白い字形が現れる。左→右の単純wipeにはしない。
+   =========================================================== */
+/* JSが動く前に完成形が出たままだと変化が見えないので、
+   スクリプトが用意できた時点(.is-ready)で一旦伏せる。
+   JS無効時は完成形がそのまま出る(何も起きないだけ)。 */
+.kv-pill.is-ready .kv-pill__ai,
+.kv-pill.is-ready .kv-pill__shift { visibility: visible; }
+
+/* mask/ペン先の軌跡。dashoffset を送って「引かれる」ようにする */
+.kv-draw {
+  stroke-dasharray: var(--len);
+  stroke-dashoffset: var(--len);
+}
+/* i と A のドットは長さがほぼ0で dash 演出が効かず、最初から見えてしまう。
+   仕様どおり opacity + わずかな scale で出す。 */
+.kv-draw--dot {
+  stroke-dasharray: none;
+  stroke-dashoffset: 0;
+  opacity: 0;
+  transform: scale(.7);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.kv-pill.is-drawing .kv-draw--dot {
+  animation: kv-dot-in 140ms cubic-bezier(.22,1,.36,1) var(--t, 0ms) both;
+}
+@keyframes kv-dot-in { to { opacity: 1; transform: scale(1) } }
+/* ドットは kv-dot-in で出すので、dash アニメの対象から外す
+   (同詳細度・後方だと kv-dot-in を上書きして opacity:0 のままになる) */
+.kv-pill.is-drawing .kv-draw:not(.kv-draw--dot) {
+  animation: kv-draw var(--u, 250ms) cubic-bezier(.4, 0, .2, 1) var(--t, 0ms) both;
+}
+@keyframes kv-draw { to { stroke-dashoffset: 0 } }
+
+/* ペン先は描いている間だけ見せ、通過後すぐ消す */
+.kv-pen { opacity: 1; }
+.kv-pen__line { opacity: 0; }
+.kv-pill.is-drawing .kv-pen__line:not(.kv-draw--dot) {
+  animation:
+    kv-draw var(--u, 250ms) cubic-bezier(.4, 0, .2, 1) var(--t, 0ms) both,
+    kv-pen-show var(--u, 250ms) linear var(--t, 0ms) both,
+    kv-pen-hide 130ms ease calc(var(--t, 0ms) + var(--u, 250ms)) both;
+}
+@keyframes kv-pen-show { from { opacity: 0 } 15%, 100% { opacity: 1 } }
+@keyframes kv-pen-hide { to { opacity: 0 } }
+
+/* 完成後は演出レイヤーを完全に畳み、Figmaの完成形だけ残す */
+.kv-pill.is-drawn .kv-pen { display: none; }
+.kv-pill.is-drawn .kv-pill__ai [mask],
+.kv-pill.is-drawn .kv-pill__shift [mask] { mask: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .kv-draw { stroke-dashoffset: 0 }
+  .kv-pen { display: none }
+}
