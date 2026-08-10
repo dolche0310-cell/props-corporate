@@ -2235,13 +2235,24 @@ body.intro-revealed .hero__intro-item {
 @supports not (container-type: inline-size) {
   .company--figma .cmp { --u: 1px; }
 }
-/* 写真はフレーム寸で書き出してあるので全面に敷くだけ */
+/* 写真エリア(232:27398)。Figmaでは x=563 からフレーム右端を越えて
+   伸びているので、左端だけ座標で固定し右は 0 で必ず右端まで届かせる。
+   画像側は cover で埋め、横に引き伸ばして歪ませない。 */
 .company--figma .cmp__photo {
   position: absolute;
-  inset: 0;
+  left: calc(var(--u) * 563);
+  right: 0;
+  top: 0;
+  bottom: 0;
+  overflow: hidden;
+}
+.company--figma .cmp__photo img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* 書き出しはフレーム全幅(1440)なので、右側の絵柄が出るよう寄せる */
+  object-position: right center;
 }
 /* ラベル(215:23995 x92 y91)。en 24/1.8 が43.2高なので ja は自然に y43 に乗る */
 .company--figma .cmp__label {
@@ -2317,6 +2328,7 @@ body.intro-revealed .hero__intro-item {
     aspect-ratio: 1440 / 813;
     height: auto;
   }
+  .company--figma .cmp__photo img { object-position: center }
   .company--figma .cmp__label,
   .company--figma .cmp__card {
     position: static;
@@ -2332,4 +2344,129 @@ body.intro-revealed .hero__intro-item {
   .company--figma .cmp__row { flex-direction: column; align-items: flex-start; gap: 4px; padding-block: 16px; }
   .company--figma .cmp__row dt { flex: none; font-size: 14px; }
   .company--figma .cmp__row dd { width: auto; font-size: 13px; }
+}
+
+/* ===========================================================
+   Service 図解(Figma 253:27104 / 253:27127)
+   背景 #323232 は変えず、Ellipse 56/57 の環境光を敷いた上で
+   粒子 → 接続線 → カード → CORE の順に構築されていく。
+   =========================================================== */
+.service__image--diagram { background: none; overflow: visible; }
+.dg-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 642 / 391;
+  background: #323232;
+  border-radius: 18px;
+  overflow: hidden;
+}
+/* Ellipse 56(右上) / 57(左下)。508pxの円が約27.91%外側まで滲む構造を
+   radial-gradient で再現。円形の輪郭が見えない濃度に抑える。 */
+.dg-glow {
+  position: absolute;
+  width: 79.1%;   /* 508 / 642 */
+  aspect-ratio: 1;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle,
+    rgba(255, 90, 60, .16) 0%,
+    rgba(255, 90, 60, .07) 40%,
+    rgba(255, 90, 60, 0) 72%);
+  filter: blur(28px);
+}
+.dg-glow--tr { right: -22%; top: -30%; }
+.dg-glow--bl { left: -24%; bottom: -28%; }
+
+.dg-stage .dg { position: relative; display: block; width: 100%; height: 100%; }
+
+/* --- 初期状態: 線とカードとCOREは伏せ、粒子だけ --- */
+.dg-line { stroke-dasharray: var(--len); stroke-dashoffset: var(--len); }
+.dg-card, .dg-core, .dg-node, .dg-ring { opacity: 0; }
+.dg-core-label { opacity: 0; }
+.dg-dot {
+  opacity: 0;
+  transform: translate(var(--dx), var(--dy));
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* --- 再生 --- */
+/* 1) 粒子が現れ、散った位置から線上へ収束していく */
+.dg-stage.is-play .dg-dot {
+  animation:
+    dg-dust-in .5s ease var(--d) both,
+    dg-dust-settle .9s cubic-bezier(.22,1,.36,1) calc(var(--d) + .28s) both,
+    dg-dust-out .45s ease calc(var(--d) + 1.15s) both;
+}
+@keyframes dg-dust-in { from { opacity: 0 } to { opacity: .85 } }
+@keyframes dg-dust-settle { to { transform: translate(0, 0) } }
+@keyframes dg-dust-out { to { opacity: 0 } }
+
+/* 2) 粒子が収束したところへ線が引かれる(solid → dashed) */
+.dg-stage.is-play .dg-line {
+  animation: dg-draw .85s cubic-bezier(.4,0,.2,1) calc(var(--d) + .95s) both;
+}
+.dg-stage.is-play .dg-line--dash { animation-delay: calc(var(--d) + 1.35s); }
+@keyframes dg-draw { to { stroke-dashoffset: 0 } }
+
+/* 3) カードは輪郭が立ち上がってから面が入る(単純なfadeにしない) */
+.dg-stage.is-play .dg-card {
+  animation: dg-card-in .7s cubic-bezier(.22,1,.36,1) 1.75s both;
+}
+.dg-stage.is-play .dg-card:nth-of-type(4) { animation-delay: 1.85s }
+.dg-stage.is-play .dg-card:nth-of-type(5) { animation-delay: 1.95s }
+.dg-stage.is-play .dg-card:nth-of-type(6) { animation-delay: 2.05s }
+.dg-stage.is-play .dg-card:nth-of-type(7) { animation-delay: 2.15s }
+.dg-stage.is-play .dg-card:nth-of-type(8) { animation-delay: 2.25s }
+.dg-stage.is-play .dg-card:nth-of-type(9) { animation-delay: 2.35s }
+@keyframes dg-card-in {
+  from { opacity: 0; filter: blur(3px) }
+  60%  { opacity: 1 }
+  to   { opacity: 1; filter: blur(0) }
+}
+
+/* 4) ノード → CORE の順に完成 */
+.dg-stage.is-play .dg-node { animation: dg-fade .5s ease 2.1s both }
+.dg-stage.is-play .dg-ring { animation: dg-ring-in .7s cubic-bezier(.22,1,.36,1) 2.3s both }
+.dg-stage.is-play .dg-core { animation: dg-core-in .6s cubic-bezier(.22,1,.36,1) 2.5s both }
+.dg-stage.is-play .dg-core-label { animation: dg-fade .45s ease 2.85s both }
+@keyframes dg-fade { to { opacity: 1 } }
+@keyframes dg-core-in {
+  from { opacity: 0; transform: scale(.86) }
+  to   { opacity: 1; transform: scale(1) }
+}
+.dg-core { transform-box: fill-box; transform-origin: center }
+/* 端点ノードだけ、ごくゆっくりした呼吸。点滅には見せない */
+@keyframes dg-ring-in {
+  from { opacity: 0; transform: scale(.8) }
+  to   { opacity: 1; transform: scale(1) }
+}
+.dg-ring { transform-box: fill-box; transform-origin: center }
+.dg-stage.is-play .dg-ring { animation-name: dg-ring-in, dg-breathe }
+.dg-stage.is-play .dg-ring {
+  animation-duration: .7s, 3.2s;
+  animation-delay: 2.3s, 3.1s;
+  animation-timing-function: cubic-bezier(.22,1,.36,1), ease-in-out;
+  animation-iteration-count: 1, infinite;
+  animation-fill-mode: both, none;
+}
+@keyframes dg-breathe {
+  0%, 100% { opacity: .78; transform: scale(1) }
+  50%      { opacity: 1;   transform: scale(1.05) }
+}
+
+/* 完成状態(reduced-motion / 再生後の静止) */
+.dg-stage.is-done .dg-line { stroke-dashoffset: 0 }
+.dg-stage.is-done .dg-card,
+.dg-stage.is-done .dg-core,
+.dg-stage.is-done .dg-node,
+.dg-stage.is-done .dg-ring,
+.dg-stage.is-done .dg-core-label { opacity: 1 }
+.dg-stage.is-done .dg-dot { display: none }
+
+@media (prefers-reduced-motion: reduce) {
+  .dg-line { stroke-dashoffset: 0 }
+  .dg-card, .dg-core, .dg-node, .dg-ring, .dg-core-label { opacity: 1 }
+  .dg-dot { display: none }
+  .dg-stage.is-play * { animation: none !important }
 }
