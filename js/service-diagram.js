@@ -147,7 +147,7 @@
     /* 円が約70%形成されたところでラベルを出す */
     if (label) label.style.setProperty('--d', (CORE_AT + CORE_DUR * 0.7).toFixed(3) + 's');
 
-    let done = false;
+    let done = false, started = false, inView = false;
     const finish = () => {
       if (done) return;
       done = true;
@@ -155,15 +155,36 @@
       stage.classList.remove('is-play');
     };
     const play = () => {
+      if (started) return;
+      started = true;
       stage.classList.add('is-play');
       setTimeout(finish, END_AT * 1000);
     };
 
-    if (!('IntersectionObserver' in window)) { play(); return; }
+    /* 図解は Service の2枚目にある。デスクトップでは 1枚目が出ている間
+       .service__text-item が opacity:0 で待機しているが、
+       IntersectionObserver は opacity を見ないので、そのままだと
+       見えないうちに構築が終わってしまう。表示されるまで待つ。
+       SP では全アイテムが並ぶ(position が absolute にならない)ので
+       この待ちは不要。ブレークポイントの数値を二重に持たずに判定する。 */
+    const owner = stage.closest('.service__text-item');
+    const shown = () => !owner
+      || getComputedStyle(owner).position !== 'absolute'
+      || owner.classList.contains('is-active');
+    /* クロスフェードが始まってから構築を見せる */
+    const maybePlay = () => { if (inView && shown()) setTimeout(play, 200); };
+
+    if (owner) {
+      new MutationObserver(maybePlay)
+        .observe(owner, { attributes: true, attributeFilter: ['class'] });
+    }
+
+    if (!('IntersectionObserver' in window)) { inView = true; maybePlay(); return; }
     const io = new IntersectionObserver((entries) => {
       entries.forEach((e) => {
         if (!e.isIntersecting) return;
-        play();
+        inView = true;
+        maybePlay();
         io.disconnect();
       });
     }, { threshold: 0.25 });

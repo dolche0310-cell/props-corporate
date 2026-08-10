@@ -7,11 +7,29 @@
   // (pure CSS, no JS needed for that part) and, shortly after this script
   // runs, a circular hole grows from its center (via an animated mask)
   // while the hero content streams in from the left.
+  // FV の立ち上がり開始点。intro-revealed と同時にすると、円形ワイプが
+  // まだ中央しか開けていない間にタイトルが動き終わってしまうため、
+  // 穴がヒーローの文字位置まで広がってから始める。
+  // (--intro-r 0%→150% / 2.2s。約4割でタイトル位置に届く)
+  var FV_AFTER_WIPE = 850;
+  var fvStarted = false;
+  function startFV() {
+    if (fvStarted) return;
+    fvStarted = true;
+    document.body.classList.add('fv-in');
+    document.dispatchEvent(new CustomEvent('miai:fv-in'));
+  }
+
   var introOverlay = document.getElementById('intro-overlay');
+  if (!introOverlay) {
+    // 幕が無いページは読み込み後すぐ
+    requestAnimationFrame(function () { requestAnimationFrame(startFV); });
+  }
   if (introOverlay) {
     if (reducedMotionMq.matches) {
       introOverlay.remove();
       document.body.classList.add('intro-revealed');
+      startFV();
     } else {
       // Design A variants play a logo crossfade sequence (see
       // .intro-overlay--logo in style.css, ~2.4s) before the circular
@@ -26,6 +44,7 @@
       setTimeout(function () {
         document.body.classList.add('intro-revealed');
         introOverlay.classList.add('is-hiding');
+        setTimeout(startFV, FV_AFTER_WIPE);
       }, revealDelay);
       introOverlay.addEventListener('transitionend', function (e) {
         if (e.propertyName === '--intro-r') removeIntroOverlay();

@@ -41,7 +41,13 @@
     ]
   };
 
-  const START_DELAY = 250; // ピルが見えてから描き始めるまで
+  /* 描き始めは FV の立ち上がり(body.fv-in)を待つ。読み込み直後に走らせると
+     スプラッシュの幕の裏で描き終わってしまい、一度も見られない。
+     pill 本体が定位置に収まりかけた頃に始め、タイトル全体の登場感より
+     内部の描画が目立たないよう、全体を 0.75 倍に詰めて 1.4s で終える。 */
+  const AFTER_FV = 550;
+  const SPEED = 0.75;
+  const TOTAL = 1150 * SPEED;
 
   const build = (svg, strokes, uid) => {
     const defs = document.createElementNS(NS, 'defs');
@@ -75,9 +81,8 @@
       pen.appendChild(p);
 
       [m, p].forEach((el) => {
-        const len = el.getTotalLength ? 0 : 0; // 長さは接続後に測る
-        el.style.setProperty('--t', s.t + START_DELAY + 'ms');
-        el.style.setProperty('--u', s.u + 'ms');
+        el.style.setProperty('--t', Math.round(s.t * SPEED) + 'ms');
+        el.style.setProperty('--u', Math.round(s.u * SPEED) + 'ms');
       });
     });
 
@@ -117,14 +122,20 @@
       build(ai, STROKES.ai, 'kvmask-ai-' + i);
       build(sh, STROKES.shift, 'kvmask-sh-' + i);
       pill.classList.add('is-ready');
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => pill.classList.add('is-drawing'));
-      });
-      /* 描き切ったら演出用レイヤーの存在を消し、完成形だけ残す */
-      setTimeout(() => {
-        pill.classList.add('is-drawn');
-        pill.classList.remove('is-drawing');
-      }, START_DELAY + 1400);
+
+      const draw = () => {
+        if (pill.classList.contains('is-drawing') || pill.classList.contains('is-drawn')) return;
+        pill.classList.add('is-drawing');
+        /* 描き切ったら演出用レイヤーの存在を消し、完成形だけ残す */
+        setTimeout(() => {
+          pill.classList.add('is-drawn');
+          pill.classList.remove('is-drawing');
+        }, TOTAL + 250);
+      };
+      const start = () => setTimeout(draw, AFTER_FV);
+
+      if (document.body.classList.contains('fv-in')) start();
+      else document.addEventListener('miai:fv-in', start, { once: true });
     });
   };
 
