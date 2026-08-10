@@ -2156,8 +2156,13 @@ body.intro-revealed .hero__intro-item {
 /* Figma 240:27506 に無い装飾は出さない(旧Aboutのブロブ等) */
 .about--figma .about__blob { display: none; }
 
+/* MiAIロゴの下に十分な白余白を取り、次のダークなServiceが近づきすぎない
+   ようにする(ロゴアニメーションの余韻を確保するため)。 */
+.about--figma { background: #fff; padding-bottom: clamp(160px, 14vw, 220px); }
+
 /* SP: Desktopの座標再現を崩さないよう、切り替えは別クエリに分離する */
 @media (max-width: 900px) {
+  .about--figma { padding-bottom: clamp(96px, 18vw, 160px); }
   .about--figma .abt { height: auto; padding: 40px 0 56px; }
   .about--figma .abt > *,
   .about--figma .abt__main > * {
