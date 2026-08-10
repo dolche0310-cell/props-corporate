@@ -426,42 +426,45 @@ button { font: inherit; }
   justify-content: space-between;
 }
 
-/* Figma 237:27488。デスクトップは左右に余白を持つ、浮いた角丸ピル型の
-   ヘッダーに。モバイルは既存のハンバーガーメニュー構成のまま。 */
+/* Figma header 215:23933。白い背景の上にロゴとナビだけが乗る構成。
+   ヘッダーを囲む角丸の白いカード(背景・border-radius・box-shadow・
+   backdrop-filter)は Figma に無いので持たせない。角丸が付くのは
+   CONTACT ボタンだけ。左右の位置は他セクションと同じ .wrap の余白に従う。 */
 @media (min-width: 768px) {
   .site-header--brushup {
     top: 20px;
     background: none;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    border-bottom: none;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
   }
   .site-header--brushup .site-header__inner {
-    max-width: 1348px;
     height: 90px;
-    padding: 0 44px;
-    background: rgba(255, 255, 255, .8);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-radius: 70px;
-    box-shadow: 0 3px 3px rgba(229, 229, 229, .25);
+    background: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
   }
-  /* グローバルナビ: Figma header 215:23933 / nav-links 215:23942。
-     Belanosima 16px / tracking .8px / #191919 の大文字。間隔は 40px。
-     NEWS だけ Figma 上で Alata が指定されている(215:23945)。 */
+  /* miai_logo 215:23935 */
+  .site-header--brushup .logo__mark { width: 104.613px; height: 38.098px; }
+  /* nav-links 215:23942 (611x28)。Alata Regular 16px / tracking .8px /
+     #191919 の大文字。項目間 40px。 */
   .site-header--brushup .nav { gap: 40px; }
   .site-header--brushup .nav__link,
   .site-header--brushup .nav__cta-label {
-    font-family: var(--font-logo);
+    font-family: var(--font-alata);
     font-size: 16px;
     font-weight: 400;
     letter-spacing: .8px;
     text-transform: uppercase;
   }
-  .site-header--brushup .nav__link--news,
-  .site-header--brushup .nav__link--news .nav__link-face { font-family: var(--font-alata); }
   .site-header--brushup .nav__link { color: #191919; }
-  /* CONTACT は 114x28 のピル。色は各案の --color-primary に従う */
+  /* CONTACT 215:23948 は 117x28 のピル。ここだけ角丸を持つ。
+     地の色は各案の --color-primary(A-1 は Figma と同じ #F16E36)。 */
   .site-header--brushup .nav__cta {
     height: 28px;
     padding: 0 20px;

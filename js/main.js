@@ -337,6 +337,25 @@
       return stableViewportH / 2;
     };
 
+    // .service__pin は translateY(-50%) で自分の高さの半分だけ上へずれる。
+    // これは post-layout の変形なので、レイアウト上の箱は元の位置のままで、
+    // パネルの見た目の下端より下に「ずらした分」の空白が残る。
+    // 実測で 900px ビューポート時に 454px。News の手前がここまで空くのは
+    // これが原因なので、同じ量を scroller の下マージンで戻す。
+    // offsetHeight / getBoundingClientRect().top は変わらないので、
+    // 上の progress 計算には影響しない。
+    var syncPinShift = function () {
+      if (!serviceDesktopMq.matches) {
+        serviceScroller.style.marginBottom = '';
+        return;
+      }
+      serviceScroller.style.marginBottom = -Math.round(servicePin.offsetHeight / 2) + 'px';
+    };
+    syncPinShift();
+    window.addEventListener('resize', syncPinShift);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncPinShift);
+    window.addEventListener('load', syncPinShift);
+
     var updateServiceProgress = function () {
       serviceTicking = false;
 
