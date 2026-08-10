@@ -816,9 +816,11 @@ button { font: inherit; }
 .hero__rest { margin-left: 6px; display: inline-block; }
 .hero__word { white-space: nowrap; }
 
-/* Figma 232:27380。タイトルはAlata、"AIShift"のみGugi。 */
+/* Figma 232:27380。タイトルはAlata、"AIShift"のみGugi。
+   ピルの "AIShift" は .hero__highlight--pill 側でGugiにしている。
+   リード文の "AI"(.hero__ai)は Figma 232:27385 では本文と同じ Alata なので、
+   ここでは書体を上書きしない。 */
 .hero--brushup .hero__title { font-family: var(--font-alata); }
-.hero--brushup .hero__ai { font-family: var(--font-gugi); }
 
 /* Figma 215:22653 (DESIGN A_brushup)。ハイライトは日本語全体ではなく
    英字の "AIShift" のみを囲むピル形状に。 */
@@ -865,7 +867,9 @@ button { font: inherit; }
   .hero__desc--brushup { font-size: 24px; letter-spacing: .12em; }
 }
 .hero__desc--brushup p { margin: 0; text-wrap: balance; }
-.hero__desc--brushup .hero__ai { font-family: var(--font-gugi); }
+/* Figma 232:27385。"AI" は前後の和文と同じ Alata 24px。違うのは字間だけで、
+   和文が tracking 2.88px(=.12em)なのに対し "AI" は 0。書体は継承させる。 */
+.hero__desc--brushup .hero__ai { letter-spacing: 0; }
 
 /* Figma 206:24159。同じ大きさで2行流していたリード文を、
    「状況説明(細く小さく)」と「掲げるコピー(太く大きく)」の2段に割って
