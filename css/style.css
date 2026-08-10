@@ -822,15 +822,33 @@ button { font: inherit; }
 
 /* Figma 215:22653 (DESIGN A_brushup)。ハイライトは日本語全体ではなく
    英字の "AIShift" のみを囲むピル形状に。 */
+/* 字面(実インク)をピルの天地・左右中央に置くための補正。
+   Gugi はメトリクスが上下非対称(54pxでアセント46/ディセント8)で、
+   末尾 "t" の右サイドベアリングも大きい。素直にベースライン揃え+左右均等
+   paddingにすると、実測で字面が上に2.6px・左に8.1pxずれる。
+   paddingを上下・左右で振り分けて相殺する(合計は変えないのでピルの寸法は不変)。
+   ずれ量はフォントサイズに比例するので em で指定している。 */
 .hero__highlight--pill {
+  --pill-shift-y: 0.048em;
+  --pill-shift-x: 0.15em;
   border-radius: 999px;
-  padding: 4px 22px;
+  padding:
+    calc(4px + var(--pill-shift-y))
+    calc(22px - var(--pill-shift-x))
+    calc(4px - var(--pill-shift-y))
+    calc(22px + var(--pill-shift-x));
   font-family: var(--font-gugi);
   font-weight: 400;
   letter-spacing: .04em;
 }
 @media (min-width: 768px) {
-  .hero__highlight--pill { padding: 6px 32px; }
+  .hero__highlight--pill {
+    padding:
+      calc(6px + var(--pill-shift-y))
+      calc(32px - var(--pill-shift-x))
+      calc(6px - var(--pill-shift-y))
+      calc(32px + var(--pill-shift-x));
+  }
 }
 
 /* Figma 215:22653。リード文はすべて同サイズ(24px)の2行で、
