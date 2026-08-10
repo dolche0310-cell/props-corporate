@@ -162,8 +162,12 @@
                       <img src="assets/images/arrow-icon.svg" alt="" class="service__link-icon">
                     </a>
                   </div>
+                  <!-- 01 の面はループ動画。枠(.service__image)は変えず中身だけ差し替える。
+                       読み込み前とフォールバックは従来の静止画(poster)。 -->
                   <div class="service__image">
-                    <img src="assets/images/service-miai-image.png" alt="MiAI面接のイメージ">
+                    <video class="service__loop-video" src="assets/videos/service-01.mp4"
+                           poster="assets/images/service-miai-image.png"
+                           autoplay loop muted playsinline preload="metadata" aria-hidden="true"></video>
                   </div>
                 </div>
               </div>
