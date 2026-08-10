@@ -853,6 +853,50 @@ button { font: inherit; }
   }
 }
 
+/* ===== AIShift レタリング切り替え(Figma 254:27435/27446/27457/27468) =====
+   ピル内のテキストを、Figmaの4種のレタリングSVGを重ねた
+   .ai-switch に差し替えている。カプセル自体(寸法・角丸・色・余白の合計)は
+   一切変えない。 */
+/* SVG差し替え時は Gugi 用の光学補正(--pill-shift-*)が不要になるので、
+   合計を変えずに左右・上下均等へ戻す */
+.hero__highlight--pill.hero__highlight--svg { padding: 4px 22px; }
+@media (min-width: 768px) {
+  .hero__highlight--pill.hero__highlight--svg { padding: 6px 32px; }
+}
+/* 旧テキスト "AIShift"(Gugi 54px)の実測ボックス 188.25x70.2 を em で固定。
+   これでカプセル幅・高さが従来と1pxも変わらない。
+   (188.25/54 = 3.486em、高さは line-height と同じ 1.3em) */
+.ai-switch {
+  position: relative;
+  display: inline-block;
+  width: 3.486em;
+  height: 1.3em;
+  vertical-align: top; /* 行ボックス(=1.3em)と同高なので top で完全一致 */
+}
+/* 4種を同一座標に重ね、opacity/scale/blur で切り替える。
+   共通viewBox(248x66)に各案を光学中央で配置してあるので、
+   切り替わっても位置はガタつかない。 */
+.ai-switch__v {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transform: scale(1.015);
+  filter: blur(1.5px);
+  transition:
+    opacity .28s cubic-bezier(.22, 1, .36, 1),
+    transform .28s cubic-bezier(.22, 1, .36, 1),
+    filter .28s cubic-bezier(.22, 1, .36, 1);
+  will-change: opacity, transform, filter;
+}
+.ai-switch__v.is-active { opacity: 1; transform: none; filter: none; }
+.ai-switch__v.is-out { opacity: 0; transform: scale(.985); filter: blur(1.5px); }
+@media (prefers-reduced-motion: reduce) {
+  /* JS側もreduced時はループを始めない。最初の1種を静止表示 */
+  .ai-switch__v { transition: none; transform: none; filter: none; }
+}
+
 /* Figma 215:22653。リード文はすべて同サイズ(24px)の2行で、
    字下げやウェイト差はなし。 */
 .hero__desc--brushup {
