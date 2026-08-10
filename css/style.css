@@ -2361,42 +2361,47 @@ body.intro-revealed .hero__intro-item {
 }
 
 /* ===========================================================
-   Service 図解(Figma 253:27104 / 253:27127)
-   背景 #323232 は変えず、Ellipse 56/57 の環境光を敷いた上で
-   粒子 → 接続線 → カード → CORE の順に構築されていく。
+   Service 図解 — Network Diagram
+   ステージ = Figma 253:27126 の 642×395。中の Diagram(253:27127)は y=4。
+
+   背景は Service セクションの #323232 をそのまま使う。図解専用の
+   角丸パネルも Glow も持たない(環境光 Ellipse 56/57 は .service__blob 側)。
+
+   ■ 位置とアニメの分離
+   CSS の transform は SVG の transform 属性を上書きしてしまう。
+   これを踏むと translate が消えて要素が原点(左上)へ飛ぶ。
+   そのため Figma 座標は内側の <g transform> に置き、アニメは外側の
+   .dg-card / .dg-ring / .dg-node / .dg-core に掛ける。カードの
+   skewY(回転)も内側にあるので、演出中も終了後も失われない。
+
+   ■ 時間軸(js/service-diagram.js が --d を配る)
+     0.00-0.60s  粒子がわずかに収束 (scale 1→.985 / opacity 1→.75)
+     0.40-2.00s  接続線が中央→上→左右→下へ伝播しながら描かれる
+     1.20-1.95s  線が届いたノードの Glow が点灯
+     1.70-2.75s  カードが CORE 周辺から外側へ実体化
+     2.60-2.95s  Core Circle → 70%形成で CORE ラベル → 弱い Pulse 一度
+   終了時に .is-play を外して .is-done にし、演出用 transform を解除する。
    =========================================================== */
-.service__image--diagram { background: none; overflow: visible; }
+.service--brushup .service__image--diagram {
+  aspect-ratio: 642 / 395;
+  border-radius: 0;
+  overflow: visible;
+  background: none;
+}
 .dg-stage {
   position: relative;
   width: 100%;
-  aspect-ratio: 642 / 391;
-  background: #323232;
-  border-radius: 18px;
-  overflow: hidden;
+  aspect-ratio: 642 / 395;
 }
-/* Ellipse 56(右上) / 57(左下)。508pxの円が約27.91%外側まで滲む構造を
-   radial-gradient で再現。円形の輪郭が見えない濃度に抑える。 */
-.dg-glow {
-  position: absolute;
-  width: 79.1%;   /* 508 / 642 */
-  aspect-ratio: 1;
-  border-radius: 50%;
-  pointer-events: none;
-  background: radial-gradient(circle,
-    rgba(255, 90, 60, .16) 0%,
-    rgba(255, 90, 60, .07) 40%,
-    rgba(255, 90, 60, 0) 72%);
-  filter: blur(28px);
-}
-.dg-glow--tr { right: -22%; top: -30%; }
-.dg-glow--bl { left: -24%; bottom: -28%; }
+.dg-stage .dg { display: block; width: 100%; height: 100%; overflow: visible; }
 
-.dg-stage .dg { position: relative; display: block; width: 100%; height: 100%; }
-
-/* --- 初期状態: 線とカードとCOREは伏せ、粒子だけ --- */
+/* --- 初期状態 --- */
 .dg-line { stroke-dasharray: var(--len); stroke-dashoffset: var(--len); }
-.dg-card, .dg-core, .dg-node, .dg-ring { opacity: 0; }
-.dg-core-label { opacity: 0; }
+.dg-card, .dg-core, .dg-node, .dg-ring, .dg-core-label { opacity: 0; }
+.dg-card, .dg-core, .dg-ring, .dg-dust {
+  transform-box: fill-box;
+  transform-origin: center;
+}
 .dg-dot {
   opacity: 0;
   transform: translate(var(--dx), var(--dy));
@@ -2404,84 +2409,81 @@ body.intro-revealed .hero__intro-item {
   transform-origin: center;
 }
 
-/* --- 再生 --- */
-/* 1) 粒子が現れ、散った位置から線上へ収束していく */
+/* --- 1) Particles: 既にある粒子場がわずかに収束する --- */
+.dg-stage.is-play .dg-dust {
+  animation: dg-field .6s cubic-bezier(.33,0,.2,1) both;
+}
+@keyframes dg-field {
+  from { opacity: 1;   transform: scale(1) }
+  to   { opacity: .75; transform: scale(.985) }
+}
 .dg-stage.is-play .dg-dot {
   animation:
-    dg-dust-in .5s ease var(--d) both,
-    dg-dust-settle .9s cubic-bezier(.22,1,.36,1) calc(var(--d) + .28s) both,
-    dg-dust-out .45s ease calc(var(--d) + 1.15s) both;
+    dg-dust-settle .9s cubic-bezier(.22,1,.36,1) calc(var(--d) + .25s) both,
+    dg-dust-out    .5s ease                      calc(var(--d) + .9s)  both;
 }
-@keyframes dg-dust-in { from { opacity: 0 } to { opacity: .85 } }
-@keyframes dg-dust-settle { to { transform: translate(0, 0) } }
-@keyframes dg-dust-out { to { opacity: 0 } }
+@keyframes dg-dust-settle { from { opacity: .8 } to { opacity: .8; transform: translate(0, 0) } }
+@keyframes dg-dust-out    { to { opacity: 0 } }
 
-/* 2) 粒子が収束したところへ線が引かれる(solid → dashed) */
+/* --- 2) Line Draw: 中央 → 上部 → 左右 → 下部へ伝播 --- */
 .dg-stage.is-play .dg-line {
-  animation: dg-draw .85s cubic-bezier(.4,0,.2,1) calc(var(--d) + .95s) both;
+  animation: dg-draw .65s cubic-bezier(.4,0,.2,1) var(--d) both;
 }
-.dg-stage.is-play .dg-line--dash { animation-delay: calc(var(--d) + 1.35s); }
 @keyframes dg-draw { to { stroke-dashoffset: 0 } }
 
-/* 3) カードは輪郭が立ち上がってから面が入る(単純なfadeにしない) */
-.dg-stage.is-play .dg-card {
-  animation: dg-card-in .7s cubic-bezier(.22,1,.36,1) 1.75s both;
-}
-.dg-stage.is-play .dg-card:nth-of-type(4) { animation-delay: 1.85s }
-.dg-stage.is-play .dg-card:nth-of-type(5) { animation-delay: 1.95s }
-.dg-stage.is-play .dg-card:nth-of-type(6) { animation-delay: 2.05s }
-.dg-stage.is-play .dg-card:nth-of-type(7) { animation-delay: 2.15s }
-.dg-stage.is-play .dg-card:nth-of-type(8) { animation-delay: 2.25s }
-.dg-stage.is-play .dg-card:nth-of-type(9) { animation-delay: 2.35s }
-@keyframes dg-card-in {
-  from { opacity: 0; filter: blur(3px) }
-  60%  { opacity: 1 }
-  to   { opacity: 1; filter: blur(0) }
-}
-
-/* 4) ノード → CORE の順に完成 */
-.dg-stage.is-play .dg-node { animation: dg-fade .5s ease 2.1s both }
-.dg-stage.is-play .dg-ring { animation: dg-ring-in .7s cubic-bezier(.22,1,.36,1) 2.3s both }
-.dg-stage.is-play .dg-core { animation: dg-core-in .6s cubic-bezier(.22,1,.36,1) 2.5s both }
-.dg-stage.is-play .dg-core-label { animation: dg-fade .45s ease 2.85s both }
-@keyframes dg-fade { to { opacity: 1 } }
-@keyframes dg-core-in {
-  from { opacity: 0; transform: scale(.86) }
-  to   { opacity: 1; transform: scale(1) }
-}
-.dg-core { transform-box: fill-box; transform-origin: center }
-/* 端点ノードだけ、ごくゆっくりした呼吸。点滅には見せない */
-@keyframes dg-ring-in {
-  from { opacity: 0; transform: scale(.8) }
-  to   { opacity: 1; transform: scale(1) }
-}
-.dg-ring { transform-box: fill-box; transform-origin: center }
-.dg-stage.is-play .dg-ring { animation-name: dg-ring-in, dg-breathe }
+/* --- 3) Node Activation: 線が届いた端点の Glow が点灯 --- */
 .dg-stage.is-play .dg-ring {
-  animation-duration: .7s, 3.2s;
-  animation-delay: 2.3s, 3.1s;
-  animation-timing-function: cubic-bezier(.22,1,.36,1), ease-in-out;
-  animation-iteration-count: 1, infinite;
-  animation-fill-mode: both, none;
+  animation: dg-node-on .22s cubic-bezier(.22,1,.36,1) var(--d) both;
 }
-@keyframes dg-breathe {
-  0%, 100% { opacity: .78; transform: scale(1) }
-  50%      { opacity: 1;   transform: scale(1.05) }
+.dg-stage.is-play .dg-node {
+  animation: dg-fade .2s ease var(--d) both;
+}
+@keyframes dg-node-on {
+  from { opacity: 0; transform: scale(.7) }
+  to   { opacity: 1; transform: scale(1) }
+}
+@keyframes dg-fade { to { opacity: 1 } }
+
+/* --- 4) Cards: CORE 周辺から外側へ連鎖して実体化 --- */
+.dg-stage.is-play .dg-card {
+  animation: dg-card-in .4s cubic-bezier(.22,1,.36,1) var(--d) both;
+}
+@keyframes dg-card-in {
+  from { opacity: 0; transform: translateY(5px) scale(.96); filter: blur(2px) }
+  to   { opacity: 1; transform: translateY(0)   scale(1);   filter: blur(0) }
 }
 
-/* 完成状態(reduced-motion / 再生後の静止) */
+/* --- 5) CORE: 円 → 70%形成でラベル → 一度だけ弱い Pulse --- */
+.dg-stage.is-play .dg-core {
+  animation:
+    dg-core-in .35s cubic-bezier(.22,1,.36,1) var(--d) both,
+    dg-core-pulse .5s ease-out calc(var(--d) + .45s) 1;
+}
+@keyframes dg-core-in {
+  from { opacity: 0; transform: scale(.84) }
+  to   { opacity: 1; transform: scale(1) }
+}
+@keyframes dg-core-pulse {
+  0%, 100% { transform: scale(1) }
+  45%      { transform: scale(1.028) }
+}
+.dg-stage.is-play .dg-core-label {
+  animation: dg-fade .25s ease var(--d) both;
+}
+
+/* --- 完成状態 = Figma 253:27126。演出用 transform は明示的に解除する --- */
 .dg-stage.is-done .dg-line { stroke-dashoffset: 0 }
 .dg-stage.is-done .dg-card,
 .dg-stage.is-done .dg-core,
 .dg-stage.is-done .dg-node,
 .dg-stage.is-done .dg-ring,
-.dg-stage.is-done .dg-core-label { opacity: 1 }
-.dg-stage.is-done .dg-dot { display: none }
+.dg-stage.is-done .dg-core-label { opacity: 1; transform: none; filter: none; }
+.dg-stage.is-done .dg-dust { display: none }
 
 @media (prefers-reduced-motion: reduce) {
   .dg-line { stroke-dashoffset: 0 }
-  .dg-card, .dg-core, .dg-node, .dg-ring, .dg-core-label { opacity: 1 }
-  .dg-dot { display: none }
+  .dg-card, .dg-core, .dg-node, .dg-ring, .dg-core-label { opacity: 1; transform: none }
+  .dg-dust { display: none }
   .dg-stage.is-play * { animation: none !important }
 }
 
