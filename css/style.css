@@ -2184,9 +2184,9 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .65s; }
    =========================================================== */
 .hero--brushup .kv-title {
   position: relative;
-  width: 14.0741em;   /* 760px */
+  width: 13.8333em;   /* 747px = 産業のの左19 + Group 138(262:29138) の 728 */
   height: 1.5926em;   /* 86px */
-  font-size: min(54px, calc((100vw - 48px) / 14.0741));
+  font-size: min(54px, calc((100vw - 48px) / 13.8333));
   font-family: var(--font-alata);
   font-weight: 400;
   line-height: 1.3;
@@ -2197,16 +2197,16 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .65s; }
 /* 産業の(232:27383): x=19 y=12。「の」だけ 50px・字間7px */
 .kv-title__prefix { position: absolute; left: .3519em; top: .2222em; white-space: nowrap; }
 /* を支援する(234:23891): x=518 y=11.672。「を」だけ 50px */
-.kv-title__suffix { position: absolute; left: 9.5926em; top: .2162em; white-space: nowrap; }
+.kv-title__suffix { position: absolute; left: 8.9074em; top: .2162em; white-space: nowrap; }
 .kv-title .kv-sm { font-size: .9259em; }            /* 50px */
 .kv-title__prefix .kv-sm { letter-spacing: .14em; } /* 7px @50px */
-/* カプセル(232:27381): x=185 y=8.672, 325x78, r=200, #F16E36。
+/* カプセル(232:27381 / Group 138 262:29138): 299x78, r=200, #F16E36。
    幅は固定。auto / fit-content / shrink にしない(中身が消えても縮ませない) */
 .kv-pill {
   position: absolute;
-  left: 3.4259em;
+  left: 3.3519em;     /* 181px = 産業のの右端177 + 4 */
   top: .1606em;
-  width: 6.0185em;    /* 325px */
+  width: 5.5370em;    /* 299px */
   height: 1.4444em;   /* 78px */
   background: #F16E36;
   border-radius: 3.7037em; /* 200px */
@@ -2215,8 +2215,11 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .65s; }
    Shift(254:27428): カプセル内 x=136.96 y=12.84, 140.215x50.531
    均等配置にせず、Figmaの座標をそのまま置く */
 .kv-pill > svg { position: absolute; display: block; }
-.kv-pill__ai    { left: .8598em; top: .2493em; width: 1.0123em; height: .9277em; }
-.kv-pill__shift { left: 2.5363em; top: .2378em; width: 2.5966em; height: .9358em; }
+/* カプセル内の位置(Group 138 のカプセル左上を原点とした Figma 座標)。
+   幅/高さは viewBox をそのまま 1:1 で写すので字形は変形しない。
+   AI 38.0/14.62、Shift 118.574/14.0 → 両者の間隔は 22.9px */
+.kv-pill__ai    { left: .7037em;  top: .2707em; width: 1.0741em; height: .9444em; }
+.kv-pill__shift { left: 2.1958em; top: .2593em; width: 2.6111em; height: .9444em; }
 
 /* ===========================================================
    About(Figma 240:27506)
