@@ -94,31 +94,34 @@ button { font: inherit; }
 
 /* ===========================================================
    スプラッシュ 〜 FV 形成(Figma 257:27678 / 215:22653)
-   一続きの現象として見せる。各見せ場に認識のための「間」を置き、
-   前の状態の終点が次の始点になるようにつなぐ。
+   一続きの現象として組む。「前が消えて次が出る」を作らない。
 
-   0.20-1.10  MiAI が1文字ずつ下から滑り上がる(帯で切って見切れさせる)
-   1.10-1.32  ロゴ完成を見せる(間)
-   1.32       i のドットがオレンジに変わる(文字はまだ在る)
-   1.32-1.54  「i だけオレンジ」を見せる(間)
-   1.54-1.94  他の文字が粒に散って消える。ドットは残る
-   1.94-2.16  オレンジのドットだけの状態を見せる(間)
-   2.16-2.30  ドットが軽く沈んで弾む(次の移動の予備動作)
-   2.30-2.86  ドットが弧を描いて中央へ移動しながら育つ = 軌跡が環になる
-   2.86-3.06  環と円群が出そろった状態を見せる(間)
-   3.06-3.76  円群が回りながらグレーの背景グラフィックへ収束
-   3.60-4.10  オレンジのグラデーションが空間へ広がる
-   3.90-4.20  ドットが AI Shift のカプセルへ変形
-   4.20-      見出し → リードが決まり、FV の完成状態で静止
+   0.20-1.05  MiAI が静かに立ち上がる(26pxのライズ + ぼけの解像)
+   1.05-1.30  ロゴ完成を見せる(間)
+   1.30-1.55  i のドットにオレンジが灯る(黒い点の上に重なる。二重に見えない)
+   1.55-1.95  文字が粒に散って消える。オレンジのドットは残る
+   1.95-2.15  ドットだけの状態を見せる(間)
+   2.15-2.28  ドットが沈む(移動の予備動作)
+   2.28-3.20  ドットが弧を描いて FV のカプセル位置へ移動しながら
+              横に伸びる(js/splash.js が実座標で受け渡す)
+   2.75       幕の白が抜け始め、FV の形成(fv-in)開始。
+              背景では柔らかい円群が回転しながら寄り集まる
+   3.45       ドットが実カプセルに重なって消える(受け渡し完了)
+   3.65       幕を除去
    =========================================================== */
 .intro-overlay--splash {
   -webkit-mask-image: none;
   mask-image: none;
   display: grid;
   place-items: center;
-  transition: opacity .55s ease;
+  transition: background-color .6s ease;
 }
-.intro-overlay--splash.is-hiding { opacity: 0; pointer-events: none; }
+/* 幕は「白が抜ける」だけ。要素は各自のタイミングで消えるので、
+   ドットの受け渡しが幕のフェードに巻き込まれない */
+.intro-overlay--splash.is-hiding {
+  background-color: transparent;
+  pointer-events: none;
+}
 
 .splash__stage { position: relative; width: min(190px, 40vw); }
 .splash__svg {
@@ -129,116 +132,62 @@ button { font: inherit; }
   shape-rendering: geometricPrecision;
 }
 
-/* ── 文字: 下から1文字ずつ滑り上がる ── */
-.splash__letter { transform: translateY(110px); transform-box: view-box; }
+/* ── 文字: 小さなライズ + ぼけが解けて立ち上がる。跳ねない ── */
+.splash__letter { opacity: 0; transform: translateY(26px); transform-box: view-box; }
 .is-run .splash__letter {
   animation:
-    splash-letter .78s cubic-bezier(.22, 1, .36, 1) both,
+    splash-letter .64s cubic-bezier(.22, 1, .36, 1) both,
     splash-letter-out .4s ease forwards;
 }
-.is-run .splash__letter--m { animation-delay: .20s, 1.54s; }
-.is-run .splash__letter--i { animation-delay: .31s, 1.60s; }
-.is-run .splash__letter--a { animation-delay: .42s, 1.66s; }
-.is-run .splash__letter--l { animation-delay: .53s, 1.72s; }
+.is-run .splash__letter--m { animation-delay: .20s, 1.55s; }
+.is-run .splash__letter--i { animation-delay: .28s, 1.61s; }
+.is-run .splash__letter--a { animation-delay: .36s, 1.67s; }
+.is-run .splash__letter--l { animation-delay: .44s, 1.73s; }
 @keyframes splash-letter {
-  from { transform: translateY(110px); }
-  to   { transform: translateY(0); }
+  from { opacity: 0; transform: translateY(26px); filter: blur(3px); }
+  to   { opacity: 1; transform: translateY(0); filter: blur(0); }
 }
-/* 消えるのではなく粒に散る。上下に散らしてから薄くなる */
 @keyframes splash-letter-out {
   0%   { opacity: 1; transform: translateY(0) scale(1); }
   55%  { opacity: .5; transform: translateY(-3px) scale(1.02); }
   100% { opacity: 0; transform: translateY(-9px) scale(1.05); }
 }
 
-/* ── 粒: 文字が散る瞬間に立ち、すぐ引く ── */
+/* ── 粒: 文字が散る瞬間だけ立つ ── */
 .splash__grain { opacity: 0; transform-box: view-box; }
-.is-run .splash__grain {
-  animation: splash-grain .62s cubic-bezier(.3, 0, .3, 1) both;
-}
-.is-run .splash__grain--1 { animation-delay: 1.56s; }
-.is-run .splash__grain--2 { animation-delay: 1.62s; }
-.is-run .splash__grain--3 { animation-delay: 1.68s; }
-.is-run .splash__grain--4 { animation-delay: 1.74s; }
+.is-run .splash__grain { animation: splash-grain .6s cubic-bezier(.3, 0, .3, 1) both; }
+.is-run .splash__grain--1 { animation-delay: 1.57s; }
+.is-run .splash__grain--2 { animation-delay: 1.63s; }
+.is-run .splash__grain--3 { animation-delay: 1.69s; }
+.is-run .splash__grain--4 { animation-delay: 1.75s; }
 @keyframes splash-grain {
   0%   { opacity: 0; transform: translate(0, 0) scale(1); }
   35%  { opacity: .85; }
   100% { opacity: 0; transform: translate(var(--gx, 0), var(--gy, -14px)) scale(.4); }
 }
 
-/* ── i のドット: 色が変わる → 見せる → 予備動作 → 弧を描いて育つ ── */
-.splash__dot { transform-box: fill-box; transform-origin: center; }
+/* ── i のドット ──
+   文字の i は自前の黒い点を持っている。以前はこの上に黒い複製を最初から
+   重ねていたため、文字が滑り上がる間「黒い丸が2つ」見えていた。
+   複製は透明で待機し、1.30s にオレンジとして初めて現れる。
+   黒い点は文字側の1つだけ。移動と伸びは js/splash.js が実座標で駆動する。 */
+.splash__dot { opacity: 0; transform-box: fill-box; transform-origin: center; }
 .is-run .splash__dot {
-  /* transform を持つものは forwards。both だと開始前に「from」が逆流し、
-     後ろのアニメ(morph)の姿勢が t=0 から適用されてしまう */
   animation:
-    splash-dot-warm .26s ease 1.32s both,
-    splash-dot-bounce .30s cubic-bezier(.34, 1.4, .5, 1) 2.16s both,
-    splash-dot-travel .56s cubic-bezier(.42, 0, .28, 1) 2.30s forwards,
-    splash-dot-morph .30s cubic-bezier(.22, 1, .36, 1) 3.90s forwards;
+    splash-dot-in .24s ease 1.30s both,
+    splash-dot-sink .26s cubic-bezier(.34, 1.2, .5, 1) 2.15s both;
 }
-@keyframes splash-dot-warm { from { fill: #040404 } to { fill: #F16E36 } }
-@keyframes splash-dot-bounce {
-  0%   { transform: translate(0, 0) scale(1); }
-  45%  { transform: translate(0, 2.5px) scale(.9, 1.08); }
-  100% { transform: translate(0, 0) scale(1); }
-}
-/* 中央へ弧を描いて移動しながら育つ。これが環の軌跡になる */
-@keyframes splash-dot-travel {
-  0%   { transform: translate(0, 0) scale(1); }
-  55%  { transform: translate(-2px, 22px) scale(3.1); }
-  100% { transform: translate(7.5px, 38px) scale(5.4); }
-}
-/* カプセルへ変形して幕の向こうの AI Shift に受け渡す */
-@keyframes splash-dot-morph {
-  from { opacity: 1; transform: translate(7.5px, 38px) scale(5.4); }
-  to   { opacity: 0; transform: translate(7.5px, 38px) scale(5.4) scaleX(2.6); }
-}
-
-/* ── 環: ドットの軌跡から生まれ、見せてから回って収束 ── */
-.splash__orbit { transform-box: fill-box; transform-origin: center; }
-.is-run .splash__orbit {
-  animation:
-    splash-orbit-turn 1.5s cubic-bezier(.32, 0, .24, 1) 2.60s both,
-    splash-orbit-settle .70s cubic-bezier(.22, 1, .36, 1) 3.06s both;
-}
-@keyframes splash-orbit-turn { from { rotate: -26deg } to { rotate: 16deg } }
-/* 出そろってから、背景グラフィックの構図へ寄っていく */
-@keyframes splash-orbit-settle {
-  from { transform: scale(1) translate(0, 0); }
-  to   { transform: scale(1.5) translate(16px, -6px); }
-}
-.splash__blob {
-  opacity: 0;
-  transform: scale(.18);
-  transform-box: fill-box;
-  transform-origin: center;
-}
-.is-run .splash__blob {
-  animation:
-    splash-blob-in .46s cubic-bezier(.22, 1, .36, 1) both,
-    splash-blob-fade .70s cubic-bezier(.3, 0, .3, 1) forwards;
-}
-/* 1つずつ立ち上がって環になる(2.30-2.86)。3.06 まで見せてから引く */
-.is-run .splash__blob--1 { animation-delay: 2.30s, 3.06s; }
-.is-run .splash__blob--2 { animation-delay: 2.39s, 3.11s; }
-.is-run .splash__blob--3 { animation-delay: 2.48s, 3.16s; }
-.is-run .splash__blob--4 { animation-delay: 2.57s, 3.21s; }
-.is-run .splash__blob--5 { animation-delay: 2.66s, 3.26s; }
-.is-run .splash__blob--6 { animation-delay: 2.75s, 3.31s; }
-.is-run .splash__blob--7 { animation-delay: 2.84s, 3.36s; }
-@keyframes splash-blob-in {
-  from { opacity: 0; transform: scale(.18); }
+@keyframes splash-dot-in {
+  from { opacity: 0; transform: scale(.6); }
   to   { opacity: 1; transform: scale(1); }
 }
-/* 消えるのではなく、グレーへ寄りながら薄くなる(背景グラフィックへ) */
-@keyframes splash-blob-fade {
-  0%   { opacity: 1; filter: saturate(1); }
-  60%  { opacity: .45; filter: saturate(.25); }
-  100% { opacity: 0; filter: saturate(0); transform: scale(1.28); }
+@keyframes splash-dot-sink {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(0, 2.5px) scale(.92, 1.06); }
+  100% { transform: translate(0, 0) scale(1); }
 }
 
-/* ── オレンジのグラデーションが空間へ広がる ── */
+/* ── オレンジのグラデーション(FV の Ellipse 55 と同位置に灯って引き継ぐ) ── */
 .splash__bloom {
   position: absolute;
   left: calc(50% + 302px);
@@ -251,12 +200,15 @@ button { font: inherit; }
   pointer-events: none;
 }
 .is-run .splash__bloom {
-  animation: splash-bloom .95s cubic-bezier(.22, 1, .36, 1) 3.60s both;
+  animation:
+    splash-bloom .9s cubic-bezier(.22, 1, .36, 1) 2.55s both,
+    splash-bloom-out .5s ease 3.15s forwards;
 }
 @keyframes splash-bloom {
   from { opacity: 0; transform: scale(.82); }
   to   { opacity: .85; transform: scale(1); }
 }
+@keyframes splash-bloom-out { to { opacity: 0; } }
 
 @media (max-width: 767px) {
   .splash__bloom { left: 60%; top: 40%; width: 380px; height: 380px; }
@@ -790,10 +742,96 @@ button { font: inherit; }
   opacity: 0;
   transform: scale(.97);
   transition:
-    opacity   1.2s cubic-bezier(.22, 1, .36, 1) .1s,
-    transform 1.2s cubic-bezier(.22, 1, .36, 1) .1s;
+    opacity   .5s cubic-bezier(.22, 1, .36, 1) 2.55s,
+    transform .5s cubic-bezier(.22, 1, .36, 1) 2.55s;
+}
+@media (max-width: 767px), (prefers-reduced-motion: reduce) {
+  /* 形成の円群を出さない環境では、従来どおりすぐ立つ */
+  .hero__motif { transition-delay: .1s, .1s; transition-duration: 1.2s, 1.2s; }
 }
 body.fv-in .hero__motif { opacity: 1; transform: none; }
+
+/* ── モチーフの形成(.hero__motif-fx) ──
+   柔らかいグレーの円9個を gooey(ぼかし+コントラスト)で溶かし、
+   群全体が -720deg → 0 の2回転を減速しながら回る間に、各円が
+   散開位置(--dx/--dy)から最終シルエットの位置へ引き寄せられて
+   ぐにゃっと繋がる。着地寸前に本物のモチーフ(img)が下から立ち、
+   円群は溶けるように引く。回転の終端 = 現在のアングルなので、
+   「今の角度感のまま2回転して着地」になる。 */
+.hero__motif-fx {
+  position: absolute;
+  left: 35%;
+  top: 24px;
+  width: 110%;
+  height: auto;
+  aspect-ratio: 844 / 618;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  overflow: visible;
+}
+@media (min-width: 768px) {
+  .hero__motif-fx {
+    left: calc(50% - 226px);
+    top: 72px;
+    width: 844px;
+    height: 618px;
+  }
+}
+body.fv-in .hero__motif-fx {
+  animation: fx-vis 3.1s linear both;
+}
+@keyframes fx-vis {
+  0%     { opacity: 0; }
+  4%     { opacity: 1; }
+  83%    { opacity: 1; }
+  100%   { opacity: 0; }
+}
+.hero__motif-fx .fx-spin {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+}
+body.fv-in .fx-spin {
+  animation: fx-spin 2.6s cubic-bezier(.3, .06, .14, 1) .1s both;
+}
+@keyframes fx-spin {
+  from { transform: rotate(-720deg) scale(.9); }
+  to   { transform: rotate(0deg) scale(1); }
+}
+.fx-c {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: translate(var(--dx, 0), var(--dy, 0)) scale(.2);
+  opacity: 0;
+}
+body.fv-in .fx-c {
+  animation:
+    fx-c-form 2.2s cubic-bezier(.32, .04, .18, 1) both,
+    fx-c-squish .55s cubic-bezier(.34, 1.2, .5, 1) forwards;
+}
+body.fv-in .fx-c--1 { animation-delay: .10s, 2.32s; }
+body.fv-in .fx-c--2 { animation-delay: .18s, 2.36s; }
+body.fv-in .fx-c--3 { animation-delay: .26s, 2.40s; }
+body.fv-in .fx-c--4 { animation-delay: .34s, 2.44s; }
+body.fv-in .fx-c--5 { animation-delay: .42s, 2.48s; }
+body.fv-in .fx-c--6 { animation-delay: .50s, 2.52s; }
+body.fv-in .fx-c--7 { animation-delay: .58s, 2.56s; }
+body.fv-in .fx-c--8 { animation-delay: .66s, 2.60s; }
+body.fv-in .fx-c--9 { animation-delay: .74s, 2.64s; }
+@keyframes fx-c-form {
+  0%   { opacity: 0; transform: translate(var(--dx, 0), var(--dy, 0)) scale(.2); }
+  18%  { opacity: 1; transform: translate(var(--dx, 0), var(--dy, 0)) scale(.9); }
+  100% { opacity: 1; transform: translate(0, 0) scale(1); }
+}
+/* 接触の瞬間、わずかに押し合って潰れる */
+@keyframes fx-c-squish {
+  0%   { transform: translate(0, 0) scale(1); }
+  45%  { transform: translate(0, 0) scale(1.05, .95); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+@media (max-width: 767px), (prefers-reduced-motion: reduce) {
+  .hero__motif-fx { display: none; }
+}
 /* モチーフは z1 なので、文字側はどの幅でも前面に。
    (SP では wrap が static のままだと z1 の下に潜る) */
 .hero--brushup > .wrap { position: relative; z-index: 2; }
@@ -1101,15 +1139,17 @@ body.fv-in .hero__intro-item {
   filter: blur(0);
 }
 .hero__intro-item--1 { transition-delay: .34s; }   /* 産業の */
-.hero__intro-item--2 { transition-delay: .52s; }   /* を支援する */
+.hero__intro-item--2 { transition-delay: .68s; }   /* を支援する */
 
 /* AI Shift の pill だけは視線の中心なので、少しだけ印象を強くする。
    blur はかけない(下地のオレンジ面がにじむため)。 */
+/* ドットが横に伸びてカプセルになる流れを受けるため、
+   浮き上がりではなく「横に開く」入り方にする */
 .kv-pill.hero__intro-item {
-  transform: translateY(14px) scale(.96);
+  transform: scale(.55, .9);
   filter: none;
-  transition-delay: .42s;
-  transition-duration: .8s;
+  transition-delay: .52s;
+  transition-duration: .6s;
 }
 body.fv-in .kv-pill.hero__intro-item { transform: none; }
 
@@ -1124,8 +1164,8 @@ body.fv-in .kv-pill.hero__intro-item { transform: none; }
     filter    .9s cubic-bezier(.22, 1, .36, 1);
 }
 body.fv-in .hero__desc--brushup p { opacity: 1; transform: none; filter: blur(0); }
-body.fv-in .hero__desc--brushup p:nth-child(1) { transition-delay: .74s; }
-body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .86s; }
+body.fv-in .hero__desc--brushup p:nth-child(1) { transition-delay: .92s; }
+body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: 1.04s; }
 
 @media (prefers-reduced-motion: reduce) {
   .hero__intro-item,
