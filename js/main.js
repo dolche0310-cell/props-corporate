@@ -408,12 +408,3 @@
   }
 })();
 
-/* --vw: スクロールバーを除いた実効ビューポート幅。Companyの写真を
-   画面右端ちょうどまで伸ばすのに使う(100vwだとバー分だけ余分に出る) */
-(() => {
-  'use strict';
-  const set = () => document.documentElement.style
-    .setProperty('--vw', document.documentElement.clientWidth + 'px');
-  set();
-  addEventListener('resize', set, { passive: true });
-})();

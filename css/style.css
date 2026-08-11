@@ -1623,7 +1623,10 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .86s; }
   .service--brushup .service__text .service__title { margin-bottom: calc(var(--su) * 40); }
   .service--brushup .service__text .service__desc { margin-bottom: calc(var(--su) * 60); }
   /* Frame 112: 218x41 に更新 */
-  .service--brushup .service__text .service__link { width: calc(var(--su) * 218); }
+  .service--brushup .service__text .service__link {
+    width: auto;
+    min-width: min(calc(var(--su) * 218), 100%);
+  }
   /* 01 の面 (215:23956): x773 y266 471x265 → ステージ内 681/266 */
   .service--brushup [data-service-item="0"] .service__image {
     position: absolute;
@@ -1679,9 +1682,15 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .86s; }
   align-items: center;
   justify-content: center;
   gap: 9px;
-  width: 215px;
+  /* 幅は Figma の 218 を基準にしつつ、狭い画面では中身に合わせて縮める。
+     固定幅のままだと文字が2行に折り返してボタンが崩れる。 */
+  width: auto;
+  min-width: min(218px, 100%);
+  max-width: 100%;
   height: 41px;
+  min-height: 41px;
   padding: 11px 20px;
+  white-space: nowrap;
   border: 1px solid #fff;
   border-radius: 29px;
   font-family: var(--font-alata);
@@ -1710,6 +1719,8 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .86s; }
 }
 .service--brushup .service__link-label,
 .service--brushup .service__link-icon { position: relative; z-index: 1; }
+.service--brushup .service__link-label { white-space: nowrap; }
+.service--brushup .service__link-icon { flex: 0 0 auto; }
 
 .service--brushup .service__link-icon {
   display: block;
@@ -1757,6 +1768,9 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .86s; }
   .news__more:active .news__more-circle { transform: scale(.92); }
 }
 
+@media (max-width: 480px) {
+  .service--brushup .service__link { font-size: 13px; padding-inline: 16px; gap: 8px; }
+}
 @media (prefers-reduced-motion: reduce) {
   .service--brushup .service__link,
   .service--brushup .service__link::before,
@@ -2771,16 +2785,12 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .86s; }
 /* 写真エリア(232:27398)。Figmaでは x=563 からフレーム右端を越えて
    伸びているので、左端だけ座標で固定し右は 0 で必ず右端まで届かせる。
    画像側は cover で埋め、横に引き伸ばして歪ませない。 */
+/* Figma 232:27398。写真はセクション全面。ただしフレームは 1442px で
+   頭打ちなので、それより広い画面では左右に白の余白が出るのが正。
+   以前は負の right で画面端まで引き伸ばしていた。 */
 .company--figma .cmp__photo {
   position: absolute;
-  /* Figma 232:27398。写真はセクション全面(以前は左563から右だけだった) */
-  left: 0;
-  /* フレームは 1442px で頭打ち。right:0 だと広い画面で枠の外に白が残るので、
-     フレーム右外の余白ぶんだけ負のrightで伸ばして画面右端に到達させる。
-     100vw ではなくルート幅基準にして、スクロールバー分の過剰はみ出しを防ぐ。 */
-  right: min(0px, calc((var(--vw, 100vw) - 100%) / -2));
-  top: 0;
-  bottom: 0;
+  inset: 0;
   overflow: hidden;
 }
 .company--figma .cmp__photo img {
