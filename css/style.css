@@ -2720,7 +2720,7 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: 1.04s; }
   top: calc(var(--u) * 133);
   width: calc(var(--u) * 740);
   font-family: var(--font-jp);
-  font-weight: 500;
+  font-weight: 400;   /* Figma 215:22677 は Noto Sans JP Regular */
   font-size: calc(var(--u) * 18);
   line-height: 1.7;
   color: #191919;
