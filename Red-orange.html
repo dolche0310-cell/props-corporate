@@ -211,10 +211,21 @@
                     <h3 class="service__title">法人向けAI活用支援 / AI開発</h3>
                     <p class="service__desc">企業の顧客コミュニケーション・業務効率化分野でのAI技術の活用・システム開発のご支援をしています。企業ごとのAI活用、集客・業務課題に応じてコンサルタントが最適なパッケージをご提案いたします。ホームページよりお問い合わせください。</p>
                   </div>
-                  <!-- 02 の面もループ動画。Figma 253:27126 のスロット
-                       (642x395) はそのままに中身だけ差し替える。
-                       読み込み前とフォールバックは先頭フレームの静止画(poster)。 -->
-                  <div class="service__image">
+                  <!-- 02 の面もループ動画。スロットは 01 の面と同じ 471x265。
+                       素材は 16:9 でスロットとの差は 0.02% なので contain で
+                       内側に収め、外周が一切切れないようにする。
+                       素材の地色がネイビーなので、01 の映像の背景実測値
+                       #1b1c1e に合わせるチャンネル別のレベル補正を掛ける。
+                       白→白 を拘束にしているのでハイライトは損なわれない。 -->
+                  <svg class="service__grade-def" aria-hidden="true" focusable="false" width="0" height="0"><defs>
+                    <filter id="miai-warm" color-interpolation-filters="sRGB">
+                      <feColorMatrix type="matrix" values="1.00885 0 0 0 -0.00885
+                                                           0 1.013393 0 0 -0.013393
+                                                           0 0 1.17801 0 -0.17801
+                                                           0 0 0 1 0"/>
+                    </filter>
+                  </defs></svg>
+                  <div class="service__image service__image--02">
                     <video class="service__loop-video" src="assets/videos/service-02.mp4"
                            poster="assets/images/service-02-poster.jpg"
                            autoplay loop muted playsinline preload="metadata" aria-hidden="true"></video>

@@ -1700,14 +1700,16 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: 1.04s; }
     aspect-ratio: auto;
     flex: none;
   }
-  /* Network Diagram (253:27126): x710 y162 642x395 → ステージ内 618/162 */
+  /* 02 の面。映像に差し替えたので 01 の面と同じスロットに揃える
+     (215:23956: x773 y266 471x265 → ステージ内 681/266)。 */
   .service--brushup [data-service-item="1"] .service__image {
     position: absolute;
-    left: calc(var(--su) * 618);
-    top: calc(var(--su) * 162);
-    width: calc(var(--su) * 642);
-    height: calc(var(--su) * 395);
+    left: calc(var(--su) * 681);
+    top: calc(var(--su) * 266);
+    width: calc(var(--su) * 471);
+    height: calc(var(--su) * 265);
     max-width: none;
+    aspect-ratio: auto;
     flex: none;
   }
 }
@@ -1917,6 +1919,21 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: 1.04s; }
 /* ループ動画は暗い映像なので、poster が出るまでの一瞬に白が挟まらないよう
    要素自体にも下地の暗色を敷いておく */
 .service__loop-video { background: #05070a; }
+
+/* 02 の面の映像。
+   ・contain で内側に収め、外周を切らない(素材16:9 とスロット 471/265 の
+     差は 0.02% なので余白は 0.03px。地色を敷いて縁が出ないようにする)
+   ・地色のネイビーを 01 の映像の背景実測値 #1b1c1e へ寄せる補正
+     (HTML 側 filter#miai-warm。チャンネル別ゲイン+オフセットで
+      白は白のまま。オレンジは青被りが抜けてブランド色に近づく) */
+.service--brushup .service__image--02 { background: #1b1c1e; }
+.service--brushup .service__image--02 video {
+  object-fit: contain;
+  object-position: center;
+  filter: url(#miai-warm);
+}
+/* filter の定義用。レイアウトに一切関与させない */
+.service__grade-def { position: absolute; width: 0; height: 0; overflow: hidden; }
 .service__stage { display: none; }
 
 @media (min-width: 768px) {
