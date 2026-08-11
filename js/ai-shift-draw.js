@@ -45,7 +45,7 @@
      スプラッシュの幕の裏で描き終わってしまい、一度も見られない。
      カプセルは fv-in+520ms から 600ms かけて横に開く(ドットの受け渡しを
      受ける入り方)。成立しきってから描き始める。 */
-  const AFTER_FV = 1180;
+  const AFTER_FV = 900;
   const SPEED = 0.9;
   const TOTAL = 1150 * SPEED;
 

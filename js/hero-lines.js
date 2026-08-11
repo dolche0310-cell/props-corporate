@@ -165,10 +165,14 @@
 
   /* 画面外では呼吸を止める */
   let visible = true;
+  let settled = false;
   if ('IntersectionObserver' in window) {
     new IntersectionObserver((es) => {
       visible = es[0].isIntersecting;
-      if (visible && idle && !raf) raf = requestAnimationFrame(frame);
+      if (visible && idle && !raf) {
+        if (settled) settledAt = null;
+        raf = requestAnimationFrame(settled ? breatheFrame : frame);
+      }
       if (!visible && idle && raf) { cancelAnimationFrame(raf); raf = 0; }
     }, { threshold: 0 }).observe(svg);
   }
@@ -193,16 +197,61 @@
       started = true;
       if (REDUCED) { setFinal(); return; }
       raf = requestAnimationFrame(frame);
+    },
+    /* スプラッシュ側がブロブ→2本の線まで描き切ったあとの受け渡し。
+       描画フェーズを飛ばして最終形で現れ、以後は呼吸だけを続ける。
+       settle() 直後のフレームが Figma の最終形そのものなので、
+       受け渡しでスナップしない。 */
+    settle() {
+      if (started) return;
+      started = true;
+      if (REDUCED) { setFinal(); return; }
+      setFinal();
+      settled = true;
+      settledAt = null;
+      raf = requestAnimationFrame(breatheFrame);
+    },
+    /* 2本の線の画面上の実ジオメトリ(始点/終点/太さ)。
+       スプラッシュがブロブの着地先を測るのに使う。 */
+    geometry() {
+      const m = svg.getScreenCTM();
+      if (!m) return null;
+      const pt = (x, y) => {
+        const p = svg.createSVGPoint(); p.x = x; p.y = y;
+        const s = p.matrixTransform(m);
+        return { x: s.x, y: s.y };
+      };
+      return LINES.map((l) => ({
+        a: pt(l.a.x, l.a.y), b: pt(l.b.x, l.b.y), w: l.w * m.a
+      }));
     }
+  };
+
+  /* settle 後の呼吸専用ループ(描画・有機変形はスプラッシュ側が済ませている) */
+  let settledAt = null;
+  const breatheFrame = (now) => {
+    if (settledAt === null) settledAt = now;
+    if (REDUCED) return;
+    const u = ((now - settledAt) / BREATH) % 1;
+    LINES.forEach((l) => {
+      const s = sample(l.breathe, u);
+      l.el.setAttribute('d', pathOf(l, s[0], s[1]));
+    });
+    idle = true;
+    raf = requestAnimationFrame(breatheFrame);
   };
   window.__miaiHeroLines = api;
 
-  /* 初期状態は非表示。スプラッシュが無い場合(直リンク等)は
-     fv-in から少し置いて自走する。 */
+  /* 初期状態は非表示。スプラッシュの幕がある間はスプラッシュ側が
+     settle() で受け渡してくるので自走しない。幕が無いページ(縮小
+     モーション環境や直リンク後の再訪キャッシュ等)のみ自走する。 */
   LINES.forEach((l) => { l.el.style.opacity = '0'; });
   if (REDUCED) { setFinal(); return; }
 
-  const auto = () => setTimeout(() => api.begin(), 180);
+  const auto = () => {
+    if (document.getElementById('intro-overlay')) return;   /* スプラッシュに委ねる */
+    setTimeout(() => api.begin(), 180);
+  };
   if (document.body.classList.contains('fv-in')) auto();
   else document.addEventListener('miai:fv-in', auto, { once: true });
 })();

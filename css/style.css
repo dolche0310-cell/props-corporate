@@ -96,125 +96,62 @@ button { font: inherit; }
 }
 
 /* ===========================================================
-   スプラッシュ 〜 FV 形成(Figma 257:27678 / 215:22653)
-   一続きの現象として組む。「前が消えて次が出る」を作らない。
-
-   0.20-1.05  MiAI が静かに立ち上がる(26pxのライズ + ぼけの解像)
-   1.05-1.30  ロゴ完成を見せる(間)
-   1.30-1.55  i のドットにオレンジが灯る(黒い点の上に重なる。二重に見えない)
-   1.55-1.95  文字が粒に散って消える。オレンジのドットは残る
-   1.95-2.15  ドットだけの状態を見せる(間)
-   2.15-2.28  ドットが沈む(移動の予備動作)
-   2.28-3.20  ドットが弧を描いて FV のカプセル位置へ移動しながら
-              横に伸びる(js/splash.js が実座標で受け渡す)
-   2.75       幕の白が抜け始め、FV の形成(fv-in)開始。
-              背景では柔らかい円群が回転しながら寄り集まる
-   3.45       ドットが実カプセルに重なって消える(受け渡し完了)
-   3.65       幕を除去
+   SplashToHeroTimeline (js/splash.js)
+   Motion Reference: seedance2-5_Video_20260812_063239.mp4
+   幕は透明で、下のページ(白)がそのまま背景。要素はすべて
+   .sp-stage(1440x810 の設計座標)の中で JS が動かす。
    =========================================================== */
+html.splash-lock, html.splash-lock body { overflow: hidden; }
 .intro-overlay--splash {
-  -webkit-mask-image: none;
-  mask-image: none;
-  display: grid;
-  place-items: center;
-  transition: background-color .6s ease;
-}
-/* 幕は「白が抜ける」だけ。要素は各自のタイミングで消えるので、
-   ドットの受け渡しが幕のフェードに巻き込まれない */
-.intro-overlay--splash.is-hiding {
-  background-color: transparent;
   pointer-events: none;
+  overflow: hidden;
+  transition: background-color .5s ease;
 }
-
-.splash__stage { position: relative; width: min(190px, 40vw); }
-.splash__svg {
-  display: block;
-  width: 100%;
-  height: auto;
-  overflow: visible;
-  shape-rendering: geometricPrecision;
-}
-
-/* ── 文字: 小さなライズ + ぼけが解けて立ち上がる。跳ねない ── */
-.splash__letter { opacity: 0; transform: translateY(26px); transform-box: view-box; }
-.is-run .splash__letter {
-  animation:
-    splash-letter .64s cubic-bezier(.22, 1, .36, 1) both,
-    splash-letter-out .4s ease forwards;
-}
-.is-run .splash__letter--m { animation-delay: .20s, 1.55s; }
-.is-run .splash__letter--i { animation-delay: .28s, 1.61s; }
-.is-run .splash__letter--a { animation-delay: .36s, 1.67s; }
-.is-run .splash__letter--l { animation-delay: .44s, 1.73s; }
-@keyframes splash-letter {
-  from { opacity: 0; transform: translateY(26px); filter: blur(3px); }
-  to   { opacity: 1; transform: translateY(0); filter: blur(0); }
-}
-@keyframes splash-letter-out {
-  0%   { opacity: 1; transform: translateY(0) scale(1); }
-  55%  { opacity: .5; transform: translateY(-3px) scale(1.02); }
-  100% { opacity: 0; transform: translateY(-9px) scale(1.05); }
-}
-
-/* ── 粒: 文字が散る瞬間だけ立つ ── */
-.splash__grain { opacity: 0; transform-box: view-box; }
-.is-run .splash__grain { animation: splash-grain .6s cubic-bezier(.3, 0, .3, 1) both; }
-.is-run .splash__grain--1 { animation-delay: 1.57s; }
-.is-run .splash__grain--2 { animation-delay: 1.63s; }
-.is-run .splash__grain--3 { animation-delay: 1.69s; }
-.is-run .splash__grain--4 { animation-delay: 1.75s; }
-@keyframes splash-grain {
-  0%   { opacity: 0; transform: translate(0, 0) scale(1); }
-  35%  { opacity: .85; }
-  100% { opacity: 0; transform: translate(var(--gx, 0), var(--gy, -14px)) scale(.4); }
-}
-
-/* ── i のドット ──
-   文字の i は自前の黒い点を持っている。以前はこの上に黒い複製を最初から
-   重ねていたため、文字が滑り上がる間「黒い丸が2つ」見えていた。
-   複製は透明で待機し、1.30s にオレンジとして初めて現れる。
-   黒い点は文字側の1つだけ。移動と伸びは js/splash.js が実座標で駆動する。 */
-.splash__dot { opacity: 0; transform-box: fill-box; transform-origin: center; }
-.is-run .splash__dot {
-  animation:
-    splash-dot-in .24s ease 1.30s both,
-    splash-dot-sink .26s cubic-bezier(.34, 1.2, .5, 1) 2.15s both;
-}
-@keyframes splash-dot-in {
-  from { opacity: 0; transform: scale(.6); }
-  to   { opacity: 1; transform: scale(1); }
-}
-@keyframes splash-dot-sink {
-  0%   { transform: translate(0, 0) scale(1); }
-  50%  { transform: translate(0, 2.5px) scale(.92, 1.06); }
-  100% { transform: translate(0, 0) scale(1); }
-}
-
-/* ── オレンジのグラデーション(FV の Ellipse 55 と同位置に灯って引き継ぐ) ── */
-.splash__bloom {
+/* fv-in と同時に幕の白を抜く(下も白なので切り替えは見えない) */
+.intro-overlay--splash.is-page { background-color: transparent; }
+.sp-stage {
   position: absolute;
-  left: calc(50% + 302px);
-  top: 350px;
-  width: 508px;
-  height: 508px;
+  left: 0;
+  top: 0;
+  width: 1440px;
+  height: 810px;
+  transform-origin: 0 0;
+}
+.sp-canvas,
+.sp-svg { position: absolute; left: 0; top: 0; width: 1440px; height: 810px; display: block; }
+.sp-svg { overflow: visible; }
+.sp-logo path { fill: #191919; }
+.sp-cells path { shape-rendering: geometricPrecision; }
+/* DESIGN 1 の左右の淡い Diffuse Glow。主張させない */
+.sp-glow {
+  position: absolute;
+  width: 560px;
+  height: 560px;
   border-radius: 50%;
-  background: radial-gradient(circle, #FFD9BC 0%, #FFD9BC 15%, rgba(255, 217, 188, 0) 65%);
-  opacity: 0;
-  pointer-events: none;
+  transition: opacity .6s ease;
 }
-.is-run .splash__bloom {
-  animation:
-    splash-bloom .9s cubic-bezier(.22, 1, .36, 1) 2.55s both,
-    splash-bloom-out .5s ease 3.15s forwards;
+.sp-glow--l { left: -180px; top: 40px; background: radial-gradient(circle, #FDDCC2 0%, #FDDCC2 12%, rgba(253, 220, 194, 0) 62%); opacity: .5; }
+.sp-glow--r { left: 1040px; top: 230px; background: radial-gradient(circle, #FFD9BC 0%, #FFD9BC 12%, rgba(255, 217, 188, 0) 62%); opacity: .5; }
+.intro-overlay--splash.is-hiding { background-color: transparent; }
+.intro-overlay--splash.is-hiding .sp-glow { opacity: 0; }
+/* リング中央の円形の窓。scale で開閉し、中の映像は JS が逆スケールで静止させる */
+.sp-window {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 244px;
+  height: 244px;
+  border-radius: 50%;
+  overflow: hidden;
+  will-change: transform;
 }
-@keyframes splash-bloom {
-  from { opacity: 0; transform: scale(.82); }
-  to   { opacity: .85; transform: scale(1); }
-}
-@keyframes splash-bloom-out { to { opacity: 0; } }
-
-@media (max-width: 767px) {
-  .splash__bloom { left: 60%; top: 40%; width: 380px; height: 380px; }
+.sp-window video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  will-change: transform, opacity, filter;
 }
 
 .wrap {
@@ -1082,8 +1019,8 @@ body.fv-in .hero__intro-item {
   transform: none;
   filter: blur(0);
 }
-.hero__intro-item--1 { transition-delay: .96s; }   /* 産業の */
-.hero__intro-item--2 { transition-delay: 1.24s; }  /* を支援する */
+.hero__intro-item--1 { transition-delay: .12s; }   /* 産業の */
+.hero__intro-item--2 { transition-delay: .44s; }   /* を支援する */
 
 /* AI Shift の pill だけは視線の中心なので、少しだけ印象を強くする。
    blur はかけない(下地のオレンジ面がにじむため)。 */
@@ -1091,7 +1028,7 @@ body.fv-in .hero__intro-item {
    する。下地のオレンジ面がにじむため blur だけは掛けない。 */
 .kv-pill.hero__intro-item {
   filter: none;
-  transition-delay: 1.10s;
+  transition-delay: .28s;
 }
 body.fv-in .kv-pill.hero__intro-item { transform: none; }
 
@@ -1106,13 +1043,26 @@ body.fv-in .kv-pill.hero__intro-item { transform: none; }
     filter    .9s cubic-bezier(.22, 1, .36, 1);
 }
 body.fv-in .hero__desc--brushup p { opacity: 1; transform: none; filter: blur(0); }
-body.fv-in .hero__desc--brushup p:nth-child(1) { transition-delay: 1.44s; }
-body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: 1.56s; }
+body.fv-in .hero__desc--brushup p:nth-child(1) { transition-delay: .68s; }
+body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .80s; }
 
 @media (prefers-reduced-motion: reduce) {
   .hero__intro-item,
   .kv-pill.hero__intro-item,
   .hero__desc--brushup p { opacity: 1; transform: none; filter: none; transition: none; }
+}
+
+/* ヘッダーはFV形成後半(fv-in + .9s)で静かに立つ */
+.site-header--brushup {
+  opacity: 0;
+  transform: translateY(-6px);
+  transition:
+    opacity   .7s cubic-bezier(.22, 1, .36, 1) .9s,
+    transform .7s cubic-bezier(.22, 1, .36, 1) .9s;
+}
+body.fv-in .site-header--brushup { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .site-header--brushup { opacity: 1; transform: none; transition: none; }
 }
 
 /* ===========================================================
