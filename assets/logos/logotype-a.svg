@@ -4,8 +4,8 @@
 <g id="section / Corporate Website Design">
 <g id="carousel" clip-path="url(#clip0_223_23884)">
 <g id="card / DESIGN C">
-<g id="LOGOMARK / LOGOTYPE DESIGN A_2" clip-path="url(#clip1_223_23884)">
-<g id="logotype_a" clip-path="url(#clip2_223_23884)">
+<g id="LOGOMARK / LOGOTYPE DESIGN A_2">
+<g id="logotype_a" clip-path="url(#clip1_223_23884)">
 <g id="Group 8">
 <g id="Group 9">
 <path id="Vector" d="M195.574 2.23716C195.574 0.74572 196.32 0 197.812 0H207.251C208.743 0 209.489 0.74572 209.489 2.23716C209.489 8.2393 209.47 14.2414 209.434 20.2436C209.398 26.2457 209.379 32.2479 209.379 38.25C209.379 44.2521 209.398 50.2543 209.434 56.2564C209.47 62.2586 209.489 68.2607 209.489 74.2628C209.489 75.7543 208.743 76.5 207.251 76.5H197.812C196.32 76.5 195.574 75.7543 195.574 74.2628C195.574 68.2607 195.593 62.2586 195.629 56.2564C195.665 50.2543 195.684 44.2521 195.684 38.25C195.684 32.2479 195.665 26.2457 195.629 20.2436C195.593 14.2414 195.574 8.2393 195.574 2.23716Z" fill="black"/>
@@ -23,12 +23,9 @@
 </g>
 <defs>
 <clipPath id="clip0_223_23884">
-<rect width="1016" height="227" fill="white" transform="translate(-452.047 -75.25)"/>
+<rect width="1016" height="227" fill="white" transform="translate(-450.256 -75.25)"/>
 </clipPath>
 <clipPath id="clip1_223_23884">
-<rect width="307.071" height="76.5" fill="white" transform="translate(-97.5828)"/>
-</clipPath>
-<clipPath id="clip2_223_23884">
 <rect width="209.489" height="76.5" fill="white"/>
 </clipPath>
 </defs>
