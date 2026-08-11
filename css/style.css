@@ -2331,6 +2331,10 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .65s; }
    移動量も 28px から 8px に落として、ロゴと同じ静かさに揃える。 */
 .js-reveal .abt__catch.reveal,
 .js-reveal .abt__body.reveal { transform: translateY(8px); }
+/* 表示後は必ず 0 に戻す。これが無いと 8px 下がったまま固定される
+   (.js-reveal .reveal.is-visible と同詳細度で、こちらが後方にあるため) */
+.js-reveal .abt__catch.reveal.is-visible,
+.js-reveal .abt__body.reveal.is-visible { transform: translateY(0); }
 .js-reveal .abt__catch.reveal { transition-delay: 1s; }
 .js-reveal .abt__body.reveal { transition-delay: 1.09s; }
 
@@ -2413,16 +2417,17 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .65s; }
   }
   .hero--brushup .kv-title {
     position: absolute;
-    left: 67px;    /* 232:27380 x */
+    /* 「産業の」の字面が 92 に来るよう、箱の中の 19px ぶんを引く */
+    left: 73px;
     top: 260.3px;  /* 350.33 - 90 */
     margin: 0;
   }
   .hero--brushup .hero__desc--brushup {
     position: absolute;
-    left: 86px;    /* 232:27385 x */
+    left: 92px;    /* 232:27385 x=92 */
     top: 381.3px;  /* 471.33 - 90 */
     margin: 0;
-    width: 721px;
+    width: 761px;  /* 232:27385 width=761 */
     max-width: none;
   }
 }
