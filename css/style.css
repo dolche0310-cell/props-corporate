@@ -93,119 +93,146 @@ button { font: inherit; }
 }
 
 /* ===========================================================
-   Intro logo sequence (Design A variants only)。
-   ロゴ表示 → 点以外がふんわりフェードアウト → 点が連続的に
-   拡大しながらimg-04の輪に育って回転 → 輪がそのままオレンジの
-   光に溶けていく、を一続きのモーションで。個別カットの
-   クロスフェードではなく、常にどこかが動き続けるようキーフレーム
-   の停止(プラトー)を最小限にして繋げている。
-   全体 3200ms で、そのあと --intro-r の円形ワイプでキービジュアル
-   へ引き継ぐ。 */
-.intro-overlay--logo .intro-logo {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+   スプラッシュ(Figma ストーリーボード 257:27678 の8フレーム)
+   白 → Mi → MiAI → 文字が解けて i のドットだけ残る → ドットが中央で育つ
+   → ブロブの環が回る → 淡くなりながら右へ → 右側のグラデーション円
+   → 幕がフェードして FV の形成へ。個別カットの切替ではなく、
+   常にどこかが動き続ける一続きのモーション。
+   js/splash.js が .is-run を付け、以下の delay 群が時間軸のすべて。 */
+.intro-overlay--splash {
+  -webkit-mask-image: none;
+  mask-image: none;
+  display: grid;
+  place-items: center;
+  transition: opacity .5s ease;
 }
-.intro-overlay--logo .intro-logo__stage {
-  position: relative;
-  width: min(72vw, 380px);
-  aspect-ratio: 1447 / 914;
-}
-.intro-overlay--logo .intro-logo__frame {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-}
-/* ロゴの「i」の点と同じ位置(実測: 中心 48.9%/53.7%、半径 幅の2.3%)に
-   置いた本物のDOM要素。この点自体が拡大し続け、途中でimg-04の輪に
-   クロスフェードすることで「点が育って輪になる」動きを連続させる。 */
-.intro-overlay--logo .intro-logo__dot {
-  position: absolute;
-  left: 48.9%;
-  top: 53.7%;
-  width: 4.6%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  /* ロゴ画像(intro-logo-02/03.png)に焼き込まれた点と同じ色に固定。
-     --color-primary はダーク/ファイア等のバリエーションで変わるため
-     ここでは使わない(バトンタッチの瞬間に色が変わって見えてしまう)。 */
-  background: #F17321;
-  opacity: 0;
-  transform: translate(-50%, -50%) scale(1);
-  animation: intro-dot-grow 3.2s cubic-bezier(.3, 0, .2, 1) forwards;
-}
-.intro-overlay--logo .intro-logo__blob-wrap {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: intro-blob-spin 8s linear infinite;
-  animation-delay: 1.7s;
-}
-.intro-overlay--logo .intro-logo__glow {
-  position: absolute;
-  width: 120%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(241, 115, 33, .55) 0%, rgba(241, 115, 33, 0) 70%);
-  opacity: 0;
-  transform: scale(.6);
-  animation: intro-glow-spread 3.2s cubic-bezier(.3, 0, .2, 1) forwards;
-}
-.intro-overlay--logo .intro-logo__frame--1 { animation: intro-frame-1 3.2s cubic-bezier(.4, 0, .2, 1) forwards; }
-.intro-overlay--logo .intro-logo__frame--2 { animation: intro-frame-2 3.2s cubic-bezier(.4, 0, .2, 1) forwards; }
-.intro-overlay--logo .intro-logo__frame--4 { animation: intro-frame-4 3.2s cubic-bezier(.4, 0, .2, 1) forwards; }
+.intro-overlay--splash.is-hiding { opacity: 0; pointer-events: none; }
 
-@keyframes intro-frame-1 {
-  0%   { opacity: 0; }
-  8%   { opacity: 1; }
-  22%  { opacity: 1; }
-  42%  { opacity: 0; }
-  100% { opacity: 0; }
+.splash__stage { position: relative; width: min(300px, 56vw); }
+.splash__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  shape-rendering: geometricPrecision;
 }
-@keyframes intro-frame-2 {
-  0%   { opacity: 0; }
-  22%  { opacity: 0; }
-  42%  { opacity: 1; }
-  58%  { opacity: 1; }
-  78%  { opacity: 0; }
-  100% { opacity: 0; }
+
+/* 文字。Mi → AI の順に静かに立ち上がる(About のロゴと同じ質感) */
+.splash__letter {
+  opacity: 0;
+  transform: translateY(6px);
+  transform-box: fill-box;
+  transform-origin: center;
 }
-/* 点: 42%あたりでふわっと現れ、以後ずっと同じイージングで拡大し
-   続ける(停止区間なし)。76%を過ぎたところで輪(frame4)へ
-   クロスフェードして退場する。 */
-@keyframes intro-dot-grow {
-  0%   { opacity: 0; transform: translate(-50%, -50%) scale(.6); }
-  42%  { opacity: 0; transform: translate(-50%, -50%) scale(.6); }
-  55%  { opacity: 1; transform: translate(-50%, -50%) scale(2.2); }
-  76%  { opacity: 1; transform: translate(-50%, -50%) scale(9); }
-  100% { opacity: 0; transform: translate(-50%, -50%) scale(13); }
+.is-run .splash__letter { animation: splash-letter .6s cubic-bezier(.16, 1, .3, 1) both; }
+.is-run .splash__letter--m { animation-delay: .15s; }
+.is-run .splash__letter--i { animation-delay: .27s; }
+.is-run .splash__letter--a { animation-delay: .75s; }
+.is-run .splash__letter--l { animation-delay: .87s; }
+@keyframes splash-letter {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-@keyframes intro-frame-4 {
-  0%   { opacity: 0; transform: scale(.55); }
-  68%  { opacity: 0; transform: scale(.72); }
-  84%  { opacity: 1; transform: scale(1); }
-  100% { opacity: .55; transform: scale(1.08); }
+/* 1.85s: 文字が静かに解けて消える(ドットだけが残る) */
+.is-run .splash__letter { animation-name: splash-letter, splash-letter-out; }
+.is-run .splash__letter--m { animation-delay: .15s, 1.85s; }
+.is-run .splash__letter--i { animation-delay: .27s, 1.85s; }
+.is-run .splash__letter--a { animation-delay: .75s, 1.9s; }
+.is-run .splash__letter--l { animation-delay: .87s, 1.9s; }
+.is-run .splash__letter {
+  animation-duration: .6s, .45s;
+  /* out 側は forwards。both だと開始前に「from(=表示)」が逆流して、
+     立ち上がりが見えなくなる */
+  animation-fill-mode: both, forwards;
 }
-@keyframes intro-glow-spread {
-  0%   { opacity: 0; transform: scale(.6); }
-  70%  { opacity: 0; transform: scale(.75); }
-  100% { opacity: 1; transform: scale(1.3); }
+@keyframes splash-letter-out {
+  from { opacity: 1; filter: blur(0); }
+  to   { opacity: 0; filter: blur(2px); }
 }
-@keyframes intro-blob-spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+
+/* i のドット。文字が消える直前に同じ位置へオレンジで灯り、
+   中央へ寄りながら育つ(storyboard 5枚目) */
+.splash__dot {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
 }
-@media (prefers-reduced-motion: reduce) {
-  .intro-overlay--logo .intro-logo__blob-wrap,
-  .intro-overlay--logo .intro-logo__frame,
-  .intro-overlay--logo .intro-logo__dot,
-  .intro-overlay--logo .intro-logo__glow { animation: none; }
+.is-run .splash__dot {
+  animation:
+    splash-dot-in   .3s ease            1.75s both,
+    splash-dot-grow .5s cubic-bezier(.65, 0, .35, 1) 2.15s both,
+    splash-dot-out  .3s ease            2.75s forwards;
+}
+@keyframes splash-dot-in   { from { opacity: 0 } to { opacity: 1 } }
+@keyframes splash-dot-grow {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(7.5px, 38px) scale(5.4); }
+}
+@keyframes splash-dot-out  { from { opacity: 1 } to { opacity: 0 } }
+
+/* ブロブの環(6枚目)。ドットから育ち、回りながら現れて淡くなる(7枚目) */
+.splash__orbit {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.is-run .splash__orbit {
+  animation: splash-orbit-turn 1.4s cubic-bezier(.3, 0, .2, 1) 2.45s both;
+}
+@keyframes splash-orbit-turn {
+  from { transform: rotate(-24deg); }
+  to   { transform: rotate(14deg); }
+}
+.splash__blob {
+  opacity: 0;
+  transform: scale(.2);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.is-run .splash__blob {
+  animation:
+    splash-blob-in  .5s cubic-bezier(.22, 1, .36, 1) both,
+    splash-blob-out .55s ease forwards;
+}
+.is-run .splash__blob--1 { animation-delay: 2.45s, 2.95s; }
+.is-run .splash__blob--2 { animation-delay: 2.51s, 2.98s; }
+.is-run .splash__blob--3 { animation-delay: 2.57s, 3.01s; }
+.is-run .splash__blob--4 { animation-delay: 2.63s, 3.04s; }
+.is-run .splash__blob--5 { animation-delay: 2.69s, 3.07s; }
+.is-run .splash__blob--6 { animation-delay: 2.75s, 3.10s; }
+.is-run .splash__blob--7 { animation-delay: 2.81s, 3.13s; }
+@keyframes splash-blob-in {
+  from { opacity: 0; transform: scale(.2); }
+  to   { opacity: 1; transform: scale(1); }
+}
+/* 消えるのではなく淡くなりながら少し右へ流れる(7→8枚目) */
+@keyframes splash-blob-out {
+  from { opacity: 1; }
+  to   { opacity: 0; transform: scale(1.12) translate(26px, 0); }
+}
+
+/* 右側のグラデーション円(8枚目)。FV の Ellipse 55 と同じ場所に灯り、
+   幕が開くとそのまま FV のグラデ円へ引き継がれる */
+.splash__bloom {
+  position: absolute;
+  left: calc(50% + 302px);   /* FV の Ellipse 55 と同じ 1022 相当 */
+  top: 350px;
+  width: 508px;
+  height: 508px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #FFD9BC 0%, #FFD9BC 15%, rgba(255, 217, 188, 0) 65%);
+  opacity: 0;
+  pointer-events: none;
+}
+.is-run .splash__bloom {
+  animation: splash-bloom .7s cubic-bezier(.22, 1, .36, 1) 2.95s both;
+}
+@keyframes splash-bloom {
+  from { opacity: 0; transform: scale(.9); }
+  to   { opacity: .8; transform: scale(1); }
+}
+
+@media (max-width: 767px) {
+  .splash__bloom { left: 60%; top: 40%; width: 380px; height: 380px; }
 }
 
 .wrap {

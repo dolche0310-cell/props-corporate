@@ -20,12 +20,18 @@
     document.dispatchEvent(new CustomEvent('miai:fv-in'));
   }
 
+  // splash.js からも呼べるように公開する(fvStarted ガードは共有)
+  window.__miaiStartFV = startFV;
+
   var introOverlay = document.getElementById('intro-overlay');
   if (!introOverlay) {
     // 幕が無いページは読み込み後すぐ
     requestAnimationFrame(function () { requestAnimationFrame(startFV); });
   }
-  if (introOverlay) {
+  if (introOverlay && introOverlay.classList.contains('intro-overlay--splash')) {
+    // 新スプラッシュ(Figma 257:27678)は js/splash.js が時間軸と
+    // FV の開始・幕の除去まで管理する。ここでは何もしない。
+  } else if (introOverlay) {
     if (reducedMotionMq.matches) {
       introOverlay.remove();
       document.body.classList.add('intro-revealed');
