@@ -1813,7 +1813,10 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: 1.56s; }
   padding-right: .5em;
   font-family: var(--font-display-en);
   font-size: clamp(40px, 11vw, 96px);
-  letter-spacing: .12em;
+  /* Figma 232:27402 は 1877x163。163/1.7 = 95.9 ≒ font-size 96px。
+     Chillax の字送り 0 での自然幅が 1775.6px なので、1877px に
+     収まる送りは 2.6px = .027em。従来の .12em は開きすぎだった。 */
+  letter-spacing: .027em;
   line-height: 1.7;
   /* Figma(253:27115)は #3D3430 → rgba(255,239,231,.23) → #4B4B4B の
      グラデーションだが、左端と中間に暖色が入って橙が混ざって見えるため、
@@ -1852,6 +1855,11 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: 1.56s; }
   object-fit: cover;
   object-position: center;
   filter: url(#miai-warm);
+  /* 素材の下 2 割ほどは暗いデスク面で、スロットに収めると黒い帯に
+     見える。上端を基準に 1.2 倍して画角を上へ寄せ、その帯を外す
+     (可視範囲は縦横とも中央〜上の 83%)。枠側が overflow:hidden。 */
+  transform: scale(1.2);
+  transform-origin: 50% 0;
 }
 /* filter の定義用。レイアウトに一切関与させない */
 .service__grade-def { position: absolute; width: 0; height: 0; overflow: hidden; }
@@ -2632,6 +2640,12 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: 1.56s; }
   top: 0;
   margin-top: -41.79%;
   width: 213.33%;
+  /* height 属性(280.393)は presentation hint として CSS の height に入り、
+     aspect-ratio より強い。打ち消さないと縦が 280.393px に固定され、
+     viewBox が meet で「高さ基準の等倍」に落ちる。すると粒子が
+     右に15px・上に15px ずれ、11% 小さいまま着地して、完成形へ
+     切り替わる瞬間にロゴが跳ねる。 */
+  height: auto;
   aspect-ratio: 498.476 / 280.393;
   overflow: visible;
   pointer-events: none;
