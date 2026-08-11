@@ -1467,9 +1467,8 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .65s; }
   /* Frame 152: x92 y90。1440 で 92/90、狭い幅では同率で追従 */
   .service--brushup .service__panel > .label {
     position: absolute;
-    /* 文頭(本文 Frame 147 の左端)に揃える。Figma の素の座標は 92 だが、
-       本文が 132 から始まるため、ラベルだけ 40px 外に出て見えていた。 */
-    left: calc(clamp(20px, 6.4vw, 92px) + var(--su, 1px) * 40);
+    /* Frame 139(274:30539)ではラベルも本文も x=92。文頭が揃う */
+    left: clamp(20px, 6.4vw, 92px);
     top: clamp(48px, 6.25vw, 90px);
     margin-bottom: 0;
   }
@@ -1543,15 +1542,24 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .65s; }
 .service--brushup .service__text { max-width: 506px; }
 @media (min-width: 768px) {
   .service--brushup .service__row { display: block; position: static; height: 100%; }
-  /* Frame 147: x132 y274 w506 → ステージ内 40/274 */
+  /* Frame 139 (274:30539): x92 y90 476x458。ステージ左端が x92 なので
+     テキスト段はステージ内 0。中の Frame 167 が y184 → 90+184=274。
+     ラベル(Frame 152)と文頭が揃う。 */
   .service--brushup .service__text {
     position: absolute;
-    left: calc(var(--su) * 40);
+    left: 0;
     top: calc(var(--su) * 274);
-    width: calc(var(--su) * 506);
+    width: calc(var(--su) * 476);
     max-width: none;
     flex: none;
   }
+  /* 見出し→本文 40px、本文→ボタン 60px (Frame 167 の 69-29 / 417-357)。
+     ベースの margin(14px/24px)が同詳細度で後にあるので、
+     .service__text を挟んで詳細度を上げないと効かない。 */
+  .service--brushup .service__text .service__title { margin-bottom: calc(var(--su) * 40); }
+  .service--brushup .service__text .service__desc { margin-bottom: calc(var(--su) * 60); }
+  /* Frame 112: 218x41 に更新 */
+  .service--brushup .service__text .service__link { width: calc(var(--su) * 218); }
   /* 01 の面 (215:23956): x773 y266 471x265 → ステージ内 681/266 */
   .service--brushup [data-service-item="0"] .service__image {
     position: absolute;
@@ -1617,7 +1625,9 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .65s; }
   line-height: 1.7;
   color: #fff;
   text-decoration: none;
-  transition: border-color .45s cubic-bezier(.22, 1, .36, 1);
+  transform-origin: center;
+  transition: transform .32s cubic-bezier(.22, 1, .36, 1),
+              border-color .45s cubic-bezier(.22, 1, .36, 1);
 }
 /* 左端から円が広がって面になる */
 .service--brushup .service__link::before {
@@ -1672,7 +1682,15 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .65s; }
     transform: translate(-1.5px, 1.5px);
     background: var(--color-primary);
   }
-  .service--brushup .service__link:active::before { transform: scale(22) translateY(1px); }
+  /* 押した瞬間だけ面がわずかに沈み、離すと戻る。richka の手応えを参考に、
+     見た目(円が満ちる)は props のままで、押下の反応だけを足している。 */
+  .service--brushup .service__link:active {
+    transform: scale(.985);
+    transition: transform .09s ease-out, border-color .45s cubic-bezier(.22, 1, .36, 1);
+  }
+  .service--brushup .service__link:active .service__link-label,
+  .service--brushup .service__link:active .service__link-icon { transform: translateY(.5px); }
+  .news__more:active .news__more-circle { transform: scale(.92); }
 }
 
 @media (prefers-reduced-motion: reduce) {
