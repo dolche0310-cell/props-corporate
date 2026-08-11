@@ -279,20 +279,23 @@
     /* ===== ブロックb) フルロックアップ + クリアスペース ===== */
     const gB = el("g", {});
     svg.appendChild(gB);
-    const outW = lockW + 2 * X, outH = X + 2 * X;
+    /* ロックアップの高さはマーク高と一致しない(案によりワードマークが高い)。
+       クリアスペースの 1X はマーク高基準のまま、囲みだけ実際の高さに合わせる。 */
+    const lockH = Math.max(X, wordH);
+    const outW = lockW + 2 * X, outH = lockH + 2 * X;
     dashBox(gB, defs, 0, 0, outW, outH, 1.05, 1.1, "lg2-box lg2-box-outer");
-    dashBox(gB, defs, X, X, lockW, X, 1.35, 0.95);
-    placeArt(gB, mark, X, X, markW, X);
+    dashBox(gB, defs, X, X, lockW, lockH, 1.35, 0.95);
+    placeArt(gB, mark, X, X + (lockH - X) / 2, markW, X);
     /* ワードマークは最後に描くので、器だけ先に作って参照を持っておく */
     const wordHost = el("g", {});
     gB.appendChild(wordHost);
-    const cx = X + lockW / 2, cy = X + X / 2;
+    const cx = X + lockW / 2, cy = X + lockH / 2;
     dimArrow(gB, defs, cx, 0, cx, X, 1.75, 0.6);
     label(gB, cx + X * 0.30, X * 0.5 + 5, "1X", 2.2, "lg2-label lg2-label-sm");
     dimArrow(gB, defs, X + lockW, cy, outW, cy, 1.9, 0.6);
     label(gB, X + lockW + X * 0.5, cy - X * 0.22, "1X", 2.35, "lg2-label lg2-label-sm");
-    dimArrow(gB, defs, cx, X + X, cx, outH, 2.05, 0.6);
-    label(gB, cx + X * 0.30, X * 2 + X * 0.5 + 5, "1X", 2.5, "lg2-label lg2-label-sm");
+    dimArrow(gB, defs, cx, X + lockH, cx, outH, 2.05, 0.6);
+    label(gB, cx + X * 0.30, X + lockH + X * 0.5 + 5, "1X", 2.5, "lg2-label lg2-label-sm");
     dimArrow(gB, defs, 0, cy, X, cy, 2.2, 0.6);
     label(gB, X * 0.5, cy - X * 0.22, "1X", 2.65, "lg2-label lg2-label-sm");
 
@@ -360,12 +363,17 @@
     /* ===== ブロック配置 ===== */
     const colGap = X * 1.3, rowGap = X * 1.5;
     const topH = Math.max(aH, outH);
-    gA.setAttribute("transform", `translate(0, ${(topH - aH) / 2})`);
-    const bX = aW + colGap;
+    const topW0 = aW + colGap + outW;
+    /* 上段と下段の広い方に合わせて両方を中央へ。負のオフセットを作らない
+       (以前は下段が広いと左へはみ出して viewBox の外に出ていた) */
+    const rowW = Math.max(topW0, cW);
+    const topOff = (rowW - topW0) / 2;
+    gA.setAttribute("transform", `translate(${topOff}, ${(topH - aH) / 2})`);
+    const bX = topOff + aW + colGap;
     gB.setAttribute("transform", `translate(${bX}, ${(topH - outH) / 2})`);
-    const topW = bX + outW;
+    const topW = rowW;
     const cY = topH + rowGap;
-    gC.setAttribute("transform", `translate(${(topW - cW) / 2}, ${cY})`);
+    gC.setAttribute("transform", `translate(${(rowW - cW) / 2}, ${cY})`);
 
     const PADV = X * 0.5;
     const totalW = Math.max(topW, cW);
@@ -374,7 +382,7 @@
 
     /* ===== 最後にロックアップのワードマークを1文字ずつ描く ===== */
     /* マークと天地中央を揃える */
-    const wordBox = placeArt(wordHost, word, X + markW + gap, X + (X - wordH) / 2, wordW, wordH);
+    const wordBox = placeArt(wordHost, word, X + markW + gap, X + (lockH - wordH) / 2, wordW, wordH);
     const letters = [];
     Array.from(wordBox.querySelectorAll("path")).forEach((p) => {
       const fill = resolveFill(p.getAttribute("fill"));
