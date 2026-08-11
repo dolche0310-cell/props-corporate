@@ -747,126 +747,49 @@ button { font: inherit; }
 /* Figma 232:27373 (image 27 [Vectorized])。淡いブロブ形状のベクター素材を
    ヒーロー〜About にまたがる背景モチーフとして敷く。実測位置(x:279/1440,
    y はヒーロー天面基準)をパーセントで再現。 */
-/* 背景グラフィック(Figma 262:29148)。1440フレーム内で x494 / y162、844x618。
-   ヒーローはページ y90 から始まるので top は 162-90=72。
-   左右は「中央から」の距離で置き、1440 超のワイド画面でも構図が保たれる。
-   レイヤー順は 白地 → グラデ円(blob z0) → モチーフ(z1) → 文字(.wrap z2)。 */
-.hero__motif {
+/* 右側グラフィック(Figma 215:22653)。
+   Rectangle 64 (277:37297 #FFE0D3) / Rectangle 65 (277:37298 #E9E9E9)。
+   どちらも rx = 幅の半分なので実体は「丸端の直線」。中心線を stroke で引く。
+     Peach (1156.257, 229.871)→( 907.369, 604.707)  太さ 153.465
+     Gray  (1557.436, -39.631)→(1174.917, 536.461)  太さ 153.465
+   ステージの viewBox はフレーム座標のまま。フレーム x830 / y-120 に置き、
+   ヒーロー天面 = フレーム y90 なので top は -120-90 = -210。
+   左右は「中央から」の距離。1440 超のワイドでも構図が保たれる。
+   右端が画面外へ大きく抜ける Figma の Crop は、セクションの
+   overflow:clip がそのまま作るので、内側へ収めない。 */
+.hero__lines {
   position: absolute;
-  left: 35%;
-  top: 24px;
-  width: 110%;
-  height: auto;              /* height属性(618)を打ち消し、aspect-ratio に任せる */
-  aspect-ratio: 844 / 618;
-  pointer-events: none;
-  z-index: 1;
-  opacity: 0;
-  transform: scale(.97);
-  transition:
-    opacity   .5s cubic-bezier(.22, 1, .36, 1) 2.55s,
-    transform .5s cubic-bezier(.22, 1, .36, 1) 2.55s;
-}
-@media (max-width: 767px), (prefers-reduced-motion: reduce) {
-  /* 形成の円群を出さない環境では、従来どおりすぐ立つ */
-  .hero__motif { transition-delay: .1s, .1s; transition-duration: 1.2s, 1.2s; }
-}
-body.fv-in .hero__motif { opacity: 1; transform: none; }
-
-/* ── モチーフの形成(.hero__motif-fx) ──
-   柔らかいグレーの円9個を gooey(ぼかし+コントラスト)で溶かし、
-   群全体が -720deg → 0 の2回転を減速しながら回る間に、各円が
-   散開位置(--dx/--dy)から最終シルエットの位置へ引き寄せられて
-   ぐにゃっと繋がる。着地寸前に本物のモチーフ(img)が下から立ち、
-   円群は溶けるように引く。回転の終端 = 現在のアングルなので、
-   「今の角度感のまま2回転して着地」になる。 */
-.hero__motif-fx {
-  position: absolute;
-  left: 35%;
-  top: 24px;
-  width: 110%;
-  height: auto;
-  aspect-ratio: 844 / 618;
-  pointer-events: none;
-  z-index: 1;
-  opacity: 0;
+  left: calc(50% + 110px);      /* フレーム x830 - 720 */
+  top: -210px;                  /* フレーム y-120 - 90 */
+  width: 810px;
+  height: 805px;
   overflow: visible;
+  pointer-events: none;
+  z-index: 1;
 }
-@media (min-width: 768px) {
-  .hero__motif-fx {
-    left: calc(50% - 226px);
-    top: 72px;
-    width: 844px;
-    height: 618px;
+.hero__lines .hl {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  shape-rendering: geometricPrecision;
+}
+/* SP は Figma に該当フレームが無いため、旧モチーフと同じ考え方
+   (中央やや右に寄せ、画面幅より大きく置いて右を切る)で置いている。 */
+@media (max-width: 767px) {
+  .hero__lines {
+    left: 40%;
+    top: -40px;
+    width: 130%;
+    height: auto;
+    aspect-ratio: 810 / 805;
   }
 }
-body.fv-in .hero__motif-fx {
-  animation: fx-vis 3.1s linear both;
-}
-@keyframes fx-vis {
-  0%     { opacity: 0; }
-  4%     { opacity: 1; }
-  83%    { opacity: 1; }
-  100%   { opacity: 0; }
-}
-.hero__motif-fx .fx-spin {
-  transform-box: view-box;
-  transform-origin: 50% 50%;
-}
-body.fv-in .fx-spin {
-  animation: fx-spin 2.6s cubic-bezier(.3, .06, .14, 1) .1s both;
-}
-@keyframes fx-spin {
-  from { transform: rotate(-720deg) scale(.9); }
-  to   { transform: rotate(0deg) scale(1); }
-}
-.fx-c {
-  transform-box: fill-box;
-  transform-origin: center;
-  transform: translate(var(--dx, 0), var(--dy, 0)) scale(.2);
-  opacity: 0;
-}
-body.fv-in .fx-c {
-  animation:
-    fx-c-form 2.2s cubic-bezier(.32, .04, .18, 1) both,
-    fx-c-squish .55s cubic-bezier(.34, 1.2, .5, 1) forwards;
-}
-body.fv-in .fx-c--1 { animation-delay: .10s, 2.32s; }
-body.fv-in .fx-c--2 { animation-delay: .18s, 2.36s; }
-body.fv-in .fx-c--3 { animation-delay: .26s, 2.40s; }
-body.fv-in .fx-c--4 { animation-delay: .34s, 2.44s; }
-body.fv-in .fx-c--5 { animation-delay: .42s, 2.48s; }
-body.fv-in .fx-c--6 { animation-delay: .50s, 2.52s; }
-body.fv-in .fx-c--7 { animation-delay: .58s, 2.56s; }
-body.fv-in .fx-c--8 { animation-delay: .66s, 2.60s; }
-body.fv-in .fx-c--9 { animation-delay: .74s, 2.64s; }
-@keyframes fx-c-form {
-  0%   { opacity: 0; transform: translate(var(--dx, 0), var(--dy, 0)) scale(.2); }
-  18%  { opacity: 1; transform: translate(var(--dx, 0), var(--dy, 0)) scale(.9); }
-  100% { opacity: 1; transform: translate(0, 0) scale(1); }
-}
-/* 接触の瞬間、わずかに押し合って潰れる */
-@keyframes fx-c-squish {
-  0%   { transform: translate(0, 0) scale(1); }
-  45%  { transform: translate(0, 0) scale(1.05, .95); }
-  100% { transform: translate(0, 0) scale(1); }
-}
-@media (max-width: 767px), (prefers-reduced-motion: reduce) {
-  .hero__motif-fx { display: none; }
+@media (prefers-reduced-motion: reduce) {
+  .hero__lines .hl { stroke-dasharray: none; stroke-dashoffset: 0; opacity: 1; }
 }
 /* モチーフは z1 なので、文字側はどの幅でも前面に。
    (SP では wrap が static のままだと z1 の下に潜る) */
 .hero--brushup > .wrap { position: relative; z-index: 2; }
-@media (min-width: 768px) {
-  .hero__motif {
-    left: calc(50% - 226px);   /* 494 - 720 */
-    top: 72px;                 /* 162 - 90 */
-    width: 844px;
-    height: 618px;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .hero__motif { opacity: 1; transform: none; transition: none; }
-}
 /* ドットアニメーションは削除 */
 .hero--brushup .hero__dots { display: none; }
 .hero__dots {
@@ -1159,18 +1082,16 @@ body.fv-in .hero__intro-item {
   transform: none;
   filter: blur(0);
 }
-.hero__intro-item--1 { transition-delay: .34s; }   /* 産業の */
-.hero__intro-item--2 { transition-delay: .68s; }   /* を支援する */
+.hero__intro-item--1 { transition-delay: .96s; }   /* 産業の */
+.hero__intro-item--2 { transition-delay: 1.24s; }  /* を支援する */
 
 /* AI Shift の pill だけは視線の中心なので、少しだけ印象を強くする。
    blur はかけない(下地のオレンジ面がにじむため)。 */
-/* ドットが横に伸びてカプセルになる流れを受けるため、
-   浮き上がりではなく「横に開く」入り方にする */
+/* ドットは右のグラフィックへ行くので、pill は他の行と同じ静かな入り方に
+   する。下地のオレンジ面がにじむため blur だけは掛けない。 */
 .kv-pill.hero__intro-item {
-  transform: scale(.55, .9);
   filter: none;
-  transition-delay: .52s;
-  transition-duration: .6s;
+  transition-delay: 1.10s;
 }
 body.fv-in .kv-pill.hero__intro-item { transform: none; }
 
@@ -1185,8 +1106,8 @@ body.fv-in .kv-pill.hero__intro-item { transform: none; }
     filter    .9s cubic-bezier(.22, 1, .36, 1);
 }
 body.fv-in .hero__desc--brushup p { opacity: 1; transform: none; filter: blur(0); }
-body.fv-in .hero__desc--brushup p:nth-child(1) { transition-delay: .92s; }
-body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: 1.04s; }
+body.fv-in .hero__desc--brushup p:nth-child(1) { transition-delay: 1.44s; }
+body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: 1.56s; }
 
 @media (prefers-reduced-motion: reduce) {
   .hero__intro-item,
@@ -1923,11 +1844,10 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: 1.04s; }
 /* 02 の面の映像。
    ・cover + center で中央トリミング(素材16:9 とスロット 471/265 の差は
      0.02% なので実質フル画角のまま中央に収まる)
-   ・素材のマゼンタ/シアンのネオンを、輝度基準のグラデーションマップで
-     サイトのダークグレー〜オレンジ(#F16E36)の階調へ置き換える
-     (HTML 側 filter#miai-warm)。色相回転だとシアンが別の色に化けるため
-     使わない。 */
-.service--brushup .service__image--02 { background: #0C0C0D; }
+   ・色は素材のまま活かす。彩度をわずかに落とし(0.82)、色温度だけを
+     サイトのオレンジ側へ少し寄せる(R x1.07 / B x0.85)。
+     セピア化やモノトーン化はしない(HTML 側 filter#miai-warm)。 */
+.service--brushup .service__image--02 { background: #221B20; }
 .service--brushup .service__image--02 video {
   object-fit: cover;
   object-position: center;

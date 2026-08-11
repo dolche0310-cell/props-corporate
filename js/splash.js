@@ -36,34 +36,45 @@
     return;
   }
 
-  /* ドット → FV カプセルへの受け渡し。
+  /* ドット → FV 右側グラフィックの起点への受け渡し。
+     ドットはそのまま右へ流れ、Peach の線の描き始めの位置に着く。
+     着いた瞬間から線が伸び始めるので、ドットが消えてから線が
+     フェードインする、という見え方にはならない。
      互いに別のレイヤーにいるので、画面座標で差分を測って動かす。
      SVG 内の CSS transform はローカル単位なので、ステージの縮尺で割る。 */
+  const DOT_TRAVEL = 650;
+
   const handoff = () => {
     const dot = overlay.querySelector('.splash__dot');
-    const pill = document.querySelector('.kv-pill');
     const svg = overlay.querySelector('.splash__svg');
-    if (!dot || !pill || !svg) return;
+    const lines = window.__miaiHeroLines;
+    const target = lines && lines.originScreen();
+    if (!dot || !svg || !target) { if (lines) lines.begin(); return; }
+
     const sf = svg.getBoundingClientRect().width / 266.312;  /* 1ローカル単位のpx */
     const d = dot.getBoundingClientRect();
-    const t = pill.getBoundingClientRect();
-    const dx = (t.left + t.width / 2 - (d.left + d.width / 2)) / sf;
-    const dy = (t.top + t.height / 2 - (d.top + d.height / 2)) / sf;
-    const sx = t.width / d.width;
-    const sy = t.height / d.height;
+    const dx = (target.x - (d.left + d.width / 2)) / sf;
+    const dy = (target.y - (d.top + d.height / 2)) / sf;
+
+    /* 線はこのドットの太さを種にして育つ。取り違えないよう実測で渡す */
+    lines.setSeedWidth(d.width);
+
     dot.animate([
-      { offset: 0,   transform: 'translate(0px, 0px) scale(1)', opacity: 1,
-        easing: 'cubic-bezier(.4, 0, .2, 1)' },
-      /* 弧: 中間点を進行方向の直交側へ膨らませる */
-      { offset: .55, transform: 'translate(' + (dx * .5).toFixed(1) + 'px, ' + (dy * .5 - 26 / sf).toFixed(1) + 'px) '
-        + 'scale(' + (1 + (sx - 1) * .35).toFixed(2) + ', ' + (1 + (sy - 1) * .35).toFixed(2) + ')', opacity: 1,
-        easing: 'cubic-bezier(.22, 1, .36, 1)' },
-      { offset: .88, transform: 'translate(' + dx.toFixed(1) + 'px, ' + dy.toFixed(1) + 'px) '
-        + 'scale(' + sx.toFixed(2) + ', ' + sy.toFixed(2) + ')', opacity: 1 },
-      /* 実カプセルに重なったら溶ける */
-      { offset: 1,   transform: 'translate(' + dx.toFixed(1) + 'px, ' + dy.toFixed(1) + 'px) '
-        + 'scale(' + sx.toFixed(2) + ', ' + sy.toFixed(2) + ')', opacity: 0 }
-    ], { duration: 1170, fill: 'forwards' });
+      { offset: 0,   transform: 'translate(0px, 0px)', opacity: 1,
+        easing: 'cubic-bezier(.36, 0, .12, 1)' },
+      /* 弧: 中間点を進行方向の直交側へ少しだけ膨らませる */
+      { offset: .58, transform: 'translate(' + (dx * .52).toFixed(1) + 'px, '
+        + (dy * .52 - 30 / sf).toFixed(1) + 'px)', opacity: 1,
+        easing: 'cubic-bezier(.3, .5, .2, 1)' },
+      { offset: 1,   transform: 'translate(' + dx.toFixed(1) + 'px, ' + dy.toFixed(1) + 'px)', opacity: 1 }
+    ], { duration: DOT_TRAVEL, fill: 'forwards' });
+
+    /* 着地と同時に線が伸び始め、ドットは先端の丸みに吸収される */
+    setTimeout(() => {
+      lines.begin();
+      dot.animate([{ opacity: 1 }, { opacity: 0 }],
+        { duration: 140, delay: 60, fill: 'forwards' });
+    }, DOT_TRAVEL);
   };
 
   let finished = false;
