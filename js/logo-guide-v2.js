@@ -231,7 +231,11 @@
     /* 基準単位。X = マークの1辺(=マーク高)。クリアスペースの1Xもこれ。 */
     const X = mark.h;
     const markW = mark.w * (X / mark.h);       // = mark.w
-    const wordW = word.w * (X / word.h);       // ワードマーク高をXに揃えた時の幅
+    /* ワードマークはマークと同じ高さとは限らない(Figma の各案で比率が違う)。
+       data-word-scale = ワードマーク高 ÷ マーク高。 */
+    const wordScale = parseFloat(d.wordScale) || 1;
+    const wordH = X * wordScale;
+    const wordW = word.w * (wordH / word.h);
     const gap = X * gapRatio;
     const lockW = markW + gap + wordW;
 
@@ -369,7 +373,8 @@
     svg.setAttribute("viewBox", `${-PADV} ${-PADV} ${totalW + PADV * 2} ${totalH + PADV * 2}`);
 
     /* ===== 最後にロックアップのワードマークを1文字ずつ描く ===== */
-    const wordBox = placeArt(wordHost, word, X + markW + gap, X, wordW, X);
+    /* マークと天地中央を揃える */
+    const wordBox = placeArt(wordHost, word, X + markW + gap, X + (X - wordH) / 2, wordW, wordH);
     const letters = [];
     Array.from(wordBox.querySelectorAll("path")).forEach((p) => {
       const fill = resolveFill(p.getAttribute("fill"));

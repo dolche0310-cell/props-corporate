@@ -298,8 +298,14 @@ body {
    間隔はFigma実測比(A=マーク高の0.4倍)をemで表現する */
 .ld-card--guide-v2 { padding: 40px 44px; }
 .ld-lockup { display: flex; align-items: center; }
+/* マークの高さを 1X とし、ワードマークの高さと間隔は Figma の比率に従う。
+   4案で mark:word の比が違う(B は 1:1.166)ので、同じ高さに揃えない。 */
 .ld-lockup-mark { height: 72px; width: auto; }
-.ld-lockup-word { height: 72px; width: auto; margin-left: calc(72px * var(--lockup-gap, 0.4)); }
+.ld-lockup-word {
+  height: calc(72px * var(--word-scale, 1));
+  width: auto;
+  margin-left: calc(72px * var(--lockup-gap, 0.4));
+}
 
 /* 斜めガイド十字線(現行サイト踏襲の追加要素)。破線ボックスと同じ線質。 */
 .lg2-diag {
@@ -318,10 +324,12 @@ body {
    `.ld-card img { height: auto }` でも実寸(≒72px)で出ていた。
    props のSVGは viewBox だけで拡縮できるよう属性を外してあるので、
    height:auto だと潰れる。詳細度を上げて明示的に高さを与える。
-   Figma(246:26696)ではマークとロゴタイプが同じ高さなので、両方同値。 */
+   マークの高さを 1X とし、ロゴタイプの高さは案ごとの比率(--word-scale)。
+   4案で mark:word の比が違うので同値にしない(B は 1:1.166)。 */
 .ld-card .ld-lockup-mark,
 .ld-card .ld-lockup-word {
-  height: 72px;
   width: auto;
   max-width: none;
 }
+.ld-card .ld-lockup-mark { height: 72px; }
+.ld-card .ld-lockup-word { height: calc(72px * var(--word-scale, 1)); }
