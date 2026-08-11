@@ -2284,9 +2284,12 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .65s; }
   height: calc(var(--u) * 332);
 }
 /* MiAIロゴ(215:23950): main内 x=0 y=107 / 266.312x96.985 */
+/* ロゴの下端を本文の下端に揃える(Figma 240:27506 の指示)。
+   Figma の素の座標は top 107(下端 204)だが、本文の下端は 226 にあり
+   22px ずれている。指示により本文側へ合わせて 129 に下げている。 */
 .about--figma .abt__logo {
   left: 0;
-  top: calc(var(--u) * 107);
+  top: calc(var(--u) * 127.8);
   width: calc(var(--u) * 266.312);
   height: calc(var(--u) * 96.985);
   display: block;
@@ -2318,7 +2321,7 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .65s; }
   .js-reveal .abt__catch.reveal,
   .js-reveal .abt__body.reveal { transition-delay: 0s; }
 }
-}
+
 /* キャッチ(215:22676): main内 x=420 y=64 / w740 / LINE Seed JP 24px
    lh1.8 / ls0.96px / #191919 */
 .about--figma .abt__catch {
