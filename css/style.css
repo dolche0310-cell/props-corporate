@@ -119,7 +119,9 @@ html.splash-lock, html.splash-lock body { overflow: hidden; }
 }
 .sp-canvas,
 .sp-svg { position: absolute; left: 0; top: 0; width: 1440px; height: 810px; display: block; }
-.sp-svg { overflow: visible; }
+/* リング(カプセル群)は半透明のまま円窓の動画の上へ全面的に重なる
+   (Figma D7: 304:46481 のレイヤー順)。窓は z1、図形は z2 */
+.sp-svg { overflow: visible; z-index: 2; }
 .sp-logo path { fill: #191919; }
 .sp-cells path { shape-rendering: geometricPrecision; }
 /* DESIGN 1 の左右の淡い Diffuse Glow。主張させない */
@@ -139,6 +141,7 @@ html.splash-lock, html.splash-lock body { overflow: hidden; }
   position: absolute;
   left: 0;
   top: 0;
+  z-index: 1;
   width: 244px;
   height: 244px;
   border-radius: 50%;

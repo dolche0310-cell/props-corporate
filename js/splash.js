@@ -130,7 +130,7 @@
         particles.push({
           x, y,
           outX: x + Math.cos(a2) * d2 * 1.5, outY: y + Math.sin(a2) * d2 + 3,
-          delay: rnd() * 520, size: 0.9 + rnd() * 1.1, aMax: 0.5 + rnd() * 0.35
+          delay: rnd() * 380, size: 0.9 + rnd() * 1.1, aMax: 0.5 + rnd() * 0.35
         });
       }
     }
@@ -343,10 +343,12 @@
   const EASE_OUT = (t) => 1 - Math.pow(1 - clamp01(t), 3);
   const DIS = 1330;                     /* 分解の開始 */
   const drawIntro = (t) => {
-    /* グループは分解フェーズのフェードだけを担う */
+    /* グループは分解フェーズのフェードだけを担う。
+       粒子が全て字形の上に出揃う(DIS+470)まで Solid を保ってから消す。
+       先に薄くすると、粒子がまだ無い箇所が白く光って見える(iの上の
+       白い光彩の正体)ため、順序を「粒子が乗る → ロゴが抜ける」に固定 */
     let ga = 1;
-    if (t < L_BASE) ga = 1;
-    if (t >= DIS) ga = 1 - smooth((t - DIS) / 300);
+    if (t >= DIS + 470) ga = 1 - smooth((t - DIS - 470) / 250);
     logoG.style.opacity = Math.max(0, ga).toFixed(3);
     letters.forEach((el, i) => {
       const u = EASE_OUT((t - L_BASE - i * L_STAG) / L_DUR);
@@ -360,13 +362,13 @@
     const ctx = canvas.getContext('2d');
     ctx.setTransform(q, 0, 0, q, 0, 0);
     ctx.clearRect(0, 0, DW, DH);
-    if (t < DIS || t > 2600) return;
+    if (t < DIS || t > 2760) return;
     ctx.fillStyle = '#191919';
     for (const p of particles) {
       const lt = t - DIS - p.delay;
       if (lt < 0) continue;
-      const uIn = clamp01(lt / 110);
-      const uOut = clamp01((lt - 110) / 640);
+      const uIn = clamp01(lt / 90);
+      const uOut = clamp01((lt - 430) / 560);   /* 全粒子が乗ってから散る */
       if (uOut >= 1) continue;
       const e = smooth(uOut);
       const alpha = p.aMax * uIn * (1 - e);
