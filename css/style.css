@@ -1458,6 +1458,16 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .65s; }
   border-radius: 0;
   padding-inline: clamp(20px, 6.4vw, 92px);
 }
+@media (min-width: 768px) {
+  .service--brushup .service__panel { padding-block: 0; }
+  /* Frame 152: x92 y90。1440 で 92/90、狭い幅では同率で追従 */
+  .service--brushup .service__panel > .label {
+    position: absolute;
+    left: clamp(20px, 6.4vw, 92px);
+    top: clamp(48px, 6.25vw, 90px);
+    margin-bottom: 0;
+  }
+}
 .service--brushup .service__blob {
   position: absolute;
   border-radius: 50%;
@@ -1482,10 +1492,19 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .65s; }
   margin-top: 32px;
 }
 @media (min-width: 768px) {
+  /* Figma 215:22691 / 253:27104 (1440x784)。ステージは x92..1348 の 1256 幅。
+     1su = 1256分の1(cqw)。マーケーの帯(y621-784)はステージの下に流れるので、
+     ステージ自体は 1256:621。 */
   .service--brushup .service__list {
+    position: relative;
     display: block;
-    min-height: 460px;
-    margin-top: 40px;
+    max-width: 1256px;
+    margin-inline: auto;
+    margin-top: 0;
+    min-height: 0;
+    container-type: inline-size;
+    aspect-ratio: 1256 / 621;
+    --su: 0.0796178cqw; /* 100/1256 */
   }
 }
 /* デスクトップ: 背景(パネル)は service__pin で固定したまま、
@@ -1515,20 +1534,39 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .65s; }
   flex-direction: column;
   gap: 24px;
 }
-@media (min-width: 768px) {
-  .service--brushup .service__row {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    gap: 40px;
-    height: 100%;
-  }
-}
 .service--brushup .service__text { max-width: 506px; }
 @media (min-width: 768px) {
-  /* 506px/642pxはFigma実測値。パネル内で両方その幅を確保できない
-     ビューポートでは、比率(506:642)を保ったまま一緒に縮む。 */
-  .service--brushup .service__text { flex: 1 1 506px; max-width: 506px; min-width: 0; }
+  .service--brushup .service__row { display: block; position: static; height: 100%; }
+  /* Frame 147: x132 y274 w506 → ステージ内 40/274 */
+  .service--brushup .service__text {
+    position: absolute;
+    left: calc(var(--su) * 40);
+    top: calc(var(--su) * 274);
+    width: calc(var(--su) * 506);
+    max-width: none;
+    flex: none;
+  }
+  /* 01 の面 (215:23956): x773 y266 471x265 → ステージ内 681/266 */
+  .service--brushup [data-service-item="0"] .service__image {
+    position: absolute;
+    left: calc(var(--su) * 681);
+    top: calc(var(--su) * 266);
+    width: calc(var(--su) * 471);
+    height: calc(var(--su) * 265);
+    max-width: none;
+    aspect-ratio: auto;
+    flex: none;
+  }
+  /* Network Diagram (253:27126): x710 y162 642x395 → ステージ内 618/162 */
+  .service--brushup [data-service-item="1"] .service__image {
+    position: absolute;
+    left: calc(var(--su) * 618);
+    top: calc(var(--su) * 162);
+    width: calc(var(--su) * 642);
+    height: calc(var(--su) * 395);
+    max-width: none;
+    flex: none;
+  }
 }
 .service--brushup .service__title {
   font-family: var(--font-alata);
@@ -1671,7 +1709,7 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .65s; }
   white-space: nowrap;
 }
 @media (min-width: 768px) {
-  .service--brushup .service__marquee { margin-block: 56px -64px; }
+  .service--brushup .service__marquee { margin-block: 0; }
 }
 /* 右から左へ常にゆっくり流れるマーケー。同じ文言を2回並べて
    -50%まで送ることで、繋ぎ目のない無限ループにしている。 */
