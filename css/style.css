@@ -1976,7 +1976,7 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .65s; }
   transition: background-color .35s cubic-bezier(.22, 1, .36, 1),
               border-color .35s ease, color .35s ease, transform .35s ease;
 }
-.news__more-circle svg { width: 11px; height: 11px; }
+.news__more-circle svg { width: 11px; height: 11px; max-width: 100%; }
 @media (hover: hover) and (pointer: fine) {
   .news__more:hover .news__more-circle {
     background: var(--color-primary);
@@ -2007,7 +2007,7 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .65s; }
   color: #9A9A9A;
   transition: color .3s ease, transform .45s cubic-bezier(.22, 1, .36, 1);
 }
-.news__arrow svg { width: 18px; height: 15px; display: block; }
+.news__arrow svg { width: 18px; height: 15px; max-width: 100%; display: block; }
 @media (min-width: 768px) {
   .news__arrow {
     display: block;
