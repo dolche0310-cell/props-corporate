@@ -20,10 +20,9 @@
   --font-logo: 'Belanosima', var(--font-jp);
   --font-en: 'Inter', var(--font-jp);
   --font-display: 'Abril Fatface', serif;
-  /* Figma は Futura Medium。Web フォントとして配布できないため、Futura を基にした
-     Jost(Google Fonts)を代替に置き、ローカルに Futura がある環境ではそちらを優先。
+  /* 英字の表示書体。Chillax(Fontshare / Indian Type Foundry)。
      アウトライン化済みの字(FV の AI Shift / MiAI ロゴ)は SVG なので対象外。 */
-  --font-futura: 'Futura', 'Futura PT', 'Jost', 'Century Gothic', var(--font-jp);
+  --font-display-en: 'Chillax', var(--font-jp);
   --font-alata: 'Alata', var(--font-jp);   /* ボタン・見出し・タイトル */
   --font-gugi: 'Gugi', var(--font-en);
 
@@ -370,7 +369,7 @@ button { font: inherit; }
 .label__eyebrow {
   display: block;
   margin: 0;
-  font-family: var(--font-futura);
+  font-family: var(--font-display-en);
   font-weight: 400;
   font-size: 16px;
   line-height: 1.8;
@@ -484,7 +483,7 @@ button { font: inherit; }
   .site-header--brushup .nav { gap: 40px; }
   .site-header--brushup .nav__link,
   .site-header--brushup .nav__cta-label {
-    font-family: var(--font-futura);
+    font-family: var(--font-display-en);
     font-size: 16px;
     font-weight: 400;
     letter-spacing: .8px;
@@ -1889,7 +1888,7 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: 1.04s; }
 .service--brushup .service__marquee-track span {
   flex-shrink: 0;
   padding-right: .5em;
-  font-family: var(--font-futura);
+  font-family: var(--font-display-en);
   font-size: clamp(40px, 11vw, 96px);
   letter-spacing: .12em;
   line-height: 1.7;
@@ -2130,7 +2129,7 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: 1.04s; }
   align-items: center;
   gap: 10px;
   margin-bottom: 32px;
-  font-family: var(--font-futura);
+  font-family: var(--font-display-en);
   font-size: 14px;
   letter-spacing: .08em;
   color: var(--color-ink);
@@ -2425,7 +2424,7 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: 1.04s; }
   .contact__card { padding: 60px 100px; }
 }
 .contact__heading {
-  font-family: var(--font-futura);
+  font-family: var(--font-display-en);
   font-size: 24px;
   font-weight: 400;
   letter-spacing: 1.2px;
@@ -2637,7 +2636,7 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: 1.04s; }
 .about--figma .abt__en {
   left: 0;
   top: calc(var(--u) * 41);
-  font-family: var(--font-futura);
+  font-family: var(--font-display-en);
   font-weight: 400;
   font-size: calc(var(--u) * 24);
   line-height: 1.8;
@@ -2874,7 +2873,7 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: 1.04s; }
 }
 .company--figma .cmp__en {
   display: block;
-  font-family: var(--font-futura);
+  font-family: var(--font-display-en);
   font-weight: 400;
   font-size: calc(var(--u) * 24);
   line-height: 1.8;
@@ -2957,133 +2956,6 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: 1.04s; }
   .company--figma .cmp__row { flex-direction: column; align-items: flex-start; gap: 4px; padding-block: 16px; }
   .company--figma .cmp__row dt { flex: none; font-size: 14px; }
   .company--figma .cmp__row dd { width: auto; font-size: 13px; }
-}
-
-/* ===========================================================
-   Service 図解 — Network Diagram
-   ステージ = Figma 253:27126 の 642×395。中の Diagram(253:27127)は y=4。
-
-   背景は Service セクションの #323232 をそのまま使う。図解専用の
-   角丸パネルも Glow も持たない(環境光 Ellipse 56/57 は .service__blob 側)。
-
-   ■ 位置とアニメの分離
-   CSS の transform は SVG の transform 属性を上書きしてしまう。
-   これを踏むと translate が消えて要素が原点(左上)へ飛ぶ。
-   そのため Figma 座標は内側の <g transform> に置き、アニメは外側の
-   .dg-card / .dg-ring / .dg-node / .dg-core に掛ける。カードの
-   skewY(回転)も内側にあるので、演出中も終了後も失われない。
-
-   ■ 時間軸(js/service-diagram.js が --d を配る)
-     0.00-0.60s  粒子がわずかに収束 (scale 1→.985 / opacity 1→.75)
-     0.40-2.00s  接続線が中央→上→左右→下へ伝播しながら描かれる
-     1.20-1.95s  線が届いたノードの Glow が点灯
-     1.70-2.75s  カードが CORE 周辺から外側へ実体化
-     2.60-2.95s  Core Circle → 70%形成で CORE ラベル → 弱い Pulse 一度
-   終了時に .is-play を外して .is-done にし、演出用 transform を解除する。
-   =========================================================== */
-.service--brushup .service__image--diagram {
-  aspect-ratio: 642 / 395;
-  border-radius: 0;
-  overflow: visible;
-  background: none;
-}
-.dg-stage {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 642 / 395;
-}
-.dg-stage .dg { display: block; width: 100%; height: 100%; overflow: visible; }
-
-/* --- 初期状態 --- */
-.dg-line { stroke-dasharray: var(--len); stroke-dashoffset: var(--len); }
-.dg-card, .dg-core, .dg-node, .dg-ring, .dg-core-label { opacity: 0; }
-.dg-card, .dg-core, .dg-ring, .dg-dust {
-  transform-box: fill-box;
-  transform-origin: center;
-}
-.dg-dot {
-  opacity: 0;
-  transform: translate(var(--dx), var(--dy));
-  transform-box: fill-box;
-  transform-origin: center;
-}
-
-/* --- 1) Particles: 既にある粒子場がわずかに収束する --- */
-.dg-stage.is-play .dg-dust {
-  animation: dg-field .6s cubic-bezier(.33,0,.2,1) both;
-}
-@keyframes dg-field {
-  from { opacity: 1;   transform: scale(1) }
-  to   { opacity: .75; transform: scale(.985) }
-}
-.dg-stage.is-play .dg-dot {
-  animation:
-    dg-dust-settle .9s cubic-bezier(.22,1,.36,1) calc(var(--d) + .25s) both,
-    dg-dust-out    .5s ease                      calc(var(--d) + .9s)  both;
-}
-@keyframes dg-dust-settle { from { opacity: .8 } to { opacity: .8; transform: translate(0, 0) } }
-@keyframes dg-dust-out    { to { opacity: 0 } }
-
-/* --- 2) Line Draw: 中央 → 上部 → 左右 → 下部へ伝播 --- */
-.dg-stage.is-play .dg-line {
-  animation: dg-draw .65s cubic-bezier(.4,0,.2,1) var(--d) both;
-}
-@keyframes dg-draw { to { stroke-dashoffset: 0 } }
-
-/* --- 3) Node Activation: 線が届いた端点の Glow が点灯 --- */
-.dg-stage.is-play .dg-ring {
-  animation: dg-node-on .22s cubic-bezier(.22,1,.36,1) var(--d) both;
-}
-.dg-stage.is-play .dg-node {
-  animation: dg-fade .2s ease var(--d) both;
-}
-@keyframes dg-node-on {
-  from { opacity: 0; transform: scale(.7) }
-  to   { opacity: 1; transform: scale(1) }
-}
-@keyframes dg-fade { to { opacity: 1 } }
-
-/* --- 4) Cards: CORE 周辺から外側へ連鎖して実体化 --- */
-.dg-stage.is-play .dg-card {
-  animation: dg-card-in .4s cubic-bezier(.22,1,.36,1) var(--d) both;
-}
-@keyframes dg-card-in {
-  from { opacity: 0; transform: translateY(5px) scale(.96); filter: blur(2px) }
-  to   { opacity: 1; transform: translateY(0)   scale(1);   filter: blur(0) }
-}
-
-/* --- 5) CORE: 円 → 70%形成でラベル → 一度だけ弱い Pulse --- */
-.dg-stage.is-play .dg-core {
-  animation:
-    dg-core-in .35s cubic-bezier(.22,1,.36,1) var(--d) both,
-    dg-core-pulse .5s ease-out calc(var(--d) + .45s) 1;
-}
-@keyframes dg-core-in {
-  from { opacity: 0; transform: scale(.84) }
-  to   { opacity: 1; transform: scale(1) }
-}
-@keyframes dg-core-pulse {
-  0%, 100% { transform: scale(1) }
-  45%      { transform: scale(1.028) }
-}
-.dg-stage.is-play .dg-core-label {
-  animation: dg-fade .25s ease var(--d) both;
-}
-
-/* --- 完成状態 = Figma 253:27126。演出用 transform は明示的に解除する --- */
-.dg-stage.is-done .dg-line { stroke-dashoffset: 0 }
-.dg-stage.is-done .dg-card,
-.dg-stage.is-done .dg-core,
-.dg-stage.is-done .dg-node,
-.dg-stage.is-done .dg-ring,
-.dg-stage.is-done .dg-core-label { opacity: 1; transform: none; filter: none; }
-.dg-stage.is-done .dg-dust { display: none }
-
-@media (prefers-reduced-motion: reduce) {
-  .dg-line { stroke-dashoffset: 0 }
-  .dg-card, .dg-core, .dg-node, .dg-ring, .dg-core-label { opacity: 1; transform: none }
-  .dg-dust { display: none }
-  .dg-stage.is-play * { animation: none !important }
 }
 
 /* ===========================================================
