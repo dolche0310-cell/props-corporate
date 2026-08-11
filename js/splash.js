@@ -13,9 +13,10 @@
 
    ■ MASTER TIMELINE (ms)
       0- 350  D1  白 + 左右の淡い Glow
-    350- 750  D2  MiAI ロゴが opacity 0→1 / translateY 5px→0 で静かに立つ
-    750-1080  D2  Solid を見せる(330ms)
-   1080-2150  D3  エッジから粒子化(canvas)。iのドットだけ残り橙へ
+    200- 970  D2  MiAI(最初のスプラッシュと同じ190px)が1文字ずつ
+              26pxライズ+ぼけの解像でスライドして立つ
+    970-1330  D2  Solid を見せる(360ms)。以降の時刻は +250ms シフト
+   1330-2400  D3  エッジから粒子化(canvas)。iのドットだけ残り橙へ
    2150-2500  D3→D4 ドットが Figma D4 の位置(709.5,292.5) r26.5 へ
    2500-2680  D4  ドットのみ
    2680-3480  D4→D5a ドットが左上へ寄り、3つのグレードットが軌跡から生まれる
@@ -94,16 +95,19 @@
   let seed = 20260812;
   const rnd = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
 
-  /* ---------- ロゴ(DESIGN 2: 306:50539 の実測)。幅294 / 中心(720,351.5) ---------- */
-  const LW = 294, LS = LW / 266.312;
+  /* ---------- ロゴ。大きさは最初のスプラッシュと同じ 190px。
+     中心は DESIGN 2 の位置(720,351.5) ---------- */
+  const LW = 190, LS = LW / 266.312;
   const LX = 720 - LW / 2, LY = 351.5 - (96.985 * LS) / 2;
   const IDOT = { x: LX + 125.66 * LS, y: LY + 10.55 * LS, r: 9.62 * LS };
-  const setLogo = (alpha, rise) => {
-    logoG.setAttribute('transform',
-      'translate(' + LX.toFixed(2) + ' ' + (LY + (rise || 0)).toFixed(2) + ') scale(' + LS.toFixed(5) + ')');
-    logoG.style.opacity = alpha.toFixed(3);
-  };
-  setLogo(0, 5);
+  logoG.setAttribute('transform',
+    'translate(' + LX.toFixed(2) + ' ' + LY.toFixed(2) + ') scale(' + LS.toFixed(5) + ')');
+  logoG.style.opacity = '0';
+  /* 文字は M, i, a, l の4パス。最初のスプラッシュと同じく1文字ずつ
+     26px ライズ + ぼけの解像で立ち上がる(値はロゴのローカル単位へ換算) */
+  const letters = [...logoG.querySelectorAll('path')];
+  const L_BASE = 200, L_STAG = 70, L_DUR = 560;
+  const L_RISE = 26 / LS;
 
   /* ---------- D3 の粒子(canvas)。ロゴの字形からサンプリング ---------- */
   const particles = [];
@@ -212,7 +216,8 @@
     }
   };
 
-  /* ---------- セグメント表 ---------- */
+  /* ---------- セグメント表(文字ライズの分だけ +250ms して使う) ---------- */
+  const SHIFT = 250;
   const SEG = [
     { t0: 2150, t1: 2500, from: S_DOT3, to: S_D4 },
     { t0: 2500, t1: 2680, hold: S_D4 },
@@ -231,6 +236,7 @@
     { t0: 11300, t1: 12150, from: DATA.nshape, to: LINES_STATE },
     { t0: 12150, t1: 12700, hold: LINES_STATE }
   ];
+  SEG.forEach((g) => { g.t0 += SHIFT; g.t1 += SHIFT; });
 
   /* 遷移のペア組み。各到達図形に最も近い出発図形を(色クラス優先で)割り当て、
      使われなかった出発図形は最寄りの到達図形へ合流させる。
@@ -331,25 +337,33 @@
     });
   };
 
-  /* ---------- D2/D3: ロゴと粒子と i ドット ---------- */
+  /* ---------- D2/D3: ロゴと粒子と i ドット ----------
+     文字は 200ms から 70ms 刻みで1文字ずつ立ち(各560ms)、970ms で完成。
+     1330ms まで Solid を見せ、以降は粒子へ譲る(タイムラインは +250ms)。 */
   const EASE_OUT = (t) => 1 - Math.pow(1 - clamp01(t), 3);
+  const DIS = 1330;                     /* 分解の開始 */
   const drawIntro = (t) => {
-    /* ロゴ: 350-750 で立ち、1080-1380 で粒子に譲る */
-    let a = 0, rise = 5;
-    if (t >= 350 && t < 750) { const u = EASE_OUT((t - 350) / 400); a = u; rise = 5 * (1 - u); }
-    else if (t >= 750 && t < 1080) { a = 1; rise = 0; }
-    else if (t >= 1080 && t < 1380) { a = 1 - smooth((t - 1080) / 300); rise = 0; }
-    setLogo(a, rise);
+    /* グループは分解フェーズのフェードだけを担う */
+    let ga = 1;
+    if (t < L_BASE) ga = 1;
+    if (t >= DIS) ga = 1 - smooth((t - DIS) / 300);
+    logoG.style.opacity = Math.max(0, ga).toFixed(3);
+    letters.forEach((el, i) => {
+      const u = EASE_OUT((t - L_BASE - i * L_STAG) / L_DUR);
+      el.style.opacity = u.toFixed(3);
+      el.setAttribute('transform', 'translate(0 ' + (L_RISE * (1 - u)).toFixed(2) + ')');
+      el.style.filter = u < 1 ? 'blur(' + (3 * (1 - u)).toFixed(1) + 'px)' : 'none';
+    });
 
     /* 粒子(分解のみ)。エッジ側(delay小)から欠けていく */
     const q = canvas.__q || 1;
     const ctx = canvas.getContext('2d');
     ctx.setTransform(q, 0, 0, q, 0, 0);
     ctx.clearRect(0, 0, DW, DH);
-    if (t < 1080 || t > 2350) return;
+    if (t < DIS || t > 2600) return;
     ctx.fillStyle = '#191919';
     for (const p of particles) {
-      const lt = t - 1080 - p.delay;
+      const lt = t - DIS - p.delay;
       if (lt < 0) continue;
       const uIn = clamp01(lt / 110);
       const uOut = clamp01((lt - 110) / 640);
@@ -364,9 +378,9 @@
 
     /* i のドット(常に1個)。ロゴ自身のドットの真上に重なった状態から
        始まり、粒子化の間に黒→橙。2150 からは状態機械が引き継ぐ */
-    if (t >= 1080 && t < 2150) {
+    if (t >= DIS && t < 2400) {
       needActors(1);
-      const cu = smooth((t - 1300) / 400);
+      const cu = smooth((t - 1550) / 400);
       const rgb = [Math.round(lerp(25, 241, cu)), Math.round(lerp(25, 110, cu)), Math.round(lerp(25, 54, cu))];
       drawShape(pool[0], circleOutline(IDOT.x, IDOT.y, IDOT.r), rgb, 1);
     }
@@ -381,25 +395,26 @@
   }
   const driveWindow = (t) => {
     if (!winEl || !video) return;
-    if (t < 7480 || t > 9640) { winEl.style.display = 'none'; return; }
+    if (t < 7480 + SHIFT || t > 9640 + SHIFT) { winEl.style.display = 'none'; return; }
     winEl.style.display = 'block';
     let k;
-    if (t < 8120) k = smooth((t - 7520) / 600);
-    else if (t < 8900) k = 1;
-    else k = 1 - smooth((t - 8900) / 700);
+    const tw = t - SHIFT;
+    if (tw < 8120) k = smooth((tw - 7520) / 600);
+    else if (tw < 8900) k = 1;
+    else k = 1 - smooth((tw - 8900) / 700);
     const s = Math.max(0.001, k);
     winEl.style.transform = 'translate(' + (W.cx - W.r) + 'px,' + (W.cy - W.r) + 'px) scale(' + s.toFixed(4) + ')';
-    const vu = clamp01((t - 7520) / 650);
-    const vo = t < 8720 ? vu : 1 - clamp01((t - 8720) / 600);
+    const vu = clamp01((tw - 7520) / 650);
+    const vo = tw < 8720 ? vu : 1 - clamp01((tw - 8720) / 600);
     video.style.opacity = vo.toFixed(3);
     video.style.transform = 'scale(' + Math.min(10, (1.03 - 0.03 * vu) / s).toFixed(3) + ')';
     video.style.filter = 'blur(' + (3 * (1 - vu)).toFixed(1) + 'px)';
-    if (!videoStarted && t > 7300) { videoStarted = true; video.play().catch(() => {}); }
-    if (videoStarted && t > 9500 && !video.paused) video.pause();
+    if (!videoStarted && tw > 7300) { videoStarted = true; video.play().catch(() => {}); }
+    if (videoStarted && tw > 9500 && !video.paused) video.pause();
   };
 
   /* ---------- マスタータイムライン ---------- */
-  const TOTAL = 12700;
+  const TOTAL = 12700 + SHIFT;
   let t0 = null, fvFired = false, handed = false, raf = 0;
 
   const frame = (now) => {
@@ -407,16 +422,16 @@
     const t = now - t0;
 
     drawIntro(t);
-    if (t >= 2150 && !handed) renderStates(t);
+    if (t >= 2400 && !handed) renderStates(t);
     driveWindow(t);
 
-    if (!fvFired && t >= 4800) {
+    if (!fvFired && t >= 4800 + SHIFT) {
       fvFired = true;
       document.body.classList.add('intro-revealed');
       overlay.classList.add('is-page');
       startFV();
     }
-    if (!handed && t >= 12150) {
+    if (!handed && t >= 12150 + SHIFT) {
       handed = true;
       settleLines();                       /* hero 側が同一形状で引き継ぐ */
       needActors(0);
