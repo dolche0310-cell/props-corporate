@@ -821,7 +821,10 @@ html.splash-lock, html.splash-lock body { overflow: hidden; }
   .hero--brushup .hero__blob--1 {
     width: 508px; height: 508px;
     left: calc(50% - 793px);   /* -73 - 720 */
-    top: 6px;                  /* 96 - 90 */
+    top: 106px;                /* 96 - 90 に指示で +100px */
+    /* 最背面。文字やグラフィックの上に載せない(hero は透明なので
+       z-index:-1 でもルートの白キャンバスより手前に描かれる) */
+    z-index: -1;
   }
   .hero--brushup .hero__blob--2 {
     width: 508px; height: 508px;
