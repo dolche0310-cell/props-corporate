@@ -129,6 +129,33 @@
         requestAnimationFrame(updateHeaderVisibility);
       }
     }, { passive: true });
+
+    // ヘッダーは面を持たないので、暗いセクションに重なると黒い文字と
+    // ロゴが沈んで読めなくなる。帯の中心が暗い面の上にある間だけ
+    // .is-on-dark を付けて白へ反転する。
+    var darkPanels = document.querySelectorAll('.service__panel, .contact--card');
+    if (darkPanels.length) {
+      var darkTicking = false;
+      var updateHeaderTone = function () {
+        darkTicking = false;
+        var band = siteHeader.getBoundingClientRect();
+        var mid = band.top + band.height / 2;
+        var on = false;
+        for (var i = 0; i < darkPanels.length; i++) {
+          var r = darkPanels[i].getBoundingClientRect();
+          if (r.top <= mid && r.bottom >= mid) { on = true; break; }
+        }
+        siteHeader.classList.toggle('is-on-dark', on);
+      };
+      updateHeaderTone();
+      window.addEventListener('scroll', function () {
+        if (!darkTicking) {
+          darkTicking = true;
+          requestAnimationFrame(updateHeaderTone);
+        }
+      }, { passive: true });
+      window.addEventListener('resize', updateHeaderTone, { passive: true });
+    }
   }
 
   var form = document.getElementById('contact-form');

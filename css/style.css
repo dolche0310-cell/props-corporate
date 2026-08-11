@@ -470,6 +470,13 @@ button { font: inherit; }
     text-transform: uppercase;
   }
   .site-header--brushup .nav__link { color: #191919; }
+  /* ヘッダーに面を持たせない構成なので、暗いセクションに重なると
+     黒い文字とロゴが沈んで読めなくなる。重なっている間だけ白へ反転する。
+     判定は js/main.js(ヘッダー帯の中心が暗い面に入っているか)。 */
+  .site-header--brushup .logo__mark,
+  .site-header--brushup .nav__link { transition: color .3s ease, filter .3s ease; }
+  .site-header--brushup.is-on-dark .nav__link { color: #F4F4F4; }
+  .site-header--brushup.is-on-dark .logo__mark { filter: invert(1) brightness(1.6); }
   /* CONTACT 215:23948 は 117x28 のピル。ここだけ角丸を持つ。
      地の色は各案の --color-primary(A-1 は Figma と同じ #F16E36)。 */
   .site-header--brushup .nav__cta {
