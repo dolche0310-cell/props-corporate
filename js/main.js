@@ -130,32 +130,20 @@
       }
     }, { passive: true });
 
-    // ヘッダーは面を持たないので、暗いセクションに重なると黒い文字と
-    // ロゴが沈んで読めなくなる。帯の中心が暗い面の上にある間だけ
-    // .is-on-dark を付けて白へ反転する。
-    var darkPanels = document.querySelectorAll('.service__panel, .contact--card');
-    if (darkPanels.length) {
-      var darkTicking = false;
-      var updateHeaderTone = function () {
-        darkTicking = false;
-        var band = siteHeader.getBoundingClientRect();
-        var mid = band.top + band.height / 2;
-        var on = false;
-        for (var i = 0; i < darkPanels.length; i++) {
-          var r = darkPanels[i].getBoundingClientRect();
-          if (r.top <= mid && r.bottom >= mid) { on = true; break; }
-        }
-        siteHeader.classList.toggle('is-on-dark', on);
-      };
-      updateHeaderTone();
-      window.addEventListener('scroll', function () {
-        if (!darkTicking) {
-          darkTicking = true;
-          requestAnimationFrame(updateHeaderTone);
-        }
-      }, { passive: true });
-      window.addEventListener('resize', updateHeaderTone, { passive: true });
-    }
+    // Figma のヘッダーは面を持たない。最上部では素のまま出し、
+    // スクロールして本文に重なっている間だけ半調の白を敷く。
+    var overlapTicking = false;
+    var updateHeaderPlate = function () {
+      overlapTicking = false;
+      siteHeader.classList.toggle('is-overlapping', window.scrollY > 8);
+    };
+    updateHeaderPlate();
+    window.addEventListener('scroll', function () {
+      if (!overlapTicking) {
+        overlapTicking = true;
+        requestAnimationFrame(updateHeaderPlate);
+      }
+    }, { passive: true });
   }
 
   var form = document.getElementById('contact-form');

@@ -20,6 +20,10 @@
   --font-logo: 'Belanosima', var(--font-jp);
   --font-en: 'Inter', var(--font-jp);
   --font-display: 'Abril Fatface', serif;
+  /* Figma は Futura Medium。Web フォントとして配布できないため、Futura を基にした
+     Jost(Google Fonts)を代替に置き、ローカルに Futura がある環境ではそちらを優先。
+     アウトライン化済みの字(FV の AI Shift / MiAI ロゴ)は SVG なので対象外。 */
+  --font-futura: 'Futura', 'Futura PT', 'Jost', 'Century Gothic', var(--font-jp);
   --font-alata: 'Alata', var(--font-jp);   /* ボタン・見出し・タイトル */
   --font-gugi: 'Gugi', var(--font-en);
 
@@ -366,7 +370,7 @@ button { font: inherit; }
 .label__eyebrow {
   display: block;
   margin: 0;
-  font-family: var(--font-alata);
+  font-family: var(--font-futura);
   font-weight: 400;
   font-size: 16px;
   line-height: 1.8;
@@ -439,7 +443,9 @@ button { font: inherit; }
    CONTACT ボタンだけ。左右の位置は他セクションと同じ .wrap の余白に従う。 */
 @media (min-width: 768px) {
   .site-header--brushup {
+    position: sticky;
     top: 20px;
+    isolation: isolate;
     background: none;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
@@ -456,6 +462,21 @@ button { font: inherit; }
     border-radius: 0;
     box-shadow: none;
   }
+  /* Figma のヘッダーは面を持たないが、スクロールで本文に重なると
+     読めなくなる。最上部は素のまま、重なっている間だけ半調の白を
+     全幅に敷いて可読性を確保する(角丸や枠線は出さない)。 */
+  .site-header--brushup::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: rgba(255, 255, 255, .72);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    opacity: 0;
+    transition: opacity .3s ease;
+  }
+  .site-header--brushup.is-overlapping::before { opacity: 1; }
   /* miai_logo 215:23935 */
   .site-header--brushup .logo__mark { width: 104.613px; height: 38.098px; }
   /* nav-links 215:23942 (611x28)。Alata Regular 16px / tracking .8px /
@@ -463,20 +484,14 @@ button { font: inherit; }
   .site-header--brushup .nav { gap: 40px; }
   .site-header--brushup .nav__link,
   .site-header--brushup .nav__cta-label {
-    font-family: var(--font-alata);
+    font-family: var(--font-futura);
     font-size: 16px;
     font-weight: 400;
     letter-spacing: .8px;
     text-transform: uppercase;
   }
   .site-header--brushup .nav__link { color: #191919; }
-  /* ヘッダーに面を持たせない構成なので、暗いセクションに重なると
-     黒い文字とロゴが沈んで読めなくなる。重なっている間だけ白へ反転する。
-     判定は js/main.js(ヘッダー帯の中心が暗い面に入っているか)。 */
-  .site-header--brushup .logo__mark,
-  .site-header--brushup .nav__link { transition: color .3s ease, filter .3s ease; }
-  .site-header--brushup.is-on-dark .nav__link { color: #F4F4F4; }
-  .site-header--brushup.is-on-dark .logo__mark { filter: invert(1) brightness(1.6); }
+
   /* CONTACT 215:23948 は 117x28 のピル。ここだけ角丸を持つ。
      地の色は各案の --color-primary(A-1 は Figma と同じ #F16E36)。 */
   .site-header--brushup .nav__cta {
@@ -1781,7 +1796,8 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: 1.04s; }
   box-sizing: border-box;
   width: 12px;
   height: 8px;
-  border: 1px solid #ED5303;
+  /* 指示によりモノトーン。ボタンの枠・文字と同じ白で統一する */
+  border: 1px solid currentColor;
   border-radius: 1px;
   transition: transform .45s cubic-bezier(.22, 1, .36, 1),
               border-color .45s ease, background-color .45s ease;
@@ -1799,7 +1815,7 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: 1.04s; }
   .service--brushup .service__link:hover { border-color: var(--color-primary); }
   .service--brushup .service__link:hover .service__link-icon { transform: translateX(3px); }
   /* 2枚がわずかに開いて奥行きが出る */
-  .service--brushup .service__link:hover .service__link-icon span { border-color: #fff; }
+  /* ホバーで面が満ちても、線は currentColor(白)のまま自然に馴染む */
   .service--brushup .service__link:hover .service__link-icon span:first-child { transform: translate(1.5px, -1.5px); }
   .service--brushup .service__link:hover .service__link-icon span:last-child {
     transform: translate(-1.5px, 1.5px);
@@ -1873,7 +1889,7 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: 1.04s; }
 .service--brushup .service__marquee-track span {
   flex-shrink: 0;
   padding-right: .5em;
-  font-family: var(--font-alata);
+  font-family: var(--font-futura);
   font-size: clamp(40px, 11vw, 96px);
   letter-spacing: .12em;
   line-height: 1.7;
@@ -2114,7 +2130,7 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: 1.04s; }
   align-items: center;
   gap: 10px;
   margin-bottom: 32px;
-  font-family: var(--font-alata);
+  font-family: var(--font-futura);
   font-size: 14px;
   letter-spacing: .08em;
   color: var(--color-ink);
@@ -2409,7 +2425,7 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: 1.04s; }
   .contact__card { padding: 60px 100px; }
 }
 .contact__heading {
-  font-family: var(--font-alata);
+  font-family: var(--font-futura);
   font-size: 24px;
   font-weight: 400;
   letter-spacing: 1.2px;
@@ -2621,7 +2637,7 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: 1.04s; }
 .about--figma .abt__en {
   left: 0;
   top: calc(var(--u) * 41);
-  font-family: var(--font-alata);
+  font-family: var(--font-futura);
   font-weight: 400;
   font-size: calc(var(--u) * 24);
   line-height: 1.8;
@@ -2858,7 +2874,7 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: 1.04s; }
 }
 .company--figma .cmp__en {
   display: block;
-  font-family: var(--font-alata);
+  font-family: var(--font-futura);
   font-weight: 400;
   font-size: calc(var(--u) * 24);
   line-height: 1.8;
