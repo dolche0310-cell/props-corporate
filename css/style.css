@@ -1921,14 +1921,15 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: 1.04s; }
 .service__loop-video { background: #05070a; }
 
 /* 02 の面の映像。
-   ・contain で内側に収め、外周を切らない(素材16:9 とスロット 471/265 の
-     差は 0.02% なので余白は 0.03px。地色を敷いて縁が出ないようにする)
-   ・地色のネイビーを 01 の映像の背景実測値 #1b1c1e へ寄せる補正
-     (HTML 側 filter#miai-warm。チャンネル別ゲイン+オフセットで
-      白は白のまま。オレンジは青被りが抜けてブランド色に近づく) */
-.service--brushup .service__image--02 { background: #1b1c1e; }
+   ・cover + center で中央トリミング(素材16:9 とスロット 471/265 の差は
+     0.02% なので実質フル画角のまま中央に収まる)
+   ・素材のマゼンタ/シアンのネオンを、輝度基準のグラデーションマップで
+     サイトのダークグレー〜オレンジ(#F16E36)の階調へ置き換える
+     (HTML 側 filter#miai-warm)。色相回転だとシアンが別の色に化けるため
+     使わない。 */
+.service--brushup .service__image--02 { background: #0C0C0D; }
 .service--brushup .service__image--02 video {
-  object-fit: contain;
+  object-fit: cover;
   object-position: center;
   filter: url(#miai-warm);
 }
