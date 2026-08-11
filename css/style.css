@@ -529,38 +529,39 @@ button { font: inherit; }
     border: none;
   }
   .site-header--brushup .nav__cta::before { display: none; }
-  /* ホバー: 面が締まり、影がわずかに立って浮く。押下: 沈む。
-     色を薄めるだけの反応(opacity .88)をやめ、手応えのある動きにする。 */
+  /* ホバー: 暗い面が下から満ちて色が入れ替わる(richka の Contact と同じ考え方)。
+     影は使わない。位置も動かさない。面の置換だけで反応させる。 */
   .site-header--brushup .nav__cta {
-    transform-origin: center;
-    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
-    transition:
-      transform .38s cubic-bezier(.22, 1, .36, 1),
-      box-shadow .38s cubic-bezier(.22, 1, .36, 1),
-      filter .38s ease;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    box-shadow: none;
+    transition: color .34s cubic-bezier(.22, 1, .36, 1);
+  }
+  .site-header--brushup .nav__cta::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--color-ink);
+    transform: translateY(101%);
+    transition: transform .46s cubic-bezier(.65, 0, .35, 1);
   }
   .site-header--brushup .nav__cta-label {
+    position: relative;
+    z-index: 1;
     display: inline-block;
-    transition: transform .38s cubic-bezier(.22, 1, .36, 1);
   }
   @media (hover: hover) and (pointer: fine) {
-    .site-header--brushup .nav__cta:hover {
-      color: #fff;
-      opacity: 1;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, .16);
-      filter: saturate(1.06);
-    }
-    .site-header--brushup .nav__cta:hover .nav__cta-label { transform: translateY(-.5px); }
+    .site-header--brushup .nav__cta:hover { color: #fff; opacity: 1; }
+    .site-header--brushup .nav__cta:hover::after { transform: translateY(0); }
   }
-  .site-header--brushup .nav__cta:active {
-    transform: translateY(0) scale(.97);
-    box-shadow: 0 1px 4px rgba(0, 0, 0, .14);
-    transition-duration: .1s;
-  }
+  /* 押下は面がわずかに締まるだけ。跳ねさせない */
+  .site-header--brushup .nav__cta:active::after { transform: translateY(0) scale(1.04); }
   @media (prefers-reduced-motion: reduce) {
     .site-header--brushup .nav__cta,
-    .site-header--brushup .nav__cta-label { transition: none; }
+    .site-header--brushup .nav__cta::after { transition: none; }
   }
 }
 .logo {
