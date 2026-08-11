@@ -1531,7 +1531,7 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .86s; }
   .service--brushup .service__list > .label {
     position: absolute;
     left: 0;
-    top: calc(var(--su) * -184);   /* ステージ上端(y274) から Frame 152(y90) へ */
+    top: calc(var(--su) * 90);     /* Frame 152 (215:24002) y=90 */
     margin-bottom: 0;
   }
   .service--brushup .service__list { overflow: visible; }
