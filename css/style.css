@@ -2287,34 +2287,32 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .65s; }
   display: block;
 }
 
-/* 粒子アニメーション(Figma 257:27640)。ステージは 498.476x280.393 で、
-   その中のロゴ矩形 132.408/97.649/233.661x85.094 が上の枠に重なるように置く。
-   縦の指定も幅基準(margin-top の % は幅解決)にしてあるので、
-   枠の高さが auto になる SP でもズレない。 */
+/* ロゴの立ち上がり(js/about-logo-reveal.js)。
+   形・比率・字間・黒は一切変えない。輪郭を鈍らせる処理も入れない。 */
 .abt__logo-wrap { position: absolute; }
-.abt__logo-mark { display: block; width: 100%; height: 100%; }
-.abt__logo-fx {
-  position: absolute;
-  left: -56.667%;            /* -132.408 / 233.661 */
-  top: 0;
-  margin-top: -41.79%;       /* -97.649 / 233.661 */
-  width: 213.33%;            /*  498.476 / 233.661 */
-  aspect-ratio: 498.476 / 280.393;
-  overflow: visible;
-  pointer-events: none;
+.abt__logo-mark {
+  display: block;
+  width: 100%;
+  height: 100%;
+  shape-rendering: geometricPrecision;
 }
-/* 演出中は静止ロゴを伏せる。終わったらステージを外して静止ロゴへ戻す */
-.abt__logo-wrap.is-playing .abt__logo-mark { visibility: hidden; }
-.abt__logo-wrap.is-done .abt__logo-fx { display: none; }
-.abt__logo-wrap.is-done .abt__logo-mark { visibility: visible; }
-.lm-dust, .lm-solid, .lm-glow { will-change: opacity, transform; }
-.lm-p { transform-box: fill-box; transform-origin: center; }
-/* 遮蔽の円は r ではなく scale で広げる(SVG属性の r は CSS で動かせない) */
-.lm-reveal-c { transform-box: fill-box; transform-origin: center; transform: scale(0); }
+/* 止まったあとは変形を残さない。静止した形が最もシャープに出る状態にする */
+.abt__logo-wrap.is-done { opacity: 1; transform: none; }
+.abt__logo-wrap.is-playing { will-change: opacity, transform; }
+.abt__logo-reveal { transform-box: fill-box; transform-origin: center; }
+
+/* キャッチ → 本文はロゴが決まってから。既存の .reveal に遅延だけ足す。
+   移動量も 28px から 8px に落として、ロゴと同じ静かさに揃える。 */
+.js-reveal .abt__catch.reveal,
+.js-reveal .abt__body.reveal { transform: translateY(8px); }
+.js-reveal .abt__catch.reveal { transition-delay: 1s; }
+.js-reveal .abt__body.reveal { transition-delay: 1.09s; }
 
 @media (prefers-reduced-motion: reduce) {
-  .abt__logo-fx { display: none; }
-  .abt__logo-mark { visibility: visible; }
+  .abt__logo-wrap { opacity: 1 !important; transform: none !important; }
+  .js-reveal .abt__catch.reveal,
+  .js-reveal .abt__body.reveal { transition-delay: 0s; }
+}
 }
 /* キャッチ(215:22676): main内 x=420 y=64 / w740 / LINE Seed JP 24px
    lh1.8 / ls0.96px / #191919 */
