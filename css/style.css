@@ -2436,7 +2436,8 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .65s; }
    画像側は cover で埋め、横に引き伸ばして歪ませない。 */
 .company--figma .cmp__photo {
   position: absolute;
-  left: calc(var(--u) * 563);
+  /* Figma 232:27398。写真はセクション全面(以前は左563から右だけだった) */
+  left: 0;
   /* フレームは 1442px で頭打ち。right:0 だと広い画面で枠の外に白が残るので、
      フレーム右外の余白ぶんだけ負のrightで伸ばして画面右端に到達させる。
      100vw ではなくルート幅基準にして、スクロールバー分の過剰はみ出しを防ぐ。 */
@@ -2454,10 +2455,11 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .65s; }
   object-position: right center;
 }
 /* ラベル(215:23995 x92 y91)。en 24/1.8 が43.2高なので ja は自然に y43 に乗る */
+/* Frame 151 (215:23995): x=92 y=51 */
 .company--figma .cmp__label {
   position: absolute;
   left: calc(var(--u) * 92);
-  top: calc(var(--u) * 91);
+  top: calc(var(--u) * 51);
 }
 .company--figma .cmp__en {
   display: block;
@@ -2478,12 +2480,13 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .65s; }
   color: #191919;
 }
 /* 白カード(257:27658 x69 y274 680x425 pad24) */
+/* Frame 166 (257:27658): x=309 y=51 / 680x388 / 内側 24 */
 .company--figma .cmp__card {
   position: absolute;
-  left: calc(var(--u) * 69);
-  top: calc(var(--u) * 274);
+  left: calc(var(--u) * 309);
+  top: calc(var(--u) * 51);
   width: calc(var(--u) * 680);
-  height: calc(var(--u) * 425);
+  height: calc(var(--u) * 388);
   padding: calc(var(--u) * 24);
   background: #fff;
   display: flex;
