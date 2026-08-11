@@ -404,7 +404,9 @@ html.splash-lock, html.splash-lock body { overflow: hidden; }
   .site-header--brushup::before {
     content: '';
     position: absolute;
-    inset: 0;
+    /* sticky の待機位置が top:20px なので、プレートを上に20px延長して
+       画面上端との間に隙間が出ないようにする */
+    inset: -20px 0 0;
     z-index: -1;
     background: rgba(255, 255, 255, .72);
     backdrop-filter: blur(10px);
@@ -1052,17 +1054,28 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .80s; }
   .hero__desc--brushup p { opacity: 1; transform: none; filter: none; transition: none; }
 }
 
-/* ヘッダーはFV形成後半(fv-in + .9s)で静かに立つ */
-.site-header--brushup {
+/* ヘッダーの登場はFV形成後半(fv-in + .9s)。登場は内側(inner)が担い、
+   ヘッダー本体の transform はスクロール開閉(.is-hidden)専用にする。
+   同じ要素に載せると開閉にも .9s の遅延が掛かって鈍くなるため分離。 */
+.site-header--brushup .site-header__inner {
   opacity: 0;
   transform: translateY(-6px);
   transition:
     opacity   .7s cubic-bezier(.22, 1, .36, 1) .9s,
     transform .7s cubic-bezier(.22, 1, .36, 1) .9s;
 }
-body.fv-in .site-header--brushup { opacity: 1; transform: none; }
+body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: none; }
+/* 下スクロールで上に閉じ、上スクロールで現れる(js/main.js が .is-hidden を制御)。
+   sticky の待機位置(top:20px)と半調プレートの上への延長(20px)も含めて
+   完全に画面外へ逃がすため -24px 余分に引き上げる。 */
+.site-header--brushup {
+  transition: transform .45s cubic-bezier(.22, 1, .36, 1);
+  will-change: transform;
+}
+.site-header--brushup.is-hidden { transform: translateY(calc(-100% - 24px)); }
 @media (prefers-reduced-motion: reduce) {
-  .site-header--brushup { opacity: 1; transform: none; transition: none; }
+  .site-header--brushup { transition: none; }
+  .site-header--brushup .site-header__inner { opacity: 1; transform: none; transition: none; }
 }
 
 /* ===========================================================
@@ -1797,11 +1810,10 @@ body.fv-in .site-header--brushup { opacity: 1; transform: none; }
 /* 02 の面の映像。
    ・cover + center で中央トリミング(素材16:9 とスロット 471/265 の差は
      0.02% なので実質フル画角のまま中央に収まる)
-   ・素材の色は残しつつ、彩度 0.56 / R x1.11・B x0.79 の暖色寄せと、
-     暗部をわずかに持ち上げる緩いトーンカーブを掛ける。CG そのままの
-     硬さを和らげるためで、セピアやモノトーンには寄せない
-     (HTML 側 filter#miai-warm)。 */
-.service--brushup .service__image--02 { background: #241C1B; }
+   ・色は素材の色相そのまま。1本目の動画に合わせてニュートラル寄りに、
+     彩度 0.92 / コントラスト 1.26 / 黒 8% 締め + アンシャープ
+     (HTML 側 filter#miai-warm)。オレンジ寄せ・セピア化はしない。 */
+.service--brushup .service__image--02 { background: #101013; }
 .service--brushup .service__image--02 video {
   object-fit: cover;
   object-position: center;

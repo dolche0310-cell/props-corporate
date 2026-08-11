@@ -42,8 +42,9 @@
     </div>
   </div>
 </div>
+<script src="js/splash-shapes.js"></script>
 <script src="js/splash.js"></script>
-<noscript><style>.intro-overlay{display:none!important}.hero__intro-item,.kv-pill.hero__intro-item,.hero__desc--brushup p{opacity:1!important;transform:none!important;filter:none!important}.hero__blob{opacity:.8!important}.hero__lines .hl{opacity:1!important;stroke-dasharray:none!important;stroke-dashoffset:0!important}.site-header--brushup{opacity:1!important;transform:none!important}</style></noscript>
+<noscript><style>.intro-overlay{display:none!important}.hero__intro-item,.kv-pill.hero__intro-item,.hero__desc--brushup p{opacity:1!important;transform:none!important;filter:none!important}.hero__blob{opacity:.8!important}.hero__lines .hl{opacity:1!important;stroke-dasharray:none!important;stroke-dashoffset:0!important}.site-header--brushup .site-header__inner{opacity:1!important;transform:none!important}</style></noscript>
 
 <header class="site-header site-header--brushup" id="site-header">
   <div class="wrap site-header__inner">
@@ -204,24 +205,22 @@
                     <h3 class="service__title">法人向けAI活用支援 / AI開発</h3>
                     <p class="service__desc">企業の顧客コミュニケーション・業務効率化分野でのAI技術の活用・システム開発のご支援をしています。企業ごとのAI活用、集客・業務課題に応じてコンサルタントが最適なパッケージをご提案いたします。ホームページよりお問い合わせください。</p>
                   </div>
-                  <!-- 02 の面はループ動画。スロットは 01 の面と同じ 471x265 のまま、
-                       素材を中央でトリミングして収める。
-                       色は素材の色を残しつつ、彩度を落として色温度を暖色へ寄せ、
-                       暗部をわずかに持ち上げる緩いトーンカーブを掛ける。
-                       CG そのままの硬さを和らげる目的で、モノトーンや
-                       セピアには寄せない。poster にも同じフィルタが掛かる。 -->
+                  <!-- 02 の面はループ動画。スロットは 01 の面と同じ 471x265、
+                       中央トリミング(scale1.2 上寄せ)。
+                       色は素材の色相そのままに、1本目の動画に合わせて
+                       ニュートラル寄りへ: 彩度 0.92 / コントラスト 1.26 /
+                       黒を 8% 締め、アンシャープで輪郭を立てる。
+                       オレンジ寄せ・セピア化はしない。 -->
                   <svg class="service__grade-def" aria-hidden="true" focusable="false" width="0" height="0"><defs>
                     <filter id="miai-warm" color-interpolation-filters="sRGB">
-                      <feColorMatrix type="saturate" values="0.56"/>
-                      <feColorMatrix type="matrix" values="1.11 0 0 0 0
-                                                           0 1 0 0 0
-                                                           0 0 0.79 0 0
-                                                           0 0 0 1 0"/>
+                      <feColorMatrix type="saturate" values="0.92"/>
                       <feComponentTransfer>
-                        <feFuncR type="table" tableValues="0.035 0.135 0.245 0.370 0.505 0.640 0.770 0.885 0.985"/>
-                        <feFuncG type="table" tableValues="0.030 0.120 0.225 0.345 0.475 0.610 0.745 0.868 0.975"/>
-                        <feFuncB type="table" tableValues="0.038 0.118 0.212 0.322 0.445 0.575 0.708 0.840 0.960"/>
+                        <feFuncR type="linear" slope="1.26" intercept="-0.08"/>
+                        <feFuncG type="linear" slope="1.26" intercept="-0.08"/>
+                        <feFuncB type="linear" slope="1.26" intercept="-0.08"/>
                       </feComponentTransfer>
+                      <feConvolveMatrix order="3" kernelMatrix="0 -0.4 0 -0.4 2.6 -0.4 0 -0.4 0"
+                                        edgeMode="duplicate" preserveAlpha="true"/>
                     </filter>
                   </defs></svg>
                   <div class="service__image service__image--02">
