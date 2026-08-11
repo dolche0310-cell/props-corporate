@@ -1847,10 +1847,11 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: 1.56s; }
 /* 02 の面の映像。
    ・cover + center で中央トリミング(素材16:9 とスロット 471/265 の差は
      0.02% なので実質フル画角のまま中央に収まる)
-   ・色は素材のまま活かす。彩度をわずかに落とし(0.82)、色温度だけを
-     サイトのオレンジ側へ少し寄せる(R x1.07 / B x0.85)。
-     セピア化やモノトーン化はしない(HTML 側 filter#miai-warm)。 */
-.service--brushup .service__image--02 { background: #221B20; }
+   ・素材の色は残しつつ、彩度 0.56 / R x1.11・B x0.79 の暖色寄せと、
+     暗部をわずかに持ち上げる緩いトーンカーブを掛ける。CG そのままの
+     硬さを和らげるためで、セピアやモノトーンには寄せない
+     (HTML 側 filter#miai-warm)。 */
+.service--brushup .service__image--02 { background: #241C1B; }
 .service--brushup .service__image--02 video {
   object-fit: cover;
   object-position: center;
