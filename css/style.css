@@ -1941,6 +1941,94 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .65s; }
 }
 
 /* ===========================================================
+   News 行レイアウト(参考: proto-review c-top?c=3#news)
+   日付 | タグ+タイトル+抜粋 | 写真 | → の並び。区切り線のリストで、
+   行ホバーで矢印がプライマリになり右へ滑る。写真は残す。
+   装飾は props の流儀(インク基調 + --color-primary のアクセント)。
+   =========================================================== */
+.news__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+}
+.news__head .label { margin-bottom: 28px; }
+.news__more {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 32px;
+  font-family: var(--font-alata);
+  font-size: 14px;
+  letter-spacing: .08em;
+  color: var(--color-ink);
+  text-decoration: none;
+}
+.news__more-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid var(--color-ink);
+  border-radius: 50%;
+  color: var(--color-ink);
+  transition: background-color .35s cubic-bezier(.22, 1, .36, 1),
+              border-color .35s ease, color .35s ease, transform .35s ease;
+}
+.news__more-circle svg { width: 11px; height: 11px; }
+@media (hover: hover) and (pointer: fine) {
+  .news__more:hover .news__more-circle {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: #fff;
+    transform: translate(1px, -1px);
+  }
+}
+
+.news__tags {
+  display: flex;
+  align-items: center;
+  margin: 0 0 10px;
+  font-family: var(--font-jp);
+  font-size: 12px;
+  font-weight: 600;
+  color: #191919;
+}
+.news__tags span + span {
+  margin-left: 10px;
+  padding-left: 10px;
+  border-left: 1px solid #C9C9C9;
+}
+
+.news__list--rows .news__item { position: relative; }
+.news__arrow {
+  display: none;
+  color: #9A9A9A;
+  transition: color .3s ease, transform .45s cubic-bezier(.22, 1, .36, 1);
+}
+.news__arrow svg { width: 18px; height: 15px; display: block; }
+@media (min-width: 768px) {
+  .news__arrow {
+    display: block;
+    order: 4;
+    align-self: center;
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+  .news__list--rows .news__item { align-items: center; }
+  .news__list--rows .news__date { align-self: center; }
+}
+.news__list--rows .news__title { transition: color .3s ease; }
+@media (hover: hover) and (pointer: fine) {
+  .news__item:hover .news__arrow { color: var(--color-primary); transform: translateX(5px); }
+  .news__item:hover .news__title { color: var(--color-primary); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .news__more-circle, .news__arrow, .news__list--rows .news__title { transition: none; }
+}
+
+/* ===========================================================
    Team
    =========================================================== */
 .team {
