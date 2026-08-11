@@ -108,7 +108,7 @@ button { font: inherit; }
 }
 .intro-overlay--splash.is-hiding { opacity: 0; pointer-events: none; }
 
-.splash__stage { position: relative; width: min(300px, 56vw); }
+.splash__stage { position: relative; width: min(190px, 40vw); }
 .splash__svg {
   display: block;
   width: 100%;
@@ -117,37 +117,37 @@ button { font: inherit; }
   shape-rendering: geometricPrecision;
 }
 
-/* 文字。Mi → AI の順に静かに立ち上がる(About のロゴと同じ質感) */
+/* 文字は holon のスプラッシュのように、下から1文字ずつ滑り上がって出る。
+   帯(splash-band)で切っているので、下にいる文字は見えない。
+   光らせない。バウンドさせない。 */
 .splash__letter {
-  opacity: 0;
-  transform: translateY(6px);
-  transform-box: fill-box;
-  transform-origin: center;
+  transform: translateY(110px);
+  transform-box: view-box;
 }
-.is-run .splash__letter { animation: splash-letter .6s cubic-bezier(.16, 1, .3, 1) both; }
-.is-run .splash__letter--m { animation-delay: .15s; }
-.is-run .splash__letter--i { animation-delay: .27s; }
-.is-run .splash__letter--a { animation-delay: .75s; }
-.is-run .splash__letter--l { animation-delay: .87s; }
-@keyframes splash-letter {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-/* 1.85s: 文字が静かに解けて消える(ドットだけが残る) */
-.is-run .splash__letter { animation-name: splash-letter, splash-letter-out; }
-.is-run .splash__letter--m { animation-delay: .15s, 1.85s; }
-.is-run .splash__letter--i { animation-delay: .27s, 1.85s; }
-.is-run .splash__letter--a { animation-delay: .75s, 1.9s; }
-.is-run .splash__letter--l { animation-delay: .87s, 1.9s; }
 .is-run .splash__letter {
-  animation-duration: .6s, .45s;
-  /* out 側は forwards。both だと開始前に「from(=表示)」が逆流して、
-     立ち上がりが見えなくなる */
+  animation: splash-letter .72s cubic-bezier(.22, 1, .36, 1) both;
+}
+.is-run .splash__letter--m { animation-delay: .15s; }
+.is-run .splash__letter--i { animation-delay: .24s; }
+.is-run .splash__letter--a { animation-delay: .33s; }
+.is-run .splash__letter--l { animation-delay: .42s; }
+@keyframes splash-letter {
+  from { transform: translateY(110px); }
+  to   { transform: translateY(0); }
+}
+/* 1.70s: 文字が静かに消える(ドットだけが残る) */
+.is-run .splash__letter { animation-name: splash-letter, splash-letter-out; }
+.is-run .splash__letter--m { animation-delay: .15s, 1.7s; }
+.is-run .splash__letter--i { animation-delay: .24s, 1.7s; }
+.is-run .splash__letter--a { animation-delay: .33s, 1.74s; }
+.is-run .splash__letter--l { animation-delay: .42s, 1.74s; }
+.is-run .splash__letter {
+  animation-duration: .72s, .4s;
   animation-fill-mode: both, forwards;
 }
 @keyframes splash-letter-out {
-  from { opacity: 1; filter: blur(0); }
-  to   { opacity: 0; filter: blur(2px); }
+  from { opacity: 1; }
+  to   { opacity: 0; }
 }
 
 /* i のドット。文字が消える直前に同じ位置へオレンジで灯り、
@@ -159,9 +159,9 @@ button { font: inherit; }
 }
 .is-run .splash__dot {
   animation:
-    splash-dot-in   .3s ease            1.75s both,
-    splash-dot-grow .5s cubic-bezier(.65, 0, .35, 1) 2.15s both,
-    splash-dot-out  .3s ease            2.75s forwards;
+    splash-dot-in   .28s ease           1.6s both,
+    splash-dot-grow .5s cubic-bezier(.65, 0, .35, 1) 2.0s both,
+    splash-dot-out  .28s ease           2.6s forwards;
 }
 @keyframes splash-dot-in   { from { opacity: 0 } to { opacity: 1 } }
 @keyframes splash-dot-grow {
@@ -176,7 +176,7 @@ button { font: inherit; }
   transform-origin: center;
 }
 .is-run .splash__orbit {
-  animation: splash-orbit-turn 1.4s cubic-bezier(.3, 0, .2, 1) 2.45s both;
+  animation: splash-orbit-turn 1.3s cubic-bezier(.3, 0, .2, 1) 2.3s both;
 }
 @keyframes splash-orbit-turn {
   from { transform: rotate(-24deg); }
@@ -193,13 +193,13 @@ button { font: inherit; }
     splash-blob-in  .5s cubic-bezier(.22, 1, .36, 1) both,
     splash-blob-out .55s ease forwards;
 }
-.is-run .splash__blob--1 { animation-delay: 2.45s, 2.95s; }
-.is-run .splash__blob--2 { animation-delay: 2.51s, 2.98s; }
-.is-run .splash__blob--3 { animation-delay: 2.57s, 3.01s; }
-.is-run .splash__blob--4 { animation-delay: 2.63s, 3.04s; }
-.is-run .splash__blob--5 { animation-delay: 2.69s, 3.07s; }
-.is-run .splash__blob--6 { animation-delay: 2.75s, 3.10s; }
-.is-run .splash__blob--7 { animation-delay: 2.81s, 3.13s; }
+.is-run .splash__blob--1 { animation-delay: 2.30s, 2.80s; }
+.is-run .splash__blob--2 { animation-delay: 2.36s, 2.83s; }
+.is-run .splash__blob--3 { animation-delay: 2.42s, 2.86s; }
+.is-run .splash__blob--4 { animation-delay: 2.48s, 2.89s; }
+.is-run .splash__blob--5 { animation-delay: 2.54s, 2.92s; }
+.is-run .splash__blob--6 { animation-delay: 2.60s, 2.95s; }
+.is-run .splash__blob--7 { animation-delay: 2.66s, 2.98s; }
 @keyframes splash-blob-in {
   from { opacity: 0; transform: scale(.2); }
   to   { opacity: 1; transform: scale(1); }
@@ -224,7 +224,7 @@ button { font: inherit; }
   pointer-events: none;
 }
 .is-run .splash__bloom {
-  animation: splash-bloom .7s cubic-bezier(.22, 1, .36, 1) 2.95s both;
+  animation: splash-bloom .7s cubic-bezier(.22, 1, .36, 1) 2.8s both;
 }
 @keyframes splash-bloom {
   from { opacity: 0; transform: scale(.9); }
@@ -1459,11 +1459,17 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .65s; }
   padding-inline: clamp(20px, 6.4vw, 92px);
 }
 @media (min-width: 768px) {
-  .service--brushup .service__panel { padding-block: 0; }
+  .service--brushup .service__panel {
+    padding-block: 0;
+    /* ステージと同じ 1su。ラベルを本文の文頭に合わせるために使う */
+    --su: min(1px, 0.0796178cqw);
+  }
   /* Frame 152: x92 y90。1440 で 92/90、狭い幅では同率で追従 */
   .service--brushup .service__panel > .label {
     position: absolute;
-    left: clamp(20px, 6.4vw, 92px);
+    /* 文頭(本文 Frame 147 の左端)に揃える。Figma の素の座標は 92 だが、
+       本文が 132 から始まるため、ラベルだけ 40px 外に出て見えていた。 */
+    left: calc(clamp(20px, 6.4vw, 92px) + var(--su, 1px) * 40);
     top: clamp(48px, 6.25vw, 90px);
     margin-bottom: 0;
   }
@@ -1954,6 +1960,12 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .65s; }
 }
 .news__head .label { margin-bottom: 28px; }
 .news__more {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  /* 遷移先がまだ無いので押しても何も起きない。見た目と手応えだけ残す */
+  cursor: default;
   display: inline-flex;
   align-items: center;
   gap: 10px;
@@ -1968,15 +1980,15 @@ body.fv-in .hero__desc--brushup p:nth-child(2) { transition-delay: .65s; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 26px;
+  height: 26px;
   border: 1.5px solid var(--color-ink);
   border-radius: 50%;
   color: var(--color-ink);
   transition: background-color .35s cubic-bezier(.22, 1, .36, 1),
               border-color .35s ease, color .35s ease, transform .35s ease;
 }
-.news__more-circle svg { width: 11px; height: 11px; max-width: 100%; }
+.news__more-circle svg { width: 13px; height: 11px; max-width: 100%; }
 @media (hover: hover) and (pointer: fine) {
   .news__more:hover .news__more-circle {
     background: var(--color-primary);
