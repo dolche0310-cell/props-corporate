@@ -16,7 +16,8 @@
     200- 970  D2  MiAI(最初のスプラッシュと同じ190px)が1文字ずつ
               26pxライズ+ぼけの解像でスライドして立つ
     970-1330  D2  Solid を見せる(360ms)。以降の時刻は +250ms シフト
-   1330-2400  D3  エッジから粒子化(canvas)。iのドットだけ残り橙へ
+   1330-1610  D3  文字は Solid のまま、i のドットが黒→橙に灯る
+   1760-2400  D3  灯ってから文字が粒子化して散る。ドットだけ残る
    2150-2500  D3→D4 ドットが Figma D4 の位置(709.5,292.5) r26.5 へ
    2500-2680  D4  ドットのみ
    2680-3480  D4→D5a ドットが左上へ寄り、3つのグレードットが軌跡から生まれる
@@ -361,7 +362,8 @@
      1330ms まで Solid を見せ、以降は粒子へ譲る(タイムラインは +250ms)。 */
   const EASE_OUT = (t) => 1 - Math.pow(1 - clamp01(t), 3);
   const DIS = 1330;                     /* Solid を見せ終える時刻 */
-  const SCATTER = DIS + 120;            /* 粒子化して散り始める時刻 */
+  const DOT_LIT = DIS;                  /* i のドットが橙に灯り始める */
+  const SCATTER = DIS + 430;            /* 灯ってから文字が散り始める */
   const drawIntro = (t) => {
     /* SVG のロゴは散り始め(SCATTER)まで不透明の黒のまま。以降は canvas が
        同じ字形を実寸で塗って引き継ぐので、切り替わりは見た目上ゼロ差。
@@ -378,6 +380,17 @@
     const ctx = canvas.getContext('2d');
     ctx.setTransform(q, 0, 0, q, 0, 0);
     ctx.clearRect(0, 0, DW, DH);
+    /* i のドット。文字がまだ Solid のうちに黒→橙へ灯り、灯り切ってから
+       (SCATTER)文字が散り始める。常に1個で、ロゴ自身のドットの真上に
+       重なるので二重にならない。SEG の先頭(2150+SHIFT)から状態機械が
+       引き継いで D4 へ動かす */
+    if (t >= DOT_LIT && t < 2150 + SHIFT) {
+      needActors(1);
+      const cu = smooth((t - DOT_LIT) / 280);
+      const rgb = [Math.round(lerp(25, 241, cu)), Math.round(lerp(25, 110, cu)), Math.round(lerp(25, 54, cu))];
+      drawShape(pool[0], circleOutline(IDOT.x, IDOT.y, IDOT.r), rgb, 1);
+    }
+
     if (t < SCATTER || t > 2900) return;
     ctx.fillStyle = '#191919';
 
@@ -408,12 +421,6 @@
 
     /* i のドット(常に1個)。ロゴ自身のドットの真上に重なった状態から
        始まり、粒子化の間に黒→橙。2150 からは状態機械が引き継ぐ */
-    if (t >= SCATTER && t < 2400) {
-      needActors(1);
-      const cu = smooth((t - SCATTER - 100) / 400);
-      const rgb = [Math.round(lerp(25, 241, cu)), Math.round(lerp(25, 110, cu)), Math.round(lerp(25, 54, cu))];
-      drawShape(pool[0], circleOutline(IDOT.x, IDOT.y, IDOT.r), rgb, 1);
-    }
   };
 
   /* ---------- D7: 円窓と映像 (窓 = Figma の Ellipse 60 マスク) ---------- */
@@ -452,7 +459,7 @@
     const t = now - t0;
 
     drawIntro(t);
-    if (t >= 2400 && !handed) renderStates(t);
+    if (t >= 2150 + SHIFT && !handed) renderStates(t);
     driveWindow(t);
 
     if (!fvFired && t >= 4650 + SHIFT) {
