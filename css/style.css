@@ -685,6 +685,12 @@ html.splash-lock, html.splash-lock body { overflow: hidden; }
 .hero > .wrap { width: 100%; }
 @media (min-width: 768px) {
   .hero { padding: 88px 0 84px; min-height: 600px; }
+  /* 右のストライプ(Gray line)はフレーム上端より上から始まる。
+     hero の overflow:clip が箱の上端(ページy90)で切ってしまい、
+     グロナビの下で見切れて見えるため、箱を上端まで引き上げる。
+     内容は padding で同じ位置に置き、ラインとグラデは下の個別指定で
+     同一ページ座標を維持する。ヘッダーは z100 なので常に手前 */
+  .hero.hero--brushup { margin-top: -90px; padding-top: 178px; min-height: 690px; }
 }
 /* Figma 232:27373 (image 27 [Vectorized])。淡いブロブ形状のベクター素材を
    ヒーロー〜About にまたがる背景モチーフとして敷く。実測位置(x:279/1440,
@@ -702,7 +708,8 @@ html.splash-lock, html.splash-lock body { overflow: hidden; }
 .hero__lines {
   position: absolute;
   left: calc(50% + 110px);      /* フレーム x830 - 720 */
-  top: -210px;                  /* フレーム y-120 - 90 */
+  top: -120px;                  /* フレーム y-120 (hero の箱がページ上端に
+                                   なったため 90px の差し引きは不要) */
   width: 810px;
   height: 805px;
   overflow: visible;
@@ -824,7 +831,7 @@ html.splash-lock, html.splash-lock body { overflow: hidden; }
   .hero--brushup .hero__blob--1 {
     width: 508px; height: 508px;
     left: calc(50% - 793px);   /* -73 - 720 */
-    top: 106px;                /* 96 - 90 に指示で +100px */
+    top: 196px;                /* (96-90+100) + 90 = hero箱の上端変更を補正 */
     /* 最背面。文字やグラフィックの上に載せない(hero は透明なので
        z-index:-1 でもルートの白キャンバスより手前に描かれる) */
     z-index: -1;

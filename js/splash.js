@@ -104,7 +104,7 @@
     'translate(' + LX.toFixed(2) + ' ' + LY.toFixed(2) + ') scale(' + LS.toFixed(5) + ')');
   logoG.style.opacity = '0';
   /* 文字は M, i, a, l の4パス。最初のスプラッシュと同じく1文字ずつ
-     26px ライズ + ぼけの解像で立ち上がる(値はロゴのローカル単位へ換算) */
+     26px ライズで立ち上がる(ぼかしは白い光彩に見える端末があるため使わない) */
   const letters = [...logoG.querySelectorAll('path')];
   const L_BASE = 200, L_STAG = 70, L_DUR = 560;
   const L_RISE = 26 / LS;
@@ -123,16 +123,16 @@
         }
       }
     }
-    const want = 1500;
+    /* 全グリッド点を保持する。間引くと粒が2.4px格子より小さいぶん
+       字の内部に隙間ができ、ロゴが抜けた瞬間に白が透けて「光彩」に
+       見える。静止中はタイルで完全な黒、散る過程でだけ粒へ痩せる */
     for (const [x, y] of pts) {
-      if (rnd() < want / pts.length) {
-        const a2 = rnd() * Math.PI * 2, d2 = 10 + rnd() * 30;   /* 10〜40px 静かにほどける */
-        particles.push({
-          x, y,
-          outX: x + Math.cos(a2) * d2 * 1.5, outY: y + Math.sin(a2) * d2 + 3,
-          delay: rnd() * 380, size: 0.9 + rnd() * 1.1, aMax: 0.5 + rnd() * 0.35
-        });
-      }
+      const a2 = rnd() * Math.PI * 2, d2 = 10 + rnd() * 30;   /* 10〜40px 静かにほどける */
+      particles.push({
+        x, y,
+        outX: x + Math.cos(a2) * d2 * 1.5, outY: y + Math.sin(a2) * d2 + 3,
+        delay: rnd() * 380, size: 0.9 + rnd() * 1.1
+      });
     }
   }
 
@@ -199,7 +199,8 @@
     if (LINES_STATE.list) return;
     const hl = window.__miaiHeroLines;
     const g = hl && hl.geometry();
-    const toStage = (p) => [(p.x - ox) / scale, (p.y - oy) / scale];
+    const sr = stage.getBoundingClientRect();   /* スクロール・absolute化に追従 */
+    const toStage = (p) => [(p.x - sr.left) / scale, (p.y - sr.top) / scale];
     if (g) {
       const [pa, pb] = [toStage(g[0].a), toStage(g[0].b)];
       const [ga, gb] = [toStage(g[1].a), toStage(g[1].b)];
@@ -218,23 +219,24 @@
 
   /* ---------- セグメント表(文字ライズの分だけ +250ms して使う) ---------- */
   const SHIFT = 250;
+  /* 遷移は短く軽快に、静止(間)はわずかに長く。動と間のリズムを作る */
   const SEG = [
-    { t0: 2150, t1: 2500, from: S_DOT3, to: S_D4 },
-    { t0: 2500, t1: 2680, hold: S_D4 },
-    { t0: 2680, t1: 3480, from: S_D4X, to: S_D5A },
-    { t0: 3480, t1: 3660, hold: S_D5A },
-    { t0: 3660, t1: 4760, from: S_D5A, to: DATA.d5b },
-    { t0: 4760, t1: 4940, hold: DATA.d5b },
-    { t0: 4940, t1: 6040, from: DATA.d5b, to: DATA.d6a },
-    { t0: 6040, t1: 6220, hold: DATA.d6a },
-    { t0: 6220, t1: 7320, from: DATA.d6a, to: DATA.ring },
-    { t0: 7320, t1: 9020, hold: DATA.ring },
-    { t0: 9020, t1: 10120, from: DATA.ring, to: DATA.blob },
-    { t0: 10120, t1: 10300, hold: DATA.blob },
-    { t0: 10300, t1: 11200, from: DATA.blob, to: DATA.nshape },
-    { t0: 11200, t1: 11300, hold: DATA.nshape },
-    { t0: 11300, t1: 12150, from: DATA.nshape, to: LINES_STATE },
-    { t0: 12150, t1: 12700, hold: LINES_STATE }
+    { t0: 2150, t1: 2460, from: S_DOT3, to: S_D4 },
+    { t0: 2460, t1: 2700, hold: S_D4 },
+    { t0: 2700, t1: 3380, from: S_D4X, to: S_D5A },
+    { t0: 3380, t1: 3640, hold: S_D5A },
+    { t0: 3640, t1: 4560, from: S_D5A, to: DATA.d5b },
+    { t0: 4560, t1: 4860, hold: DATA.d5b },
+    { t0: 4860, t1: 5780, from: DATA.d5b, to: DATA.d6a },
+    { t0: 5780, t1: 6080, hold: DATA.d6a },
+    { t0: 6080, t1: 7000, from: DATA.d6a, to: DATA.ring },
+    { t0: 7000, t1: 10400, hold: DATA.ring },
+    { t0: 10400, t1: 11320, from: DATA.ring, to: DATA.blob },
+    { t0: 11320, t1: 11620, hold: DATA.blob },
+    { t0: 11620, t1: 12460, from: DATA.blob, to: DATA.nshape },
+    { t0: 12460, t1: 12660, hold: DATA.nshape },
+    { t0: 12660, t1: 13500, from: DATA.nshape, to: LINES_STATE },
+    { t0: 13500, t1: 14050, hold: LINES_STATE }
   ];
   SEG.forEach((g) => { g.t0 += SHIFT; g.t1 += SHIFT; });
 
@@ -323,17 +325,28 @@
       return;
     }
     if (pairSeg !== si) { pairCache = buildPairs(seg); pairSeg = si; }
-    const u = smooth((t - seg.t0) / (seg.t1 - seg.t0));
-    needActors(pairCache.length);
+    /* richka 参考の「軽快で品よく弾む」動き:
+       ・図形ごとに小さなスタガ(最大60ms)で順に動き出す
+       ・ジオメトリは 5% 弱のオーバーシュート付きで着地(局所u=1で厳密に
+         目標へ戻るので最終形は崩れない)。色と不透明度は滑らかなまま */
+    const segDur = seg.t1 - seg.t0;
+    const nPairs = pairCache.length;
+    const stag = nPairs > 1 ? Math.min(60, (segDur * 0.2) / (nPairs - 1)) : 0;
+    const actDur = segDur - stag * (nPairs - 1);
+    needActors(nPairs);
     pairCache.forEach((pr, i) => {
+      const local = clamp01((t - seg.t0 - stag * i) / actDur);
+      const v = local - 1;
+      const ug = 1 + 2.0 * v * v * v + 1.0 * v * v;   /* soft back-out(≈5%) */
+      const uc = smooth(local);
       for (let j = 0; j < N; j++) {
         const p = pr.a[(j + pr.k) % N], q = pr.b[j];
-        tmp[j] = [lerp(p[0], q[0], u), lerp(p[1], q[1], u)];
+        tmp[j] = [lerp(p[0], q[0], ug), lerp(p[1], q[1], ug)];
       }
-      const rgb = [Math.round(lerp(pr.fa[0], pr.fb[0], u)),
-                   Math.round(lerp(pr.fa[1], pr.fb[1], u)),
-                   Math.round(lerp(pr.fa[2], pr.fb[2], u))];
-      drawShape(pool[i], tmp, rgb, lerp(pr.aa, pr.ab, u));
+      const rgb = [Math.round(lerp(pr.fa[0], pr.fb[0], uc)),
+                   Math.round(lerp(pr.fa[1], pr.fb[1], uc)),
+                   Math.round(lerp(pr.fa[2], pr.fb[2], uc))];
+      drawShape(pool[i], tmp, rgb, lerp(pr.aa, pr.ab, uc));
     });
   };
 
@@ -354,7 +367,6 @@
       const u = EASE_OUT((t - L_BASE - i * L_STAG) / L_DUR);
       el.style.opacity = u.toFixed(3);
       el.setAttribute('transform', 'translate(0 ' + (L_RISE * (1 - u)).toFixed(2) + ')');
-      el.style.filter = u < 1 ? 'blur(' + (3 * (1 - u)).toFixed(1) + 'px)' : 'none';
     });
 
     /* 粒子(分解のみ)。エッジ側(delay小)から欠けていく */
@@ -371,10 +383,13 @@
       const uOut = clamp01((lt - 430) / 560);   /* 全粒子が乗ってから散る */
       if (uOut >= 1) continue;
       const e = smooth(uOut);
-      const alpha = p.aMax * uIn * (1 - e);
+      /* 静止中は格子を埋める 2.8px タイル(=ソリッドな黒)。
+         散る過程でだけ粒サイズへ痩せ、薄れて消える */
+      const alpha = uIn * (1 - e);
       if (alpha <= 0.01) continue;
+      const sz = lerp(2.8, p.size, e);
       ctx.globalAlpha = alpha;
-      ctx.fillRect(lerp(p.x, p.outX, e), lerp(p.y, p.outY, e), p.size, p.size);
+      ctx.fillRect(lerp(p.x, p.outX, e) - sz / 2, lerp(p.y, p.outY, e) - sz / 2, sz, sz);
     }
     ctx.globalAlpha = 1;
 
@@ -397,26 +412,26 @@
   }
   const driveWindow = (t) => {
     if (!winEl || !video) return;
-    if (t < 7480 + SHIFT || t > 9640 + SHIFT) { winEl.style.display = 'none'; return; }
+    if (t < 7160 + SHIFT || t > 10820 + SHIFT) { winEl.style.display = 'none'; return; }
     winEl.style.display = 'block';
     let k;
-    const tw = t - SHIFT;
+    const tw = t - SHIFT + 320;   /* リズム前倒し分 */
     if (tw < 8120) k = smooth((tw - 7520) / 600);
-    else if (tw < 8900) k = 1;
-    else k = 1 - smooth((tw - 8900) / 700);
+    else if (tw < 10400) k = 1;
+    else k = 1 - smooth((tw - 10400) / 700);
     const s = Math.max(0.001, k);
     winEl.style.transform = 'translate(' + (W.cx - W.r) + 'px,' + (W.cy - W.r) + 'px) scale(' + s.toFixed(4) + ')';
     const vu = clamp01((tw - 7520) / 650);
-    const vo = tw < 8720 ? vu : 1 - clamp01((tw - 8720) / 600);
+    const vo = tw < 10220 ? vu : 1 - clamp01((tw - 10220) / 600);
     video.style.opacity = vo.toFixed(3);
     video.style.transform = 'scale(' + Math.min(10, (1.03 - 0.03 * vu) / s).toFixed(3) + ')';
     video.style.filter = 'blur(' + (3 * (1 - vu)).toFixed(1) + 'px)';
     if (!videoStarted && tw > 7300) { videoStarted = true; video.play().catch(() => {}); }
-    if (videoStarted && tw > 9500 && !video.paused) video.pause();
+    if (videoStarted && tw > 11000 && !video.paused) video.pause();
   };
 
   /* ---------- マスタータイムライン ---------- */
-  const TOTAL = 12700 + SHIFT;
+  const TOTAL = 14050 + SHIFT;
   let t0 = null, fvFired = false, handed = false, raf = 0;
 
   const frame = (now) => {
@@ -427,13 +442,21 @@
     if (t >= 2400 && !handed) renderStates(t);
     driveWindow(t);
 
-    if (!fvFired && t >= 4800 + SHIFT) {
+    if (!fvFired && t >= 4650 + SHIFT) {
       fvFired = true;
       document.body.classList.add('intro-revealed');
       overlay.classList.add('is-page');
       startFV();
+      /* 見出しとリードが立った時点でスクロールを解禁する。
+         幕は fixed のままだとスクロールに置いていかれるので、
+         ページ座標(absolute)に切り替えて図形をヒーローに追従させる。
+         アニメーションはそのまま継続する */
+      unlock();
+      overlay.style.position = 'absolute';
+      overlay.style.bottom = 'auto';
+      overlay.style.height = Math.round(DH * scale) + 'px';
     }
-    if (!handed && t >= 12150 + SHIFT) {
+    if (!handed && t >= 13500 + SHIFT) {
       handed = true;
       settleLines();                       /* hero 側が同一形状で引き継ぐ */
       needActors(0);
@@ -457,7 +480,7 @@
   };
 
   requestAnimationFrame(() => { raf = requestAnimationFrame(frame); });
-  setTimeout(finish, 16000);
+  setTimeout(finish, 17500);
 
   window.__splashTimeline = { finish, seek(ms) { t0 = performance.now() - ms; } };
 })();
