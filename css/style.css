@@ -106,6 +106,12 @@ html.splash-lock, html.splash-lock body { overflow: hidden; }
   pointer-events: none;
   overflow: hidden;
   transition: background-color .5s ease;
+  /* ベースの .intro-overlay は円形マスクで幕を抜く旧演出を持っている。
+     そのマスクが残ると、中央付近が円形に薄く抜けて「白い光彩」に
+     見える(ロゴのiの上や円クラスタに出ていたのはこれ)。
+     新しいスプラッシュは幕を抜かないのでマスクごと無効化する。 */
+  -webkit-mask-image: none;
+  mask-image: none;
 }
 /* fv-in と同時に幕の白を抜く(下も白なので切り替えは見えない) */
 .intro-overlay--splash.is-page { background-color: transparent; }
