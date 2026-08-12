@@ -279,9 +279,12 @@
         }
         if (e < bestE) { bestE = e; bestK = k; }
       }
+      /* merge = 行き先が同じ余剰の出発図形。到達点で不透明度0にして
+         主図形とぴったり重ならないようにする。重ねると色面が二重に
+         なり、輪郭が版ズレのようにずれて見える */
       return { a, b, k: bestK,
                fa: hex(src[si].f), fb: hex(dst[di].f),
-               aa: src[si].a, ab: merge ? dst[di].a : dst[di].a };
+               aa: src[si].a, ab: merge ? 0 : dst[di].a, merge: !!merge };
     });
   };
 
@@ -347,7 +350,9 @@
       const rgb = [Math.round(lerp(pr.fa[0], pr.fb[0], uc)),
                    Math.round(lerp(pr.fa[1], pr.fb[1], uc)),
                    Math.round(lerp(pr.fa[2], pr.fb[2], uc))];
-      drawShape(pool[i], tmp, rgb, lerp(pr.aa, pr.ab, uc));
+      /* 合体組は早めに引いて(u=0.72で消える)、着地の瞬間には主図形だけ */
+      const av = pr.merge ? pr.aa * (1 - clamp01(uc / 0.72)) : lerp(pr.aa, pr.ab, uc);
+      drawShape(pool[i], tmp, rgb, av);
     });
   };
 
