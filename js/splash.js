@@ -111,9 +111,10 @@
 
   /* ---------- D3 の粒子(canvas)。ロゴの字形からサンプリング ---------- */
   const particles = [];
+  const glyphPaths = [...logoG.querySelectorAll('path')].map((p) => new Path2D(p.getAttribute('d')));
   {
     const test = document.createElement('canvas').getContext('2d');
-    const paths = [...logoG.querySelectorAll('path')].map((p) => new Path2D(p.getAttribute('d')));
+    const paths = glyphPaths;
     test.setTransform(LS, 0, 0, LS, LX, LY);
     const pts = [];
     for (let y = LY; y < LY + 97 * LS + 4; y += 2.4) {
@@ -354,15 +355,13 @@
      文字は 200ms から 70ms 刻みで1文字ずつ立ち(各560ms)、970ms で完成。
      1330ms まで Solid を見せ、以降は粒子へ譲る(タイムラインは +250ms)。 */
   const EASE_OUT = (t) => 1 - Math.pow(1 - clamp01(t), 3);
-  const DIS = 1330;                     /* 分解の開始 */
+  const DIS = 1330;                     /* Solid を見せ終える時刻 */
+  const SCATTER = DIS + 120;            /* 粒子化して散り始める時刻 */
   const drawIntro = (t) => {
-    /* グループは分解フェーズのフェードだけを担う。
-       粒子が全て字形の上に出揃う(DIS+470)まで Solid を保ってから消す。
-       先に薄くすると、粒子がまだ無い箇所が白く光って見える(iの上の
-       白い光彩の正体)ため、順序を「粒子が乗る → ロゴが抜ける」に固定 */
-    let ga = 1;
-    if (t >= DIS + 470) ga = 1 - smooth((t - DIS - 470) / 250);
-    logoG.style.opacity = Math.max(0, ga).toFixed(3);
+    /* SVG のロゴは散り始め(SCATTER)まで不透明の黒のまま。以降は canvas が
+       同じ字形を実寸で塗って引き継ぐので、切り替わりは見た目上ゼロ差。
+       半透明で重ねる区間を作らない = 白が透ける経路が存在しない */
+    logoG.style.opacity = t < SCATTER ? '1' : '0';
     letters.forEach((el, i) => {
       const u = EASE_OUT((t - L_BASE - i * L_STAG) / L_DUR);
       el.style.opacity = u.toFixed(3);
@@ -374,30 +373,39 @@
     const ctx = canvas.getContext('2d');
     ctx.setTransform(q, 0, 0, q, 0, 0);
     ctx.clearRect(0, 0, DW, DH);
-    if (t < DIS || t > 2760) return;
+    if (t < SCATTER || t > 2900) return;
     ctx.fillStyle = '#191919';
+
+    /* 下層: 字形そのものを塗る。散り始めの 300ms だけ残し、粒子が
+       広がって隙間ができる前に完全に引く。ここがあるおかげで
+       「粒子の隙間から白が透ける(=光彩に見える)」が起きない */
+    const solid = 1 - smooth(clamp01((t - SCATTER) / 460));
+    if (solid > 0.004) {
+      ctx.save();
+      ctx.globalAlpha = solid;
+      ctx.setTransform(q * LS, 0, 0, q * LS, q * LX, q * LY);
+      for (const gp of glyphPaths) ctx.fill(gp);
+      ctx.restore();
+      ctx.setTransform(q, 0, 0, q, 0, 0);
+    }
+
+    /* 上層: 粒子。最初から不透明・全面タイルで、散りながら痩せて消える */
     for (const p of particles) {
-      const lt = t - DIS - p.delay;
-      if (lt < 0) continue;
-      const uIn = clamp01(lt / 90);
-      const uOut = clamp01((lt - 430) / 560);   /* 全粒子が乗ってから散る */
-      if (uOut >= 1) continue;
-      const e = smooth(uOut);
-      /* 静止中は格子を埋める 2.8px タイル(=ソリッドな黒)。
-         散る過程でだけ粒サイズへ痩せ、薄れて消える */
-      const alpha = uIn * (1 - e);
-      if (alpha <= 0.01) continue;
+      const lt = t - SCATTER - p.delay;
+      if (lt < 0) { ctx.globalAlpha = 1; ctx.fillRect(p.x - 1.4, p.y - 1.4, 2.8, 2.8); continue; }
+      const e = smooth(clamp01(lt / 620));
+      if (e >= 1) continue;
+      ctx.globalAlpha = 1 - e * e;
       const sz = lerp(2.8, p.size, e);
-      ctx.globalAlpha = alpha;
       ctx.fillRect(lerp(p.x, p.outX, e) - sz / 2, lerp(p.y, p.outY, e) - sz / 2, sz, sz);
     }
     ctx.globalAlpha = 1;
 
     /* i のドット(常に1個)。ロゴ自身のドットの真上に重なった状態から
        始まり、粒子化の間に黒→橙。2150 からは状態機械が引き継ぐ */
-    if (t >= DIS && t < 2400) {
+    if (t >= SCATTER && t < 2400) {
       needActors(1);
-      const cu = smooth((t - 1550) / 400);
+      const cu = smooth((t - SCATTER - 100) / 400);
       const rgb = [Math.round(lerp(25, 241, cu)), Math.round(lerp(25, 110, cu)), Math.round(lerp(25, 54, cu))];
       drawShape(pool[0], circleOutline(IDOT.x, IDOT.y, IDOT.r), rgb, 1);
     }
