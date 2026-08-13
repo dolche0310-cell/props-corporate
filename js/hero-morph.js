@@ -98,40 +98,48 @@
 
   /* ---------- 状態列(Figma 実測値) ---------- */
   const EQY = 400;
+  /* S12 の12点。Figma の実座標を中心(1125,377.5)まわりの角度に直したもの
+     (半径はいずれも196)。回転させるので角度で持つ。 */
+  const RING_A = [0.0, 29.4, 60.3, 88.7, 120.4, 150.6, 180.0, 209.4, 239.1, 271.3, 300.1, 330.6];
   const STATES = [
     /* S04 */ { id: 's04', t: 496, e: 'soft', h: 120, fdx: 446, fdy: 75, list: [dotG(709.5, 292.5)] },
     /* S05 */ { id: 's05', t: 256, e: 'bold', h: 72,  fdx: 446, fdy: 75, list: [dotG(709.5, 423.5)] },
     /* S06 */ { id: 's06', t: 272, e: 'over', h: 96,  fdx: 446, fdy: 75, list: [dotG(709.5, 192.5)] },
-    /* S07 */ { id: 's07', t: 336, e: 'soft', h: 160, fdx: 436, fdy: 34,
+    /* S07 */ { id: 's07', t: 336, e: 'soft', h: 460, fdx: 436, fdy: 34, orbit: true,
       list: [dotG(669.5, 308.5), dotG(768.5, 308.5), dotG(669.5, 393.5), dotG(768.5, 393.5)] },
-    /* S08 */ { id: 's08', t: 304, e: 'soft', h: 128, fdx: 436, fdy: 34,
+    /* S08 */ { id: 's08', t: 304, e: 'soft', h: 420, fdx: 436, fdy: 34, elastic: true,
       list: [S(capsule(670.5, 272.5, 670.5, 431.5, 26.5)), S(capsule(769.5, 272.5, 769.5, 431.5, 26.5))] },
-    /* S09 */ { id: 's09', t: 336, e: 'bold', h: 128, fdx: 285, fdy: 32,
+    /* S09 */ { id: 's09', t: 336, e: 'bold', h: 420, fdx: 285, fdy: 32, elastic: true,
       list: [S(capsule(778.68, 373.22, 891.12, 260.79, 26.5)),
              S(capsule(848.69, 443.22, 961.13, 330.79, 26.5))] },
-    /* S10 */ { id: 's10', t: 336, e: 'soft', h: 160, fdx: 435, fdy: 34,
-      list: [S(capsule(720.5, 115.5, 720.5, 587.5, 26.5))] },
+    /* S10 縦長バー。Figma は y115.5..587.5 だが、上端がヘッダー(高さ137)の
+       背面に潜って見切れるので、天地を詰めて y196..568 にする(半長236→186)。
+       FV では fdy 34 が乗るので実際の上端は 230。 */
+    { id: 's10', t: 336, e: 'soft', h: 460, fdx: 435, fdy: 34, elastic: true,
+      list: [S(capsule(720.5, 196.5, 720.5, 568.5, 26.5))] },
     /* S11 */ { id: 's11', t: 416, e: 'bold', h: 256, fv: true, fdx: 439,
       list: [S(circle(703.5, 399.5, 262.5))] },
-    /* S12 12点円環 (中心1125,377.5 / 各r21.5) */ { id: 's12', t: 448, e: 'soft', h: 192,
-      list: [[954.5,281.5],[1295.5,281.5],[954.5,473.5],[1295.5,473.5],[928.5,377.5],[1321.5,377.5],
-             [1024.5,209.5],[1222.5,209.5],[1024.5,548.5],[1222.5,548.5],[1129.5,181.5],[1129.5,570.5]]
-             .map(([x,y]) => S(circle(x, y, 21.5))) },
-    /* S13 散在5円。FV では左側の円がテキストに重なるため、
-       右ゾーン(x>=880)の対角スキャッタに置き換える(fvL) */
-    { id: 's13', t: 448, e: 'soft', h: 192,
+    /* S12 12点円環(中心1125,377.5 / 半径196 / 各r21.5)。
+       ぐるぐる回りながら、円が順に大きく明るくなる(spin:true)。 */
+    { id: 's12', t: 448, e: 'soft', h: 900, spin: true,
+      list: RING_A.map((d) => S(circle(1125 + Math.cos(d * Math.PI / 180) * 196,
+                                       377.5 + Math.sin(d * Math.PI / 180) * 196, 21.5))) },
+    /* S13 散在円。画面いっぱいに広がるパターンなので、FV でも
+       Figma の原配置のまま(指示)。中心から弾けて外へ広がり、
+       次々に現れる動きは burst:true で専用に駆動する(下の burstList)。 */
+    { id: 's13', t: 1700, e: 'soft', h: 520, burst: true,
       list: [S(circle(414.5, 217.5, 21.5)), S(circle(1223.5, 482.5, 132.5)),
              S(circle(17.5, 243.5, 132.5)), S(circle(911.5, 256.5, 60.5)),
-             S(circle(222.5, 712.5, 60.5))],
-      fvL:  [S(circle(1010, 180, 21.5)), S(circle(1223.5, 482.5, 132.5)),
-             S(circle(1370, 220, 132.5)), S(circle(925, 256.5, 60.5)),
-             S(circle(1060, 640, 60.5))] },
-    /* S14 リング2 (外r113.5 / 内r98.64) */ { id: 's14', t: 448, e: 'soft', h: 208,
+             S(circle(222.5, 712.5, 60.5)),
+             /* 外側いっぱいまで広がる分。上下左右の縁に掛かる位置へ */
+             S(circle(1372.5, 96.5, 96.5)), S(circle(596.5, 528.5, 40.5)),
+             S(circle(742.5, 748.5, 74.5)), S(circle(1108.5, 44.5, 34.5))] },
+    /* S14 リング2 (外r113.5 / 内r98.64) */ { id: 's14', t: 448, e: 'soft', h: 660, resonate: true,
       list: [S(circle(1044.5, 314.5, 113.5), circle(1044.5, 314.5, 98.64)),
              S(circle(1179.5, 314.5, 113.5), circle(1179.5, 314.5, 98.64))] },
-    /* S15 ブロブ */ { id: 's15', t: 448, e: 'soft', h: 192,
+    /* S15 ブロブ */ { id: 's15', t: 448, e: 'soft', h: 520, jelly: true,
       list: SHAPES.blob.map((p) => S(p)) },
-    /* S16 H形 */ { id: 's16', t: 416, e: 'soft', h: 192,
+    /* S16 H形 */ { id: 's16', t: 416, e: 'soft', h: 520, jelly: true,
       list: SHAPES.hshape.map((p) => S(p)) },
     /* S17 サウンドメーター。Figma の7要素(x/幅/角丸は不変)。
        高さだけが「ひとつの波が通過する」ように連続して伸縮し続ける。
@@ -147,7 +155,7 @@
              S(circle(1335.43, EQY, 23.3))] },
     /* S18a 中円 */ { id: 's18a', t: 384, e: 'soft', h: 112, fdx: 435, fdy: 30, list: [S(circle(720.5, 355.5, 117.5))] },
     /* S18b 巨大円 */ { id: 's18b', t: 496, e: 'bold', h: 208, fdx: 287, list: [S(circle(1139.5, 355.5, 546.5))] },
-    /* S19 N形 */ { id: 's19', t: 496, e: 'soft', h: 208, list: SHAPES.nshape.map((p) => S(p)) },
+    /* S19 N形 */ { id: 's19', t: 496, e: 'soft', h: 520, jelly: true, list: SHAPES.nshape.map((p) => S(p)) },
     /* S20 最終モチーフ = Figma FV 完成形 */ { id: 's20', t: 480, e: 'soft', h: 900,
       list: [S(capsule(909.53, 521.37, 1053.51, 304.53, 44.3885)),
              S(capsule(1097.53, 521.37, 1241.51, 304.53, 44.3885)),
@@ -163,12 +171,36 @@
      (約1155,385)あたりへ。大きな円(S11/S18b)と全面に散る S13、
      元々バランスの取れている S12/S14/S17/S20 は指示どおり現状のまま。 */
   STATES.forEach((st) => {
-    if (st.fvL) { st.fvList = st.fvL; return; }
-    if (!st.fdx && !st.fdy) { st.fvList = st.list; return; }
-    const dx = st.fdx || 0, dy = st.fdy || 0;
-    st.fvList = st.list.map((sh) => ({
-      p: sh.p.map(([x, y]) => [x + dx, y + dy]),
-      hole: sh.hole ? sh.hole.map(([x, y]) => [x + dx, y + dy]) : null
+    if (st.fvL) st.fvList = st.fvL;
+    else if (!st.fdx && !st.fdy) st.fvList = st.list;
+    else {
+      const dx = st.fdx || 0, dy = st.fdy || 0;
+      st.fvList = st.list.map((sh) => ({
+        p: sh.p.map(([x, y]) => [x + dx, y + dy]),
+        hole: sh.hole ? sh.hole.map(([x, y]) => [x + dx, y + dy]) : null
+      }));
+    }
+  });
+
+  /* FV 表示後は、グロナビ(高さ137)の背面に潜って見切れないようにする。
+     形の上端が SAFE_TOP より上に出ていたら、その分だけ下へ平行移動する。
+     縮小はしない(形を変えない)ため、テキスト帯 x72..853 を侵さない
+     右ゾーン配置と両立する。 */
+  /* 152 はヘッダー下端(137)+15。さらに 8px は呼吸/弾みの余裕として足す
+     (大きい形ほど呼吸の絶対量が大きいので、半径に比例した余裕も見る)。 */
+  const SAFE_TOP = 152;
+  STATES.forEach((st) => {
+    const src = st.fvList;
+    let top = Infinity;
+    src.forEach((sh) => sh.p.forEach(([, y]) => { if (y < top) top = y; }));
+    let bottom = -Infinity;
+    src.forEach((sh) => sh.p.forEach(([, y]) => { if (y > bottom) bottom = y; }));
+    const margin = 8 + Math.min(18, (bottom - top) * 0.015);   /* 呼吸の余裕 */
+    st.fvShift = top < SAFE_TOP + margin ? SAFE_TOP + margin - top : 0;
+    if (!st.fvShift) return;
+    st.fvList = src.map((sh) => ({
+      p: sh.p.map(([x, y]) => [x, y + st.fvShift]),
+      hole: sh.hole ? sh.hole.map(([x, y]) => [x, y + st.fvShift]) : null
     }));
   });
 
@@ -226,6 +258,96 @@
     return out;
   };
 
+  /* ---------- 回転する円環(S12) ----------
+     ・全体が 5.2s で1周(ぐるぐる)
+     ・進行方向に走る位相で各点が明滅する(半径 0.6〜1.4倍 / 不透明度
+       0.35〜1.0)。ローダーのように光が回って見える。
+     ・中心(1125,377.5)と半径196はそのまま。角度だけを回す。 */
+  const RING_C = [1125, 377.5], RING_R = 196, RING_DOT = 21.5;
+  const ringList = (now, k, dy) => {
+    const sy = dy || 0;
+    const spin = (now / 5200) * 360;
+    const wave = (now / 1450) * Math.PI * 2;
+    const n = RING_A.length;
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      const d = (RING_A[i] + spin) * Math.PI / 180;
+      const w = 0.5 + 0.5 * Math.sin(wave - (i / n) * Math.PI * 2 * 2);
+      out.push({ p: circle(RING_C[0] + Math.cos(d) * RING_R,
+                           RING_C[1] + sy + Math.sin(d) * RING_R,
+                           RING_DOT * (1 + (w - 0.5) * 0.8 * k)),
+                 hole: null,
+                 a: 1 - 0.65 * (1 - w) * k });
+    }
+    return out;
+  };
+
+  /* ---------- バウンド + 軌跡(S13) ----------
+     ■ 前半(0〜1500ms): 円が「垂直に」バスケットボールのように2回弾む
+       水平位置は一切動かさず、y だけが放物線で落ちて跳ね返る。
+       1バウンド目の高さを 1、2バウンド目を 0.42 として、接地の瞬間だけ
+       わずかに縦を潰す(スカッシュ)。跳ねる先は各円の最終 x 上。
+     ■ 後半(1500ms〜): 弾み終わった円が最終位置へ向かい、
+       通った軌跡が薄い円のグラデーション(3段)となって重なり合う。
+       残像は本体より十分薄く、動きの向きだけを感じさせる。 */
+  const BURST_O = [720, 400];
+  const GROUND = 690;                            /* 接地線 */
+  const B1 = 620, B2 = 380;                      /* 1回目/2回目のバウンド時間 */
+  const bounceY = (t, topY) => {
+    /* 放物線を2回。落下→接地→跳ね返り。u=0 と u=1 で接地 */
+    const h1 = GROUND - topY;
+    if (t < B1) {
+      /* 1回目: 上から落ちて接地し、跳ね上がる(前半だけ落下として使う) */
+      const u = clamp01(t / B1);
+      return GROUND - h1 * (1 - Math.pow(2 * u - 1, 2)) * (u < 0.5 ? 1 : 1);
+    }
+    const u2 = clamp01((t - B1) / B2);
+    return GROUND - h1 * 0.42 * (1 - Math.pow(2 * u2 - 1, 2));
+  };
+  const squash = (t) => {
+    /* 接地の瞬間(t=0 / B1 / B1+B2)だけ縦を潰す */
+    const near = Math.min(Math.abs(t - B1), Math.abs(t - (B1 + B2)));
+    return near < 90 ? 1 - 0.16 * (1 - near / 90) : 1;
+  };
+  const burstDelay = (i, n) => (i / Math.max(1, n - 1)) * 220;
+  const BOUNCE_END = B1 + B2;                    /* 1000ms */
+  const burstList = (st, elapsed, k, ghosts) => {
+    const n = st.list.length;
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      const src = (geomFV && st.fvList ? st.fvList : st.list)[i];
+      const c = src.c || (src.c = centroid(src.p));
+      const r = src.r !== undefined ? src.r : (src.r = (() => {
+        let m = 0; for (const q of src.p) m = Math.max(m, Math.hypot(q[0] - c[0], q[1] - c[1])); return m;
+      })());
+      const te = elapsed - burstDelay(i, n);
+      if (te <= 0) { out.push(S(circle(c[0], -r * 2, r * 0.9))); continue; }
+      if (te < BOUNCE_END) {
+        /* 垂直バウンド。x は最終位置のまま動かさない。
+           1回目は「落ちてきて接地→跳ね上がる」ので放物線の後半から入る */
+        const y = bounceY(te, Math.min(c[1], GROUND - 120));
+        const sq = squash(te);
+        const p0 = circle(c[0], y, r);
+        out.push(S(p0.map(([x, yy]) => [c[0] + (x - c[0]) / Math.max(0.7, sq), y + (yy - y) * sq])));
+      } else {
+        /* 弾み終わり → 最終位置へ。軌跡が薄く重なる */
+        const u = clamp01((te - BOUNCE_END) / 620);
+        const e = 1 - Math.pow(1 - u, 3);
+        const fromY = bounceY(BOUNCE_END, Math.min(c[1], GROUND - 120));
+        const y = lerp(fromY, c[1], e);
+        out.push(S(circle(c[0], y, r)));
+        if (ghosts && u < 1) {
+          for (let g = 1; g <= 3; g++) {
+            const ug = clamp01(e - g * 0.13);
+            ghosts.push({ p: circle(c[0], lerp(fromY, c[1], ug), r * (1 - g * 0.04)),
+                          a: (0.13 - g * 0.033) * (1 - u) * k });
+          }
+        }
+      }
+    }
+    return out;
+  };
+
   /* ---------- 対応付け(最近傍 + 余剰は合流) ---------- */
   const centroid = (p) => {
     let x = 0, y = 0;
@@ -280,7 +402,9 @@
       let nx = 0, ny = 0;
       if (dist > 1) { nx = -mvy / dist; ny = mvx / dist; }
       const bulge = Math.min(64, dist * 0.13);
-      return { a: a.p, b: b.p, k: bestK, hA, hB, merge, nx, ny, bulge };
+      return { a: a.p, b: b.p, k: bestK, hA, hB, merge, nx, ny, bulge,
+               alphaA: a.a !== undefined ? a.a : 1,
+               alphaB: merge ? 0 : (b.a !== undefined ? b.a : 1) };
     });
   };
 
@@ -358,9 +482,115 @@
       /* ホールド中も完全静止させない(sun-asterisk 参考)。
          各図形が位相をずらした呼吸(半径±1.2% + 2〜4pxのドリフト)を
          続ける。振幅は strength に従い、FV では一段静かになる */
+      /* --- 点の群れ: それぞれが小さな軌道を巡り、位相差で脈動する --- */
+      if (st.orbit) {
+        const hl0 = pick(st);
+        needActors(hl0.length);
+        const bt0 = nowRef / 1000;
+        hl0.forEach((sh, i) => {
+          const c = sh.c || (sh.c = centroid(sh.p));
+          const ph = i * (Math.PI * 2 / hl0.length);
+          const ox = Math.cos(bt0 * 1.15 + ph) * 9 * strength;
+          const oy = Math.sin(bt0 * 1.15 + ph) * 9 * strength;
+          const g = 1 + Math.sin(bt0 * 2.0 + ph * 1.6) * 0.09 * strength;
+          drawShape(pool[i], sh.p.map(([x, y]) =>
+            [c[0] + (x - c[0]) * g + ox, c[1] + (y - c[1]) * g + oy]), null);
+          pool[i].style.opacity = '1';
+        });
+        return;
+      }
+      /* --- バー: しなやかに伸縮し、位置もわずかに揺れる --- */
+      if (st.elastic) {
+        const hl1 = pick(st);
+        needActors(hl1.length);
+        const bt1 = nowRef / 1000;
+        hl1.forEach((sh, i) => {
+          const c = sh.c || (sh.c = centroid(sh.p));
+          const ph = i * 0.9;
+          const sy = 1 + Math.sin(bt1 * 1.75 + ph) * 0.075 * strength;
+          const sx = 1 - Math.sin(bt1 * 1.75 + ph) * 0.022 * strength;   /* 体積を保つ */
+          const dy = Math.sin(bt1 * 1.1 + ph * 1.4) * 5 * strength;
+          drawShape(pool[i], sh.p.map(([x, y]) =>
+            [c[0] + (x - c[0]) * sx, c[1] + (y - c[1]) * sy + dy]), null);
+          pool[i].style.opacity = '1';
+        });
+        return;
+      }
+      /* --- 重なるリング: 引き合い、共鳴して近づいたり離れたりする --- */
+      if (st.resonate) {
+        const hl2 = pick(st);
+        needActors(hl2.length);
+        const bt2r = nowRef / 1000;
+        const pull = Math.sin(bt2r * 0.78) * 15 * strength;
+        const mid = hl2.reduce((a2, sh) => a2 + centroid(sh.p)[0], 0) / hl2.length;
+        hl2.forEach((sh, i) => {
+          const c = sh.c || (sh.c = centroid(sh.p));
+          const dir = c[0] < mid ? 1 : -1;                 /* 内側へ引き合う */
+          const g = 1 + Math.sin(bt2r * 1.05 + i * Math.PI) * 0.035 * strength;
+          const rot = Math.sin(bt2r * 0.52 + i) * 0.05 * strength;
+          const cs = Math.cos(rot), sn = Math.sin(rot);
+          drawShape(pool[i], sh.p.map(([x, y]) => {
+            const dx0 = (x - c[0]) * g, dy0 = (y - c[1]) * g;
+            return [c[0] + dx0 * cs - dy0 * sn + pull * dir, c[1] + dx0 * sn + dy0 * cs];
+          }), sh.hole ? sh.hole.map(([x, y]) => {
+            const dx0 = (x - c[0]) * g, dy0 = (y - c[1]) * g;
+            return [c[0] + dx0 * cs - dy0 * sn + pull * dir, c[1] + dx0 * sn + dy0 * cs];
+          }) : null);
+          pool[i].style.opacity = '1';
+        });
+        return;
+      }
+      /* --- 液状: 輪郭が波打ち、ゼリーのように柔らかく揺れる --- */
+      if (st.jelly) {
+        const hl3 = pick(st);
+        needActors(hl3.length);
+        const bt3 = nowRef / 1000;
+        hl3.forEach((sh, i) => {
+          const c = sh.c || (sh.c = centroid(sh.p));
+          const ph = i * 2.1;
+          const pts = sh.p.map(([x, y], j) => {
+            const ang = (j / N) * Math.PI * 2;
+            /* 輪郭に沿って進む2つの波。法線方向へごく浅く出入りする */
+            const w = Math.sin(ang * 2 - bt3 * 1.25 + ph) * 0.030
+                    + Math.sin(ang * 3 + bt3 * 0.85 + ph * 1.7) * 0.018;
+            const g = 1 + w * strength;
+            return [c[0] + (x - c[0]) * g, c[1] + (y - c[1]) * g];
+          });
+          drawShape(pool[i], pts, sh.hole);
+          pool[i].style.opacity = '1';
+        });
+        return;
+      }
+      if (st.spin) {
+        const rl = ringList(nowRef, strength, geomFV ? (st.fvShift || 0) : 0);
+        needActors(rl.length);
+        rl.forEach((sh, i) => { drawShape(pool[i], sh.p, null); pool[i].style.opacity = sh.a.toFixed(3); });
+        return;
+      }
+      if (st.burst) {
+        /* 弾み終えて軌跡が重なり、そのあとはごく弱い残響で息づく */
+        const ghosts = [];
+        const bl = burstList(st, st.t + into, strength, ghosts);
+        needActors(bl.length + ghosts.length);
+        const bt2 = nowRef / 1000;
+        bl.forEach((sh, i) => {
+          const c = centroid(sh.p);
+          const w = Math.sin(bt2 * 1.9 + i * 1.3) * 0.012 * strength;
+          drawShape(pool[i], sh.p.map(([x, y]) =>
+            [c[0] + (x - c[0]) * (1 + w), c[1] + (y - c[1]) * (1 + w)]), null);
+          pool[i].style.opacity = '1';
+        });
+        ghosts.forEach((g, j) => {
+          const el = pool[bl.length + j];
+          drawShape(el, g.p, null);
+          el.style.opacity = Math.max(0, g.a).toFixed(3);
+        });
+        return;
+      }
       if (st.meter) {
         /* サウンドメーターは常時生きている。呼吸は掛けない */
-        const ml = meterList(nowRef, geomFV ? (st.fdx || 0) : 0, geomFV ? (st.fdy || 0) : 0, strength);
+        const ml = meterList(nowRef, geomFV ? (st.fdx || 0) : 0,
+                             geomFV ? ((st.fdy || 0) + (st.fvShift || 0)) : 0, strength);
         needActors(ml.length);
         ml.forEach((sh, i) => { pool[i].setAttribute('d', sh.d); pool[i].style.opacity = '1'; });
         return;
@@ -392,12 +622,44 @@
       });
       return;
     }
+    /* バーストへの遷移は buildPairs を使わない。
+       前の形が中心へ吸い込まれながら、入れ替わりに円が外へ弾け出る。 */
+    if (st.burst) {
+      const prevList = pick(prev);
+      const ghosts = [];
+      const bl = burstList(st, into, strength, ghosts);
+      needActors(prevList.length + bl.length + ghosts.length);
+      const collapse = smooth(clamp01(into / (st.t * 0.42)));
+      prevList.forEach((sh, i) => {
+        const c = sh.c || (sh.c = centroid(sh.p));
+        const sc = 1 - collapse;
+        const pts = sh.p.map(([x, y]) => [
+          lerp(BURST_O[0], c[0] + (x - c[0]) * sc, 1 - collapse * 0.85),
+          lerp(BURST_O[1], c[1] + (y - c[1]) * sc, 1 - collapse * 0.85)
+        ]);
+        drawShape(pool[i], pts, null);
+        pool[i].style.opacity = (1 - collapse).toFixed(3);
+      });
+      bl.forEach((sh, i) => {
+        const el = pool[prevList.length + i];
+        drawShape(el, sh.p, null);
+        el.style.opacity = '1';
+      });
+      ghosts.forEach((g, j) => {
+        const el = pool[prevList.length + bl.length + j];
+        drawShape(el, g.p, null);
+        el.style.opacity = Math.max(0, g.a).toFixed(3);
+      });
+      pairKey = '';                 /* 次の遷移で必ず作り直す */
+      return;
+    }
+
     /* fv への切替: 最初の s11→s12 遷移で発動。出発点だけ原座標の S11 を
        使うので画面上の形はスナップしない(S12 以降は両変種で同一) */
     if (!geomFV && fvFired && st.id === 's12') { geomFV = true; switchSrcOnce = true; }
     /* メーターへ入る/出る遷移は、到達側/出発側を毎フレームのライブ値に
        するため対応付けを作り直す(高さが飛ばない) */
-    const liveMeter = st.meter || prev.meter;
+    const liveMeter = st.meter || prev.meter || st.spin || prev.spin;
     const key = prev.id + '>' + st.id + (geomFV ? '/fv' : '') + (liveMeter ? '/' + Math.round(into) : '');
     if (pairKey !== key) {
       let srcList = (switchSrcOnce && st.id === 's12') ? prev.list : pick(prev);
@@ -406,6 +668,8 @@
       const mdx = geomFV ? 15 : 0;
       if (st.meter) dstList = meterList(nowRef, mdx, 0, strength);
       if (prev.meter) srcList = meterList(nowRef, mdx, 0, strength);
+      if (st.spin) dstList = ringList(nowRef, strength, geomFV ? (st.fvShift || 0) : 0);
+      if (prev.spin) srcList = ringList(nowRef, strength, geomFV ? (prev.fvShift || 0) : 0);
       pairCache = buildPairs(srcList, dstList);
       pairKey = key;
     }
@@ -432,8 +696,11 @@
         hole = tmpH;
       }
       drawShape(pool[i], tmp, hole);
-      /* 合流組は着地直前に静かに引く(重なりの版ズレを作らない) */
-      pool[i].style.opacity = pr.merge ? String(1 - smooth(clamp01((local - 0.55) / 0.35))) : '1';
+      /* 合流組は着地直前に静かに引く(重なりの版ズレを作らない)。
+         点滅する状態(S12)との出入りでは不透明度も補間する。 */
+      pool[i].style.opacity = pr.merge
+        ? String(1 - smooth(clamp01((local - 0.55) / 0.35)))
+        : lerp(pr.alphaA, pr.alphaB, smooth(local)).toFixed(3);
     });
   };
 

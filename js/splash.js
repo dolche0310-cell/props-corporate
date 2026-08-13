@@ -13,7 +13,8 @@
     200- 970  文字が 70ms 刻みで 26px ライズ(各560ms)
     970-1330  Solid
    1330-1610  i のドットが黒→#FF2400 に灯る(文字は Solid のまま)
-   1760-2830  文字が粒子化して散る。ドットは残る
+   1610-2030  灯り切って一拍。オレンジの円と黒い粒子を重ねない
+   2030-3180  文字が粒子化して散る。ドットの周りは粒子を作らない
    2150-2500  ドットが S04(709.5,292.5) r26.5 へ
    2500       幕の白が抜け、hero-morph.start() = S04 から引き継ぎ
    3200       幕を除去(粒子が散り終わる)
@@ -89,8 +90,12 @@
     const test = document.createElement('canvas').getContext('2d');
     const paths = letters.map((p) => new Path2D(p.getAttribute('d')));
     test.setTransform(LS, 0, 0, LS, LX, LY);
+    /* i のドットの領域は粒子を作らない。オレンジの円と黒いノイズが
+       同じ場所で重なると濁って見えるため、そこは円だけに任せる。 */
+    const DOT_KEEP = IDOT.r + 2.5;
     for (let y = LY; y < LY + 97 * LS + 4; y += 2.4) {
       for (let x = LX; x < LX + LW + 4; x += 2.4) {
+        if (Math.hypot(x - IDOT.x, y - IDOT.y) < DOT_KEEP) continue;
         for (const pa of paths) {
           if (test.isPointInPath(pa, x, y)) {
             const a2 = rnd() * Math.PI * 2, d2 = 10 + rnd() * 30;
@@ -117,8 +122,9 @@
   cellsG.appendChild(dotEl);
 
   const DIS = 1330;                /* ドット点灯の開始 */
-  const SCATTER = DIS + 430;       /* 文字が散り始める */
-  const HANDOFF = 2500;            /* hero-morph へ受け渡し */
+  const LIT = DIS + 280;           /* 点灯し切る */
+  const SCATTER = LIT + 420;       /* 灯り切って一拍おいてから文字が散る */
+  const HANDOFF = SCATTER + 470;   /* hero-morph へ受け渡し */
 
   const drawIntro = (t) => {
     /* 文字: 1文字ずつライズ。散開開始後はグループごと消えていく */
@@ -136,7 +142,7 @@
     const ctx = canvas.getContext('2d');
     ctx.setTransform(q, 0, 0, q, 0, 0);
     ctx.clearRect(0, 0, DW, DH);
-    if (t >= SCATTER && t <= 2900) {
+    if (t >= SCATTER && t <= SCATTER + 1150) {
       ctx.fillStyle = '#191919';
       for (const p of particles) {
         const lt = t - SCATTER - p.delay;
@@ -158,7 +164,7 @@
     if (t >= DIS && t < HANDOFF) {
       dotEl.style.display = '';
       const cu = smooth((t - DIS) / 280);
-      const mu = smooth((t - 2150) / 350);          /* S04 への移動 */
+      const mu = smooth((t - (HANDOFF - 350)) / 350);   /* S04 への移動 */
       const x = lerp(IDOT.x, 709.5, mu);
       const y = lerp(IDOT.y, 292.5, mu);
       const r = lerp(IDOT.r, 26.5, mu);
@@ -197,7 +203,7 @@
       if (m) m.start();                          /* S04 から引き継ぎ */
       else { startFV(); }                        /* 保険 */
     }
-    if (t >= 3200) { finish(); return; }
+    if (t >= HANDOFF + 700) { finish(); return; }
     raf = requestAnimationFrame(frame);
   };
 

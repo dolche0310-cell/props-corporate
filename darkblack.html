@@ -214,16 +214,16 @@
                        色: ポイントカラーだけを #FF2400 に置換する選択フィルタ。
                        feColorMatrix の RGB 行が「ピンク平均→#FF2400 / シアン・
                        白不変」の置換、α行(4r-8g+4b-1.375)が強いマゼンタだけを
-                       選ぶマスク。ベースは承認済みのニュートラル調
-                       (彩度0.92 / コントラスト1.26)に R+2%/B-2% の微temperature。
+                       選ぶマスク。ベースは彩度0.66 / コントラスト1.08 に
+                       R+6%/B-10% の色温度で、街並みの青紫かぶりを自然にする。
                        街並み・空・シアンは自然なまま残る。 -->
                   <svg class="service__grade-def" aria-hidden="true" focusable="false" width="0" height="0"><defs>
                     <filter id="miai-warm" color-interpolation-filters="sRGB">
-                      <feColorMatrix in="SourceGraphic" type="saturate" values="0.92" result="b1"/>
+                      <feColorMatrix in="SourceGraphic" type="saturate" values="0.66" result="b1"/>
                       <feComponentTransfer in="b1" result="base">
-                        <feFuncR type="linear" slope="1.285" intercept="-0.08"/>
-                        <feFuncG type="linear" slope="1.26" intercept="-0.08"/>
-                        <feFuncB type="linear" slope="1.235" intercept="-0.08"/>
+                        <feFuncR type="linear" slope="1.145" intercept="-0.027"/>
+                        <feFuncG type="linear" slope="1.08" intercept="-0.027"/>
+                        <feFuncB type="linear" slope="0.972" intercept="-0.027"/>
                       </feComponentTransfer>
                       <feColorMatrix in="SourceGraphic" type="matrix" result="accent"
                         values="1.31834 -1.05382 0.73548 0 0
