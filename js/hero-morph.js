@@ -191,7 +191,15 @@
         if (!hA) hA = circle(centroid(a.p)[0], centroid(a.p)[1], 0.6);
         if (!hB) hB = circle(centroid(b.p)[0], centroid(b.p)[1], 0.6);
       }
-      return { a: a.p, b: b.p, k: bestK, hA, hB, merge };
+      /* 移動の弧: 重心の移動量に応じて直交方向へ膨らむ。
+         図形ごとに交互の向きで、流れに渦のような有機性を出す */
+      const ca = centroid(a.p), cb = centroid(b.p);
+      const mvx = cb[0] - ca[0], mvy = cb[1] - ca[1];
+      const dist = Math.hypot(mvx, mvy);
+      let nx = 0, ny = 0;
+      if (dist > 1) { nx = -mvy / dist; ny = mvx / dist; }
+      const bulge = Math.min(64, dist * 0.13);
+      return { a: a.p, b: b.p, k: bestK, hA, hB, merge, nx, ny, bulge };
     });
   };
 
@@ -225,11 +233,15 @@
 
   /* ---------- タイムライン ---------- */
   /* ease: ジオメトリのみオーバーシュート付き。u=1 で厳密に 1 */
+  /* soft: 速く出て長い尾で絹のように収まる(sun-asterisk 参考)。
+     bold/over: 山なりに加速し、わずかに行き過ぎて戻る。
+     いずれも u=1 で厳密に 1(最終形は崩れない)。 */
   const geoEase = (u, kind, strength) => {
-    const base = smooth(u);
-    const s = (kind === 'bold' ? 1.6 : kind === 'over' ? 2.2 : 1.0) * strength;
-    const v = clamp01(u) - 1;
-    return base + s * 0.045 * (v * v * v + v * v) * 6.75; /* max≈s*4.5% at u≈2/3 */
+    const uu = clamp01(u);
+    const base = kind === 'soft' ? 1 - Math.pow(1 - uu, 3.2) : smooth(uu);
+    const s = (kind === 'bold' ? 1.5 : kind === 'over' ? 2.1 : 0.7) * strength;
+    const v = uu - 1;
+    return base + s * 0.045 * (v * v * v + v * v) * 6.75;
   };
 
   const total = STATES.reduce((a, s) => a + s.t + s.h, 0);
@@ -240,6 +252,7 @@
   let pairCache = null, pairKey = '';
   const tmp = new Array(N), tmpH = new Array(N);
 
+  let nowRef = 0;
   const renderAt = (cycleT) => {
     /* cycleT(0..total) から現在の区間を決める */
     let acc = 0, idx = 0, into = 0;
@@ -258,9 +271,33 @@
     }
 
     if (into >= st.t) {
-      /* ホールド(=状態そのもの)。マイクロドリフトは transform 側 */
+      /* ホールド中も完全静止させない(sun-asterisk 参考)。
+         各図形が位相をずらした呼吸(半径±1.2% + 2〜4pxのドリフト)を
+         続ける。振幅は strength に従い、FV では一段静かになる */
       needActors(st.list.length);
-      st.list.forEach((s, i) => drawShape(pool[i], s.p, s.hole));
+      const bt = nowRef / 1000;
+      st.list.forEach((s, i) => {
+        const cx = s.cx !== undefined ? s.cx : (s.cx = centroid(s.p)[0]);
+        const cy = s.cy !== undefined ? s.cy : (s.cy = centroid(s.p)[1]);
+        const ph = i * 1.7;
+        const w1 = smooth(0.5 + 0.5 * Math.sin(bt * 0.85 + ph));
+        const w2 = smooth(0.5 + 0.5 * Math.sin(bt * 0.53 + ph * 2.3));
+        const grow = 1 + (w1 - 0.5) * 0.024 * strength;
+        const dx = (w2 - 0.5) * 6 * strength;
+        const dy = (w1 - 0.5) * 4 * strength;
+        for (let j = 0; j < N; j++) {
+          tmp[j] = [cx + (s.p[j][0] - cx) * grow + dx, cy + (s.p[j][1] - cy) * grow + dy];
+        }
+        let hole = null;
+        if (s.hole) {
+          for (let j = 0; j < N; j++) {
+            tmpH[j] = [cx + (s.hole[j][0] - cx) * grow + dx, cy + (s.hole[j][1] - cy) * grow + dy];
+          }
+          hole = tmpH;
+        }
+        drawShape(pool[i], tmp, hole);
+        pool[i].style.opacity = '1';
+      });
       return;
     }
     const key = prev.id + '>' + st.id;
@@ -272,9 +309,12 @@
     pairCache.forEach((pr, i) => {
       const local = clamp01((into - stag * i) / actDur);
       const ug = geoEase(local, st.e, strength);
+      /* 弧: 中間で最大、両端で0。u=1 では必ず消える */
+      const arc = pr.bulge * 4 * ug * (1 - ug) * (i % 2 ? -1 : 1) * strength;
+      const ax = pr.nx * arc, ay = pr.ny * arc;
       for (let j = 0; j < N; j++) {
         const p = pr.a[(j + pr.k) % N], q = pr.b[j];
-        tmp[j] = [lerp(p[0], q[0], ug), lerp(p[1], q[1], ug)];
+        tmp[j] = [lerp(p[0], q[0], ug) + ax, lerp(p[1], q[1], ug) + ay];
       }
       let hole = null;
       if (pr.hA) {
@@ -345,6 +385,7 @@
     let t = now - t0 + START_OFFSET;
     const cycleT = t % total;
     if (t >= total + START_OFFSET && !firstPassDone) { firstPassDone = true; strength = 0.75; }
+    nowRef = now;
     renderAt(cycleT);
     applyStage(now);
     raf = requestAnimationFrame(frame);
