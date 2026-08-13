@@ -155,7 +155,7 @@
     /* S13 散在円。画面いっぱいに広がるパターンなので、FV でも
        Figma の原配置のまま(指示)。中心から弾けて外へ広がり、
        次々に現れる動きは burst:true で専用に駆動する(下の burstList)。 */
-    { id: 's13', t: 2100, e: 'soft', h: 620, burst: true,
+    { id: 's13', t: 2100, e: 'soft', h: 620, burst: true, fullBleed: true,
       list: [S(circle(414.5, 217.5, 21.5)), S(circle(1223.5, 482.5, 132.5)),
              S(circle(17.5, 243.5, 132.5)), S(circle(911.5, 256.5, 60.5)),
              S(circle(222.5, 712.5, 60.5)),
@@ -221,11 +221,14 @@
   /* 画面いっぱいに広がる構図はそのまま。ただし FV 表示後にテキスト
      (x72..853)へ掛かるものは、左端が 880 に来るまで右へ逃がす。 */
   const KEEP_WIDE = { s11: 1, s13: 1, s18b: 1 };
-  const TEXT_R = 878;
+  const TEXT_R = 896;      /* 文字の右端853 + 呼吸/伸縮の余裕 */
   STATES.forEach((st) => {
     if (st.fvL) { st.fvList = st.fvL; return; }
     if (KEEP_WIDE[st.id]) {
-      /* 大きい形はそのままの構図。ただし文字に掛かるなら右へ逃がす */
+      /* 画面いっぱいに広がる構図はそのまま。
+         S13(円がたくさん出て外へ飛び出す演出)は画面全体を使うことが
+         意図なので、文字を避ける移動もしない。 */
+      if (st.fullBleed) { st.fvList = st.list; return; }
       let lx = Infinity;
       st.list.forEach((sh) => sh.p.forEach(([x]) => { if (x < lx) lx = x; }));
       const push = lx < TEXT_R ? TEXT_R - lx : 0;
@@ -262,6 +265,7 @@
   /* 中心へ寄せたあと、文字帯(x<878)へ掛かるものは右へ逃がす。
      形は変えず平行移動だけ。 */
   STATES.forEach((st) => {
+    if (st.fullBleed) return;                 /* 全画面の演出はそのまま */
     let lx = Infinity;
     st.fvList.forEach((sh) => sh.p.forEach(([x]) => { if (x < lx) lx = x; }));
     const push = lx < TEXT_R ? TEXT_R - lx : 0;
@@ -279,7 +283,7 @@
     let bottom = -Infinity;
     src.forEach((sh) => sh.p.forEach(([, y]) => { if (y > bottom) bottom = y; }));
     const margin = 14 + Math.min(24, (bottom - top) * 0.02);   /* 呼吸/伸縮の余裕 */
-    st.fvShift = top < SAFE_TOP + margin ? SAFE_TOP + margin - top : 0;
+    st.fvShift = (!st.fullBleed && top < SAFE_TOP + margin) ? SAFE_TOP + margin - top : 0;
     if (st.dots) st.fvDots = st.dots.map((c) =>
       [c[0] + (st.fdx || 0), c[1] + (st.fdy || 0) + st.fvShift, c[2]]);
     if (st.caps) st.fvCaps = st.caps.map((c) =>
