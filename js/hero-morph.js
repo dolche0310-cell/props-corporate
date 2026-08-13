@@ -116,7 +116,9 @@
       list: [S(capsule(670.5, 272.5, 670.5, 431.5, 26.5)), S(capsule(769.5, 272.5, 769.5, 431.5, 26.5))] },
     /* S08b 縦のバーが一度ほどけて円に戻り、斜めの位置へ移りながら
        また伸びる。これで S08 と S09 が「同じ2つの塊の移動」に見える。 */
-    { id: 's08b', t: 300, e: 'soft', h: 150, orbit: true,
+    /* S08b 2つの円が交互にバウンドし、上下の高さが入れ替わる。
+       左が上がれば右が下がる、を繰り返しながら斜めのバーへ向かう。 */
+    { id: 's08b', t: 300, e: 'soft', h: 900, swap: true,
       dots: [[700, 320, 30], [824, 396, 30]],
       list: [S(circle(700, 320, 30)), S(circle(824, 396, 30))] },
     /* S09 */ { id: 's09', t: 336, e: 'bold', h: 420, glide: true,
@@ -635,6 +637,31 @@
          真円のまま扱う(輪郭点を個別に動かすと円が歪むため、中心と半径
          だけを変える)。dotsFill のときは、ひとつずつ順に
          「線の輪」→「塗りの円」へ変わり、最後は4つとも塗りになる。 */
+      /* --- 2つの円が交互に弾んで上下が入れ替わる --- */
+      if (st.swap) {
+        const ds = (geomFV && st.fvDots) ? st.fvDots : st.dots;
+        needActors(ds.length);
+        const ht4 = into - st.t;
+        const midY = (ds[0][1] + ds[1][1]) / 2;
+        const amp = Math.abs(ds[1][1] - ds[0][1]) / 2;    /* 入れ替わりの振幅 */
+        const PERIOD = 760;                                /* 1往復 */
+        const u = (ht4 % PERIOD) / PERIOD;
+        /* 放物線の弾み。0→1→0 を繰り返す */
+        const hop = 1 - Math.pow(2 * u - 1, 2);
+        ds.forEach((d, i) => {
+          /* 符号だけを反転させるので、片方が上がれば必ずもう片方は下がる */
+          const sign = i ? 1 : -1;
+          const y = midY + sign * amp * (1 - 2 * hop);
+          /* 到達点(hop=0 / 1)の前後だけ、着地らしく横に潰す */
+          const near = Math.min(hop, 1 - hop);
+          const sq = near < 0.10 ? 1 - 0.14 * (1 - near / 0.10) : 1;
+          const el = pool[i];
+          drawShape(el, circle(d[0], y, d[2]).map(([x, yy]) =>
+            [d[0] + (x - d[0]) / sq, y + (yy - y) * sq]), null);
+          el.style.opacity = '1';
+        });
+        return;
+      }
       if (st.orbit || st.dotsFill) {
         const ds = (geomFV && st.fvDots) ? st.fvDots : st.dots;
         needActors(ds.length);
@@ -975,7 +1002,8 @@
     if (!geomFV && fvFired && st.id === 's12') { geomFV = true; switchSrcOnce = true; }
     /* メーターへ入る/出る遷移は、到達側/出発側を毎フレームのライブ値に
        するため対応付けを作り直す(高さが飛ばない) */
-    const liveMeter = st.meter || prev.meter || st.spin || prev.spin || prev.burst;
+    const liveMeter = st.meter || prev.meter || st.spin || prev.spin || prev.burst
+                    || prev.swap;
     const key = prev.id + '>' + st.id + (geomFV ? '/fv' : '') + (liveMeter ? '/' + Math.round(into) : '');
     if (pairKey !== key) {
       let srcList = (switchSrcOnce && st.id === 's12') ? prev.list : pick(prev);
