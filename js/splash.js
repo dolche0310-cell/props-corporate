@@ -84,29 +84,50 @@
   const L_BASE = 200, L_STAG = 70, L_DUR = 560;
   const L_RISE = 26 / LS;
 
-  /* ---------- 粒子(全グリッド点 / 静止中は 2.8px タイルで完全な黒) ---------- */
+  /* ---------- 粒子 ----------
+     字形を細かい格子で埋め、静止中はタイルで完全な黒を作る。
+     散るときは「i のドットから解放されたエネルギー」として、
+     ドットに近い粒から順に持ち上がる。
+
+     ・速度: 上方向 + ドットからの外向き + わずかな乱れ
+     ・軌道: 直線でなく、粒ごとの位相でゆるく渦を巻く(curl)
+     ・減速: 立ち上がりが速く、終盤はほとんど止まって消える
+     ・寿命と大きさに個体差があるので、一斉に消えない */
   const particles = [];
   {
     const test = document.createElement('canvas').getContext('2d');
     const paths = letters.map((p) => new Path2D(p.getAttribute('d')));
     test.setTransform(LS, 0, 0, LS, LX, LY);
-    /* i のドットの領域は粒子を作らない。オレンジの円と黒いノイズが
+    /* i のドットの領域は粒子を作らない。オレンジの円と黒い粒が
        同じ場所で重なると濁って見えるため、そこは円だけに任せる。 */
     const DOT_KEEP = IDOT.r + 2.5;
-    for (let y = LY; y < LY + 97 * LS + 4; y += 2.4) {
-      for (let x = LX; x < LX + LW + 4; x += 2.4) {
+    const STEP = 1.85;                       /* 格子。細かいほど密になる */
+    const maxD = Math.hypot(LW, 97 * LS);
+    for (let y = LY; y < LY + 97 * LS + 4; y += STEP) {
+      for (let x = LX; x < LX + LW + 4; x += STEP) {
         if (Math.hypot(x - IDOT.x, y - IDOT.y) < DOT_KEEP) continue;
-        for (const pa of paths) {
-          if (test.isPointInPath(pa, x, y)) {
-            const a2 = rnd() * Math.PI * 2, d2 = 10 + rnd() * 30;
-            particles.push({
-              x, y,
-              outX: x + Math.cos(a2) * d2 * 1.5, outY: y + Math.sin(a2) * d2 + 3,
-              delay: rnd() * 380, size: 0.9 + rnd() * 1.1
-            });
-            break;
-          }
-        }
+        let inside = false;
+        for (const pa of paths) { if (test.isPointInPath(pa, x, y)) { inside = true; break; } }
+        if (!inside) continue;
+        /* ドットからの向きと距離。近い粒ほど早く、速く動く */
+        const ddx = x - IDOT.x, ddy = y - IDOT.y;
+        const dist = Math.hypot(ddx, ddy) || 1;
+        const nx = ddx / dist, ny = ddy / dist;
+        const near = 1 - Math.min(1, dist / maxD);          /* 0..1 */
+        const jitter = (rnd() - 0.5) * 0.9;
+        const speed = (58 + rnd() * 88) * (0.5 + near * 1.0);
+        particles.push({
+          x, y,
+          /* 上へ立ち上がりつつ、ドットから外へ広がる */
+          vx: nx * speed * 0.62 + jitter * 44,
+          vy: -speed * 0.78 + ny * speed * 0.28 + (rnd() - 0.5) * 26,
+          curlA: rnd() * Math.PI * 2,
+          curlR: 5 + rnd() * 16,
+          delay: (1 - near) * 260 + rnd() * 260,
+          life: 720 + rnd() * 520,
+          size: 0.75 + rnd() * 1.25,
+          aMax: 0.72 + rnd() * 0.28
+        });
       }
     }
   }
@@ -121,6 +142,8 @@
   dotEl.style.display = 'none';
   cellsG.appendChild(dotEl);
 
+  const STEP_F = 2.15, STEP_H = STEP_F / 2;   /* 静止中に字形を埋めるタイル */
+  const SCATTER_LEN = 1700;                  /* 散り切るまで */
   const DIS = 1330;                /* ドット点灯の開始 */
   const LIT = DIS + 280;           /* 点灯し切る */
   const SCATTER = LIT + 420;       /* 灯り切って一拍おいてから文字が散る */
@@ -129,7 +152,7 @@
   const drawIntro = (t) => {
     /* 文字: 1文字ずつライズ。散開開始後はグループごと消えていく */
     let ga = 1;
-    if (t >= SCATTER) ga = 1 - smooth((t - SCATTER) / 250);
+    if (t >= SCATTER) ga = 1 - smooth((t - SCATTER) / 220);
     logoG.style.opacity = Math.max(0, ga).toFixed(3);
     letters.forEach((el, i) => {
       const u = EASE_OUT((t - L_BASE - i * L_STAG) / L_DUR);
@@ -142,20 +165,32 @@
     const ctx = canvas.getContext('2d');
     ctx.setTransform(q, 0, 0, q, 0, 0);
     ctx.clearRect(0, 0, DW, DH);
-    if (t >= SCATTER && t <= SCATTER + 1150) {
+    if (t >= SCATTER && t <= SCATTER + SCATTER_LEN) {
       ctx.fillStyle = '#191919';
       for (const p of particles) {
         const lt = t - SCATTER - p.delay;
-        if (lt < 0) continue;
-        const uIn = clamp01(lt / 90);
-        const uOut = clamp01((lt - 430) / 560);
-        if (uOut >= 1) continue;
-        const e = smooth(uOut);
-        const alpha = uIn * (1 - e);
-        if (alpha <= 0.01) continue;
-        const sz = lerp(2.8, p.size, e);
+        if (lt < 0) {
+          /* まだ散り始めていない粒は、字形を埋めるタイルとして置く */
+          ctx.globalAlpha = 1;
+          ctx.fillRect(p.x - STEP_H, p.y - STEP_H, STEP_F, STEP_F);
+          continue;
+        }
+        const u = lt / p.life;
+        if (u >= 1) continue;
+        const sec = lt / 1000;
+        /* 減速: 立ち上がりが速く、終盤はほとんど止まる */
+        const damp = (1 - Math.exp(-sec * 1.45)) / 1.45;
+        const cur = p.curlA + sec * 2.3;
+        const px = p.x + p.vx * damp + Math.cos(cur) * p.curlR * damp * 1.6;
+        const py = p.y + p.vy * damp + Math.sin(cur * 1.3) * p.curlR * damp;
+        /* 濃度: 出はほぼ即時、消えぎわを長く引く */
+        const fade = u < 0.18 ? 1 : Math.pow(1 - (u - 0.18) / 0.82, 1.7);
+        const alpha = p.aMax * fade;
+        if (alpha <= 0.012) continue;
+        /* 大きさ: タイルから粒へ痩せる */
+        const sz = lerp(STEP_F, p.size, smooth(clamp01(u * 2.2)));
         ctx.globalAlpha = alpha;
-        ctx.fillRect(lerp(p.x, p.outX, e) - sz / 2, lerp(p.y, p.outY, e) - sz / 2, sz, sz);
+        ctx.fillRect(px - sz / 2, py - sz / 2, sz, sz);
       }
       ctx.globalAlpha = 1;
     }
@@ -203,7 +238,7 @@
       if (m) m.start();                          /* S04 から引き継ぎ */
       else { startFV(); }                        /* 保険 */
     }
-    if (t >= HANDOFF + 700) { finish(); return; }
+    if (t >= SCATTER + SCATTER_LEN) { finish(); return; }
     raf = requestAnimationFrame(frame);
   };
 
