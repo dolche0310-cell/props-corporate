@@ -127,7 +127,7 @@
     /* S13 散在円。画面いっぱいに広がるパターンなので、FV でも
        Figma の原配置のまま(指示)。中心から弾けて外へ広がり、
        次々に現れる動きは burst:true で専用に駆動する(下の burstList)。 */
-    { id: 's13', t: 1700, e: 'soft', h: 520, burst: true,
+    { id: 's13', t: 1700, e: 'soft', h: 1150, burst: true,
       list: [S(circle(414.5, 217.5, 21.5)), S(circle(1223.5, 482.5, 132.5)),
              S(circle(17.5, 243.5, 132.5)), S(circle(911.5, 256.5, 60.5)),
              S(circle(222.5, 712.5, 60.5)),
@@ -330,17 +330,26 @@
         const p0 = circle(c[0], y, r);
         out.push(S(p0.map(([x, yy]) => [c[0] + (x - c[0]) / Math.max(0.7, sq), y + (yy - y) * sq])));
       } else {
-        /* 弾み終わり → 最終位置へ。軌跡が薄く重なる */
-        const u = clamp01((te - BOUNCE_END) / 620);
-        const e = 1 - Math.pow(1 - u, 3);
+        /* 弾み終わり → 最終位置へ寄りつつ、そこから外へ広がり続ける。
+           中心(720,400)からの外向きに一定の速さで流れ、止まらない。
+           軌跡は進行方向の後ろに3段だけ薄く残す。 */
+        const te2 = te - BOUNCE_END;
+        const e = 1 - Math.pow(1 - clamp01(te2 / 620), 3);
         const fromY = bounceY(BOUNCE_END, Math.min(c[1], GROUND - 120));
-        const y = lerp(fromY, c[1], e);
-        out.push(S(circle(c[0], y, r)));
-        if (ghosts && u < 1) {
+        const baseY = lerp(fromY, c[1], e);
+        let dx = c[0] - BURST_O[0], dy = c[1] - BURST_O[1];
+        const L = Math.hypot(dx, dy) || 1;
+        dx /= L; dy /= L;
+        /* 円ごとに速さを変える(大きいものはゆっくり)。300ms 後から効き始める */
+        const sp = Math.max(0, te2 - 300) * (0.30 - Math.min(0.16, r / 900)) * k;
+        const x = c[0] + dx * sp, y = baseY + dy * sp;
+        out.push(S(circle(x, y, r * (1 + sp / 2600))));
+        if (ghosts) {
           for (let g = 1; g <= 3; g++) {
-            const ug = clamp01(e - g * 0.13);
-            ghosts.push({ p: circle(c[0], lerp(fromY, c[1], ug), r * (1 - g * 0.04)),
-                          a: (0.13 - g * 0.033) * (1 - u) * k });
+            const back = sp - g * 26;
+            if (back <= 0) continue;
+            ghosts.push({ p: circle(c[0] + dx * back, baseY + dy * back, r * (1 - g * 0.05)),
+                          a: (0.12 - g * 0.03) * k });
           }
         }
       }
@@ -472,6 +481,7 @@
     }
     const st = STATES[idx];
     const prev = STATES[(idx - 1 + STATES.length) % STATES.length];
+    setGoo(!!(GOO_STATES[st.id] || (into < st.t && GOO_STATES[prev.id])));
 
     if (st.fv && !fvFired && into >= st.t * 0.62) {
       fvFired = true;
@@ -659,7 +669,7 @@
     if (!geomFV && fvFired && st.id === 's12') { geomFV = true; switchSrcOnce = true; }
     /* メーターへ入る/出る遷移は、到達側/出発側を毎フレームのライブ値に
        するため対応付けを作り直す(高さが飛ばない) */
-    const liveMeter = st.meter || prev.meter || st.spin || prev.spin;
+    const liveMeter = st.meter || prev.meter || st.spin || prev.spin || prev.burst;
     const key = prev.id + '>' + st.id + (geomFV ? '/fv' : '') + (liveMeter ? '/' + Math.round(into) : '');
     if (pairKey !== key) {
       let srcList = (switchSrcOnce && st.id === 's12') ? prev.list : pick(prev);
@@ -668,6 +678,7 @@
       const mdx = geomFV ? 15 : 0;
       if (st.meter) dstList = meterList(nowRef, mdx, 0, strength);
       if (prev.meter) srcList = meterList(nowRef, mdx, 0, strength);
+      if (prev.burst) srcList = burstList(prev, prev.t + prev.h + into, strength, null);
       if (st.spin) dstList = ringList(nowRef, strength, geomFV ? (st.fvShift || 0) : 0);
       if (prev.spin) srcList = ringList(nowRef, strength, geomFV ? (prev.fvShift || 0) : 0);
       pairCache = buildPairs(srcList, dstList);
@@ -779,6 +790,17 @@
       }
     }, { threshold: 0 }).observe(svg);
   }
+
+  /* 円が複数あって互いに近づく状態では、メタボールで融合させる。
+     ひとつの形しかない状態や、既に有機的な塊(ブロブ/N形)では掛けない。 */
+  const GOO_STATES = { s07: 1, s08: 1, s12: 1, s13: 1, s14: 1, s17: 1, s20: 1 };
+  let gooOn = null;
+  const setGoo = (on) => {
+    if (gooOn === on) return;
+    gooOn = on;
+    liveG.setAttribute('filter', on ? 'url(#hm-goo)' : '');
+    if (!on) liveG.removeAttribute('filter');
+  };
 
   const showStatic = () => {
     staticG.style.display = '';

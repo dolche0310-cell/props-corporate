@@ -112,6 +112,18 @@
         <path class="hm hm--b" d="M1097.53 521.37L1241.51 304.53"/>
         <circle class="hm hm--dot" cx="1285.50" cy="522.00" r="44.5"/>
       </g>
+      <!-- 円同士が近づくと細胞のように融合して見えるメタボール。
+           ぼかしてから alpha のコントラストを立てる古典的な gooey。
+           近い円の間にだけ「首」ができ、離れると自然に切れる。 -->
+      <defs>
+        <filter id="hm-goo" x="-25%" y="-25%" width="150%" height="150%"
+                color-interpolation-filters="sRGB">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="17" result="b"/>
+          <feColorMatrix in="b" type="matrix" result="g"
+            values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 21 -9"/>
+          <feComposite in="SourceGraphic" in2="g" operator="atop"/>
+        </filter>
+      </defs>
       <g class="hm-live" style="display:none"></g>
     </svg>
     <span class="hero__dots" id="hero-dots" aria-hidden="true"></span>
