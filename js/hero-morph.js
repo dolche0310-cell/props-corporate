@@ -108,14 +108,16 @@
     /* S07 */ { id: 's07', t: 336, e: 'soft', h: 460, fdx: 436, fdy: 34, orbit: true,
       list: [dotG(669.5, 308.5), dotG(768.5, 308.5), dotG(669.5, 393.5), dotG(768.5, 393.5)] },
     /* S08 */ { id: 's08', t: 304, e: 'soft', h: 420, fdx: 436, fdy: 34, elastic: true,
+      caps: [[670.5, 352, 79.5, 26.5], [769.5, 352, 79.5, 26.5]],
       list: [S(capsule(670.5, 272.5, 670.5, 431.5, 26.5)), S(capsule(769.5, 272.5, 769.5, 431.5, 26.5))] },
-    /* S09 */ { id: 's09', t: 336, e: 'bold', h: 420, fdx: 285, fdy: 32, elastic: true,
+    /* S09 */ { id: 's09', t: 336, e: 'bold', h: 420, fdx: 285, fdy: 32, glide: true,
       list: [S(capsule(778.68, 373.22, 891.12, 260.79, 26.5)),
              S(capsule(848.69, 443.22, 961.13, 330.79, 26.5))] },
     /* S10 縦長バー。Figma は y115.5..587.5 だが、上端がヘッダー(高さ137)の
        背面に潜って見切れるので、天地を詰めて y196..568 にする(半長236→186)。
        FV では fdy 34 が乗るので実際の上端は 230。 */
     { id: 's10', t: 336, e: 'soft', h: 460, fdx: 435, fdy: 34, elastic: true,
+      caps: [[720.5, 382.5, 186, 26.5]],
       list: [S(capsule(720.5, 196.5, 720.5, 568.5, 26.5))] },
     /* S11 */ { id: 's11', t: 416, e: 'bold', h: 256, fv: true, fdx: 439,
       list: [S(circle(703.5, 399.5, 262.5))] },
@@ -155,7 +157,7 @@
              S(circle(1335.43, EQY, 23.3))] },
     /* S18a 中円 */ { id: 's18a', t: 384, e: 'soft', h: 112, fdx: 435, fdy: 30, list: [S(circle(720.5, 355.5, 117.5))] },
     /* S18b 巨大円 */ { id: 's18b', t: 496, e: 'bold', h: 208, fdx: 287, list: [S(circle(1139.5, 355.5, 546.5))] },
-    /* S19 N形 */ { id: 's19', t: 496, e: 'soft', h: 520, jelly: true, list: SHAPES.nshape.map((p) => S(p)) },
+    /* S19 N形 */ { id: 's19', t: 496, e: 'soft', h: 1150, stroke: true, list: SHAPES.nshape.map((p) => S(p)) },
     /* S20 最終モチーフ = Figma FV 完成形 */ { id: 's20', t: 480, e: 'soft', h: 900,
       list: [S(capsule(909.53, 521.37, 1053.51, 304.53, 44.3885)),
              S(capsule(1097.53, 521.37, 1241.51, 304.53, 44.3885)),
@@ -197,6 +199,8 @@
     src.forEach((sh) => sh.p.forEach(([, y]) => { if (y > bottom) bottom = y; }));
     const margin = 8 + Math.min(18, (bottom - top) * 0.015);   /* 呼吸の余裕 */
     st.fvShift = top < SAFE_TOP + margin ? SAFE_TOP + margin - top : 0;
+    if (st.caps) st.fvCaps = st.caps.map((c) =>
+      [c[0] + (st.fdx || 0), c[1] + (st.fdy || 0) + st.fvShift, c[2], c[3]]);
     if (!st.fvShift) return;
     st.fvList = src.map((sh) => ({
       p: sh.p.map(([x, y]) => [x, y + st.fvShift]),
@@ -443,6 +447,14 @@
   };
   const drawShape = (el, pts, hole) => {
     el.setAttribute('d', ringOf(pts) + (hole ? ringOf(hole) : ''));
+    if (el.__stroked) {                 /* 線描画の後始末 */
+      el.removeAttribute('stroke');
+      el.removeAttribute('stroke-width');
+      el.removeAttribute('fill-opacity');
+      el.style.strokeDasharray = '';
+      el.style.strokeDashoffset = '';
+      el.__stroked = false;
+    }
   };
 
   /* ---------- タイムライン ---------- */
@@ -481,7 +493,10 @@
     }
     const st = STATES[idx];
     const prev = STATES[(idx - 1 + STATES.length) % STATES.length];
-    setGoo(!!(GOO_STATES[st.id] || (into < st.t && GOO_STATES[prev.id])));
+    /* 遷移の 12%〜88% の間だけ融合させる(着地の瞬間は必ず素の形) */
+    const inTrans = into < st.t;
+    const tp = inTrans ? into / st.t : 1;
+    setGoo(inTrans && tp > 0.12 && tp < 0.88 && !st.stroke && !prev.stroke);
 
     if (st.fv && !fvFired && into >= st.t * 0.62) {
       fvFired = true;
@@ -509,19 +524,33 @@
         });
         return;
       }
-      /* --- バー: しなやかに伸縮し、位置もわずかに揺れる --- */
-      if (st.elastic) {
+      /* --- バー(Figma 397:61953 ほか): 液状にしなやかに伸縮する ---
+         輪郭の64点を拡大縮小すると角アールまで歪んで波打つので、
+         中心線の長さ(半長)だけを変え、半径は固定したまま厳密な弧で
+         描き直す。端は常に真円のまま、縦だけが滑らかに伸び縮みする。 */
+      if (st.elastic && st.caps) {
+        const cps = (geomFV && st.fvCaps) ? st.fvCaps : st.caps;
+        needActors(cps.length);
+        const bt1 = nowRef / 1000;
+        cps.forEach((cp, i) => {
+          const x = cp[0], cy = cp[1], h0 = cp[2], r = cp[3];
+          const ph = i * 1.15;
+          const w = Math.sin(bt1 * 1.55 + ph);
+          const h = h0 * (1 + w * 0.14 * strength);
+          const dy = Math.sin(bt1 * 0.95 + ph * 1.4) * 5 * strength;
+          pool[i].setAttribute('d', meterPath(x, cy + dy, Math.max(r * 0.2, h), r));
+          pool[i].style.opacity = '1';
+        });
+        return;
+      }
+      /* --- 斜めのバー: 形は変えず、軸に沿って滑らせる --- */
+      if (st.glide) {
         const hl1 = pick(st);
         needActors(hl1.length);
         const bt1 = nowRef / 1000;
         hl1.forEach((sh, i) => {
-          const c = sh.c || (sh.c = centroid(sh.p));
-          const ph = i * 0.9;
-          const sy = 1 + Math.sin(bt1 * 1.75 + ph) * 0.075 * strength;
-          const sx = 1 - Math.sin(bt1 * 1.75 + ph) * 0.022 * strength;   /* 体積を保つ */
-          const dy = Math.sin(bt1 * 1.1 + ph * 1.4) * 5 * strength;
-          drawShape(pool[i], sh.p.map(([x, y]) =>
-            [c[0] + (x - c[0]) * sx, c[1] + (y - c[1]) * sy + dy]), null);
+          const g = Math.sin(bt1 * 1.25 + i * 1.6) * 12 * strength;
+          drawShape(pool[i], sh.p.map(([x, y]) => [x + g * 0.707, y - g * 0.707]), null);
           pool[i].style.opacity = '1';
         });
         return;
@@ -547,6 +576,35 @@
             return [c[0] + dx0 * cs - dy0 * sn + pull * dir, c[1] + dx0 * sn + dy0 * cs];
           }) : null);
           pool[i].style.opacity = '1';
+        });
+        return;
+      }
+      /* --- N形(Figma 277:37247): 輪郭を線で描いていき、描き切った
+         直後だけベタ塗りを一瞬見せて、また線に戻る ---
+           0- 620ms  外形を stroke で描く(dashoffset を詰める)
+         620- 900ms  塗りが差し、ピークで一瞬だけベタ(280ms)
+         900-1150ms  塗りが引いて線だけが残り、静かに息づく */
+      if (st.stroke) {
+        const hl4 = pick(st);
+        needActors(hl4.length);
+        const ht = into - st.t;          /* ホールド内の経過(0..st.h) */
+        hl4.forEach((sh, i) => {
+          const e = pool[i];
+          drawShape(e, sh.p, sh.hole);
+          const len = e.getTotalLength ? e.getTotalLength() : 2600;
+          const draw = clamp01(ht / 620);
+          const dr = 1 - Math.pow(1 - draw, 3);
+          e.style.strokeDasharray = len;
+          e.style.strokeDashoffset = (len * (1 - dr)).toFixed(1);
+          e.__stroked = true;
+          e.setAttribute('stroke', COLOR);
+          e.setAttribute('stroke-width', '10');
+          e.setAttribute('stroke-linejoin', 'round');
+          /* 塗りは描き切ってから差し、ピークで一瞬だけベタ */
+          const fu = clamp01((ht - 620) / 280);
+          const fd = clamp01((ht - 900) / 250);
+          e.setAttribute('fill-opacity', (smooth(fu) * (1 - smooth(fd))).toFixed(3));
+          e.style.opacity = '1';
         });
         return;
       }
@@ -793,13 +851,15 @@
 
   /* 円が複数あって互いに近づく状態では、メタボールで融合させる。
      ひとつの形しかない状態や、既に有機的な塊(ブロブ/N形)では掛けない。 */
-  const GOO_STATES = { s07: 1, s08: 1, s12: 1, s13: 1, s14: 1, s17: 1, s20: 1 };
+  /* 融合は「形から形へ移る途中」だけ。静止(ホールド)では必ず外し、
+     Figma どおりの綺麗な輪郭に戻す。遷移の入りと出でも掛け外しを
+     なめらかにするため、中盤だけ有効にする。 */
   let gooOn = null;
   const setGoo = (on) => {
     if (gooOn === on) return;
     gooOn = on;
-    liveG.setAttribute('filter', on ? 'url(#hm-goo)' : '');
-    if (!on) liveG.removeAttribute('filter');
+    if (on) liveG.setAttribute('filter', 'url(#hm-goo)');
+    else liveG.removeAttribute('filter');
   };
 
   const showStatic = () => {

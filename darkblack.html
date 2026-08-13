@@ -118,10 +118,10 @@
       <defs>
         <filter id="hm-goo" x="-25%" y="-25%" width="150%" height="150%"
                 color-interpolation-filters="sRGB">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="17" result="b"/>
+          <feGaussianBlur in="SourceGraphic" stdDeviation="13" result="b"/>
           <feColorMatrix in="b" type="matrix" result="g"
-            values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 21 -9"/>
-          <feComposite in="SourceGraphic" in2="g" operator="atop"/>
+            values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 34 -15"/>
+          <feComposite in="g" in2="SourceGraphic" operator="over"/>
         </filter>
       </defs>
       <g class="hm-live" style="display:none"></g>
