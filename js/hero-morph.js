@@ -92,23 +92,6 @@
     for (let i = 1; i < N; i++) if (pts[i][1] < pts[top][1]) top = i;
     return pts.slice(top).concat(pts.slice(0, top));
   };
-  /* 円弧を「太さのある帯」として 64 点で作る。外周を行って内周を戻る
-     ひと繋ぎの輪郭なので、円やリングとも素直に補間できる。 */
-  const ribbon = (cx, cy, r, a0, a1, w) => {
-    const n = N / 2;
-    const p = [];
-    const t0 = a0 * Math.PI / 180, t1 = a1 * Math.PI / 180;
-    for (let i = 0; i < n; i++) {
-      const th = t0 + (t1 - t0) * (i / (n - 1));
-      p.push([cx + Math.cos(th) * (r + w), cy + Math.sin(th) * (r + w)]);
-    }
-    for (let i = 0; i < n; i++) {
-      const th = t1 + (t0 - t1) * (i / (n - 1));
-      p.push([cx + Math.cos(th) * (r - w), cy + Math.sin(th) * (r - w)]);
-    }
-    return p;
-  };
-
   /* 図形 = {p, hole} */
   const S = (p, hole) => ({ p, hole: hole || null });
   const dotG = (cx, cy) => S(circle(cx, cy, 26.5));
@@ -170,8 +153,10 @@
        描き切ると波紋になって広がり、そのまま次の二重リングへ。
        到達形は同心の2本なので S14 へ素直に変形できる。 */
     { id: 's13b', t: 560, e: 'soft', h: 1450, ripple: true,
-      list: [S(ribbon(1160, 456, 246, 0, 359.9, 2.4)),
-             S(ribbon(1160, 456, 150, 0, 359.9, 2.0))] },
+      /* 輪郭は単純な円。stroke すると線は1本になる(リボンだと外周と
+         内周の2本が描かれて二重線に見えるため使わない)。
+         次の S14 は同じ円が2つなので、そのまま素直に変形できる。 */
+      list: [S(circle(1160, 456, 246)), S(circle(1160, 456, 150))] },
     /* S14 リング2 (外r113.5 / 内r98.64) */ { id: 's14', t: 448, e: 'soft', h: 660, resonate: true,
       list: [S(circle(1044.5, 314.5, 113.5), circle(1044.5, 314.5, 98.64)),
              S(circle(1179.5, 314.5, 113.5), circle(1179.5, 314.5, 98.64))] },
@@ -809,7 +794,9 @@
         e0.setAttribute('fill-opacity', '0');
         e0.style.opacity = '1';
         /* 内側の波紋。中心から湧いて広がる */
-        const ri = clamp01((ht3 - 1050) / 400);
+        /* 内側の波紋。中心から湧いて広がるが、外側(246)には届かない
+           大きさ(150)で止まるので線同士が重ならない */
+        const ri = clamp01((ht3 - 980) / 470);
         const e1 = pool[1];
         const gi = 0.05 + smooth(ri) * 0.95;
         drawShape(e1, hl6[1].p.map(([x, y]) =>
@@ -823,6 +810,8 @@
         e1.style.opacity = (ri > 0 ? 0.35 + 0.65 * smooth(ri) : 0).toFixed(3);
         /* 描いている丸。1周したら溶ける */
         const e2 = pool[2];
+        /* 丸は描画の先端に居る。丸が通った後だけ線が残るので、
+           軌跡がそのまま円になっていくように見える */
         const th = (-90 + dr * 360) * Math.PI / 180;
         const R0 = 246 * g0;
         const fade = 1 - smooth(clamp01((ht3 - 700) / 260));
