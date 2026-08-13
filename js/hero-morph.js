@@ -99,17 +99,17 @@
   /* ---------- 状態列(Figma 実測値) ---------- */
   const EQY = 400;
   const STATES = [
-    /* S04 */ { id: 's04', t: 496, e: 'soft', h: 120, fdx: 197, list: [dotG(709.5, 292.5)] },
-    /* S05 */ { id: 's05', t: 256, e: 'bold', h: 72,  fdx: 197, list: [dotG(709.5, 423.5)] },
-    /* S06 */ { id: 's06', t: 272, e: 'over', h: 96,  fdx: 197, list: [dotG(709.5, 192.5)] },
-    /* S07 */ { id: 's07', t: 336, e: 'soft', h: 160, fdx: 237,
+    /* S04 */ { id: 's04', t: 496, e: 'soft', h: 120, fdx: 446, fdy: 75, list: [dotG(709.5, 292.5)] },
+    /* S05 */ { id: 's05', t: 256, e: 'bold', h: 72,  fdx: 446, fdy: 75, list: [dotG(709.5, 423.5)] },
+    /* S06 */ { id: 's06', t: 272, e: 'over', h: 96,  fdx: 446, fdy: 75, list: [dotG(709.5, 192.5)] },
+    /* S07 */ { id: 's07', t: 336, e: 'soft', h: 160, fdx: 436, fdy: 34,
       list: [dotG(669.5, 308.5), dotG(768.5, 308.5), dotG(669.5, 393.5), dotG(768.5, 393.5)] },
-    /* S08 */ { id: 's08', t: 304, e: 'soft', h: 128, fdx: 236,
+    /* S08 */ { id: 's08', t: 304, e: 'soft', h: 128, fdx: 436, fdy: 34,
       list: [S(capsule(670.5, 272.5, 670.5, 431.5, 26.5)), S(capsule(769.5, 272.5, 769.5, 431.5, 26.5))] },
-    /* S09 */ { id: 's09', t: 336, e: 'bold', h: 128, fdx: 128,
+    /* S09 */ { id: 's09', t: 336, e: 'bold', h: 128, fdx: 285, fdy: 32,
       list: [S(capsule(778.68, 373.22, 891.12, 260.79, 26.5)),
              S(capsule(848.69, 443.22, 961.13, 330.79, 26.5))] },
-    /* S10 */ { id: 's10', t: 336, e: 'soft', h: 160, fdx: 186,
+    /* S10 */ { id: 's10', t: 336, e: 'soft', h: 160, fdx: 435, fdy: 34,
       list: [S(capsule(720.5, 115.5, 720.5, 587.5, 26.5))] },
     /* S11 */ { id: 's11', t: 416, e: 'bold', h: 256, fv: true, fdx: 439,
       list: [S(circle(703.5, 399.5, 262.5))] },
@@ -133,7 +133,11 @@
       list: SHAPES.blob.map((p) => S(p)) },
     /* S16 H形 */ { id: 's16', t: 416, e: 'soft', h: 192,
       list: SHAPES.hshape.map((p) => S(p)) },
-    /* S17 イコライザー(y中心400) */ { id: 's17', t: 448, e: 'soft', h: 208, fdx: 15,
+    /* S17 サウンドメーター。Figma の7要素(x/幅/角丸は不変)。
+       高さだけが「ひとつの波が通過する」ように連続して伸縮し続ける。
+       list は補間の対応付け用の基準形で、実際の描画は meterList() が
+       毎フレーム作り直す(下の renderAt を参照)。 */
+    { id: 's17', t: 448, e: 'soft', h: 1180, fdx: 15, meter: true,
       list: [S(circle(888.39, EQY, 23.3)),
              S(capsule(963.22, EQY - 25.4, 963.22, EQY + 25.4, 23.7)),
              S(capsule(1037.72, EQY - 62.66, 1037.72, EQY + 62.66, 23.7)),
@@ -141,7 +145,7 @@
              S(capsule(1186.74, EQY - 62.66, 1186.74, EQY + 62.66, 23.7)),
              S(capsule(1261.24, EQY - 25.4, 1261.24, EQY + 25.4, 23.7)),
              S(circle(1335.43, EQY, 23.3))] },
-    /* S18a 中円 */ { id: 's18a', t: 384, e: 'soft', h: 112, fdx: 277, list: [S(circle(720.5, 355.5, 117.5))] },
+    /* S18a 中円 */ { id: 's18a', t: 384, e: 'soft', h: 112, fdx: 435, fdy: 30, list: [S(circle(720.5, 355.5, 117.5))] },
     /* S18b 巨大円 */ { id: 's18b', t: 496, e: 'bold', h: 208, fdx: 287, list: [S(circle(1139.5, 355.5, 546.5))] },
     /* S19 N形 */ { id: 's19', t: 496, e: 'soft', h: 208, list: SHAPES.nshape.map((p) => S(p)) },
     /* S20 最終モチーフ = Figma FV 完成形 */ { id: 's20', t: 480, e: 'soft', h: 900,
@@ -155,14 +159,72 @@
      各状態を水平シフト(fdx)する。S13 だけは専用レイアウト(fvL)。
      S12/S14/S15/S16/S19/S20 は元々右ゾーンなのでそのまま。
      スプラッシュ中(文字が無い間)は Figma の原座標で動く。 */
+  /* 小さめの状態(ドット・格子・バー・中円)は右ゾーンの視覚中心
+     (約1155,385)あたりへ。大きな円(S11/S18b)と全面に散る S13、
+     元々バランスの取れている S12/S14/S17/S20 は指示どおり現状のまま。 */
   STATES.forEach((st) => {
     if (st.fvL) { st.fvList = st.fvL; return; }
-    if (!st.fdx) { st.fvList = st.list; return; }
+    if (!st.fdx && !st.fdy) { st.fvList = st.list; return; }
+    const dx = st.fdx || 0, dy = st.fdy || 0;
     st.fvList = st.list.map((sh) => ({
-      p: sh.p.map(([x, y]) => [x + st.fdx, y]),
-      hole: sh.hole ? sh.hole.map(([x, y]) => [x + st.fdx, y]) : null
+      p: sh.p.map(([x, y]) => [x + dx, y + dy]),
+      hole: sh.hole ? sh.hole.map(([x, y]) => [x + dx, y + dy]) : null
     }));
   });
+
+  /* ---------- サウンドメーター ----------
+     7本の x と半径は Figma のまま。半長(=カプセルの中心線の半分)だけを
+     時間の関数で作る。
+       ・位相差 62ms/本 → ひとつの波がバーを通過して見える
+       ・周期の異なる3つの正弦を重ねる(1.35s / 2.15s / 3.7s)ので
+         同じ形が繰り返さず、常に次の変化へ流れ込む
+       ・中央ほど大きい包絡(env)は維持しつつ、左右で微妙に非対称
+       ・目標値へ毎フレーム lerp(一次ローパス)で追従するため、
+         方向転換でも折れない
+     縦だけ伸縮し、横幅と角丸は不変(丸端カプセルなので端は常に半円)。 */
+  const MX = [888.39, 963.22, 1037.72, 1112.22, 1186.74, 1261.24, 1335.43];
+  const MR = [23.3, 23.7, 23.7, 23.7, 23.7, 23.7, 23.3];
+  const MENV = [0.10, 0.36, 0.74, 1.00, 0.78, 0.40, 0.12];   /* 中央が最大 */
+  const MSKW = [0.00, 0.06, -0.05, 0.00, 0.07, -0.04, 0.03]; /* 左右の非対称 */
+  const MH_MAX = 100;                                        /* Figma の中央半長 */
+  /* ホールド中は点列ではなく厳密なパス(直線+円弧)を直接組む。
+     64点アウトラインは点密度が一定でないと Catmull-Rom が膨らむため、
+     縦に大きく伸びたとき幅が崩れる。ここは形が最重要なので厳密解にする。
+     (状態間の遷移では従来どおり capsuleOutline の点列で補間する) */
+  const meterPath = (x, cy, h, r) => {
+    const L = (x - r).toFixed(2), R = (x + r).toFixed(2);
+    const T = (cy - h).toFixed(2), B = (cy + h).toFixed(2);
+    const a = r.toFixed(2) + ' ' + r.toFixed(2) + ' 0 0 1 ';
+    /* 上下が半円(直径=2r)、左右が直線。幅は常に厳密に 2r で、
+       h(半長)だけが伸縮する。 */
+    return 'M' + L + ' ' + T + 'A' + a + R + ' ' + T +
+           'L' + R + ' ' + B + 'A' + a + L + ' ' + B + 'Z';
+  };
+  const mHalf = MENV.map((e) => e * MH_MAX);                 /* 現在値(平滑後) */
+  let mInit = false;
+  const meterList = (now, dx, dy, k) => {
+    const t = now / 1000;
+    const out = [];
+    for (let i = 0; i < 7; i++) {
+      const ph = i * 0.062 * Math.PI * 2;                    /* 62ms 相当の位相差 */
+      const w = 0.5 + 0.5 * Math.sin(t * 4.65 - ph)          /* 1.35s */
+              + 0.34 * Math.sin(t * 2.92 - ph * 1.7 + 1.1)   /* 2.15s */
+              + 0.22 * Math.sin(t * 1.70 - ph * 0.6 + 2.3);  /* 3.70s */
+      const norm = clamp01((w + 0.56) / 1.62);               /* 0..1 へ */
+      const shaped = 0.34 + 0.66 * norm;                     /* 完全には潰さない */
+      const target = MH_MAX * (MENV[i] + MSKW[i] * (norm - 0.5)) * shaped * k;
+      if (!mInit) mHalf[i] = target;
+      /* 一次ローパス: 伸びは速く、縮みは柔らかく */
+      const rate = target > mHalf[i] ? 0.165 : 0.115;
+      mHalf[i] += (target - mHalf[i]) * rate;
+      const h = Math.max(0, mHalf[i]);
+      const x = MX[i] + dx, cy = EQY + dy;
+      out.push({ p: capsule(x, cy - h, x, cy + h, MR[i]), hole: null,
+                 d: meterPath(x, cy, h, MR[i]) });
+    }
+    mInit = true;
+    return out;
+  };
 
   /* ---------- 対応付け(最近傍 + 余剰は合流) ---------- */
   const centroid = (p) => {
@@ -296,6 +358,13 @@
       /* ホールド中も完全静止させない(sun-asterisk 参考)。
          各図形が位相をずらした呼吸(半径±1.2% + 2〜4pxのドリフト)を
          続ける。振幅は strength に従い、FV では一段静かになる */
+      if (st.meter) {
+        /* サウンドメーターは常時生きている。呼吸は掛けない */
+        const ml = meterList(nowRef, geomFV ? (st.fdx || 0) : 0, geomFV ? (st.fdy || 0) : 0, strength);
+        needActors(ml.length);
+        ml.forEach((sh, i) => { pool[i].setAttribute('d', sh.d); pool[i].style.opacity = '1'; });
+        return;
+      }
       const hl = pick(st);
       needActors(hl.length);
       const bt = nowRef / 1000;
@@ -326,11 +395,18 @@
     /* fv への切替: 最初の s11→s12 遷移で発動。出発点だけ原座標の S11 を
        使うので画面上の形はスナップしない(S12 以降は両変種で同一) */
     if (!geomFV && fvFired && st.id === 's12') { geomFV = true; switchSrcOnce = true; }
-    const key = prev.id + '>' + st.id + (geomFV ? '/fv' : '');
+    /* メーターへ入る/出る遷移は、到達側/出発側を毎フレームのライブ値に
+       するため対応付けを作り直す(高さが飛ばない) */
+    const liveMeter = st.meter || prev.meter;
+    const key = prev.id + '>' + st.id + (geomFV ? '/fv' : '') + (liveMeter ? '/' + Math.round(into) : '');
     if (pairKey !== key) {
-      const srcList = (switchSrcOnce && st.id === 's12') ? prev.list : pick(prev);
+      let srcList = (switchSrcOnce && st.id === 's12') ? prev.list : pick(prev);
       if (st.id === 's12') switchSrcOnce = false;
-      pairCache = buildPairs(srcList, pick(st));
+      let dstList = pick(st);
+      const mdx = geomFV ? 15 : 0;
+      if (st.meter) dstList = meterList(nowRef, mdx, 0, strength);
+      if (prev.meter) srcList = meterList(nowRef, mdx, 0, strength);
+      pairCache = buildPairs(srcList, dstList);
       pairKey = key;
     }
     const nPairs = pairCache.length;
