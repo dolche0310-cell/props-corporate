@@ -124,6 +124,19 @@
           <feComposite in="g" in2="SourceGraphic" operator="over"/>
         </filter>
       </defs>
+      <!-- 円軌道の弧(FV の余韻)。モーフの中心と同じ (1160,456) を巡る。
+           細いオレンジのベクターで、速度の違う3層がゆっくり回る。 -->
+      <g class="hm-orbit" aria-hidden="true">
+        <g class="ho-l1">
+        <path class="ho ho--o1" d="M959.1 572.0A232 232 0 0 1 1378.0 535.3" stroke-width="1.6"/>
+        <path class="ho ho--o2" d="M1324.0 620.0A232 232 0 0 1 1100.0 680.1" stroke-width="1.6"/>
+        <path class="ho ho--o3" d="M1080.3 210.6A258 258 0 0 1 1357.6 290.2" stroke-width="1.4"/>
+        <path class="ho ho--o4" d="M1289.0 679.4A258 258 0 0 1 1001.2 659.3" stroke-width="1.4"/>
+        <path class="ho ho--o5" d="M981.6 353.0A206 206 0 0 1 1142.0 250.8" stroke-width="1.2"/>
+        <circle class="ho-dot" cx="1231.7" cy="235.4" r="9.5"/>
+        <circle class="ho-dot" cx="1302.8" cy="638.8" r="4.5"/>
+        </g>
+      </g>
       <g class="hm-live" style="display:none"></g>
     </svg>
     <span class="hero__dots" id="hero-dots" aria-hidden="true"></span>

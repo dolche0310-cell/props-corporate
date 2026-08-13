@@ -102,24 +102,24 @@
      (半径はいずれも196)。回転させるので角度で持つ。 */
   const RING_A = [0.0, 29.4, 60.3, 88.7, 120.4, 150.6, 180.0, 209.4, 239.1, 271.3, 300.1, 330.6];
   const STATES = [
-    /* S04 */ { id: 's04', t: 496, e: 'soft', h: 120, fdx: 446, fdy: 75, list: [dotG(709.5, 292.5)] },
-    /* S05 */ { id: 's05', t: 256, e: 'bold', h: 72,  fdx: 446, fdy: 75, list: [dotG(709.5, 423.5)] },
-    /* S06 */ { id: 's06', t: 272, e: 'over', h: 96,  fdx: 446, fdy: 75, list: [dotG(709.5, 192.5)] },
-    /* S07 */ { id: 's07', t: 336, e: 'soft', h: 460, fdx: 436, fdy: 34, orbit: true,
+    /* S04 */ { id: 's04', t: 496, e: 'soft', h: 120, list: [dotG(709.5, 292.5)] },
+    /* S05 */ { id: 's05', t: 256, e: 'bold', h: 72,  list: [dotG(709.5, 423.5)] },
+    /* S06 */ { id: 's06', t: 272, e: 'over', h: 96,  list: [dotG(709.5, 192.5)] },
+    /* S07 */ { id: 's07', t: 336, e: 'soft', h: 460, orbit: true,
       list: [dotG(669.5, 308.5), dotG(768.5, 308.5), dotG(669.5, 393.5), dotG(768.5, 393.5)] },
-    /* S08 */ { id: 's08', t: 304, e: 'soft', h: 420, fdx: 436, fdy: 34, elastic: true,
+    /* S08 */ { id: 's08', t: 304, e: 'soft', h: 420, elastic: true,
       caps: [[670.5, 352, 79.5, 26.5], [769.5, 352, 79.5, 26.5]],
       list: [S(capsule(670.5, 272.5, 670.5, 431.5, 26.5)), S(capsule(769.5, 272.5, 769.5, 431.5, 26.5))] },
-    /* S09 */ { id: 's09', t: 336, e: 'bold', h: 420, fdx: 285, fdy: 32, glide: true,
+    /* S09 */ { id: 's09', t: 336, e: 'bold', h: 420, glide: true,
       list: [S(capsule(778.68, 373.22, 891.12, 260.79, 26.5)),
              S(capsule(848.69, 443.22, 961.13, 330.79, 26.5))] },
     /* S10 縦長バー。Figma は y115.5..587.5 だが、上端がヘッダー(高さ137)の
        背面に潜って見切れるので、天地を詰めて y196..568 にする(半長236→186)。
        FV では fdy 34 が乗るので実際の上端は 230。 */
-    { id: 's10', t: 336, e: 'soft', h: 460, fdx: 435, fdy: 34, elastic: true,
+    { id: 's10', t: 336, e: 'soft', h: 460, elastic: true,
       caps: [[720.5, 382.5, 186, 26.5]],
       list: [S(capsule(720.5, 196.5, 720.5, 568.5, 26.5))] },
-    /* S11 */ { id: 's11', t: 416, e: 'bold', h: 256, fv: true, fdx: 439,
+    /* S11 */ { id: 's11', t: 416, e: 'bold', h: 256, fv: true,
       list: [S(circle(703.5, 399.5, 262.5))] },
     /* S12 12点円環(中心1125,377.5 / 半径196 / 各r21.5)。
        ぐるぐる回りながら、円が順に大きく明るくなる(spin:true)。 */
@@ -129,7 +129,7 @@
     /* S13 散在円。画面いっぱいに広がるパターンなので、FV でも
        Figma の原配置のまま(指示)。中心から弾けて外へ広がり、
        次々に現れる動きは burst:true で専用に駆動する(下の burstList)。 */
-    { id: 's13', t: 1700, e: 'soft', h: 1150, burst: true,
+    { id: 's13', t: 2100, e: 'soft', h: 620, burst: true,
       list: [S(circle(414.5, 217.5, 21.5)), S(circle(1223.5, 482.5, 132.5)),
              S(circle(17.5, 243.5, 132.5)), S(circle(911.5, 256.5, 60.5)),
              S(circle(222.5, 712.5, 60.5)),
@@ -147,7 +147,7 @@
        高さだけが「ひとつの波が通過する」ように連続して伸縮し続ける。
        list は補間の対応付け用の基準形で、実際の描画は meterList() が
        毎フレーム作り直す(下の renderAt を参照)。 */
-    { id: 's17', t: 448, e: 'soft', h: 1180, fdx: 15, meter: true,
+    { id: 's17', t: 448, e: 'soft', h: 1180, meter: true,
       list: [S(circle(888.39, EQY, 23.3)),
              S(capsule(963.22, EQY - 25.4, 963.22, EQY + 25.4, 23.7)),
              S(capsule(1037.72, EQY - 62.66, 1037.72, EQY + 62.66, 23.7)),
@@ -155,8 +155,8 @@
              S(capsule(1186.74, EQY - 62.66, 1186.74, EQY + 62.66, 23.7)),
              S(capsule(1261.24, EQY - 25.4, 1261.24, EQY + 25.4, 23.7)),
              S(circle(1335.43, EQY, 23.3))] },
-    /* S18a 中円 */ { id: 's18a', t: 384, e: 'soft', h: 112, fdx: 435, fdy: 30, list: [S(circle(720.5, 355.5, 117.5))] },
-    /* S18b 巨大円 */ { id: 's18b', t: 496, e: 'bold', h: 208, fdx: 287, list: [S(circle(1139.5, 355.5, 546.5))] },
+    /* S18a 中円 */ { id: 's18a', t: 384, e: 'soft', h: 112, list: [S(circle(720.5, 355.5, 117.5))] },
+    /* S18b 巨大円 */ { id: 's18b', t: 496, e: 'bold', h: 208, list: [S(circle(1139.5, 355.5, 546.5))] },
     /* S19 N形 */ { id: 's19', t: 496, e: 'soft', h: 1150, stroke: true, list: SHAPES.nshape.map((p) => S(p)) },
     /* S20 最終モチーフ = Figma FV 完成形 */ { id: 's20', t: 480, e: 'soft', h: 900,
       list: [S(capsule(909.53, 521.37, 1053.51, 304.53, 44.3885)),
@@ -172,16 +172,28 @@
   /* 小さめの状態(ドット・格子・バー・中円)は右ゾーンの視覚中心
      (約1155,385)あたりへ。大きな円(S11/S18b)と全面に散る S13、
      元々バランスの取れている S12/S14/S17/S20 は指示どおり現状のまま。 */
+  /* FV 表示後の配置。テキスト(x72..853)を避けた右の余白
+     x880..1440 / y152..760 の「中心」に、形の外接矩形の中心を合わせる。
+     大きく画面いっぱいに広がる状態(S11/S13/S18b)は構図が意図なので
+     そのまま。縮小はせず平行移動だけ(形は不変)。 */
+  const ZONE = { x0: 880, x1: 1440, y0: 152, y1: 760 };
+  const ZONE_C = [(ZONE.x0 + ZONE.x1) / 2, (ZONE.y0 + ZONE.y1) / 2];   /* 1160, 456 */
+  const KEEP_WIDE = { s11: 1, s13: 1, s18b: 1 };
   STATES.forEach((st) => {
-    if (st.fvL) st.fvList = st.fvL;
-    else if (!st.fdx && !st.fdy) st.fvList = st.list;
-    else {
-      const dx = st.fdx || 0, dy = st.fdy || 0;
-      st.fvList = st.list.map((sh) => ({
-        p: sh.p.map(([x, y]) => [x + dx, y + dy]),
-        hole: sh.hole ? sh.hole.map(([x, y]) => [x + dx, y + dy]) : null
-      }));
-    }
+    if (st.fvL) { st.fvList = st.fvL; return; }
+    if (KEEP_WIDE[st.id]) { st.fvList = st.list; return; }
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    st.list.forEach((sh) => sh.p.forEach(([x, y]) => {
+      if (x < x0) x0 = x; if (x > x1) x1 = x;
+      if (y < y0) y0 = y; if (y > y1) y1 = y;
+    }));
+    const dx = ZONE_C[0] - (x0 + x1) / 2;
+    const dy = ZONE_C[1] - (y0 + y1) / 2;
+    st.fvList = st.list.map((sh) => ({
+      p: sh.p.map(([x, y]) => [x + dx, y + dy]),
+      hole: sh.hole ? sh.hole.map(([x, y]) => [x + dx, y + dy]) : null
+    }));
+    st.fdx = dx; st.fdy = dy;        /* caps / メーター等にも同じ量を使う */
   });
 
   /* FV 表示後は、グロナビ(高さ137)の背面に潜って見切れないようにする。
@@ -268,17 +280,28 @@
        0.35〜1.0)。ローダーのように光が回って見える。
      ・中心(1125,377.5)と半径196はそのまま。角度だけを回す。 */
   const RING_C = [1125, 377.5], RING_R = 196, RING_DOT = 21.5;
-  const ringList = (now, k, dy) => {
-    const sy = dy || 0;
-    const spin = (now / 5200) * 360;
+  const ringList = (now, k, dy, dx) => {
+    const sy = dy || 0, sx = dx || 0;
+    const t = now / 1000;
+    /* 回転は一定速度にしない。低周波を重ねて、速い区間と静かな区間をつくる */
+    const spin = (now / 5200) * 360
+               + Math.sin(t * 0.37) * 26 + Math.sin(t * 0.83 + 1.7) * 11;
     const wave = (now / 1450) * Math.PI * 2;
+    /* 円環自体が数%だけ呼吸し、軌道はわずかに楕円 */
+    const breathe = 1 + Math.sin(t * 0.52) * 0.035 * k;
+    const ex = 1 + Math.sin(t * 0.29 + 0.6) * 0.055 * k;
+    const ey = 1 - Math.sin(t * 0.29 + 0.6) * 0.045 * k;
     const n = RING_A.length;
     const out = [];
     for (let i = 0; i < n; i++) {
-      const d = (RING_A[i] + spin) * Math.PI / 180;
       const w = 0.5 + 0.5 * Math.sin(wave - (i / n) * Math.PI * 2 * 2);
-      out.push({ p: circle(RING_C[0] + Math.cos(d) * RING_R,
-                           RING_C[1] + sy + Math.sin(d) * RING_R,
+      /* 大きい点(w が大)は少し先導し、小さい点は遅れて追従する */
+      const lead = (w - 0.5) * 7 * k;
+      const d = (RING_A[i] + spin + lead) * Math.PI / 180;
+      /* 点同士の距離もわずかに伸縮する */
+      const rr = RING_R * breathe * (1 + Math.sin(t * 0.71 + i * 1.9) * 0.022 * k);
+      out.push({ p: circle(RING_C[0] + sx + Math.cos(d) * rr * ex,
+                           RING_C[1] + sy + Math.sin(d) * rr * ey,
                            RING_DOT * (1 + (w - 0.5) * 0.8 * k)),
                  hole: null,
                  a: 1 - 0.65 * (1 - w) * k });
@@ -295,26 +318,35 @@
        通った軌跡が薄い円のグラデーション(3段)となって重なり合う。
        残像は本体より十分薄く、動きの向きだけを感じさせる。 */
   const BURST_O = [720, 400];
-  const GROUND = 690;                            /* 接地線 */
-  const B1 = 620, B2 = 380;                      /* 1回目/2回目のバウンド時間 */
+  const GROUND = 690;                 /* 接地線 */
+  /* バスケットボールのリズム。落下は速く、跳ね返りは短くなっていく。
+     ダン…ダン・ダン と詰まっていく感じ(320 / 480 / 260)。 */
+  const D0 = 320;                     /* 画面上から接地までの落下 */
+  const B1 = 480, B2 = 260;           /* 1回目/2回目のバウンド */
+  const BOUNCE_END = D0 + B1 + B2;    /* 1060ms */
+  /* 垂直バウンド。x は一切動かさない。
+     落下 → 接地 → 高く1回 → 低く1回 → 接地、というバスケットボールの
+     リズム。各区間は放物線で、接地の瞬間に速度が最大になる。 */
   const bounceY = (t, topY) => {
-    /* 放物線を2回。落下→接地→跳ね返り。u=0 と u=1 で接地 */
-    const h1 = GROUND - topY;
-    if (t < B1) {
-      /* 1回目: 上から落ちて接地し、跳ね上がる(前半だけ落下として使う) */
-      const u = clamp01(t / B1);
-      return GROUND - h1 * (1 - Math.pow(2 * u - 1, 2)) * (u < 0.5 ? 1 : 1);
+    const H = GROUND - topY;                       /* 落下高さ */
+    if (t < D0) {                                  /* 落ちてくる(加速) */
+      const u = clamp01(t / D0);
+      return topY + H * u * u;
     }
-    const u2 = clamp01((t - B1) / B2);
-    return GROUND - h1 * 0.42 * (1 - Math.pow(2 * u2 - 1, 2));
+    if (t < D0 + B1) {                             /* 1回目のバウンド */
+      const u = clamp01((t - D0) / B1);
+      return GROUND - H * 0.55 * (1 - Math.pow(2 * u - 1, 2));
+    }
+    const u2 = clamp01((t - D0 - B1) / B2);        /* 2回目(低い) */
+    return GROUND - H * 0.22 * (1 - Math.pow(2 * u2 - 1, 2));
   };
+  /* 接地の瞬間(D0 / D0+B1 / D0+B1+B2)だけ縦を潰す */
   const squash = (t) => {
-    /* 接地の瞬間(t=0 / B1 / B1+B2)だけ縦を潰す */
-    const near = Math.min(Math.abs(t - B1), Math.abs(t - (B1 + B2)));
-    return near < 90 ? 1 - 0.16 * (1 - near / 90) : 1;
+    const near = Math.min(Math.abs(t - D0), Math.abs(t - (D0 + B1)),
+                          Math.abs(t - BOUNCE_END));
+    return near < 85 ? 1 - 0.17 * (1 - near / 85) : 1;
   };
-  const burstDelay = (i, n) => (i / Math.max(1, n - 1)) * 220;
-  const BOUNCE_END = B1 + B2;                    /* 1000ms */
+  const burstDelay = (i, n) => (i / Math.max(1, n - 1)) * 90;
   const burstList = (st, elapsed, k, ghosts) => {
     const n = st.list.length;
     const out = [];
@@ -325,11 +357,11 @@
         let m = 0; for (const q of src.p) m = Math.max(m, Math.hypot(q[0] - c[0], q[1] - c[1])); return m;
       })());
       const te = elapsed - burstDelay(i, n);
-      if (te <= 0) { out.push(S(circle(c[0], -r * 2, r * 0.9))); continue; }
+      const topY = -r - 60;                        /* 画面の上から落ちてくる */
+      if (te <= 0) { out.push(S(circle(c[0], topY, r))); continue; }
       if (te < BOUNCE_END) {
-        /* 垂直バウンド。x は最終位置のまま動かさない。
-           1回目は「落ちてきて接地→跳ね上がる」ので放物線の後半から入る */
-        const y = bounceY(te, Math.min(c[1], GROUND - 120));
+        /* 垂直バウンド。x は最終位置のまま一切動かさない(斜めにしない) */
+        const y = bounceY(te, topY);
         const sq = squash(te);
         const p0 = circle(c[0], y, r);
         out.push(S(p0.map(([x, yy]) => [c[0] + (x - c[0]) / Math.max(0.7, sq), y + (yy - y) * sq])));
@@ -339,21 +371,29 @@
            軌跡は進行方向の後ろに3段だけ薄く残す。 */
         const te2 = te - BOUNCE_END;
         const e = 1 - Math.pow(1 - clamp01(te2 / 620), 3);
-        const fromY = bounceY(BOUNCE_END, Math.min(c[1], GROUND - 120));
+        const fromY = bounceY(BOUNCE_END, topY);
         const baseY = lerp(fromY, c[1], e);
         let dx = c[0] - BURST_O[0], dy = c[1] - BURST_O[1];
         const L = Math.hypot(dx, dy) || 1;
         dx /= L; dy /= L;
         /* 円ごとに速さを変える(大きいものはゆっくり)。300ms 後から効き始める */
-        const sp = Math.max(0, te2 - 300) * (0.30 - Math.min(0.16, r / 900)) * k;
+        /* 接地の反動をそのまま外向きの初速に変える。
+           v0 で弾け出し、抵抗でなめらかに伸び続ける(止まらない)。
+           小さい円ほど軽く速い。 */
+        const tv = Math.max(0, te2 - 120) / 1000;
+        const v0 = (900 - Math.min(420, r * 2.2)) * k;         /* px/s */
+        const sp = v0 * (1 - Math.exp(-tv * 1.15)) / 1.15;
         const x = c[0] + dx * sp, y = baseY + dy * sp;
         out.push(S(circle(x, y, r * (1 + sp / 2600))));
+        /* 通った軌跡が薄い円のグラデーションとなって重なり合う。
+           5段、後ろほど薄く小さく。本体の邪魔をしない濃度に抑える。 */
         if (ghosts) {
-          for (let g = 1; g <= 3; g++) {
-            const back = sp - g * 26;
+          const step = Math.max(14, sp * 0.09);
+          for (let g = 1; g <= 5; g++) {
+            const back = sp - g * step;
             if (back <= 0) continue;
-            ghosts.push({ p: circle(c[0] + dx * back, baseY + dy * back, r * (1 - g * 0.05)),
-                          a: (0.12 - g * 0.03) * k });
+            ghosts.push({ p: circle(c[0] + dx * back, baseY + dy * back, r * (1 - g * 0.035)),
+                          a: (0.15 - g * 0.026) * k });
           }
         }
       }
@@ -482,7 +522,27 @@
   const tmp = new Array(N), tmpH = new Array(N);
 
   let nowRef = 0;
+  /* 描いた全図形の重心から、共有の運動エネルギーを更新する。
+     これが次の状態へそのまま引き継がれる(動きのリセットをしない) */
+  const updateFlow = (n) => {
+    let cx = 0, cy = 0, c = 0;
+    for (let i = 0; i < n && i < pool.length; i++) {
+      const el = pool[i];
+      if (el.style.display === 'none') continue;
+      const b = el.getBBox();
+      cx += b.x + b.width / 2; cy += b.y + b.height / 2; c++;
+    }
+    if (!c) return;
+    cx /= c; cy /= c;
+    if (lastCentre) {
+      flow.x = flow.x * 0.88 + (cx - lastCentre[0]) * 0.12;
+      flow.y = flow.y * 0.88 + (cy - lastCentre[1]) * 0.12;
+    }
+    lastCentre = [cx, cy];
+  };
+  let updateFlowSkip = false;
   const renderAt = (cycleT) => {
+    updateFlowSkip = false;
     /* cycleT(0..total) から現在の区間を決める */
     let acc = 0, idx = 0, into = 0;
     for (let i = 0; i < STATES.length; i++) {
@@ -630,12 +690,15 @@
         return;
       }
       if (st.spin) {
-        const rl = ringList(nowRef, strength, geomFV ? (st.fvShift || 0) : 0);
+        const rl = ringList(nowRef, strength, geomFV ? (st.fdy || 0) + (st.fvShift || 0) : 0,
+                            geomFV ? (st.fdx || 0) : 0);
         needActors(rl.length);
         rl.forEach((sh, i) => { drawShape(pool[i], sh.p, null); pool[i].style.opacity = sh.a.toFixed(3); });
         return;
       }
       if (st.burst) {
+        /* バウンド中は共有の慣性を効かせない(垂直を保つため) */
+        flow.x *= 0.55; flow.y *= 0.55;
         /* 弾み終えて軌跡が重なり、そのあとはごく弱い残響で息づく */
         const ghosts = [];
         const bl = burstList(st, st.t + into, strength, ghosts);
@@ -648,6 +711,7 @@
             [c[0] + (x - c[0]) * (1 + w), c[1] + (y - c[1]) * (1 + w)]), null);
           pool[i].style.opacity = '1';
         });
+        updateFlowSkip = true;
         ghosts.forEach((g, j) => {
           const el = pool[bl.length + j];
           drawShape(el, g.p, null);
@@ -666,17 +730,33 @@
       const hl = pick(st);
       needActors(hl.length);
       const bt = nowRef / 1000;
+      /* 次の変形の予兆: 260ms 前から進行方向と逆へ溜める */
+      const toGo = st.t + st.h - into;
+      const antic = toGo < 260 ? smooth(1 - toGo / 260) : 0;
       hl.forEach((s, i) => {
         const cx = s.cx !== undefined ? s.cx : (s.cx = centroid(s.p)[0]);
         const cy = s.cy !== undefined ? s.cy : (s.cy = centroid(s.p)[1]);
         const ph = i * 1.7;
-        const w1 = smooth(0.5 + 0.5 * Math.sin(bt * 0.85 + ph));
-        const w2 = smooth(0.5 + 0.5 * Math.sin(bt * 0.53 + ph * 2.3));
-        const grow = 1 + (w1 - 0.5) * 0.024 * strength;
-        const dx = (w2 - 0.5) * 6 * strength;
-        const dy = (w1 - 0.5) * 4 * strength;
+        const w1 = 0.5 + 0.5 * LFN(bt, ph);
+        const w2 = 0.5 + 0.5 * LFN(bt * 0.62, ph * 2.3 + 4.1);
+        const grow = 1 + (w1 - 0.5) * 0.026 * strength;
+        /* 質量: 大きいものほど遅れて動く */
+        let rad = 0;
+        for (const q of s.p) rad = Math.max(rad, Math.hypot(q[0] - cx, q[1] - cy));
+        const lag = lagOf(rad);
+        const dx = (w2 - 0.5) * 6 * strength + flow.x * (1.1 - lag) * 2.4
+                 - antic * flow.x * 3.2;
+        const dy = (w1 - 0.5) * 4 * strength + flow.y * (1.1 - lag) * 2.4
+                 - antic * flow.y * 3.2;
+        /* 運動方向へわずかに引き伸ばす(後端が遅れて追いつく) */
+        const sp = Math.hypot(flow.x, flow.y);
+        const ux = sp > 0.01 ? flow.x / sp : 0, uy = sp > 0.01 ? flow.y / sp : 0;
+        const st2 = Math.min(0.10, sp * 0.014) * strength;
         for (let j = 0; j < N; j++) {
-          tmp[j] = [cx + (s.p[j][0] - cx) * grow + dx, cy + (s.p[j][1] - cy) * grow + dy];
+          let px = (s.p[j][0] - cx) * grow, py = (s.p[j][1] - cy) * grow;
+          const along = px * ux + py * uy;
+          px += ux * along * st2; py += uy * along * st2;
+          tmp[j] = [cx + px + dx, cy + py + dy];
         }
         let hole = null;
         if (s.hole) {
@@ -693,6 +773,7 @@
     /* バーストへの遷移は buildPairs を使わない。
        前の形が中心へ吸い込まれながら、入れ替わりに円が外へ弾け出る。 */
     if (st.burst) {
+      flow.x *= 0.55; flow.y *= 0.55;      /* 垂直を保つ */
       const prevList = pick(prev);
       const ghosts = [];
       const bl = burstList(st, into, strength, ghosts);
@@ -736,9 +817,11 @@
       const mdx = geomFV ? 15 : 0;
       if (st.meter) dstList = meterList(nowRef, mdx, 0, strength);
       if (prev.meter) srcList = meterList(nowRef, mdx, 0, strength);
-      if (prev.burst) srcList = burstList(prev, prev.t + prev.h + into, strength, null);
-      if (st.spin) dstList = ringList(nowRef, strength, geomFV ? (st.fvShift || 0) : 0);
-      if (prev.spin) srcList = ringList(nowRef, strength, geomFV ? (prev.fvShift || 0) : 0);
+      if (prev.burst) srcList = burstList(prev, prev.t + prev.h + into * 0.75, strength, null);
+      if (st.spin) dstList = ringList(nowRef, strength, geomFV ? (st.fdy || 0) + (st.fvShift || 0) : 0,
+                                     geomFV ? (st.fdx || 0) : 0);
+      if (prev.spin) srcList = ringList(nowRef, strength, geomFV ? (prev.fdy || 0) + (prev.fvShift || 0) : 0,
+                                       geomFV ? (prev.fdx || 0) : 0);
       pairCache = buildPairs(srcList, dstList);
       pairKey = key;
     }
@@ -772,6 +855,25 @@
         : lerp(pr.alphaA, pr.alphaB, smooth(local)).toFixed(3);
     });
   };
+
+  /* ---------- ひとつの生命体としての「場」 ----------
+     状態が変わっても動きをリセットしない。全ての形が共有する
+     速度ベクトル(FLOW)と、次の変形の予兆(ANTICIPATION)を持つ。
+
+     ・FLOW: 遷移で生まれた重心の移動が慣性として残り、指数減衰しながら
+       次の状態へ持ち越される。形はこの速度の向きへわずかに引き伸ばされ、
+       後端が遅れて追いつく(質量に応じて遅れ量が変わる)。
+     ・ANTICIPATION: 次の遷移が始まる 260ms 前から内部のエネルギーが
+       動き出し、進行方向と逆へ小さく「溜める」。
+     ・LFN: 位相の異なる低周波を重ねた擬似ノイズ。sin 一本の往復に
+       見えないようにする。周期そのものもゆっくり揺れる。 */
+  const flow = { x: 0, y: 0 };          /* 共有の運動エネルギー(px/frame) */
+  let lastCentre = null;
+  const LFN = (t, seed) => Math.sin(t * 0.41 + seed) * 0.55
+                         + Math.sin(t * 0.97 + seed * 2.3) * 0.30
+                         + Math.sin(t * 1.63 + seed * 3.7) * 0.15;
+  /* 質量に応じた遅れ。半径が大きいほど鈍い */
+  const lagOf = (r) => clamp01(0.18 + Math.min(0.62, r / 260));
 
   /* ---------- マイクロモーション / 奥行き / スクロール ---------- */
   const sample2 = (states, u) => {
@@ -832,6 +934,7 @@
     if (t >= total + START_OFFSET && !firstPassDone) { firstPassDone = true; strength = 0.75; }
     nowRef = now;
     renderAt(cycleT);
+    if (!updateFlowSkip) updateFlow(pool.length);
     applyStage(now);
     raf = requestAnimationFrame(frame);
   };
