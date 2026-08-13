@@ -14,7 +14,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Alata&family=Belanosima:wght@600;700&family=Gugi&family=Inter:wght@400;700&family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 <style>
-  :root { --color-primary: #ED551B; }
+  :root { --color-primary: #FF2400; }
 </style>
 </head>
 <body>
@@ -36,10 +36,6 @@
       </g>
       <g class="sp-cells"></g>
     </svg>
-    <!-- リング中央に開く円形の窓。中は AI 面接の実映像 -->
-    <div class="sp-window" style="display:none">
-      <video src="assets/videos/splash-window.mp4" muted playsinline preload="auto" loop></video>
-    </div>
   </div>
 </div>
 <script src="js/splash-shapes.js"></script>
@@ -106,11 +102,17 @@
          rotate(33.5838) を解いた中心線を stroke で引く(太さ88.7769)。
          Rectangle 66 は 89x90 の円。viewBox はフレーム座標のままなので
          下の数値は Figma と一致する。描画と変形は js/hero-lines.js。 -->
-    <svg class="hero__motif" viewBox="848 243 482 340" width="482" height="340"
+    <svg class="hero__motif" viewBox="0 0 1440 810" width="1440" height="810"
          fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path class="hm hm--a" d="M909.53 521.37L1053.51 304.53"/>
-      <path class="hm hm--b" d="M1097.53 521.37L1241.51 304.53"/>
-      <circle class="hm hm--dot" cx="1285.50" cy="522.00" r="44.5"/>
+      <!-- 静的な最終形(Figma 215:22653 / Group 148)。JS 無効・reduced-motion 用。
+           JS 有効時は js/hero-morph.js が hm-live に Figma 397:25889 の
+           18状態モーフループを描き、こちらは隠す -->
+      <g class="hm-static">
+        <path class="hm hm--a" d="M909.53 521.37L1053.51 304.53"/>
+        <path class="hm hm--b" d="M1097.53 521.37L1241.51 304.53"/>
+        <circle class="hm hm--dot" cx="1285.50" cy="522.00" r="44.5"/>
+      </g>
+      <g class="hm-live" style="display:none"></g>
     </svg>
     <span class="hero__dots" id="hero-dots" aria-hidden="true"></span>
     <span class="hero__blob hero__blob--1" aria-hidden="true"></span>
@@ -209,8 +211,8 @@
                   </div>
                   <!-- 02 の面はループ動画。スロットは 01 の面と同じ 471x265、
                        中央トリミング(scale1.2 上寄せ)。
-                       色: ピンク/マゼンタ系だけをブランドのオレンジ #ED551B へ
-                       移す行列。「ピンクの平均(173,91,167)→#ED551B」
+                       色: ピンク/マゼンタ系だけをブランドのオレンジ #FF2400 へ
+                       移す行列。「ピンクの平均(173,91,167)→#FF2400」
                        「シアン(94,161,190)不変」「白不変」の3拘束で解いたので
                        シアン・肌・空は素材のまま残り、明部は自然に明るい
                        オレンジ(#ff7834)へ伸びる。
@@ -218,9 +220,9 @@
                        シャープはノイズが出るため掛けない。 -->
                   <svg class="service__grade-def" aria-hidden="true" focusable="false" width="0" height="0"><defs>
                     <filter id="miai-warm" color-interpolation-filters="sRGB">
-                      <feColorMatrix type="matrix" values="1.24846 -0.82249 0.57403 0 0
-                                                           -0.02329 1.07711 -0.05382 0 0
-                                                           -0.54351 1.79920 -0.25569 0 0
+                      <feColorMatrix type="matrix" values="1.31834 -1.05382 0.73548 0 0
+                                                           -0.21352 1.70683 -0.49331 0 0
+                                                           -0.64833 2.14618 -0.49786 0 0
                                                            0 0 0 1 0"/>
                       <feColorMatrix type="saturate" values="0.92"/>
                       <feComponentTransfer>
@@ -230,12 +232,12 @@
                       </feComponentTransfer>
                     </filter>
                     <!-- 01 の面。素材のオレンジ(251,141,70)をブランドの
-                         #ED551B へ。白・黒・灰は不変の3拘束なので、
+                         #FF2400 へ。白・黒・灰は不変の3拘束なので、
                          黒いキーボードや白い画面は素材のまま。 -->
                     <filter id="miai-brand" color-interpolation-filters="sRGB">
-                      <feColorMatrix type="matrix" values="0.87273 0.12727 0 0 0
-                                                           -0.50909 1.50909 0 0 0
-                                                           -0.39091 0.39091 1 0 0
+                      <feColorMatrix type="matrix" values="1.03636 -0.03636 0 0 0
+                                                           -0.95455 1.95455 0 0 0
+                                                           -0.63636 0.63636 1 0 0
                                                            0 0 0 1 0"/>
                     </filter>
                   </defs></svg>
@@ -392,7 +394,7 @@
 <script src="js/service-stage.js"></script>
 <script src="assets/logos/miai-particles.js" defer></script>
 <script src="js/about-logo-motion.js" defer></script>
-<script src="js/hero-lines.js"></script>
+<script src="js/hero-morph.js"></script>
 <script src="js/ai-shift-draw.js"></script>
 </body>
 </html>

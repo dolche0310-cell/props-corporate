@@ -2,7 +2,7 @@
    Tokens
    =========================================================== */
 :root {
-  --color-primary: #ED551B;
+  --color-primary: #FF2400;
   --color-primary-dark: #C44102;
   --color-ink: #040404;
   --color-text: #0F172A;
@@ -142,26 +142,6 @@ html.splash-lock, html.splash-lock body { overflow: hidden; }
 .sp-glow--r { display: none; left: 1040px; top: 230px; background: radial-gradient(circle, #FFD9BC 0%, #FFD9BC 12%, rgba(255, 217, 188, 0) 62%); opacity: .5; }
 .intro-overlay--splash.is-hiding { background-color: transparent; }
 .intro-overlay--splash.is-hiding .sp-glow { opacity: 0; }
-/* リング中央の円形の窓。scale で開閉し、中の映像は JS が逆スケールで静止させる */
-.sp-window {
-  position: absolute;
-  left: 0;
-  top: 0;
-  z-index: 1;
-  width: 244px;
-  height: 244px;
-  border-radius: 50%;
-  overflow: hidden;
-  will-change: transform;
-}
-.sp-window video {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  will-change: transform, opacity, filter;
-}
 
 .wrap {
   max-width: var(--wrap-max);
@@ -613,15 +593,21 @@ html.splash-lock, html.splash-lock body { overflow: hidden; }
    しているので、SVG 内の数値はそのまま Figma の値。
    ヒーローの箱はページ上端から始まるので top はフレーム y をそのまま使う。
    左右は「中央から」の距離にして 1440 超のワイドでも構図を保つ。 */
+/* モーフループのステージ。1440x810 のフレーム座標をそのまま持つ。
+   transform は js/hero-morph.js が毎フレーム
+   perspective + rotateX/rotateY + 微小ドリフト + スクロール接続
+   として書き込む(CSS 側では書かない)。 */
 .hero__motif {
   position: absolute;
-  left: calc(50% + 128px);      /* フレーム x848 - 720 */
-  top: 243px;
-  width: 482px;
-  height: 340px;
+  left: calc(50% - 720px);
+  top: 0;
+  width: 1440px;
+  height: 810px;
   overflow: visible;
   pointer-events: none;
   z-index: 1;
+  transform-origin: 50% 46%;
+  will-change: transform;
 }
 .hero__motif .hm {
   fill: none;
@@ -634,12 +620,11 @@ html.splash-lock, html.splash-lock body { overflow: hidden; }
 /* SP は Figma に該当フレームが無いので、右上に寄せて一部を切る */
 @media (max-width: 767px) {
   .hero__motif {
-    left: auto;
-    right: -60px;
-    top: 40px;
-    width: 62vw;
+    left: calc(50% - 50vw);
+    top: 0;
+    width: 100vw;
     height: auto;
-    aspect-ratio: 482 / 340;
+    aspect-ratio: 1440 / 810;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -1730,7 +1715,7 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
 /* ループ動画は暗い映像なので、poster が出るまでの一瞬に白が挟まらないよう
    要素自体にも下地の暗色を敷いておく */
 .service__loop-video { background: #05070a; }
-/* 01 の面の映像。素材のオレンジをブランドの #ED551B に揃える
+/* 01 の面の映像。素材のオレンジをブランドの #FF2400 に揃える
    (HTML 側 filter#miai-brand。白・黒・灰は不変) */
 .service--brushup [data-service-item="0"] .service__loop-video { filter: url(#miai-brand); }
 
@@ -2463,7 +2448,7 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
 .kv-title__suffix { position: absolute; left: 8.9074em; top: .2162em; white-space: nowrap; }
 .kv-title .kv-sm { font-size: .9259em; }            /* 50px */
 .kv-title__prefix .kv-sm { letter-spacing: .14em; } /* 7px @50px */
-/* カプセル(232:27381 / Group 138 262:29138): 299x78, r=200, #ED551B。
+/* カプセル(232:27381 / Group 138 262:29138): 299x78, r=200, #FF2400。
    幅は固定。auto / fit-content / shrink にしない(中身が消えても縮ませない) */
 .kv-pill {
   position: absolute;
@@ -2471,7 +2456,7 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   top: .1606em;
   width: 5.5370em;    /* 299px */
   height: 1.4444em;   /* 78px */
-  background: #ED551B;
+  background: #FF2400;
   border-radius: 3.7037em; /* 200px */
 }
 /* AI(254:27424): カプセル内 x=46.43 y=13.46, 54.664x50.096

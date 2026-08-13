@@ -2,7 +2,7 @@
    ロゴ詳細(アイソレーション図解)
    proto-review(Cuolega)の css/logo-detail.css をそのまま採用。
    レイアウト・文言・挙動を合わせる指示のため、構造には手を入れず、
-   アクセント色(ティール #00A9AD)だけ props のオレンジ #ED551B に置換している。
+   アクセント色(ティール #00A9AD)だけ props のオレンジ #FF2400 に置換している。
    =========================================================== */
 /* ============ Logomark / Logotype 詳細ページ(logo-detail-1/2/3 共通) ============
    ハブ(index.html)の .wrap / トークンを踏襲し、そのままFigma実測値と揃える。 */
@@ -116,7 +116,7 @@ body {
   fill: rgba(17, 17, 18, 0.3);
 }
 
-/* ワードマーク: アウトライン(#ED551B)描画 → 本来の色(黒)で塗りが入って完成(freee風)。
+/* ワードマーク: アウトライン(#FF2400)描画 → 本来の色(黒)で塗りが入って完成(freee風)。
    O/Aのような穴あき文字は「stroke専用(サブパス分割済み)」と
    「fill専用(未分割・fill-ruleで中抜きが正しく出る)」を別々のpathとして
    重ね、アウトライン描画完了後にfillがフェードインしつつstrokeがフェード
@@ -124,7 +124,7 @@ body {
    潰れて黒い塊になるため、必ずこの2要素構成にすること)。 */
 .ld-g-word-stroke {
   fill: none;
-  stroke: #ED551B;
+  stroke: #FF2400;
   stroke-width: 1.6;
   stroke-linejoin: round;
   stroke-linecap: round;
@@ -221,19 +221,19 @@ body {
 /* 寸法線(X / 1X)はアクセント色の実線 */
 .lg2-dim {
   fill: none;
-  stroke: #ED551B;
+  stroke: #FF2400;
   stroke-width: 1;
   stroke-linecap: butt;
   vector-effect: non-scaling-stroke;
 }
-.lg2-dim-head { fill: #ED551B; stroke: none; }
+.lg2-dim-head { fill: #FF2400; stroke: none; }
 
 /* マーク単体カードのX計測用引き出し線(Figma 585:12333)。
    マークの外形端から寸法線へ伸ばす延長線。色は寸法線と同じティールにしつつ、
    実線の寸法線と役割を区別するため細かい点線にする。 */
 .lg2-leader {
   fill: none;
-  stroke: #ED551B;
+  stroke: #FF2400;
   stroke-width: 1;
   stroke-linecap: butt;
   stroke-dasharray: 1.5 3;
@@ -259,11 +259,11 @@ body {
 }
 .lg2-label-sm { font-size: 13px; }
 
-/* ワードマーク: アウトライン(#ED551B)描画 → 本来の色で塗りが入って完成。
+/* ワードマーク: アウトライン(#FF2400)描画 → 本来の色で塗りが入って完成。
    穴あき文字はサブパスに分割したものをstrokeに使うため、塗りは別pathが持つ。 */
 .lg2-word-stroke {
   fill: none;
-  stroke: #ED551B;
+  stroke: #FF2400;
   stroke-width: 1.6;
   stroke-linejoin: round;
   stroke-linecap: round;
