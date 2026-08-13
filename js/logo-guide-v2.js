@@ -55,7 +55,9 @@
     if (!root || root.nodeName === "parsererror") throw new Error(`parse ${url}`);
     const vb = (root.getAttribute("viewBox") || "").split(/[\s,]+/).map(Number);
     if (vb.length < 4 || !vb[2] || !vb[3]) throw new Error(`viewBox ${url}`);
-    return { root, w: vb[2], h: vb[3] };
+    /* 原点(vb[0], vb[1])も持ち回る。ロックアップ1枚を切り出して作った素材は
+       原点が 0 0 にならないので、捨てるとその分アートがずれて配置される。 */
+    return { root, x: vb[0], y: vb[1], w: vb[2], h: vb[3] };
   };
 
   /* 取り込んだSVGの id / url(#id) を一意化する。同一ページに同じアートを
@@ -83,7 +85,7 @@
   const placeArt = (parent, art, x, y, w, h) => {
     const box = el("svg", {
       x, y, width: w, height: h,
-      viewBox: `0 0 ${art.w} ${art.h}`,
+      viewBox: `${art.x} ${art.y} ${art.w} ${art.h}`,
       preserveAspectRatio: "xMidYMid meet",
       overflow: "visible",
     });
