@@ -207,7 +207,9 @@
   const ZONE_C = [(ZONE.x0 + ZONE.x1) / 2, (ZONE.y0 + ZONE.y1) / 2];   /* 1160, 380 */
   /* 画面いっぱいに広がる構図はそのまま。ただし FV 表示後にテキスト
      (x72..853)へ掛かるものは、左端が 880 に来るまで右へ逃がす。 */
-  const KEEP_WIDE = { s11: 1, s13: 1, s18b: 1 };
+  /* 画面いっぱいの構図を保つのは、外へ飛び出す演出(S13)だけ。
+     大円(S11)と巨大円(S18b)は FV では可視域に収める。 */
+  const KEEP_WIDE = { s13: 1 };
   const TEXT_R = 896;      /* 文字の右端853 + 呼吸/伸縮の余裕 */
   STATES.forEach((st) => {
     if (st.fvL) { st.fvList = st.fvL; return; }
@@ -233,12 +235,20 @@
       if (x < x0) x0 = x; if (x > x1) x1 = x;
       if (y < y0) y0 = y; if (y > y1) y1 = y;
     }));
-    const dx = ZONE_C[0] - (x0 + x1) / 2;
-    const dy = ZONE_C[1] - (y0 + y1) / 2;
+    /* 可視域(右ゾーン 880..1440 / 152..762)に収まらない大きさなら、
+       中心基準で縮めてから置く。形の比率は変えない。 */
+    const w = x1 - x0, h = y1 - y0;
+    const fit = Math.min(1, (ZONE.x1 - ZONE.x0 - 24) / Math.max(1, w),
+                            (ZONE.y1 - ZONE.y0 - 24) / Math.max(1, h));
+    const cx0 = (x0 + x1) / 2, cy0 = (y0 + y1) / 2;
+    const dx = ZONE_C[0] - cx0;
+    const dy = ZONE_C[1] - cy0;
+    const map = ([x, y]) => [ZONE_C[0] + (x - cx0) * fit, ZONE_C[1] + (y - cy0) * fit];
     st.fvList = st.list.map((sh) => ({
-      p: sh.p.map(([x, y]) => [x + dx, y + dy]),
-      hole: sh.hole ? sh.hole.map(([x, y]) => [x + dx, y + dy]) : null
+      p: sh.p.map(map),
+      hole: sh.hole ? sh.hole.map(map) : null
     }));
+    st.fvFit = fit;
     st.fdx = dx; st.fdy = dy;        /* caps / メーター等にも同じ量を使う */
   });
 
@@ -270,7 +280,21 @@
     let bottom = -Infinity;
     src.forEach((sh) => sh.p.forEach(([, y]) => { if (y > bottom) bottom = y; }));
     const margin = 14 + Math.min(24, (bottom - top) * 0.02);   /* 呼吸/伸縮の余裕 */
-    st.fvShift = (!st.fullBleed && top < SAFE_TOP + margin) ? SAFE_TOP + margin - top : 0;
+    /* 上はヘッダーの下、下は FV の下端(760) の内側に収める。
+       両方に掛かる大きさなら、収まる範囲で天地中央へ置く。 */
+    const SAFE_BOT = 762;
+    let shift = 0;
+    if (!st.fullBleed) {
+      const h = bottom - top;
+      if (h >= SAFE_BOT - SAFE_TOP - margin * 2) {
+        shift = (SAFE_TOP + SAFE_BOT) / 2 - (top + bottom) / 2;   /* 収まらない: 天地中央 */
+      } else if (top < SAFE_TOP + margin) {
+        shift = SAFE_TOP + margin - top;
+      } else if (bottom > SAFE_BOT - margin) {
+        shift = SAFE_BOT - margin - bottom;
+      }
+    }
+    st.fvShift = shift;
     if (st.dots) st.fvDots = st.dots.map((c) =>
       [c[0] + (st.fdx || 0), c[1] + (st.fdy || 0) + st.fvShift, c[2]]);
     if (st.caps) st.fvCaps = st.caps.map((c) =>
