@@ -122,7 +122,11 @@
     /* S04 */ { id: 's04', t: 496, e: 'soft', h: 120, list: [dotG(709.5, 292.5)] },
     /* S05 */ { id: 's05', t: 256, e: 'bold', h: 72,  list: [dotG(709.5, 423.5)] },
     /* S06 */ { id: 's06', t: 272, e: 'over', h: 96,  list: [dotG(709.5, 192.5)] },
-    /* S07 */ { id: 's07', t: 336, e: 'soft', h: 460, orbit: true,
+    /* S07 2x2 の点。円がひとつずつ「線の輪」から「塗りの円」へ変わり、
+       最後に4つとも塗りの円になる。形は真円のまま崩さない。 */
+    { id: 's07', t: 336, e: 'soft', h: 900, dotsFill: true,
+      dots: [[669.5, 308.5, 26.5], [768.5, 308.5, 26.5],
+             [669.5, 393.5, 26.5], [768.5, 393.5, 26.5]],
       list: [dotG(669.5, 308.5), dotG(768.5, 308.5), dotG(669.5, 393.5), dotG(768.5, 393.5)] },
     /* S08 */ { id: 's08', t: 304, e: 'soft', h: 300, elastic: true,
       caps: [[670.5, 352, 79.5, 26.5], [769.5, 352, 79.5, 26.5]],
@@ -130,6 +134,7 @@
     /* S08b 縦のバーが一度ほどけて円に戻り、斜めの位置へ移りながら
        また伸びる。これで S08 と S09 が「同じ2つの塊の移動」に見える。 */
     { id: 's08b', t: 300, e: 'soft', h: 150, orbit: true,
+      dots: [[700, 320, 30], [824, 396, 30]],
       list: [S(circle(700, 320, 30)), S(circle(824, 396, 30))] },
     /* S09 */ { id: 's09', t: 336, e: 'bold', h: 420, glide: true,
       list: [S(capsule(778.68, 373.22, 891.12, 260.79, 26.5)),
@@ -161,15 +166,12 @@
        その上を走る大小2つの円。ここから S14 の二重リングへ吸い込まれる。
        弧は「太さのあるリボン」として持つ(外周→内周でひと繋ぎ)ので、
        次のリングとも同じ 64 点で自然に補間できる。 */
-    { id: 's13b', t: 560, e: 'soft', h: 1250, orbitTrail: true,
-      /* 到達形は「太さのあるリング2本 + 走る円2つ」。
-         ホールド中に 線で描かれる → 塗りが差す → 次へ、と進む */
-      list: [S(ribbon(1160, 456, 232, 0, 359.9, 2.6)),
-             S(ribbon(1160, 456, 264, 0, 359.9, 1.8)),
-             S(circle(1160 + 232 * Math.cos(-72 * Math.PI / 180),
-                      456 + 232 * Math.sin(-72 * Math.PI / 180), 13)),
-             S(circle(1160 + 264 * Math.cos(52 * Math.PI / 180),
-                      456 + 264 * Math.sin(52 * Math.PI / 180), 6))] },
+    /* S13b ひとつの円が巡り、その軌跡が円のラインになる。
+       描き切ると波紋になって広がり、そのまま次の二重リングへ。
+       到達形は同心の2本なので S14 へ素直に変形できる。 */
+    { id: 's13b', t: 560, e: 'soft', h: 1450, ripple: true,
+      list: [S(ribbon(1160, 456, 246, 0, 359.9, 2.4)),
+             S(ribbon(1160, 456, 150, 0, 359.9, 2.0))] },
     /* S14 リング2 (外r113.5 / 内r98.64) */ { id: 's14', t: 448, e: 'soft', h: 660, resonate: true,
       list: [S(circle(1044.5, 314.5, 113.5), circle(1044.5, 314.5, 98.64)),
              S(circle(1179.5, 314.5, 113.5), circle(1179.5, 314.5, 98.64))] },
@@ -278,6 +280,8 @@
     src.forEach((sh) => sh.p.forEach(([, y]) => { if (y > bottom) bottom = y; }));
     const margin = 14 + Math.min(24, (bottom - top) * 0.02);   /* 呼吸/伸縮の余裕 */
     st.fvShift = top < SAFE_TOP + margin ? SAFE_TOP + margin - top : 0;
+    if (st.dots) st.fvDots = st.dots.map((c) =>
+      [c[0] + (st.fdx || 0), c[1] + (st.fdy || 0) + st.fvShift, c[2]]);
     if (st.caps) st.fvCaps = st.caps.map((c) =>
       [c[0] + (st.fdx || 0), c[1] + (st.fdy || 0) + st.fvShift, c[2], c[3]]);
     if (!st.fvShift) return;
@@ -638,19 +642,35 @@
          各図形が位相をずらした呼吸(半径±1.2% + 2〜4pxのドリフト)を
          続ける。振幅は strength に従い、FV では一段静かになる */
       /* --- 点の群れ: それぞれが小さな軌道を巡り、位相差で脈動する --- */
-      if (st.orbit) {
-        const hl0 = pick(st);
-        needActors(hl0.length);
+      /* --- 点の群れ ---
+         真円のまま扱う(輪郭点を個別に動かすと円が歪むため、中心と半径
+         だけを変える)。dotsFill のときは、ひとつずつ順に
+         「線の輪」→「塗りの円」へ変わり、最後は4つとも塗りになる。 */
+      if (st.orbit || st.dotsFill) {
+        const ds = (geomFV && st.fvDots) ? st.fvDots : st.dots;
+        needActors(ds.length);
         const bt0 = nowRef / 1000;
-        hl0.forEach((sh, i) => {
-          const c = sh.c || (sh.c = centroid(sh.p));
-          const ph = i * (Math.PI * 2 / hl0.length);
+        const ht0 = into - st.t;
+        ds.forEach((d, i) => {
+          const ph = i * (Math.PI * 2 / ds.length);
           const ox = Math.cos(bt0 * 1.15 + ph) * 9 * strength;
           const oy = Math.sin(bt0 * 1.15 + ph) * 9 * strength;
           const g = 1 + Math.sin(bt0 * 2.0 + ph * 1.6) * 0.09 * strength;
-          drawShape(pool[i], sh.p.map(([x, y]) =>
-            [c[0] + (x - c[0]) * g + ox, c[1] + (y - c[1]) * g + oy]), null);
-          pool[i].style.opacity = '1';
+          const el = pool[i];
+          drawShape(el, circle(d[0] + ox, d[1] + oy, d[2] * g), null);
+          el.style.opacity = '1';
+          if (!st.dotsFill) return;
+          /* 左上→右上→左下→右下 の順に、線が描かれてから塗りが差す */
+          const t0 = i * 150;
+          const len = el.getTotalLength ? el.getTotalLength() : 170;
+          const dr = 1 - Math.pow(1 - clamp01((ht0 - t0) / 300), 2.4);
+          el.__stroked = true;
+          el.setAttribute('stroke', COLOR);
+          el.setAttribute('stroke-width', '2.4');
+          el.style.strokeDasharray = len;
+          el.style.strokeDashoffset = (len * (1 - dr)).toFixed(1);
+          el.setAttribute('fill-opacity',
+            smooth(clamp01((ht0 - t0 - 260) / 260)).toFixed(3));
         });
         return;
       }
@@ -757,6 +777,54 @@
           drawShape(pool[i], pts, sh.hole);
           pool[i].style.opacity = '1';
         });
+        return;
+      }
+      /* --- ひとつの円が描く軌跡 → 波紋 ---
+           0- 760ms  丸が円周を1周し、通った後がラインになる
+         760-1050ms  丸が溶け、描かれた円が波紋として外へ広がり始める
+        1050-1450ms  内側にもう一本の波紋が湧き、二重の輪になって次へ */
+      if (st.ripple) {
+        const hl6 = pick(st);
+        const ht3 = into - st.t;
+        const c = geomFV ? [1160 + (st.fdx || 0), 456 + (st.fdy || 0) + (st.fvShift || 0)]
+                         : [1160, 456];
+        needActors(3);
+        const draw = clamp01(ht3 / 760);
+        const dr = 1 - Math.pow(1 - draw, 2.2);
+        /* 外側の輪。描き切ってから波紋として少し外へ開く */
+        const g0 = 1 + smooth(clamp01((ht3 - 760) / 690)) * 0.075 * strength;
+        const e0 = pool[0];
+        drawShape(e0, hl6[0].p.map(([x, y]) =>
+          [c[0] + (x - c[0]) * g0, c[1] + (y - c[1]) * g0]), null);
+        const len0 = e0.getTotalLength ? e0.getTotalLength() : 3000;
+        e0.__stroked = true;
+        e0.setAttribute('stroke', COLOR);
+        e0.setAttribute('stroke-width', '2.4');
+        e0.style.strokeDasharray = len0;
+        e0.style.strokeDashoffset = (len0 * (1 - dr)).toFixed(1);
+        e0.setAttribute('fill-opacity', '0');
+        e0.style.opacity = '1';
+        /* 内側の波紋。中心から湧いて広がる */
+        const ri = clamp01((ht3 - 1050) / 400);
+        const e1 = pool[1];
+        const gi = 0.05 + smooth(ri) * 0.95;
+        drawShape(e1, hl6[1].p.map(([x, y]) =>
+          [c[0] + (x - c[0]) * gi, c[1] + (y - c[1]) * gi]), null);
+        e1.__stroked = true;
+        e1.setAttribute('stroke', COLOR);
+        e1.setAttribute('stroke-width', '2.0');
+        e1.style.strokeDasharray = '';
+        e1.style.strokeDashoffset = '';
+        e1.setAttribute('fill-opacity', '0');
+        e1.style.opacity = (ri > 0 ? 0.35 + 0.65 * smooth(ri) : 0).toFixed(3);
+        /* 描いている丸。1周したら溶ける */
+        const e2 = pool[2];
+        const th = (-90 + dr * 360) * Math.PI / 180;
+        const R0 = 246 * g0;
+        const fade = 1 - smooth(clamp01((ht3 - 700) / 260));
+        drawShape(e2, circle(c[0] + Math.cos(th) * R0, c[1] + Math.sin(th) * R0,
+                             Math.max(0.5, 13 * fade)), null);
+        e2.style.opacity = fade.toFixed(3);
         return;
       }
       /* --- 円の軌跡 ---
