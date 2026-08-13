@@ -210,8 +210,12 @@
      x880..1440 / y152..760 の「中心」に、形の外接矩形の中心を合わせる。
      大きく画面いっぱいに広がる状態(S11/S13/S18b)は構図が意図なので
      そのまま。縮小はせず平行移動だけ(形は不変)。 */
-  const ZONE = { x0: 880, x1: 1440, y0: 152, y1: 760 };
-  const ZONE_C = [(ZONE.x0 + ZONE.x1) / 2, (ZONE.y0 + ZONE.y1) / 2];   /* 1160, 456 */
+  /* 縦の基準は「ヘッダー下端(152) 〜 リード下端(477)+余白」。
+     FV の主役であるタイトル(283..361)とリード(395..477)の帯の中心
+     およそ 380 に合わせると、文字と水平に釣り合って見える。
+     ヒーローの箱の中心(460)だと下に沈んで見えるため使わない。 */
+  const ZONE = { x0: 880, x1: 1440, y0: 152, y1: 608 };
+  const ZONE_C = [(ZONE.x0 + ZONE.x1) / 2, (ZONE.y0 + ZONE.y1) / 2];   /* 1160, 380 */
   const KEEP_WIDE = { s11: 1, s13: 1, s18b: 1 };
   STATES.forEach((st) => {
     if (st.fvL) { st.fvList = st.fvL; return; }
@@ -412,11 +416,14 @@
         dx /= L; dy /= L;
         /* 円ごとに速さを変える(大きいものはゆっくり)。300ms 後から効き始める */
         /* 接地の反動をそのまま外向きの初速に変える。
-           v0 で弾け出し、抵抗でなめらかに伸び続ける(止まらない)。
-           小さい円ほど軽く速い。 */
-        const tv = Math.max(0, te2 - 120) / 1000;
-        const v0 = (900 - Math.min(420, r * 2.2)) * k;         /* px/s */
-        const sp = v0 * (1 - Math.exp(-tv * 1.15)) / 1.15;
+           前半は勢いよく飛び出し、後半は一定の速さで流れ続ける。
+           指数減衰だけだと終盤で止まって見えるので、下限の等速成分
+           (vMin)を必ず足して「絶えず動いている」状態にする。 */
+        const tv = Math.max(0, te2 - 100) / 1000;
+        const v0 = (980 - Math.min(430, r * 2.2)) * k;         /* 初速 px/s */
+        const vMin = (215 - Math.min(95, r * 0.5)) * k;        /* 途切れない等速 */
+        const burstPart = (v0 - vMin) * (1 - Math.exp(-tv * 1.6)) / 1.6;
+        const sp = burstPart + vMin * tv;
         const x = c[0] + dx * sp, y = baseY + dy * sp;
         out.push(S(circle(x, y, r * (1 + sp / 2600))));
         /* 通った軌跡が薄い円のグラデーションとなって重なり合う。
@@ -730,15 +737,9 @@
         const bt5 = nowRef / 1000;
         const SPD = [0.10, -0.07, 0.14, -0.05, 0.42, -0.30];
         hlo.forEach((sh, i) => {
-          const c = sh.cc || (sh.cc = (() => {
-            /* 回転中心は状態の外接矩形の中心(FV では移動後の位置) */
-            let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
-            hlo.forEach((q) => q.p.forEach(([x, y]) => {
-              if (x < x0) x0 = x; if (x > x1) x1 = x;
-              if (y < y0) y0 = y; if (y > y1) y1 = y;
-            }));
-            return [(x0 + x1) / 2, (y0 + y1) / 2];
-          })());
+          /* 回転中心は弧を描いた円の中心。FV では移動量を足す */
+          const c = geomFV ? [1160 + (st.fdx || 0), 456 + (st.fdy || 0) + (st.fvShift || 0)]
+                           : [1160, 456];
           const rot = bt5 * SPD[i % SPD.length] * strength;
           const cs = Math.cos(rot), sn = Math.sin(rot);
           drawShape(pool[i], sh.p.map(([x, y]) => {
@@ -766,7 +767,7 @@
         const bt2 = nowRef / 1000;
         bl.forEach((sh, i) => {
           const c = centroid(sh.p);
-          const w = Math.sin(bt2 * 1.9 + i * 1.3) * 0.012 * strength;
+          const w = Math.sin(bt2 * 1.9 + i * 1.3) * 0.008 * strength;
           drawShape(pool[i], sh.p.map(([x, y]) =>
             [c[0] + (x - c[0]) * (1 + w), c[1] + (y - c[1]) * (1 + w)]), null);
           pool[i].style.opacity = '1';
