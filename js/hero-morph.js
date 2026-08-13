@@ -92,6 +92,23 @@
     for (let i = 1; i < N; i++) if (pts[i][1] < pts[top][1]) top = i;
     return pts.slice(top).concat(pts.slice(0, top));
   };
+  /* 円弧を「太さのある帯」として 64 点で作る。外周を行って内周を戻る
+     ひと繋ぎの輪郭なので、円やリングとも素直に補間できる。 */
+  const ribbon = (cx, cy, r, a0, a1, w) => {
+    const n = N / 2;
+    const p = [];
+    const t0 = a0 * Math.PI / 180, t1 = a1 * Math.PI / 180;
+    for (let i = 0; i < n; i++) {
+      const th = t0 + (t1 - t0) * (i / (n - 1));
+      p.push([cx + Math.cos(th) * (r + w), cy + Math.sin(th) * (r + w)]);
+    }
+    for (let i = 0; i < n; i++) {
+      const th = t1 + (t0 - t1) * (i / (n - 1));
+      p.push([cx + Math.cos(th) * (r - w), cy + Math.sin(th) * (r - w)]);
+    }
+    return p;
+  };
+
   /* 図形 = {p, hole} */
   const S = (p, hole) => ({ p, hole: hole || null });
   const dotG = (cx, cy) => S(circle(cx, cy, 26.5));
@@ -136,6 +153,19 @@
              /* 外側いっぱいまで広がる分。上下左右の縁に掛かる位置へ */
              S(circle(1372.5, 96.5, 96.5)), S(circle(596.5, 528.5, 40.5)),
              S(circle(742.5, 748.5, 74.5)), S(circle(1108.5, 44.5, 34.5))] },
+    /* S13b 弾んだ円が描いた軌跡。中心(1160,456)を巡る弧が数本と、
+       その上を走る大小2つの円。ここから S14 の二重リングへ吸い込まれる。
+       弧は「太さのあるリボン」として持つ(外周→内周でひと繋ぎ)ので、
+       次のリングとも同じ 64 点で自然に補間できる。 */
+    { id: 's13b', t: 620, e: 'soft', h: 720, orbitTrail: true,
+      list: [S(ribbon(1160, 456, 232, 150, 380, 1.7)),
+             S(ribbon(1160, 456, 232, 45, 105, 1.7)),
+             S(ribbon(1160, 456, 258, -108, -40, 1.5)),
+             S(ribbon(1160, 456, 206, -150, -95, 1.3)),
+             S(circle(1160 + 232 * Math.cos(-72 * Math.PI / 180),
+                      456 + 232 * Math.sin(-72 * Math.PI / 180), 13)),
+             S(circle(1160 + 232 * Math.cos(52 * Math.PI / 180),
+                      456 + 232 * Math.sin(52 * Math.PI / 180), 6))] },
     /* S14 リング2 (外r113.5 / 内r98.64) */ { id: 's14', t: 448, e: 'soft', h: 660, resonate: true,
       list: [S(circle(1044.5, 314.5, 113.5), circle(1044.5, 314.5, 98.64)),
              S(circle(1179.5, 314.5, 113.5), circle(1179.5, 314.5, 98.64))] },
@@ -685,6 +715,32 @@
             return [c[0] + (x - c[0]) * g, c[1] + (y - c[1]) * g];
           });
           drawShape(pool[i], pts, sh.hole);
+          pool[i].style.opacity = '1';
+        });
+        return;
+      }
+      /* --- 軌跡の弧: 層ごとに速度と向きが違う。円は弧の上を走る --- */
+      if (st.orbitTrail) {
+        const hlo = pick(st);
+        needActors(hlo.length);
+        const bt5 = nowRef / 1000;
+        const SPD = [0.10, -0.07, 0.14, -0.05, 0.42, -0.30];
+        hlo.forEach((sh, i) => {
+          const c = sh.cc || (sh.cc = (() => {
+            /* 回転中心は状態の外接矩形の中心(FV では移動後の位置) */
+            let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+            hlo.forEach((q) => q.p.forEach(([x, y]) => {
+              if (x < x0) x0 = x; if (x > x1) x1 = x;
+              if (y < y0) y0 = y; if (y > y1) y1 = y;
+            }));
+            return [(x0 + x1) / 2, (y0 + y1) / 2];
+          })());
+          const rot = bt5 * SPD[i % SPD.length] * strength;
+          const cs = Math.cos(rot), sn = Math.sin(rot);
+          drawShape(pool[i], sh.p.map(([x, y]) => {
+            const dx0 = x - c[0], dy0 = y - c[1];
+            return [c[0] + dx0 * cs - dy0 * sn, c[1] + dx0 * sn + dy0 * cs];
+          }), null);
           pool[i].style.opacity = '1';
         });
         return;

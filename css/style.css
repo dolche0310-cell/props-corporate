@@ -609,32 +609,6 @@ html.splash-lock, html.splash-lock body { overflow: hidden; }
   transform-origin: 50% 46%;
   will-change: transform;
 }
-/* 円軌道の弧。FV が立ち上がってから静かに現れ、速度の違う層が
-   ゆっくり回り続ける。主張させないので細く薄い。 */
-.hero__motif .hm-orbit {
-  opacity: 0;
-  transition: opacity 1.2s ease 1.1s;
-}
-body.fv-in .hero__motif .hm-orbit { opacity: .5; }
-.hero__motif .ho {
-  fill: none;
-  stroke: var(--color-primary);
-  stroke-linecap: round;
-  transform-origin: 1160px 456px;
-}
-.hero__motif .ho-dot { fill: var(--color-primary); }
-.hero__motif .ho-l1 {
-  transform-origin: 1160px 456px;
-  animation: ho-spin 46s linear infinite;
-}
-.hero__motif .ho--o3, .hero__motif .ho--o4 { animation: ho-spin-r 62s linear infinite; }
-.hero__motif .ho--o5 { animation: ho-spin 34s linear infinite; }
-@keyframes ho-spin   { to { transform: rotate(360deg); } }
-@keyframes ho-spin-r { to { transform: rotate(-360deg); } }
-@media (prefers-reduced-motion: reduce) {
-  .hero__motif .ho-l1, .hero__motif .ho--o3,
-  .hero__motif .ho--o4, .hero__motif .ho--o5 { animation: none; }
-}
 .hero__motif .hm {
   fill: none;
   stroke: var(--color-primary);
