@@ -22,7 +22,7 @@
   --font-display: 'Abril Fatface', serif;
   /* 英字の表示書体。Chillax(Fontshare / Indian Type Foundry)。
      アウトライン化済みの字(FV の AI Shift / MiAI ロゴ)は SVG なので対象外。 */
-  --font-display-en: 'Chillax', var(--font-jp);
+  --font-display-en: 'Roboto', 'Helvetica Neue', Arial, var(--font-jp);
   --font-alata: 'Alata', var(--font-jp);   /* ボタン・見出し・タイトル */
   --font-gugi: 'Gugi', var(--font-en);
 
