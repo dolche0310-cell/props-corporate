@@ -99,28 +99,33 @@
   /* ---------- 状態列(Figma 実測値) ---------- */
   const EQY = 400;
   const STATES = [
-    /* S04 */ { id: 's04', t: 496, e: 'soft', h: 120, list: [dotG(709.5, 292.5)] },
-    /* S05 */ { id: 's05', t: 256, e: 'bold', h: 72,  list: [dotG(709.5, 423.5)] },
-    /* S06 */ { id: 's06', t: 272, e: 'over', h: 96,  list: [dotG(709.5, 192.5)] },
-    /* S07 */ { id: 's07', t: 336, e: 'soft', h: 160,
+    /* S04 */ { id: 's04', t: 496, e: 'soft', h: 120, fdx: 197, list: [dotG(709.5, 292.5)] },
+    /* S05 */ { id: 's05', t: 256, e: 'bold', h: 72,  fdx: 197, list: [dotG(709.5, 423.5)] },
+    /* S06 */ { id: 's06', t: 272, e: 'over', h: 96,  fdx: 197, list: [dotG(709.5, 192.5)] },
+    /* S07 */ { id: 's07', t: 336, e: 'soft', h: 160, fdx: 237,
       list: [dotG(669.5, 308.5), dotG(768.5, 308.5), dotG(669.5, 393.5), dotG(768.5, 393.5)] },
-    /* S08 */ { id: 's08', t: 304, e: 'soft', h: 128,
+    /* S08 */ { id: 's08', t: 304, e: 'soft', h: 128, fdx: 236,
       list: [S(capsule(670.5, 272.5, 670.5, 431.5, 26.5)), S(capsule(769.5, 272.5, 769.5, 431.5, 26.5))] },
-    /* S09 */ { id: 's09', t: 336, e: 'bold', h: 128,
+    /* S09 */ { id: 's09', t: 336, e: 'bold', h: 128, fdx: 128,
       list: [S(capsule(778.68, 373.22, 891.12, 260.79, 26.5)),
              S(capsule(848.69, 443.22, 961.13, 330.79, 26.5))] },
-    /* S10 */ { id: 's10', t: 336, e: 'soft', h: 160,
+    /* S10 */ { id: 's10', t: 336, e: 'soft', h: 160, fdx: 186,
       list: [S(capsule(720.5, 115.5, 720.5, 587.5, 26.5))] },
-    /* S11 */ { id: 's11', t: 416, e: 'bold', h: 256, fv: true,
+    /* S11 */ { id: 's11', t: 416, e: 'bold', h: 256, fv: true, fdx: 439,
       list: [S(circle(703.5, 399.5, 262.5))] },
     /* S12 12点円環 (中心1125,377.5 / 各r21.5) */ { id: 's12', t: 448, e: 'soft', h: 192,
       list: [[954.5,281.5],[1295.5,281.5],[954.5,473.5],[1295.5,473.5],[928.5,377.5],[1321.5,377.5],
              [1024.5,209.5],[1222.5,209.5],[1024.5,548.5],[1222.5,548.5],[1129.5,181.5],[1129.5,570.5]]
              .map(([x,y]) => S(circle(x, y, 21.5))) },
-    /* S13 散在5円 */ { id: 's13', t: 448, e: 'soft', h: 192,
+    /* S13 散在5円。FV では左側の円がテキストに重なるため、
+       右ゾーン(x>=880)の対角スキャッタに置き換える(fvL) */
+    { id: 's13', t: 448, e: 'soft', h: 192,
       list: [S(circle(414.5, 217.5, 21.5)), S(circle(1223.5, 482.5, 132.5)),
              S(circle(17.5, 243.5, 132.5)), S(circle(911.5, 256.5, 60.5)),
-             S(circle(222.5, 712.5, 60.5))] },
+             S(circle(222.5, 712.5, 60.5))],
+      fvL:  [S(circle(1010, 180, 21.5)), S(circle(1223.5, 482.5, 132.5)),
+             S(circle(1370, 220, 132.5)), S(circle(925, 256.5, 60.5)),
+             S(circle(1060, 640, 60.5))] },
     /* S14 リング2 (外r113.5 / 内r98.64) */ { id: 's14', t: 448, e: 'soft', h: 208,
       list: [S(circle(1044.5, 314.5, 113.5), circle(1044.5, 314.5, 98.64)),
              S(circle(1179.5, 314.5, 113.5), circle(1179.5, 314.5, 98.64))] },
@@ -128,7 +133,7 @@
       list: SHAPES.blob.map((p) => S(p)) },
     /* S16 H形 */ { id: 's16', t: 416, e: 'soft', h: 192,
       list: SHAPES.hshape.map((p) => S(p)) },
-    /* S17 イコライザー(y中心400) */ { id: 's17', t: 448, e: 'soft', h: 208,
+    /* S17 イコライザー(y中心400) */ { id: 's17', t: 448, e: 'soft', h: 208, fdx: 15,
       list: [S(circle(888.39, EQY, 23.3)),
              S(capsule(963.22, EQY - 25.4, 963.22, EQY + 25.4, 23.7)),
              S(capsule(1037.72, EQY - 62.66, 1037.72, EQY + 62.66, 23.7)),
@@ -136,14 +141,28 @@
              S(capsule(1186.74, EQY - 62.66, 1186.74, EQY + 62.66, 23.7)),
              S(capsule(1261.24, EQY - 25.4, 1261.24, EQY + 25.4, 23.7)),
              S(circle(1335.43, EQY, 23.3))] },
-    /* S18a 中円 */ { id: 's18a', t: 384, e: 'soft', h: 112, list: [S(circle(720.5, 355.5, 117.5))] },
-    /* S18b 巨大円 */ { id: 's18b', t: 496, e: 'bold', h: 208, list: [S(circle(1139.5, 355.5, 546.5))] },
+    /* S18a 中円 */ { id: 's18a', t: 384, e: 'soft', h: 112, fdx: 277, list: [S(circle(720.5, 355.5, 117.5))] },
+    /* S18b 巨大円 */ { id: 's18b', t: 496, e: 'bold', h: 208, fdx: 287, list: [S(circle(1139.5, 355.5, 546.5))] },
     /* S19 N形 */ { id: 's19', t: 496, e: 'soft', h: 208, list: SHAPES.nshape.map((p) => S(p)) },
     /* S20 最終モチーフ = Figma FV 完成形 */ { id: 's20', t: 480, e: 'soft', h: 900,
       list: [S(capsule(909.53, 521.37, 1053.51, 304.53, 44.3885)),
              S(capsule(1097.53, 521.37, 1241.51, 304.53, 44.3885)),
              S(circle(1285.5, 522.0, 44.5))] }
   ];
+
+  /* FV 表示後の配置(指示: 見出し・リードに重ねない)。
+     テキストは x72..853 を占めるので、x>=880 の右ゾーンに収まるよう
+     各状態を水平シフト(fdx)する。S13 だけは専用レイアウト(fvL)。
+     S12/S14/S15/S16/S19/S20 は元々右ゾーンなのでそのまま。
+     スプラッシュ中(文字が無い間)は Figma の原座標で動く。 */
+  STATES.forEach((st) => {
+    if (st.fvL) { st.fvList = st.fvL; return; }
+    if (!st.fdx) { st.fvList = st.list; return; }
+    st.fvList = st.list.map((sh) => ({
+      p: sh.p.map(([x, y]) => [x + st.fdx, y]),
+      hole: sh.hole ? sh.hole.map(([x, y]) => [x + st.fdx, y]) : null
+    }));
+  });
 
   /* ---------- 対応付け(最近傍 + 余剰は合流) ---------- */
   const centroid = (p) => {
@@ -250,6 +269,9 @@
   let fvFired = false;
 
   let pairCache = null, pairKey = '';
+  let geomFV = false;              /* fv 以後は fvList で描く */
+  let switchSrcOnce = false;       /* s11→s12 の初回だけ出発点を原座標に */
+  const pick = (st) => (geomFV ? st.fvList : st.list);
   const tmp = new Array(N), tmpH = new Array(N);
 
   let nowRef = 0;
@@ -274,9 +296,10 @@
       /* ホールド中も完全静止させない(sun-asterisk 参考)。
          各図形が位相をずらした呼吸(半径±1.2% + 2〜4pxのドリフト)を
          続ける。振幅は strength に従い、FV では一段静かになる */
-      needActors(st.list.length);
+      const hl = pick(st);
+      needActors(hl.length);
       const bt = nowRef / 1000;
-      st.list.forEach((s, i) => {
+      hl.forEach((s, i) => {
         const cx = s.cx !== undefined ? s.cx : (s.cx = centroid(s.p)[0]);
         const cy = s.cy !== undefined ? s.cy : (s.cy = centroid(s.p)[1]);
         const ph = i * 1.7;
@@ -300,8 +323,16 @@
       });
       return;
     }
-    const key = prev.id + '>' + st.id;
-    if (pairKey !== key) { pairCache = buildPairs(prev.list, st.list); pairKey = key; }
+    /* fv への切替: 最初の s11→s12 遷移で発動。出発点だけ原座標の S11 を
+       使うので画面上の形はスナップしない(S12 以降は両変種で同一) */
+    if (!geomFV && fvFired && st.id === 's12') { geomFV = true; switchSrcOnce = true; }
+    const key = prev.id + '>' + st.id + (geomFV ? '/fv' : '');
+    if (pairKey !== key) {
+      const srcList = (switchSrcOnce && st.id === 's12') ? prev.list : pick(prev);
+      if (st.id === 's12') switchSrcOnce = false;
+      pairCache = buildPairs(srcList, pick(st));
+      pairKey = key;
+    }
     const nPairs = pairCache.length;
     const stag = nPairs > 1 ? Math.min(64, (st.t * 0.18) / (nPairs - 1)) : 0;
     const actDur = st.t - stag * (nPairs - 1);
@@ -380,9 +411,11 @@
   /* 開始位相: 1周目は S04 のホールドから始める(ラップ遷移 20→04 は
      2周目以降にだけ現れる)。スプラッシュのドットが既に S04 に居るため */
   const START_OFFSET = STATES[0].t;
+  let lastPhase = START_OFFSET;      /* 一時停止(画面外)からの復帰用 */
   const frame = (now) => {
-    if (t0 === null) t0 = now;
+    if (t0 === null) t0 = now - (lastPhase - START_OFFSET);
     let t = now - t0 + START_OFFSET;
+    lastPhase = t;
     const cycleT = t % total;
     if (t >= total + START_OFFSET && !firstPassDone) { firstPassDone = true; strength = 0.75; }
     nowRef = now;
