@@ -2,7 +2,7 @@
    Tokens
    =========================================================== */
 :root {
-  --color-primary: #FF2400;
+  --color-primary: #ED551B;
   --color-primary-dark: #C44102;
   --color-ink: #040404;
   --color-text: #0F172A;
@@ -600,51 +600,50 @@ html.splash-lock, html.splash-lock body { overflow: hidden; }
      グロナビの下で見切れて見えるため、箱を上端まで引き上げる。
      内容は padding で同じ位置に置き、ラインとグラデは下の個別指定で
      同一ページ座標を維持する。ヘッダーは z100 なので常に手前 */
-  .hero.hero--brushup { margin-top: -90px; padding-top: 178px; min-height: 690px; }
+  /* 768以上では FV の中身はすべて絶対配置(基準は .wrap)なので、
+     上のパディングを残すと Figma の y にその分が足されてしまう。0 にして
+     フレーム座標をそのまま使えるようにする。 */
+  .hero.hero--brushup { margin-top: -90px; padding-top: 0; min-height: 690px; }
 }
 /* Figma 232:27373 (image 27 [Vectorized])。淡いブロブ形状のベクター素材を
    ヒーロー〜About にまたがる背景モチーフとして敷く。実測位置(x:279/1440,
    y はヒーロー天面基準)をパーセントで再現。 */
-/* 右側グラフィック(Figma 215:22653)。
-   Rectangle 64 (277:37297 #FFE0D3) / Rectangle 65 (277:37298 #E9E9E9)。
-   どちらも rx = 幅の半分なので実体は「丸端の直線」。中心線を stroke で引く。
-     Peach (1156.257, 229.871)→( 907.369, 604.707)  太さ 153.465
-     Gray  (1557.436, -39.631)→(1174.917, 536.461)  太さ 153.465
-   ステージの viewBox はフレーム座標のまま。フレーム x830 / y-120 に置き、
-   ヒーロー天面 = フレーム y90 なので top は -120-90 = -210。
-   左右は「中央から」の距離。1440 超のワイドでも構図が保たれる。
-   右端が画面外へ大きく抜ける Figma の Crop は、セクションの
-   overflow:clip がそのまま作るので、内側へ収めない。 */
-.hero__lines {
+/* 右のモチーフ(Figma 215:22653 / Group 148 399:76725)。
+   Group 148 はフレーム x848 y243 の 482x340。viewBox をフレーム座標に
+   しているので、SVG 内の数値はそのまま Figma の値。
+   ヒーローの箱はページ上端から始まるので top はフレーム y をそのまま使う。
+   左右は「中央から」の距離にして 1440 超のワイドでも構図を保つ。 */
+.hero__motif {
   position: absolute;
-  left: calc(50% + 110px);      /* フレーム x830 - 720 */
-  top: -120px;                  /* フレーム y-120 (hero の箱がページ上端に
-                                   なったため 90px の差し引きは不要) */
-  width: 810px;
-  height: 805px;
+  left: calc(50% + 128px);      /* フレーム x848 - 720 */
+  top: 243px;
+  width: 482px;
+  height: 340px;
   overflow: visible;
   pointer-events: none;
   z-index: 1;
 }
-.hero__lines .hl {
+.hero__motif .hm {
   fill: none;
+  stroke: var(--color-primary);
+  stroke-width: 88.7769;        /* Rectangle 64/65 の幅 */
   stroke-linecap: round;
-  stroke-linejoin: round;
   shape-rendering: geometricPrecision;
 }
-/* SP は Figma に該当フレームが無いため、旧モチーフと同じ考え方
-   (中央やや右に寄せ、画面幅より大きく置いて右を切る)で置いている。 */
+.hero__motif .hm--dot { fill: var(--color-primary); stroke: none; }
+/* SP は Figma に該当フレームが無いので、右上に寄せて一部を切る */
 @media (max-width: 767px) {
-  .hero__lines {
-    left: 40%;
-    top: -40px;
-    width: 130%;
+  .hero__motif {
+    left: auto;
+    right: -60px;
+    top: 40px;
+    width: 62vw;
     height: auto;
-    aspect-ratio: 810 / 805;
+    aspect-ratio: 482 / 340;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .hero__lines .hl { stroke-dasharray: none; stroke-dashoffset: 0; opacity: 1; }
+  .hero__motif .hm { stroke-dasharray: none; stroke-dashoffset: 0; opacity: 1; }
 }
 /* モチーフは z1 なので、文字側はどの幅でも前面に。
    (SP では wrap が static のままだと z1 の下に潜る) */
@@ -1731,6 +1730,9 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
 /* ループ動画は暗い映像なので、poster が出るまでの一瞬に白が挟まらないよう
    要素自体にも下地の暗色を敷いておく */
 .service__loop-video { background: #05070a; }
+/* 01 の面の映像。素材のオレンジをブランドの #ED551B に揃える
+   (HTML 側 filter#miai-brand。白・黒・灰は不変) */
+.service--brushup [data-service-item="0"] .service__loop-video { filter: url(#miai-brand); }
 
 /* 02 の面の映像。
    ・cover + center で中央トリミング(素材16:9 とスロット 471/265 の差は
@@ -2461,7 +2463,7 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
 .kv-title__suffix { position: absolute; left: 8.9074em; top: .2162em; white-space: nowrap; }
 .kv-title .kv-sm { font-size: .9259em; }            /* 50px */
 .kv-title__prefix .kv-sm { letter-spacing: .14em; } /* 7px @50px */
-/* カプセル(232:27381 / Group 138 262:29138): 299x78, r=200, #FF2400。
+/* カプセル(232:27381 / Group 138 262:29138): 299x78, r=200, #ED551B。
    幅は固定。auto / fit-content / shrink にしない(中身が消えても縮ませない) */
 .kv-pill {
   position: absolute;
@@ -2469,7 +2471,7 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   top: .1606em;
   width: 5.5370em;    /* 299px */
   height: 1.4444em;   /* 78px */
-  background: #FF2400;
+  background: #ED551B;
   border-radius: 3.7037em; /* 200px */
 }
 /* AI(254:27424): カプセル内 x=46.43 y=13.46, 54.664x50.096
@@ -2683,19 +2685,24 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
     height: 802px; /* 892 - 90 */
     padding-inline: 0;
   }
+  /* Figma 399:76711(Group 149)。ヒーローの箱がページ上端から始まるので
+     フレーム y をそのまま使う。
+       産業の  399:76714  x91  y286.33
+       カプセル 399:76715  x253 y283      (箱の中で top .1606em = 8.67px)
+       を支援する 399:76723 x553 y286
+       リード   399:76724  x92  y395  w761 */
   .hero--brushup .kv-title {
     position: absolute;
-    /* 「産業の」の字面が 92 に来るよう、箱の中の 19px ぶんを引く */
-    left: 73px;
-    top: 260.3px;  /* 350.33 - 90 */
+    left: 72px;      /* 産業の 91 - 箱の中の 19 */
+    top: 274.33px;   /* カプセル 283 - 箱の中の 8.67 */
     margin: 0;
   }
   .hero--brushup .hero__desc--brushup {
     position: absolute;
-    left: 92px;    /* 232:27385 x=92 */
-    top: 381.3px;  /* 471.33 - 90 */
+    left: 92px;
+    top: 395px;
     margin: 0;
-    width: 761px;  /* 232:27385 width=761 */
+    width: 761px;
     max-width: none;
   }
 }

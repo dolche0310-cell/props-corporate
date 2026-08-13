@@ -1,55 +1,57 @@
-/* ============ FV 右側グラフィック「2本の軌跡」 ============
-   Figma 215:22653 の Rectangle 64 / 65 (277:37297 / 277:37298)。
-   どちらも rx = 幅の半分の角丸矩形なので、実体は「丸端の直線」。
-   ここでは矩形ではなく中心線を stroke で引く。
+/* ============ FV 右のモチーフ ============
+   Figma 215:22653 / Group 148 (399:76725)。フレーム x848 y243 の 482x340。
 
-     Peach 277:37297  #FFE0D3  太さ 153.465
-       (1156.257, 229.871) → ( 907.369, 604.707)   長さ 449.94
-     Gray  277:37298  #E9E9E9  太さ 153.465
-       (1557.436, -39.631) → (1174.917, 536.461)   長さ 691.52
-
-   座標は Figma の 1440 フレームそのまま。SVG の viewBox も
-   フレーム座標にしてあるので、下の数値は Figma の値と一致する。
+     Rectangle 64 / 65  rx = 幅の半分 = 丸端カプセル。
+       Figma は rect(x, 0, 88.7769, 349.061) を rotate(33.5838, x, 0)。
+       これを解いた中心線(フレーム座標):
+         A  (909.53, 521.37) → (1053.51, 304.53)
+         B  (1097.53, 521.37) → (1241.51, 304.53)
+       太さはどちらも 88.7769。
+     Rectangle 66  89x90 の円 → 中心 (1285.50, 522.00) r44.5。
 
    ■ 構造
-   1本の <path> を cubic 1本で持ち、制御点を「線に対して垂直」へ
-   ずらすことでたわませる。制御点が 0 のときは完全な直線 = Figma の
-   最終状態。したがって最終形は必ず Figma に一致する。
+   カプセルは矩形ではなく中心線を stroke で引く。1本の cubic で持ち、
+   制御点を「線に対して垂直」へずらすことでたわませる。制御点が 0 の
+   ときは厳密な直線 = Figma の最終状態。したがって最終形は必ず一致する。
+   円は半径だけを動かす。
 
    ■ 流れ (t は begin() からのミリ秒)
-        0 -  900   Peach を描画。dashoffset を詰めながら太さを
-                   種(スプラッシュのドット径)から 153.465 へ。
-                   描き始めは少したわみ、描き終わりで直線に戻る。
-      300 - 1200   Gray が追いかけて描画(スタガ 300ms)。
-      900 - 2600   Peach の有機的な変形(1200)＋最終状態への収束(500)。
-                   5つの状態を smoothstep で補間し、最後は必ず直線に戻る。
-     1200 - 2900   Gray は 300ms 遅れて、変形量も小さく追従。
-     2900 -        ごく弱い呼吸。6.5s 周期・±5px。
+        0 -  820   A を描画。dashoffset を詰めながら太さを種(スプラッシュ
+                   のドット径)から 88.7769 へ。描き終わりで直線に戻る。
+      260 - 1080   B が追いかけて描画(スタガ 260ms)。
+      560 -  980   円が湧く(遅れて、弾みは弱く)。
+      820 - 2300   A の有機的な変形(1100)＋最終状態への収束(380)。
+     1080 - 2560   B は遅れて、変形量も小さく追従。
+     2560 -        ごく弱い呼吸。6.5s 周期・±4px。
 
    sin 波は使わない。離散した状態を滑らかに繋いでいるだけなので
    規則的な波には見えない。 */
 (() => {
   'use strict';
 
-  const svg = document.querySelector('.hero__lines');
+  const svg = document.querySelector('.hero__motif');
   if (!svg) return;
 
-  /* Figma の実測値 */
+  const W = 88.7769;
+
+  /* Figma を解いた実測値 */
   const LINES = [
-    { el: svg.querySelector('.hl--peach'),
-      a: { x: 1156.257, y: 229.871 }, b: { x: 907.369, y: 604.707 },
-      w: 153.465, draw: 900, delay: 0,
+    { el: svg.querySelector('.hm--a'),
+      a: { x: 909.53, y: 521.37 }, b: { x: 1053.51, y: 304.53 },
+      w: W, draw: 820, delay: 0,
       /* 変形の状態(制御点1, 制御点2 の垂直方向オフセット px) */
-      states: [[0, 0], [-15, 9], [10, -14], [-6, 7], [0, 0]],
-      breathe: [[0, 0], [5, -3], [-4, 5], [0, 0]] },
-    { el: svg.querySelector('.hl--gray'),
-      a: { x: 1557.436, y: -39.631 }, b: { x: 1174.917, y: 536.461 },
-      w: 153.465, draw: 900, delay: 300,
-      /* Peach より遅れて、量も小さい */
-      states: [[0, 0], [9, -6], [-8, 9], [4, -5], [0, 0]],
-      breathe: [[0, 0], [3, -2], [-3, 3], [0, 0]] }
+      states: [[0, 0], [-11, 7], [8, -10], [-4, 5], [0, 0]],
+      breathe: [[0, 0], [4, -2], [-3, 4], [0, 0]] },
+    { el: svg.querySelector('.hm--b'),
+      a: { x: 1097.53, y: 521.37 }, b: { x: 1241.51, y: 304.53 },
+      w: W, draw: 820, delay: 260,
+      /* A より遅れて、量も小さい */
+      states: [[0, 0], [7, -5], [-6, 7], [3, -4], [0, 0]],
+      breathe: [[0, 0], [3, -2], [-2, 3], [0, 0]] }
   ];
-  if (LINES.some((l) => !l.el)) return;
+  const DOT = { el: svg.querySelector('.hm--dot'), cx: 1285.50, cy: 522.00, r: 44.5,
+                t0: 560, dur: 420 };
+  if (LINES.some((l) => !l.el) || !DOT.el) return;
 
   /* 各線の単位ベクトルと法線 */
   LINES.forEach((l) => {
@@ -84,13 +86,11 @@
     return [states[i][0] + (states[i + 1][0] - states[i][0]) * f,
             states[i][1] + (states[i + 1][1] - states[i][1]) * f];
   };
-  /* 描画の緩急。軽快に出て終盤で静かに収まる。
-     Gray が走り出す 300ms の時点で Peach が約42%描けている量
-     (仕様の「35〜50%描かれたところから追いかける」に合わせた指数)。 */
+  /* 描画の緩急。軽快に出て終盤で静かに収まる */
   const easeDraw = (t) => 1 - Math.pow(1 - t, 1.35);
 
-  const ORGANIC = 1200;      /* 有機的変形 */
-  const SETTLE  = 500;       /* 最終状態への収束 */
+  const ORGANIC = 1100;      /* 有機的変形 */
+  const SETTLE  = 380;       /* 最終状態への収束 */
   const BREATH  = 6500;      /* 呼吸の周期 */
 
   let seedW = 20;            /* 種の太さ(スプラッシュのドット径) */
@@ -98,6 +98,11 @@
   let raf = 0;
   let started = false;
   let idle = false;          /* 呼吸フェーズに入ったか */
+
+  const setDot = (r, alpha) => {
+    DOT.el.setAttribute('r', r.toFixed(2));
+    DOT.el.style.opacity = alpha.toFixed(3);
+  };
 
   const setFinal = () => {
     LINES.forEach((l) => {
@@ -107,6 +112,7 @@
       l.el.style.strokeDashoffset = '0';
       l.el.style.opacity = '1';
     });
+    setDot(DOT.r, 1);
   };
 
   const frame = (now) => {
@@ -127,7 +133,7 @@
       let o1 = 0, o2 = 0;
       if (dp < 1) {
         /* 描いている間はゆるく弓なり。描き終わりで 0 に戻る */
-        const bow = (1 - drawn) * 26;
+        const bow = (1 - drawn) * 20;
         o1 = bow; o2 = bow * 0.45;
         running = true;
       } else {
@@ -147,7 +153,7 @@
       }
 
       l.el.setAttribute('d', pathOf(l, o1, o2));
-      /* 太さは種から Figma の 153.465 へ。線が育つように見せる */
+      /* 太さは種から Figma の 88.7769 へ。線が育つように見せる */
       l.el.style.strokeWidth = dp < 1 ? (seedW + (l.w - seedW) * drawn) : l.w;
 
       if (dp < 1) {
@@ -159,6 +165,15 @@
         l.el.style.strokeDashoffset = '0';
       }
     });
+
+    /* --- 円。2本が育ったあと、遅れて静かに湧く --- */
+    const dt = clamp01((t - DOT.t0) / DOT.dur);
+    if (dt <= 0) { setDot(0.01, 0); running = true; }
+    else {
+      const e = smooth(dt);
+      setDot(Math.max(0.01, DOT.r * e), e);
+      if (dt < 1) running = true;
+    }
 
     raf = running ? requestAnimationFrame(frame) : 0;
   };
@@ -198,10 +213,8 @@
       if (REDUCED) { setFinal(); return; }
       raf = requestAnimationFrame(frame);
     },
-    /* スプラッシュ側がブロブ→2本の線まで描き切ったあとの受け渡し。
-       描画フェーズを飛ばして最終形で現れ、以後は呼吸だけを続ける。
-       settle() 直後のフレームが Figma の最終形そのものなので、
-       受け渡しでスナップしない。 */
+    /* スプラッシュ側が最終形まで描き切ったあとの受け渡し。
+       描画フェーズを飛ばして最終形で現れ、以後は呼吸だけを続ける。 */
     settle() {
       if (started) return;
       started = true;
@@ -211,8 +224,9 @@
       settledAt = null;
       raf = requestAnimationFrame(breatheFrame);
     },
-    /* 2本の線の画面上の実ジオメトリ(始点/終点/太さ)。
-       スプラッシュがブロブの着地先を測るのに使う。 */
+    /* モチーフの画面上の実ジオメトリ。スプラッシュが着地先を測るのに使う。
+       円は「長さ0のカプセル」として返す(始点=終点)。受け側の
+       capsuleOutline は L=0 のとき厳密な円になる。 */
     geometry() {
       const m = svg.getScreenCTM();
       if (!m) return null;
@@ -221,9 +235,12 @@
         const s = p.matrixTransform(m);
         return { x: s.x, y: s.y };
       };
-      return LINES.map((l) => ({
+      const out = LINES.map((l) => ({
         a: pt(l.a.x, l.a.y), b: pt(l.b.x, l.b.y), w: l.w * m.a
       }));
+      const c = pt(DOT.cx, DOT.cy);
+      out.push({ a: c, b: c, w: DOT.r * 2 * m.a });
+      return out;
     }
   };
 
@@ -246,6 +263,7 @@
      settle() で受け渡してくるので自走しない。幕が無いページ(縮小
      モーション環境や直リンク後の再訪キャッシュ等)のみ自走する。 */
   LINES.forEach((l) => { l.el.style.opacity = '0'; });
+  setDot(0.01, 0);
   if (REDUCED) { setFinal(); return; }
 
   const auto = () => {

@@ -178,14 +178,14 @@
     for (const q of p) { x += q[0]; y += q[1]; }
     return [x / p.length, y / p.length];
   };
-  const isOrange = (f) => f.toUpperCase() === '#FF2400';
+  const isOrange = (f) => f.toUpperCase() === '#ED551B';
 
   /* 状態 = [{p:64点, f:'#hex', a:不透明度}] */
   const shp = (pts, f, a) => ({ p: pts, f, a: a === undefined ? 1 : a });
 
-  const S_DOT3  = [shp(circleOutline(IDOT.x, IDOT.y, IDOT.r), '#FF2400')];
-  const S_D4    = [shp(circleOutline(709.5, 292.5, 26.5), '#FF2400')];
-  const S_D5A   = [shp(circleOutline(669.5, 308.5, 26.5), '#FF2400'),
+  const S_DOT3  = [shp(circleOutline(IDOT.x, IDOT.y, IDOT.r), '#ED551B')];
+  const S_D4    = [shp(circleOutline(709.5, 292.5, 26.5), '#ED551B')];
+  const S_D5A   = [shp(circleOutline(669.5, 308.5, 26.5), '#ED551B'),
                    shp(circleOutline(768.5, 308.5, 26.5), '#E9E9E9'),
                    shp(circleOutline(669.5, 393.5, 26.5), '#E9E9E9'),
                    shp(circleOutline(768.5, 393.5, 26.5), '#E9E9E9')];
@@ -204,17 +204,17 @@
     const sr = stage.getBoundingClientRect();   /* スクロール・absolute化に追従 */
     const toStage = (p) => [(p.x - sr.left) / scale, (p.y - sr.top) / scale];
     if (g) {
-      const [pa, pb] = [toStage(g[0].a), toStage(g[0].b)];
-      const [ga, gb] = [toStage(g[1].a), toStage(g[1].b)];
-      LINES_STATE.list = [
-        shp(capsuleOutline(pa[0], pa[1], pb[0], pb[1], (g[0].w / scale) / 2), '#FFE0D3'),
-        shp(capsuleOutline(ga[0], ga[1], gb[0], gb[1], (g[1].w / scale) / 2), '#E9E9E9')
-      ];
+      /* 2本のカプセル + 円(始点=終点の長さ0カプセル)。色は全てブランドカラー */
+      LINES_STATE.list = g.map((k) => {
+        const a1 = toStage(k.a), b1 = toStage(k.b);
+        return shp(capsuleOutline(a1[0], a1[1], b1[0], b1[1], (k.w / scale) / 2), '#ED551B');
+      });
     } else {
-      /* 保険: Figma 215:22653 の値(フレーム座標) */
+      /* 保険: Figma 215:22653 / Group 148 の値(フレーム座標) */
       LINES_STATE.list = [
-        shp(capsuleOutline(1156.257, 229.871, 907.369, 604.707, 76.7325), '#FFE0D3'),
-        shp(capsuleOutline(1557.436, -39.631, 1174.917, 536.461, 76.7325), '#E9E9E9')
+        shp(capsuleOutline(909.53, 521.37, 1053.51, 304.53, 44.3885), '#ED551B'),
+        shp(capsuleOutline(1097.53, 521.37, 1241.51, 304.53, 44.3885), '#ED551B'),
+        shp(capsuleOutline(1285.50, 522.00, 1285.50, 522.00, 44.5), '#ED551B')
       ];
     }
   };
