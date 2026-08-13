@@ -161,15 +161,15 @@
        その上を走る大小2つの円。ここから S14 の二重リングへ吸い込まれる。
        弧は「太さのあるリボン」として持つ(外周→内周でひと繋ぎ)ので、
        次のリングとも同じ 64 点で自然に補間できる。 */
-    { id: 's13b', t: 620, e: 'soft', h: 720, orbitTrail: true,
-      list: [S(ribbon(1160, 456, 232, 150, 380, 1.7)),
-             S(ribbon(1160, 456, 232, 45, 105, 1.7)),
-             S(ribbon(1160, 456, 258, -108, -40, 1.5)),
-             S(ribbon(1160, 456, 206, -150, -95, 1.3)),
+    { id: 's13b', t: 560, e: 'soft', h: 1250, orbitTrail: true,
+      /* 到達形は「太さのあるリング2本 + 走る円2つ」。
+         ホールド中に 線で描かれる → 塗りが差す → 次へ、と進む */
+      list: [S(ribbon(1160, 456, 232, 0, 359.9, 2.6)),
+             S(ribbon(1160, 456, 264, 0, 359.9, 1.8)),
              S(circle(1160 + 232 * Math.cos(-72 * Math.PI / 180),
                       456 + 232 * Math.sin(-72 * Math.PI / 180), 13)),
-             S(circle(1160 + 232 * Math.cos(52 * Math.PI / 180),
-                      456 + 232 * Math.sin(52 * Math.PI / 180), 6))] },
+             S(circle(1160 + 264 * Math.cos(52 * Math.PI / 180),
+                      456 + 264 * Math.sin(52 * Math.PI / 180), 6))] },
     /* S14 リング2 (外r113.5 / 内r98.64) */ { id: 's14', t: 448, e: 'soft', h: 660, resonate: true,
       list: [S(circle(1044.5, 314.5, 113.5), circle(1044.5, 314.5, 98.64)),
              S(circle(1179.5, 314.5, 113.5), circle(1179.5, 314.5, 98.64))] },
@@ -216,10 +216,26 @@
      ヒーローの箱の中心(460)だと下に沈んで見えるため使わない。 */
   const ZONE = { x0: 880, x1: 1440, y0: 152, y1: 608 };
   const ZONE_C = [(ZONE.x0 + ZONE.x1) / 2, (ZONE.y0 + ZONE.y1) / 2];   /* 1160, 380 */
+  /* 画面いっぱいに広がる構図はそのまま。ただし FV 表示後にテキスト
+     (x72..853)へ掛かるものは、左端が 880 に来るまで右へ逃がす。 */
   const KEEP_WIDE = { s11: 1, s13: 1, s18b: 1 };
+  const TEXT_R = 878;
   STATES.forEach((st) => {
     if (st.fvL) { st.fvList = st.fvL; return; }
-    if (KEEP_WIDE[st.id]) { st.fvList = st.list; return; }
+    if (KEEP_WIDE[st.id]) {
+      /* 大きい形はそのままの構図。ただし文字に掛かるなら右へ逃がす */
+      let lx = Infinity;
+      st.list.forEach((sh) => sh.p.forEach(([x]) => { if (x < lx) lx = x; }));
+      const push = lx < TEXT_R ? TEXT_R - lx : 0;
+      st.fvList = push
+        ? st.list.map((sh) => ({
+            p: sh.p.map(([x, y]) => [x + push, y]),
+            hole: sh.hole ? sh.hole.map(([x, y]) => [x + push, y]) : null
+          }))
+        : st.list;
+      if (push) st.fdx = push;
+      return;
+    }
     let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
     st.list.forEach((sh) => sh.p.forEach(([x, y]) => {
       if (x < x0) x0 = x; if (x > x1) x1 = x;
@@ -241,13 +257,26 @@
   /* 152 はヘッダー下端(137)+15。さらに 8px は呼吸/弾みの余裕として足す
      (大きい形ほど呼吸の絶対量が大きいので、半径に比例した余裕も見る)。 */
   const SAFE_TOP = 152;
+  /* 中心へ寄せたあと、文字帯(x<878)へ掛かるものは右へ逃がす。
+     形は変えず平行移動だけ。 */
+  STATES.forEach((st) => {
+    let lx = Infinity;
+    st.fvList.forEach((sh) => sh.p.forEach(([x]) => { if (x < lx) lx = x; }));
+    const push = lx < TEXT_R ? TEXT_R - lx : 0;
+    if (!push) return;
+    st.fvList = st.fvList.map((sh) => ({
+      p: sh.p.map(([x, y]) => [x + push, y]),
+      hole: sh.hole ? sh.hole.map(([x, y]) => [x + push, y]) : null
+    }));
+    st.fdx = (st.fdx || 0) + push;
+  });
   STATES.forEach((st) => {
     const src = st.fvList;
     let top = Infinity;
     src.forEach((sh) => sh.p.forEach(([, y]) => { if (y < top) top = y; }));
     let bottom = -Infinity;
     src.forEach((sh) => sh.p.forEach(([, y]) => { if (y > bottom) bottom = y; }));
-    const margin = 8 + Math.min(18, (bottom - top) * 0.015);   /* 呼吸の余裕 */
+    const margin = 14 + Math.min(24, (bottom - top) * 0.02);   /* 呼吸/伸縮の余裕 */
     st.fvShift = top < SAFE_TOP + margin ? SAFE_TOP + margin - top : 0;
     if (st.caps) st.fvCaps = st.caps.map((c) =>
       [c[0] + (st.fdx || 0), c[1] + (st.fdy || 0) + st.fvShift, c[2], c[3]]);
@@ -699,7 +728,7 @@
           e.style.strokeDashoffset = (len * (1 - dr)).toFixed(1);
           e.__stroked = true;
           e.setAttribute('stroke', COLOR);
-          e.setAttribute('stroke-width', '10');
+          e.setAttribute('stroke-width', '6');
           e.setAttribute('stroke-linejoin', 'round');
           /* 塗りは描き切ってから差し、ピークで一瞬だけベタ */
           const fu = clamp01((ht - 620) / 280);
@@ -730,23 +759,39 @@
         });
         return;
       }
-      /* --- 軌跡の弧: 層ごとに速度と向きが違う。円は弧の上を走る --- */
+      /* --- 円の軌跡 ---
+           0- 640ms  走る円が残した軌跡が「線」として描かれていく
+         640- 940ms  線に塗りが差して、太さのあるリングになる
+         940-1250ms  そのまま回りながら次の形へ渡す
+         走る円は最初から実体で、弧の上を巡り続ける。 */
       if (st.orbitTrail) {
         const hlo = pick(st);
         needActors(hlo.length);
+        const ht2 = into - st.t;
         const bt5 = nowRef / 1000;
-        const SPD = [0.10, -0.07, 0.14, -0.05, 0.42, -0.30];
+        const SPD = [0.12, -0.08, 0.46, -0.33];
+        const c = geomFV ? [1160 + (st.fdx || 0), 456 + (st.fdy || 0) + (st.fvShift || 0)]
+                         : [1160, 456];
         hlo.forEach((sh, i) => {
-          /* 回転中心は弧を描いた円の中心。FV では移動量を足す */
-          const c = geomFV ? [1160 + (st.fdx || 0), 456 + (st.fdy || 0) + (st.fvShift || 0)]
-                           : [1160, 456];
+          const el = pool[i];
           const rot = bt5 * SPD[i % SPD.length] * strength;
           const cs = Math.cos(rot), sn = Math.sin(rot);
-          drawShape(pool[i], sh.p.map(([x, y]) => {
+          drawShape(el, sh.p.map(([x, y]) => {
             const dx0 = x - c[0], dy0 = y - c[1];
             return [c[0] + dx0 * cs - dy0 * sn, c[1] + dx0 * sn + dy0 * cs];
           }), null);
-          pool[i].style.opacity = '1';
+          el.style.opacity = '1';
+          if (i >= 2) return;                     /* 走る円はそのまま実体 */
+          /* リングは 線 → 塗り の順で立ち上がる */
+          const len = el.getTotalLength ? el.getTotalLength() : 3000;
+          const dr = 1 - Math.pow(1 - clamp01((ht2 - i * 140) / 640), 3);
+          el.__stroked = true;
+          el.setAttribute('stroke', COLOR);
+          el.setAttribute('stroke-width', '2.4');
+          el.setAttribute('stroke-linejoin', 'round');
+          el.style.strokeDasharray = len;
+          el.style.strokeDashoffset = (len * (1 - dr)).toFixed(1);
+          el.setAttribute('fill-opacity', smooth(clamp01((ht2 - 640 - i * 90) / 300)).toFixed(3));
         });
         return;
       }
