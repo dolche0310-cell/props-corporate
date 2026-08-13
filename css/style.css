@@ -2,7 +2,7 @@
    Tokens
    =========================================================== */
 :root {
-  --color-primary: #ED5303;
+  --color-primary: #FF2400;
   --color-primary-dark: #C44102;
   --color-ink: #040404;
   --color-text: #0F172A;
@@ -428,62 +428,38 @@ html.splash-lock, html.splash-lock body { overflow: hidden; }
   .site-header--brushup .logo__mark { width: 104.613px; height: 38.098px; }
   /* nav-links 215:23942 (611x28)。Alata Regular 16px / tracking .8px /
      #191919 の大文字。項目間 40px。 */
-  .site-header--brushup .nav { gap: 40px; }
-  .site-header--brushup .nav__link,
-  .site-header--brushup .nav__cta-label {
+  .site-header--brushup .nav { gap: 40px; align-items: center; }
+  .site-header--brushup .nav__link {
     font-family: var(--font-display-en);
     font-size: 16px;
-    font-weight: 400;
+    font-weight: 500;          /* Figma 277:35876 は Medium */
     letter-spacing: .8px;
     text-transform: uppercase;
-  }
-  .site-header--brushup .nav__link { color: #191919; }
-
-  /* CONTACT 215:23948 は 117x28 のピル。ここだけ角丸を持つ。
-     地の色は各案の --color-primary(A-1 は Figma と同じ #F16E36)。 */
-  .site-header--brushup .nav__cta {
-    height: 28px;
-    padding: 0 20px;
-    border-radius: 30px;
-    background: var(--color-primary);
-    color: #fff;
-    border: none;
-  }
-  .site-header--brushup .nav__cta::before { display: none; }
-  /* ホバー: 暗い面が下から満ちて色が入れ替わる(richka の Contact と同じ考え方)。
-     影は使わない。位置も動かさない。面の置換だけで反応させる。 */
-  .site-header--brushup .nav__cta {
+    color: #191919;
     position: relative;
-    overflow: hidden;
-    isolation: isolate;
-    box-shadow: none;
-    transition: color .34s cubic-bezier(.22, 1, .36, 1);
+    line-height: 1;
+    padding: 4px 0;
   }
-  .site-header--brushup .nav__cta::after {
+  /* 下線: 右から縮んで消え、ホバーで左から引かれる(cuolega C案と同じ) */
+  .site-header--brushup .nav__link::after {
     content: '';
     position: absolute;
-    inset: 0;
-    z-index: -1;
-    border-radius: inherit;
-    background: var(--color-ink);
-    transform: translateY(101%);
-    transition: transform .46s cubic-bezier(.65, 0, .35, 1);
-  }
-  .site-header--brushup .nav__cta-label {
-    position: relative;
-    z-index: 1;
-    display: inline-block;
+    left: 0;
+    bottom: -2px;
+    width: 100%;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right center;
+    transition: transform .5s cubic-bezier(.16, 1, .3, 1);
   }
   @media (hover: hover) and (pointer: fine) {
-    .site-header--brushup .nav__cta:hover { color: #fff; opacity: 1; }
-    .site-header--brushup .nav__cta:hover::after { transform: translateY(0); }
+    .site-header--brushup .nav__link:hover::after {
+      transform: scaleX(1);
+      transform-origin: left center;
+    }
   }
-  /* 押下は面がわずかに締まるだけ。跳ねさせない */
-  .site-header--brushup .nav__cta:active::after { transform: translateY(0) scale(1.04); }
-  @media (prefers-reduced-motion: reduce) {
-    .site-header--brushup .nav__cta,
-    .site-header--brushup .nav__cta::after { transition: none; }
-  }
+
 }
 .logo {
   display: inline-flex;
@@ -551,43 +527,6 @@ html.splash-lock, html.splash-lock body { overflow: hidden; }
   vertical-align: middle;
 }
 .nav__link-face--back { display: none; }
-.nav__cta {
-  margin: 16px 4px 0;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-  background: transparent;
-  color: var(--color-ink);
-  border: 1.5px solid var(--color-ink);
-  border-radius: 30px;
-  transition: color .3s ease, border-color .3s ease;
-}
-.nav__cta-label {
-  position: relative;
-  z-index: 1;
-}
-.nav__cta::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 18%;
-  width: 18px;
-  height: 18px;
-  margin: -9px 0 0 -9px;
-  border-radius: 50%;
-  background: var(--color-primary);
-  transform: scale(0);
-  transition: transform .45s cubic-bezier(.22, 1, .36, 1);
-  will-change: transform;
-}
-.nav__cta:hover {
-  color: #fff;
-  border-color: var(--color-primary);
-}
-.nav__cta:hover::before {
-  transform: scale(16);
-}
-
 @media (min-width: 768px) {
   .nav {
     position: static;
@@ -604,7 +543,6 @@ html.splash-lock, html.splash-lock body { overflow: hidden; }
     transition: none;
   }
   .nav__link { padding: 0; border-bottom: none; }
-  .nav__cta { margin: 0; }
 
   /* -----------------------------------------------------------
      Nav link hover (About, Service, News, Team, Company): the
@@ -633,39 +571,23 @@ html.splash-lock, html.splash-lock body { overflow: hidden; }
                   segment over 500ms, no extra delay
 
      Pure CSS (:hover-driven), no JS. */
+  /* cuolega C案と同じ: マスクの中で前面が上へ抜け、控えが下から入る。
+     回転もグラデーションの走査も掛けない素直なスライド。 */
   .nav__link-face {
     display: block;
     will-change: transform;
-    color: transparent;
-    background-image: linear-gradient(100deg,
-      #292929 0%, #292929 38%,
-      #fff 47%, var(--color-primary) 53%,
-      #292929 62%, #292929 100%);
-    background-size: 260% 100%;
-    background-repeat: no-repeat;
-    background-position: 100% 0;
-    -webkit-background-clip: text;
-    background-clip: text;
-    /* Smooth ease-in-out (slow start -> speed up -> slow finish),
-       not a constant-speed slide, for a softer "flip" feel. */
-    transition: transform .62s cubic-bezier(.65, 0, .35, 1),
-                background-position 500ms cubic-bezier(.22, 1, .36, 1) 0ms;
+    transition: transform .5s cubic-bezier(.16, 1, .3, 1);
   }
-  .nav__link-face--front { transform: translateY(0) rotate(0deg); }
+  .nav__link-face--front { transform: translateY(0); }
   .nav__link-face--back {
     display: block;
     position: absolute;
     top: 0;
     left: 0;
-    transform: translateY(100%) rotate(8deg);
+    transform: translateY(105%);
   }
-  .nav__link:hover .nav__link-face--front { transform: translateY(-100%) rotate(-8deg); }
-  .nav__link:hover .nav__link-face--back { transform: translateY(0) rotate(0deg); }
-  .nav__link:hover .nav__link-face {
-    background-position: 0% 0;
-    transition: transform .62s cubic-bezier(.65, 0, .35, 1),
-                background-position 550ms cubic-bezier(.22, 1, .36, 1) 550ms;
-  }
+  .nav__link:hover .nav__link-face--front { transform: translateY(-105%); }
+  .nav__link:hover .nav__link-face--back { transform: translateY(0); }
 
   @media (prefers-reduced-motion: reduce) {
     .nav__link-face,
@@ -1976,6 +1898,7 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   border-top: 1px solid #EBEBEB;
 }
 .news__list--rows .news__item {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -1983,7 +1906,18 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   border-bottom: 1px solid #EBEBEB;
 }
 @media (min-width: 768px) {
-  .news__list--rows .news__item { flex-direction: row; align-items: flex-start; gap: 40px; padding: 48px 0; }
+  /* Figma の縦のリズム: 区切り線→タイトル 60、抜粋の下→次の線 60、
+     行の高さ 233。props 独自のタグ行(26 + 下余白18 = 44)はその 60 の
+     内側に収め、タイトルが Figma と同じ位置に来るよう上を 16 にする。
+       16 + 44 + 52(タイトル) + 15 + 46(抜粋) + 60 = 233 */
+  .news__list--rows .news__item {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 0;
+    /* 実測(本文段の高さ156)から逆算: 上16 でタイトルが区切り線から60、
+       下61 で行の高さが Figma の 233 になる。 */
+    padding: 16px 0 61px;
+  }
 }
 .news__list--rows .news__date {
   display: flex;
@@ -1997,11 +1931,23 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   flex-shrink: 0;
 }
 @media (min-width: 768px) {
-  .news__list--rows .news__date { flex-direction: column; align-items: flex-start; gap: 4px; width: 70px; }
+  .news__list--rows .news__date {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    width: 11.01%;              /* 138 / 1253 = 日付段 + 本文までの間隔 */
+    flex: none;
+    align-self: flex-start;
+    margin-top: 58px;           /* 区切り線から 90 (16 + 58 + 行送り16) */
+    /* 本文段は 700 のまま。右のブランクは絶対配置なので幅計算に入らない */
+  }
 }
 .news__date-year { font-size: 14px; }
 .news__date-day { font-size: 20px; }
 .news__list--rows .news__body { flex: 1; min-width: 0; }
+@media (min-width: 768px) {
+  .news__list--rows .news__body { width: 55.87%; flex: none; }   /* 700 / 1253 */
+}
 .news__list--rows .news__title {
   font-family: var(--font-alata);
   font-weight: 700;
@@ -2026,13 +1972,30 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
 @media (min-width: 768px) {
   .news__list--rows .news__excerpt { font-size: 14px; }
 }
+/* サムネイルは実写を置かずグレーのブランク(Figma 397:64582/64583 #F4F4F4)。
+   行の寸法も Figma 277:34576 に合わせる:
+     区切り線 y154 / y387 / y617 → 行の高さ 233 / 230
+     日付 x0 w50 (行頭から90)、本文 x138 w700 (行頭から60)
+     ブランク 219x168、右端から51px 内側で天地中央 */
 .news__list--rows .news__thumb {
   margin: 0;
-  aspect-ratio: 320 / 168;
-  background: #fff;
+  aspect-ratio: 219 / 168;
+  background: #F4F4F4;
+  border-radius: 2px;
 }
 @media (min-width: 768px) {
-  .news__list--rows .news__thumb { width: 320px; flex-shrink: 0; order: 3; }
+  /* ブランクは絶対配置。フレックスの行に混ぜると自身の高さ(168)が
+     行の高さを決めてしまい、Figma の 233 と本文の位置が崩れるため。
+     天地中央 = (233-168)/2 = 32.5 で Figma の 33 と一致する。 */
+  .news__list--rows .news__thumb {
+    position: absolute;
+    right: 4.07%;               /* 51 / 1253 */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 17.48%;              /* 219 / 1253 */
+    aspect-ratio: 219 / 168;
+    margin: 0;
+  }
 }
 
 /* ===========================================================
@@ -2126,17 +2089,19 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
 @media (min-width: 768px) {
   .news__arrow {
     display: block;
-    order: 4;
-    align-self: center;
-    flex-shrink: 0;
-    margin-left: 8px;
+    /* Figma には無い props 独自の要素。行の幅計算に影響させないよう
+       絶対配置にして、ブランク右の余白帯(51px)に収める */
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
   }
   .news__list--rows .news__item { align-items: center; }
   .news__list--rows .news__date { align-self: center; }
 }
 .news__list--rows .news__title { transition: color .3s ease; }
 @media (hover: hover) and (pointer: fine) {
-  .news__item:hover .news__arrow { color: var(--color-primary); transform: translateX(5px); }
+  .news__item:hover .news__arrow { color: var(--color-primary); transform: translateY(-50%) translateX(5px); }
   .news__item:hover .news__title { color: var(--color-primary); }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -2514,7 +2479,7 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
 .kv-title__suffix { position: absolute; left: 8.9074em; top: .2162em; white-space: nowrap; }
 .kv-title .kv-sm { font-size: .9259em; }            /* 50px */
 .kv-title__prefix .kv-sm { letter-spacing: .14em; } /* 7px @50px */
-/* カプセル(232:27381 / Group 138 262:29138): 299x78, r=200, #F16E36。
+/* カプセル(232:27381 / Group 138 262:29138): 299x78, r=200, #FF2400。
    幅は固定。auto / fit-content / shrink にしない(中身が消えても縮ませない) */
 .kv-pill {
   position: absolute;
@@ -2522,7 +2487,7 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   top: .1606em;
   width: 5.5370em;    /* 299px */
   height: 1.4444em;   /* 78px */
-  background: #F16E36;
+  background: #FF2400;
   border-radius: 3.7037em; /* 200px */
 }
 /* AI(254:27424): カプセル内 x=46.43 y=13.46, 54.664x50.096

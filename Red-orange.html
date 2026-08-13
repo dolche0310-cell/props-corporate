@@ -14,7 +14,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Alata&family=Belanosima:wght@600;700&family=Gugi&family=Inter:wght@400;700&family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 <style>
-  :root { --color-primary: #F16E36; }
+  :root { --color-primary: #FF2400; }
 </style>
 </head>
 <body>
@@ -83,7 +83,12 @@
           <span class="nav__link-face nav__link-face--back" aria-hidden="true">Company</span>
         </span>
       </a>
-      <a href="#contact" class="btn btn--sm nav__cta"><span class="nav__cta-label">Contact</span></a>
+      <a href="#contact" class="nav__link">
+        <span class="nav__link-flip">
+          <span class="nav__link-face nav__link-face--front">Contact</span>
+          <span class="nav__link-face nav__link-face--back" aria-hidden="true">Contact</span>
+        </span>
+      </a>
     </nav>
 
     <button type="button" class="hamburger" id="hamburger-btn" aria-label="メニューを開く" aria-expanded="false" aria-controls="site-nav">
@@ -264,9 +269,7 @@
             <h3 class="news__title">株式会社日比谷花壇がAI面接サービス「MiAI面接」を導入。&quot;人の温度&quot;を守りながら全国採用の公平性と効率性を両立。</h3>
             <p class="news__excerpt">プロップス株式会社（本社：東京都中央区、代表取締役 松元勇人）は、株式会社日比谷花壇（本社：東京都港区、代表取締役社長 宮島 浩彰）がAI面接サービス「MiAI面接」を正式導入したことをお知らせします...</p>
           </div>
-          <div class="news__thumb">
-            <img src="assets/images/news-hibiya.png" alt="株式会社日比谷花壇がAI面接サービス「MiAI面接」を導入">
-          </div>
+          <div class="news__thumb" aria-hidden="true"></div>
           <span class="news__arrow" aria-hidden="true"><svg viewBox="0 0 14 12" fill="none" width="14" height="12"><path d="M1 6H13M8.6 1.6L13 6L8.6 10.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         </article>
 
@@ -277,9 +280,7 @@
             <h3 class="news__title">AIで採用を加速する。ノーコードで自社向けにカスタマイズできるAI面接官「MiAI面接」を正式リリース</h3>
             <p class="news__excerpt">採用初期のリードタイムを90%以上削減。24時間365日対応で、企業ごとに求職者一人一人に合わせた面接対話体験を提供。最新の生成AIを活用し採用体験にイノベーションを。採用市場の激化と労働人口減少...</p>
           </div>
-          <div class="news__thumb">
-            <img src="assets/images/news-miai.png" alt="AIで採用を加速する。MiAI面接を正式リリース">
-          </div>
+          <div class="news__thumb" aria-hidden="true"></div>
           <span class="news__arrow" aria-hidden="true"><svg viewBox="0 0 14 12" fill="none" width="14" height="12"><path d="M1 6H13M8.6 1.6L13 6L8.6 10.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         </article>
       </div>

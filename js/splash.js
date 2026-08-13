@@ -178,14 +178,14 @@
     for (const q of p) { x += q[0]; y += q[1]; }
     return [x / p.length, y / p.length];
   };
-  const isOrange = (f) => f.toUpperCase() === '#F16E36';
+  const isOrange = (f) => f.toUpperCase() === '#FF2400';
 
   /* 状態 = [{p:64点, f:'#hex', a:不透明度}] */
   const shp = (pts, f, a) => ({ p: pts, f, a: a === undefined ? 1 : a });
 
-  const S_DOT3  = [shp(circleOutline(IDOT.x, IDOT.y, IDOT.r), '#F16E36')];
-  const S_D4    = [shp(circleOutline(709.5, 292.5, 26.5), '#F16E36')];
-  const S_D5A   = [shp(circleOutline(669.5, 308.5, 26.5), '#F16E36'),
+  const S_DOT3  = [shp(circleOutline(IDOT.x, IDOT.y, IDOT.r), '#FF2400')];
+  const S_D4    = [shp(circleOutline(709.5, 292.5, 26.5), '#FF2400')];
+  const S_D5A   = [shp(circleOutline(669.5, 308.5, 26.5), '#FF2400'),
                    shp(circleOutline(768.5, 308.5, 26.5), '#E9E9E9'),
                    shp(circleOutline(669.5, 393.5, 26.5), '#E9E9E9'),
                    shp(circleOutline(768.5, 393.5, 26.5), '#E9E9E9')];

@@ -98,8 +98,8 @@
 <feGaussianBlur stdDeviation="6.22456" result="effect1_foregroundBlur_0_8"/>
 </filter>
 <radialGradient id="paint0_radial_0_8" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(33.9491 33.9491) scale(21.5)">
-<stop stop-color="#F16E36"/>
-<stop offset="1" stop-color="#F16E36" stop-opacity="0"/>
+<stop stop-color="#FF2400"/>
+<stop offset="1" stop-color="#FF2400" stop-opacity="0"/>
 </radialGradient>
 </defs></g>
 <g class="dg-ring" transform="translate(39.550 297.550) scale(1.00000 1.00000)"><g id="Group 122">
@@ -115,8 +115,8 @@
 <feGaussianBlur stdDeviation="6.22456" result="effect1_foregroundBlur_0_8"/>
 </filter>
 <radialGradient id="paint0_radial_0_8" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(33.9491 33.9491) scale(21.5)">
-<stop stop-color="#F16E36"/>
-<stop offset="1" stop-color="#F16E36" stop-opacity="0"/>
+<stop stop-color="#FF2400"/>
+<stop offset="1" stop-color="#FF2400" stop-opacity="0"/>
 </radialGradient>
 </defs></g>
 <g class="dg-ring" transform="translate(531.550 234.550) scale(1.00000 1.00000)"><g id="Group 122">
@@ -132,8 +132,8 @@
 <feGaussianBlur stdDeviation="6.22456" result="effect1_foregroundBlur_0_8"/>
 </filter>
 <radialGradient id="paint0_radial_0_8" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(33.9491 33.9491) scale(21.5)">
-<stop stop-color="#F16E36"/>
-<stop offset="1" stop-color="#F16E36" stop-opacity="0"/>
+<stop stop-color="#FF2400"/>
+<stop offset="1" stop-color="#FF2400" stop-opacity="0"/>
 </radialGradient>
 </defs></g>
 <g class="dg-node" transform="translate(299.670 324.857) scale(0.99997 0.99997)"><g id="Waypoints">
