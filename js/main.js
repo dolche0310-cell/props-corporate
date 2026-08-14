@@ -313,6 +313,38 @@
     aboutHeadingInner.classList.add('is-visible');
   }
 
+  // Service の暗転(cuolega a-top と同じ機構)。
+  // 暗くするのは body の下地色で、セクションの箱ではない。箱を暗くすると
+  // ヘッダー帯・セクションの上下・wrap の左右に白が残るため。
+  // 固定のメッシュ(.svc-aurora)は overlay で合成され、下地が沈んだときだけ
+  // 角から包み込むように効く。
+  var svcSection = document.querySelector('.service--brushup');
+  if (svcSection) {
+    var aurora = document.createElement('div');
+    aurora.className = 'svc-aurora';
+    aurora.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(aurora);
+
+    var svcDarkTicking = false;
+    var updateSvcDark = function () {
+      svcDarkTicking = false;
+      var r = svcSection.getBoundingClientRect();
+      var vh = window.innerHeight || 800;
+      // 入り: 上端が画面の 62% を越えたら。抜け: 下端が 12% を切ったら。
+      // ピン留めの範囲ぶんセクションが縦に長いので、掛かっている間ずっと沈む。
+      document.body.classList.toggle(
+        'is-svc-dark', r.top < vh * 0.62 && r.bottom > vh * 0.12);
+    };
+    window.addEventListener('scroll', function () {
+      if (!svcDarkTicking) {
+        svcDarkTicking = true;
+        requestAnimationFrame(updateSvcDark);
+      }
+    }, { passive: true });
+    window.addEventListener('resize', updateSvcDark);
+    updateSvcDark();
+  }
+
   var serviceScroller = document.getElementById('service-scroller');
   var servicePin = document.querySelector('.service__pin');
   var serviceTextList = document.getElementById('service-text-list');
