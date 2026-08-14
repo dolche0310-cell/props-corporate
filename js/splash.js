@@ -95,57 +95,7 @@
   const L_BASE = 200, L_STAG = 70, L_DUR = 560;
   const L_RISE = 26 / LS;
 
-  /* ---------- 粒子 ----------
-     字形を細かい格子で埋め、静止中はタイルで完全な黒を作る。
-     散るときは「i のドットから解放されたエネルギー」として、
-     ドットに近い粒から順に持ち上がる。
-
-     ・速度: 上方向 + ドットからの外向き + わずかな乱れ
-     ・軌道: 直線でなく、粒ごとの位相でゆるく渦を巻く(curl)
-     ・減速: 立ち上がりが速く、終盤はほとんど止まって消える
-     ・寿命と大きさに個体差があるので、一斉に消えない */
-  const particles = [];
-  {
-    const test = document.createElement('canvas').getContext('2d');
-    const paths = letters.map((p) => new Path2D(p.getAttribute('d')));
-    test.setTransform(LS, 0, 0, LS, LX, LY);
-    /* i のドットの領域は粒子を作らない。オレンジの円と黒い粒が
-       同じ場所で重なると濁って見えるため、そこは円だけに任せる。 */
-    const DOT_KEEP = IDOT.r + 2.5;
-    const STEP = 1.85;                       /* 格子。細かいほど密になる */
-    const maxD = Math.hypot(LW, 97 * LS);
-    for (let y = LY; y < LY + 97 * LS + 4; y += STEP) {
-      for (let x = LX; x < LX + LW + 4; x += STEP) {
-        if (Math.hypot(x - IDOT.x, y - IDOT.y) < DOT_KEEP) continue;
-        let inside = false;
-        for (const pa of paths) { if (test.isPointInPath(pa, x, y)) { inside = true; break; } }
-        if (!inside) continue;
-        /* 砂が風にさらわれるように、字の左から順に右へ流れて散る。
-           速度は粒ごとに大きく散らし(0.35〜1.0の3乗分布)、遅い粒が
-           長く残ることで密度の濃淡=塊が生まれる。 */
-        const tx = (x - LX) / LW;                 /* 字の中の横位置 0..1 */
-        const r1 = rnd(), r2 = rnd(), r3 = rnd();
-        /* 少数だけがとても速く、遠くまで届いて長い尾をつくる */
-        const fast = 0.18 + 0.82 * Math.pow(r1, 2.2);
-        const speed = 620 * fast;
-        particles.push({
-          x, y,
-          /* 主に右へ。上下は控えめに散らす(横に流れる帯になる) */
-          vx: speed * (0.78 + r2 * 0.5),
-          vy: (r3 - 0.5) * speed * 0.42 - 12 * fast,
-          /* 渦: 遅い粒ほど大きく漂う */
-          curlA: rnd() * Math.PI * 2,
-          curlR: (3 + rnd() * 14) * (1.3 - fast),
-          /* 左から順に崩れる。同じ縦列でも少しばらす */
-          delay: tx * 360 + rnd() * 200,
-          /* 速い粒ほど長く飛ぶ(尾が伸びる)。遅い粒は手前で静かに消える */
-          life: 780 + fast * 1000 + rnd() * 320,
-          size: 0.55 + rnd() * (0.7 + fast * 1.1),
-          aMax: 0.55 + rnd() * 0.45
-        });
-      }
-    }
-  }
+  /* 字は粒子に崩さない。退場は drawIntro の staggered なフェードで行う。 */
 
   /* ---------- ドット(常に1個) ---------- */
   const clamp01 = (t) => (t < 0 ? 0 : t > 1 ? 1 : t);
@@ -158,7 +108,7 @@
   cellsG.appendChild(dotEl);
 
   const STEP_F = 2.15, STEP_H = STEP_F / 2;   /* 静止中に字形を埋めるタイル */
-  const SCATTER_LEN = 2500;                  /* 散り切るまで */
+  const SCATTER_LEN = 1100;                  /* 字が抜け切るまで */
   const DIS = 1330;                /* ドット点灯の開始 */
   const LIT = DIS + 280;           /* 点灯し切る */
   const SCATTER = LIT + 420;       /* 灯り切って一拍おいてから文字が散る */
@@ -166,68 +116,25 @@
 
   const drawIntro = (t) => {
     /* 文字: 1文字ずつライズ。散開開始後はグループごと消えていく */
-    let ga = 1;
-    if (t >= SCATTER) ga = 1 - smooth((t - SCATTER) / 300);
-    logoG.style.opacity = Math.max(0, ga).toFixed(3);
+    /* 退場は入場の裏返し。1文字ずつ、入ってきたのと同じ間合い(70ms)で
+       上へ 26px 抜けながら消える。粒子で崩すより静かで、字形が最後まで
+       字形のまま残るぶん品がある。 */
+    logoG.style.opacity = '1';
+    const L_OUT = 420;
     letters.forEach((el, i) => {
       const u = EASE_OUT((t - L_BASE - i * L_STAG) / L_DUR);
-      el.style.opacity = u.toFixed(3);
-      el.setAttribute('transform', 'translate(0 ' + (L_RISE * (1 - u)).toFixed(2) + ')');
+      const o = smooth(clamp01((t - SCATTER - i * L_STAG) / L_OUT));
+      el.style.opacity = (u * (1 - o)).toFixed(3);
+      el.setAttribute('transform',
+        'translate(0 ' + (L_RISE * (1 - u) - L_RISE * o).toFixed(2) + ')');
     });
 
-    /* 崩壊(タイル → 進行方向へ伸びる細い線 → 消える)
-       黒い粉が飛び散る絵は粒が点にしか見えず粗い。動いている粒は
-       速度の向きへ尾を引いた「線」として描き、進むほど細く長くなって
-       溶けるようにする。字形はそのまま流れて薄い線の束になる。 */
+    /* 粒子は使わない。字は上の staggered な退場だけで消えるので、
+       キャンバスは常に空のままにしておく(要素は互換のため残す)。 */
     const q = canvas.__q || 1;
     const ctx = canvas.getContext('2d');
     ctx.setTransform(q, 0, 0, q, 0, 0);
     ctx.clearRect(0, 0, DW, DH);
-    if (t >= SCATTER && t <= SCATTER + SCATTER_LEN) {
-      ctx.fillStyle = '#191919';
-      ctx.strokeStyle = '#191919';
-      ctx.lineCap = 'round';
-      for (const p of particles) {
-        const lt = t - SCATTER - p.delay;
-        if (lt < 0) {
-          /* まだ散り始めていない粒は、字形を埋めるタイルとして置く */
-          ctx.globalAlpha = 1;
-          ctx.fillRect(p.x - STEP_H, p.y - STEP_H, STEP_F, STEP_F);
-          continue;
-        }
-        const u = lt / p.life;
-        if (u >= 1) continue;
-        const sec = lt / 1000;
-        /* 空気抵抗で減速する。速い粒ほど遠くまで届く */
-        const damp = (1 - Math.exp(-sec * 1.25)) / 1.25;
-        const cur = p.curlA + sec * 1.9;
-        const px = p.x + p.vx * damp + Math.cos(cur) * p.curlR * damp * 1.5;
-        const py = p.y + p.vy * damp + Math.sin(cur * 1.27) * p.curlR * damp * 1.2;
-        /* 濃度: 出はほぼ即時、消えぎわを長く引く */
-        const fade = u < 0.14 ? 1 : Math.pow(1 - (u - 0.14) / 0.86, 2.1);
-        const alpha = p.aMax * fade;
-        if (alpha <= 0.010) continue;
-        ctx.globalAlpha = alpha;
-        /* 尾の長さは「その瞬間の速さ」に比例(残像と同じ理屈)。
-           出た直後は短く、伸び切ってから細く消える。 */
-        const v0 = Math.hypot(p.vx, p.vy);
-        const spd = v0 * Math.exp(-sec * 1.25);
-        const grow = smooth(clamp01(u * 2.4));
-        const tail = Math.min(110, spd * 0.052) * (0.28 + 0.72 * grow);
-        const th = lerp(STEP_F * 0.85, 0.5, smooth(clamp01(u * 1.5)));
-        if (tail < 1.2) {
-          ctx.fillRect(px - th / 2, py - th / 2, th, th);
-          continue;
-        }
-        const ux = p.vx / (v0 || 1), uy = p.vy / (v0 || 1);
-        ctx.lineWidth = th;
-        ctx.beginPath();
-        ctx.moveTo(px - ux * tail, py - uy * tail);
-        ctx.lineTo(px, py);
-        ctx.stroke();
-      }
-      ctx.globalAlpha = 1;
-    }
 
     /* ドット: ロゴ自身のドットの真上で黒→#FF2400、S04 へ移動して受け渡し */
     if (t >= DIS && t < HANDOFF) {
