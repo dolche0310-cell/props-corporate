@@ -2843,65 +2843,52 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   transform: var(--kb-b);
   transition: transform 6.5s linear;
 }
-/* 寄りすぎないよう、動きは全て scale 1.00 起点。最大でも +1.8% に留める
-   (Figma は写真が引きの構図なので、拡大で画角を削らない)。
-   写真は5枚(オフィスの人物カットは不使用)。 */
-/* 01 わずかに横へ流れる */
+/* 素材側を表示比率(1442:813)に切ってあるので、cover での意図しない
+   切り落としは起きない。translate を掛ける端点は端の露出を防ぐため
+   scale 1.015 以上にする(8px の移動に対して +1.5% で余白が出ない)。 */
 .company--figma .cmp__slide:nth-child(1) {
-  --kb-a: translate3d(8px, 0, 0) scale(1.000);
-  --kb-b: translate3d(-8px, 0, 0) scale(1.016);
+  --kb-a: translate3d(0, 0, 0) scale(1.015);
+  --kb-b: translate3d(-5px, 0, 0) scale(1.022);
 }
-/* 02 ゆっくり引く */
 .company--figma .cmp__slide:nth-child(2) {
-  --kb-a: translate3d(0, -3px, 0) scale(1.022);
-  --kb-b: translate3d(0, 3px, 0) scale(1.000);
+  --kb-a: translate3d(8px, 0, 0) scale(1.016);
+  --kb-b: translate3d(-8px, 0, 0) scale(1.024);
 }
-/* 03 わずかに縦へ */
 .company--figma .cmp__slide:nth-child(3) {
-  --kb-a: translate3d(0, -8px, 0) scale(1.000);
-  --kb-b: translate3d(0, 6px, 0) scale(1.014);
+  --kb-a: translate3d(0, -3px, 0) scale(1.022);
+  --kb-b: translate3d(0, 3px, 0) scale(1.015);
 }
-/* 04 静かに寄る */
 .company--figma .cmp__slide:nth-child(4) {
-  --kb-a: translate3d(-4px, 0, 0) scale(1.000);
-  --kb-b: translate3d(4px, 0, 0) scale(1.018);
+  --kb-a: translate3d(0, -6px, 0) scale(1.016);
+  --kb-b: translate3d(0, 5px, 0) scale(1.022);
 }
-/* 05 ゆるく横へ */
 .company--figma .cmp__slide:nth-child(5) {
-  --kb-a: translate3d(3px, 0, 0) scale(1.008);
-  --kb-b: translate3d(-6px, 0, 0) scale(1.014);
+  --kb-a: translate3d(-4px, 0, 0) scale(1.015);
+  --kb-b: translate3d(4px, 0, 0) scale(1.022);
 }
-/* 06 ほぼ静止。終わりの値を 01 の入りに近づけて 6→1 を繋ぐ */
 .company--figma .cmp__slide:nth-child(6) {
-  --kb-a: translate3d(4px, 0, 0) scale(1.010);
-  --kb-b: translate3d(-2px, 0, 0) scale(1.000);
+  --kb-a: translate3d(4px, 0, 0) scale(1.018);
+  --kb-b: translate3d(-2px, 0, 0) scale(1.015);
 }
 
-/* --- 写真ごとの構図。
-   01/05 は Figma に全面配置の実データがあるので、その配置から
-   「セクション中心が写真のどこに当たるか」を割り出して写している。
-     01 (408:25730 office x-214 y-39 / 写真 1711x921)  → 55% / 48%
-     05 (408:29664 office x-265 y-126 / 写真 1505x902) → 51% / 52%
-   02/03/04 は Figma では右半分(628x813)の縦位置での使用なので全面の
-   実データが無い。建築の水平を保ったまま被写体が残る帯を選ぶ。 --- */
-/* 1枚目だけは Figma 408:24551 に実配置がある。
-   office(408:25730) が 1442x813 のセクションに対して x-214 y-39 / 1711x921。
-   素材の比(1.858)と表示比が一致しているので、その寸法と位置をそのまま
-   置けば Figma と同じ画角になる(cover 任せより 13% 寄った絵)。 */
-.company--figma .cmp__slide:nth-child(1) img {
+/* --- 構図は素材側で確定済み(帯を切ってから書き出している)。
+       表示は中央のまま。1枚目だけ Figma 408:24551 の絶対配置。 --- */
+.company--figma .cmp__slide img { object-position: 50% 50%; }
+
+/* --- 見出し(Company / 会社概要)の裏の保険。素材側でも質感を均して
+       いるが、ケンバーンズで写真が動いても読めるよう、ごく淡い白の
+       ラジアルを写真の上・文字の下に敷く。輪郭が出ない大きさと濃さ。 --- */
+.company--figma .cmp__slides::after {
+  content: "";
   position: absolute;
-  left: calc(var(--u) * -214);
-  top: calc(var(--u) * -39);
-  width: calc(var(--u) * 1711);
-  height: calc(var(--u) * 921);
-  max-width: none;   /* 全体の img リセット(max-width:100%)が幅を殺すため */
+  left: calc(var(--u) * -80);
+  top: calc(var(--u) * -110);
+  width: calc(var(--u) * 640);
+  height: calc(var(--u) * 500);
+  background: radial-gradient(closest-side,
+    rgba(255, 255, 255, .42), rgba(255, 255, 255, 0) 72%);
+  pointer-events: none;
 }
-.company--figma .cmp__slide:nth-child(2) img { object-position: 50% 45%; }
-.company--figma .cmp__slide:nth-child(3) img { object-position: 50% 48%; }
-.company--figma .cmp__slide:nth-child(4) img { object-position: 50% 46%; }
-.company--figma .cmp__slide:nth-child(5) img { object-position: 51% 52%; }
-/* 06 (Figma 422:33748) 手前の机と奥行きが残る帯 */
-.company--figma .cmp__slide:nth-child(6) img { object-position: 50% 52%; }
 
 /* --- 情報パネルの登場。下からのフェードインにはしない --- */
 .company--figma .cmp__label,
