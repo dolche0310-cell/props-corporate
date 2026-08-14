@@ -93,9 +93,18 @@
   logoG.style.opacity = '0';
   const letters = [...logoG.querySelectorAll('path')];
   const L_BASE = 200, L_STAG = 70, L_DUR = 560;
-  const L_RISE = 26 / LS;
-
-  /* 字は粒子に崩さない。退場は drawIntro の staggered なフェードで行う。 */
+  /* 出入りとも字は常にベタの黒のまま。半透明の字が重なって見える
+     フェードは使わず、ロゴの枠でクリップした「昇降」だけで見せる。
+     入り: 枠の下から立ち上がる / 抜け: 枠の上へ抜けて切れる。 */
+  const L_RISE_IN = 130, L_RISE_OUT = 125;   /* ロゴ座標(字高97)基準 */
+  {
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    defs.innerHTML =
+      '<clipPath id="sp-logo-clip">' +
+      '<rect x="-8" y="-6" width="284" height="110"/></clipPath>';
+    svg.insertBefore(defs, svg.firstChild);
+    logoG.setAttribute('clip-path', 'url(#sp-logo-clip)');
+  }
 
   /* ---------- ドット(常に1個) ---------- */
   const clamp01 = (t) => (t < 0 ? 0 : t > 1 ? 1 : t);
@@ -116,17 +125,16 @@
 
   const drawIntro = (t) => {
     /* 文字: 1文字ずつライズ。散開開始後はグループごと消えていく */
-    /* 退場は入場の裏返し。1文字ずつ、入ってきたのと同じ間合い(70ms)で
-       上へ 26px 抜けながら消える。粒子で崩すより静かで、字形が最後まで
-       字形のまま残るぶん品がある。 */
+    /* 出入りとも不透明度は使わない(常にベタの黒)。ロゴ枠のクリップの
+       中で、1文字ずつ 70ms 刻みに、下から立ち上がり・上へ抜ける。 */
     logoG.style.opacity = '1';
     const L_OUT = 700;
     letters.forEach((el, i) => {
       const u = EASE_OUT((t - L_BASE - i * L_STAG) / L_DUR);
       const o = smooth(clamp01((t - SCATTER - i * L_STAG) / L_OUT));
-      el.style.opacity = (u * (1 - o)).toFixed(3);
+      el.style.opacity = '1';
       el.setAttribute('transform',
-        'translate(0 ' + (L_RISE * (1 - u) - L_RISE * o).toFixed(2) + ')');
+        'translate(0 ' + (L_RISE_IN * (1 - u) - L_RISE_OUT * o).toFixed(2) + ')');
     });
 
     /* 粒子は使わない。字は上の staggered な退場だけで消えるので、
@@ -144,12 +152,27 @@
     if (t >= DIS && t < HANDOFF) {
       dotEl.style.display = '';
       const cu = smooth((t - DIS) / 280);
-      /* 最後の字と同じタイミングで抜ける(i は2文字目なので stagger も合わせる) */
-      const o = smooth(clamp01((t - SCATTER - 1 * L_STAG) / 420));
+      /* i の字と同じタイミング・同じ道筋で上へ抜ける(ベタのまま。
+         フェードはしない)。クリップは logoG と同じ枠をステージ座標で。 */
+      const o = smooth(clamp01((t - SCATTER - 1 * L_STAG) / 700));
       dotEl.setAttribute('cx', IDOT.x.toFixed(2));
-      dotEl.setAttribute('cy', (IDOT.y - L_RISE * LS * o).toFixed(2));
+      dotEl.setAttribute('cy', (IDOT.y - L_RISE_OUT * LS * o).toFixed(2));
       dotEl.setAttribute('r', IDOT.r.toFixed(2));
-      dotEl.style.opacity = (1 - o).toFixed(3);
+      dotEl.style.opacity = '1';
+      if (!dotEl.__clipped) {
+        dotEl.__clipped = true;
+        dotEl.setAttribute('clip-path', 'url(#sp-dot-clip)');
+        const defs = svg.querySelector('defs');
+        const cp = document.createElementNS(NSVG, 'clipPath');
+        cp.setAttribute('id', 'sp-dot-clip');
+        const rc = document.createElementNS(NSVG, 'rect');
+        rc.setAttribute('x', (LX - 6).toFixed(2));
+        rc.setAttribute('y', (LY - 4.5).toFixed(2));
+        rc.setAttribute('width', (LW + 12).toFixed(2));
+        rc.setAttribute('height', (96.985 * LS + 9).toFixed(2));
+        cp.appendChild(rc);
+        defs.appendChild(cp);
+      }
       dotEl.setAttribute('fill',
         'rgb(' + Math.round(lerp(25, ACCENT[0], cu)) + ',' + Math.round(lerp(25, ACCENT[1], cu)) + ',' + Math.round(lerp(25, ACCENT[2], cu)) + ')');
     } else if (t >= HANDOFF) {

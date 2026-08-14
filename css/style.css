@@ -2995,8 +2995,7 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   align-items: center;
   padding-block: calc(var(--u) * 24);
 }
-/* Figma 408:24427 で罫を持つのは 1行目(会社名)だけ。他の行には無い。 */
-.company--figma .cmp__row:first-child { border-bottom: 1px solid #EBEBEB; }
+/* 罫線は持たない(指示により会社名の下の1本も削除。ベタの面でまとめる) */
 .company--figma .cmp__row dt {
   flex: 0 0 calc(var(--u) * 238);   /* Figma 408:24430 ほか */
   font-family: var(--font-jp);
