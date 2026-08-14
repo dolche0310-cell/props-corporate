@@ -108,11 +108,11 @@
   cellsG.appendChild(dotEl);
 
   const STEP_F = 2.15, STEP_H = STEP_F / 2;   /* 静止中に字形を埋めるタイル */
-  const SCATTER_LEN = 1400;                  /* 字が抜け切るまで */
+  const SCATTER_LEN = 1700;                  /* 字が抜け切るまで */
   const DIS = 1330;                /* ドット点灯の開始 */
   const LIT = DIS + 280;           /* 点灯し切る */
-  const SCATTER = LIT + 560;       /* 灯り切って一拍おいてから文字が散る */
-  const HANDOFF = SCATTER + 620;   /* hero-morph へ受け渡し */
+  const SCATTER = LIT + 720;       /* 灯り切って一拍おいてから文字が散る */
+  const HANDOFF = SCATTER + 780;   /* hero-morph へ受け渡し */
 
   const drawIntro = (t) => {
     /* 文字: 1文字ずつライズ。散開開始後はグループごと消えていく */
@@ -120,7 +120,7 @@
        上へ 26px 抜けながら消える。粒子で崩すより静かで、字形が最後まで
        字形のまま残るぶん品がある。 */
     logoG.style.opacity = '1';
-    const L_OUT = 560;
+    const L_OUT = 700;
     letters.forEach((el, i) => {
       const u = EASE_OUT((t - L_BASE - i * L_STAG) / L_DUR);
       const o = smooth(clamp01((t - SCATTER - i * L_STAG) / L_OUT));

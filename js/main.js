@@ -358,9 +358,16 @@
       if (p !== lastSvcDark) {
         lastSvcDark = p;
         document.documentElement.style.setProperty('--svc-dark', String(p));
+        // マーキーの色変化は「地が完全に白」のときだけ(0/1 の二値)。
+        // 沈み残りのグレー地でオレンジを出すと濁って見える。
+        var white = p === 0 ? 1 : 0;
+        if (white !== lastMqWhite) {
+          lastMqWhite = white;
+          document.documentElement.style.setProperty('--mq-white', String(white));
+        }
       }
     };
-    var lastSvcDark = -1;
+    var lastSvcDark = -1, lastMqWhite = -1;
     window.addEventListener('scroll', function () {
       if (!svcDarkTicking) {
         svcDarkTicking = true;

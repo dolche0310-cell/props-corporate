@@ -1709,12 +1709,13 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   /* Figma(253:27115)は #3D3430 → rgba(255,239,231,.23) → #4B4B4B の
      グラデーションだが、左端と中間に暖色が入って橙が混ざって見えるため、
      指示によりグラデーションをやめて中立グレー1色にしている。
-     暗転が抜けて News の白地に掛かるところ(--svc-dark → 0)では
-     アクセント色へ寄せる。A-2(darkblack)はページ側で --mq-accent を
-     グレーに固定しているので変化しない。 */
-  color: color-mix(in srgb, #4B4B4B calc(var(--svc-dark, 0) * 100%),
-                   var(--mq-accent, var(--color-primary)));
-  transition: color .32s linear;
+     アクセント色になるのは「背景が完全に白へ戻り切ったとき」だけ。
+     沈み残りのグレー地の上でオレンジを出すと煉瓦色に濁って見えるため、
+     中間値では変化させない(--mq-white は js/main.js が 0/1 で書く)。
+     A-2(darkblack)はページ側で --mq-accent をグレーに固定している。 */
+  color: color-mix(in srgb, var(--mq-accent, var(--color-primary))
+                   calc(var(--mq-white, 0) * 100%), #4B4B4B);
+  transition: color .5s ease;
 }
 @keyframes service-marquee {
   from { transform: translateX(0); }

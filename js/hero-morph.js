@@ -109,26 +109,28 @@
        着地点の円へ吸い込まれる。spinIn は「到達形の中心まわりに回す角度」で、
        u=0 で 0、u=1 で全角。u=1 では全員が同じ円になっているので、
        回し切ったところで形が飛ぶことはない。 */
-    { id: 's04', t: 620, e: 'soft', h: 90, spinIn: 190 * Math.PI / 180,
+    { id: 's04', t: 720, e: 'soft', h: 140, spinIn: 190 * Math.PI / 180,
       list: [dotG(709.5, 292.5)] },
-    /* S05 */ { id: 's07', t: 340, e: 'soft', h: 640, dotsFill: true,
+    /* S05 */ { id: 's07', t: 400, e: 'soft', h: 720, dotsFill: true,
       dots: [[669.5, 308.5, 26.5], [768.5, 308.5, 26.5],
              [669.5, 393.5, 26.5], [768.5, 393.5, 26.5]],
       list: [dotG(669.5, 308.5), dotG(768.5, 308.5), dotG(669.5, 393.5), dotG(768.5, 393.5)] },
-    /* S08 */ { id: 's10', t: 340, e: 'soft', h: 320, elastic: true,
+    /* S08 */ { id: 's10', t: 400, e: 'soft', h: 400, elastic: true,
       caps: [[720.5, 382.5, 186, 26.5]],
       list: [S(capsule(720.5, 196.5, 720.5, 568.5, 26.5))] },
-    /* S11 */ { id: 's11', t: 420, e: 'soft', h: 260, fv: true,
+    /* S11。大きな円は画面中央に居るので、この時点ではまだ文字を出さない。
+       出すと円と「産業の…」が重なる。 */
+    { id: 's11', t: 480, e: 'soft', h: 320,
       list: [S(circle(703.5, 399.5, 262.5))] },
     /* S12 12点円環(中心1125,377.5 / 半径196 / 各r21.5)。
        ぐるぐる回りながら、円が順に大きく明るくなる(spin:true)。 */
-    { id: 's12', t: 448, e: 'soft', h: 760, spin: true,
+    { id: 's12', t: 520, e: 'soft', h: 880, spin: true, fv: true, fvAt: 0,
       list: RING_A.map((d) => S(circle(1125 + Math.cos(d * Math.PI / 180) * 196,
                                        377.5 + Math.sin(d * Math.PI / 180) * 196, 21.5))) },
     /* S13 散在円。画面いっぱいに広がるパターンなので、FV でも
        Figma の原配置のまま(指示)。中心から弾けて外へ広がり、
        次々に現れる動きは burst:true で専用に駆動する(下の burstList)。 */
-    { id: 's13', t: 1400, e: 'soft', h: 620, burst: true, fullBleed: true,
+    { id: 's13', t: 1400, e: 'soft', h: 720, burst: true, fullBleed: true,
       list: [S(circle(414.5, 217.5, 21.5)), S(circle(1223.5, 482.5, 132.5)),
              S(circle(17.5, 243.5, 132.5)), S(circle(911.5, 256.5, 60.5)),
              S(circle(222.5, 712.5, 60.5)),
@@ -142,23 +144,23 @@
     /* S13b ひとつの円が巡り、その軌跡が円のラインになる。
        描き切ると波紋になって広がり、そのまま次の二重リングへ。
        到達形は同心の2本なので S14 へ素直に変形できる。 */
-    { id: 's13b', t: 560, e: 'soft', h: 1000, ripple: true,
+    { id: 's13b', t: 560, e: 'soft', h: 1150, ripple: true,
       /* 輪郭は単純な円。stroke すると線は1本になる(リボンだと外周と
          内周の2本が描かれて二重線に見えるため使わない)。
          次の S14 は同じ円が2つなので、そのまま素直に変形できる。 */
       list: [S(circle(1160, 456, 246)), S(circle(1160, 456, 150))] },
-    /* S14 リング2 (外r113.5 / 内r98.64) */ { id: 's14', t: 448, e: 'soft', h: 560, resonate: true,
+    /* S14 リング2 (外r113.5 / 内r98.64) */ { id: 's14', t: 448, e: 'soft', h: 650, resonate: true,
       list: [S(circle(1044.5, 314.5, 113.5), circle(1044.5, 314.5, 98.64)),
              S(circle(1179.5, 314.5, 113.5), circle(1179.5, 314.5, 98.64))] },
-    /* S15 ブロブ */ { id: 's15', t: 448, e: 'soft', h: 460, jelly: true,
+    /* S15 ブロブ */ { id: 's15', t: 448, e: 'soft', h: 540, jelly: true,
       list: SHAPES.blob.map((p) => S(p)) },
-    /* S16 H形 */ { id: 's16', t: 416, e: 'soft', h: 460, jelly: true,
+    /* S16 H形 */ { id: 's16', t: 416, e: 'soft', h: 540, jelly: true,
       list: SHAPES.hshape.map((p) => S(p)) },
     /* S17 サウンドメーター。Figma の7要素(x/幅/角丸は不変)。
        高さだけが「ひとつの波が通過する」ように連続して伸縮し続ける。
        list は補間の対応付け用の基準形で、実際の描画は meterList() が
        毎フレーム作り直す(下の renderAt を参照)。 */
-    { id: 's17', t: 448, e: 'soft', h: 900, meter: true,
+    { id: 's17', t: 448, e: 'soft', h: 1030, meter: true,
       list: [S(circle(888.39, EQY, 23.3)),
              S(capsule(963.22, EQY - 25.4, 963.22, EQY + 25.4, 23.7)),
              S(capsule(1037.72, EQY - 62.66, 1037.72, EQY + 62.66, 23.7)),
@@ -171,8 +173,8 @@
     /* S19 N形。線で描いてから塗る演出はやめ、前の形からそのまま
        塗りのまま変形して到達する(他の状態と同じ扱い)。
        尺は t=420 / h=520 に詰めてテンポを揃えた。 */
-    { id: 's19', t: 420, e: 'soft', h: 640, list: SHAPES.nshape.map((p) => S(p)) },
-    /* S20 最終モチーフ = Figma FV 完成形 */ { id: 's20', t: 480, e: 'soft', h: 820,
+    { id: 's19', t: 420, e: 'soft', h: 740, list: SHAPES.nshape.map((p) => S(p)) },
+    /* S20 最終モチーフ = Figma FV 完成形 */ { id: 's20', t: 480, e: 'soft', h: 940,
       list: [S(capsule(909.53, 521.37, 1053.51, 304.53, 44.3885)),
              S(capsule(1097.53, 521.37, 1241.51, 304.53, 44.3885)),
              S(circle(1285.5, 522.0, 44.5))] }
@@ -640,7 +642,10 @@
     const tp = inTrans ? into / st.t : 1;
     setGoo(inTrans && tp > 0.12 && tp < 0.88 && !st.stroke && !prev.stroke);
 
-    if (st.fv && !fvFired && into >= st.t * 0.62) {
+    /* 文字の解禁は「円が中央を離れて右の輪へ変わり始める」のと同時(S12
+       遷移の頭 = fvAt:0)。以前は S11 の途中で出していたため、中央の
+       大きな円の上に「産業の…」が重なって描かれてしまっていた。 */
+    if (st.fv && !fvFired && into >= (st.fvAt !== undefined ? st.fvAt : st.t * 0.62)) {
       fvFired = true;
       document.dispatchEvent(new CustomEvent('miai:morph-fv'));
     }
