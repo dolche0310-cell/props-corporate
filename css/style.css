@@ -2753,6 +2753,127 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   /* 書き出しはフレーム全幅(1440)なので、右側の絵柄が出るよう寄せる */
   object-position: right center;
 }
+
+/* -----------------------------------------------------------
+   写真スライドショー(Figma 1〜6案の写真)
+
+   カルーセルに見せないための決めごと:
+   ・矢印/ドット/横スライドは持たない。切り替えは「大きな矩形マスクが
+     右から静かに侵入して次の写真を露出する」映像的な処理。
+   ・単純なクロスフェードは使わない。マスク + わずかな scale + opacity を
+     重ね、旧写真は覆われ切るまで不透明のまま下に残す(白が透けない)。
+   ・写真は静止させない。1枚ごとに向きの違うごく緩い寄り/引き(--kb-*)。
+   ・情報パネルは写真と一緒に切り替えない。写真だけが背後で入れ替わる。
+   ・視差は写真だけ(--cmp-par)。ポインタへの反応も 3px まで(--cmp-px/py)。
+   ----------------------------------------------------------- */
+.company--figma .cmp__slides {
+  transform: translate3d(var(--cmp-px, 0px), calc(var(--cmp-par, 0px) + var(--cmp-py, 0px)), 0);
+  transition: transform .32s cubic-bezier(.22, 1, .36, 1);
+}
+.company--figma .cmp__slide {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  /* 既定は右辺で閉じている(=見えない)。出るときだけ左へ開く */
+  clip-path: inset(0 0 0 100%);
+  opacity: 0;
+  z-index: 0;
+}
+.company--figma .cmp__slide.is-active {
+  clip-path: inset(0 0 0 0);
+  opacity: 1;
+  z-index: 1;
+}
+/* 入場。マスクは開始が速く終盤で静かに止まる。opacity は先に開け切って
+   しまい(0.62s)、露出の先端が硬い線に見えないようにする。 */
+.company--figma .cmp__slide.is-entering {
+  clip-path: inset(0 0 0 0);
+  opacity: 1;
+  z-index: 2;
+  transition:
+    clip-path 1.3s cubic-bezier(.22, 1, .36, 1),
+    opacity .62s linear;
+  will-change: clip-path;
+}
+/* 退場側は不透明のまま下に残す。覆い切ってから畳む */
+.company--figma .cmp__slide.is-leaving { z-index: 1; clip-path: inset(0 0 0 0); opacity: 1; }
+
+/* --- ケンバーンズ。写真ごとに向きと量を変える(--kb-a → --kb-b) --- */
+.company--figma .cmp__slide img { transform: var(--kb-a); }
+.company--figma .cmp__slide.is-active img,
+.company--figma .cmp__slide.is-entering img {
+  transform: var(--kb-b);
+  transition: transform 6.5s linear;
+}
+/* 01 ほとんど静止 */
+.company--figma .cmp__slide:nth-child(1) {
+  --kb-a: translate3d(0, 0, 0) scale(1.000);
+  --kb-b: translate3d(-5px, 0, 0) scale(1.014);
+}
+/* 02 わずかに横へ流れる */
+.company--figma .cmp__slide:nth-child(2) {
+  --kb-a: translate3d(10px, 0, 0) scale(1.010);
+  --kb-b: translate3d(-8px, 0, 0) scale(1.028);
+}
+/* 03 ゆっくり引く */
+.company--figma .cmp__slide:nth-child(3) {
+  --kb-a: translate3d(0, -4px, 0) scale(1.040);
+  --kb-b: translate3d(0, 3px, 0) scale(1.006);
+}
+/* 04 わずかに縦へ */
+.company--figma .cmp__slide:nth-child(4) {
+  --kb-a: translate3d(0, -10px, 0) scale(1.008);
+  --kb-b: translate3d(0, 6px, 0) scale(1.026);
+}
+/* 05 静かに寄る */
+.company--figma .cmp__slide:nth-child(5) {
+  --kb-a: translate3d(-4px, 0, 0) scale(1.000);
+  --kb-b: translate3d(4px, 0, 0) scale(1.032);
+}
+/* 06 ほぼ静止。終わりの値を 01 の入りに近づけて 6→1 を繋ぐ */
+.company--figma .cmp__slide:nth-child(6) {
+  --kb-a: translate3d(3px, 0, 0) scale(1.012);
+  --kb-b: translate3d(-2px, 0, 0) scale(1.018);
+}
+
+/* --- 写真ごとの構図。中央 crop にせず、情報パネルが乗る左側に
+       余白が来るよう寄せる(建築の水平垂直は保つ) --- */
+.company--figma .cmp__slide:nth-child(1) img { object-position: 62% center; }
+.company--figma .cmp__slide:nth-child(2) img { object-position: 55% center; }
+.company--figma .cmp__slide:nth-child(3) img { object-position: 60% 45%; }
+.company--figma .cmp__slide:nth-child(4) img { object-position: 58% center; }
+.company--figma .cmp__slide:nth-child(5) img { object-position: 52% 55%; }
+.company--figma .cmp__slide:nth-child(6) img { object-position: 50% 60%; }
+
+/* --- 情報パネルの登場。下からのフェードインにはしない --- */
+.company--figma .cmp__label,
+.company--figma .cmp__card {
+  opacity: 0;
+  transform: translateY(18px);
+  clip-path: inset(0 0 12% 0);
+}
+.company--figma.is-in .cmp__label,
+.company--figma.is-in .cmp__card {
+  opacity: 1;
+  transform: none;
+  clip-path: inset(0 0 0 0);
+  transition:
+    opacity 1.05s cubic-bezier(.16, 1, .3, 1),
+    transform 1.05s cubic-bezier(.16, 1, .3, 1),
+    clip-path 1.05s cubic-bezier(.16, 1, .3, 1);
+}
+/* 見出し → 会社情報 の順に 85ms 差 */
+.company--figma.is-in .cmp__card { transition-delay: 85ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .company--figma .cmp__slides { transform: none; }
+  .company--figma .cmp__slide,
+  .company--figma .cmp__slide img,
+  .company--figma .cmp__label,
+  .company--figma .cmp__card { transition: none; }
+  .company--figma .cmp__label,
+  .company--figma .cmp__card { opacity: 1; transform: none; clip-path: none; }
+}
 /* ラベル(215:23995 x92 y91)。en 24/1.8 が43.2高なので ja は自然に y43 に乗る */
 /* Frame 151 (215:23995): x=92 y=51 */
 .company--figma .cmp__label {
@@ -2804,7 +2925,8 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   display: flex;
   align-items: center;
   padding-block: calc(var(--u) * 24);
-  border-bottom: 1px solid #EBEBEB;
+  /* 写真を主役にするため罫は弱く(指示: #D8D8D8〜#E5E5E5) */
+  border-bottom: 1px solid #E2E2E2;
 }
 .company--figma .cmp__row:last-child { border-bottom: none; }
 .company--figma .cmp__row dt {

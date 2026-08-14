@@ -343,7 +343,17 @@
          左に白カードの会社概要テーブルを絶対座標で置く。 -->
     <div class="cmp-frame">
       <div class="cmp">
-        <div class="cmp__photo" aria-hidden="true"><img src="assets/images/company-office.jpg" alt=""></div>
+        <!-- 背景の写真スライドショー。Figma 408:23239/24551/29798/27176/
+             31120/28485 の6枚をモノクロに調律したもの。矩形マスクで
+             切り替わり、1枚ごとに緩やかなケンバーンズが掛かる。 -->
+        <div class="cmp__photo cmp__slides" aria-hidden="true">
+          <div class="cmp__slide is-active"><img src="assets/images/company/office-1.jpg" alt=""></div>
+          <div class="cmp__slide"><img src="assets/images/company/office-2.jpg" alt=""></div>
+          <div class="cmp__slide"><img src="assets/images/company/office-3.jpg" alt=""></div>
+          <div class="cmp__slide"><img src="assets/images/company/office-4.jpg" alt=""></div>
+          <div class="cmp__slide"><img src="assets/images/company/office-5.jpg" alt=""></div>
+          <div class="cmp__slide"><img src="assets/images/company/office-6.jpg" alt=""></div>
+        </div>
         <div class="cmp__label reveal">
           <span class="cmp__en">Company</span>
           <h2 class="cmp__ja">会社概要</h2>
@@ -411,6 +421,7 @@
   <p class="site-footer__copy">©️2025 props, Inc</p>
 </footer>
 
+<script src="js/company-photos.js"></script>
 <script src="js/main.js"></script>
 <script src="js/service-stage.js"></script>
 <script src="assets/logos/miai-particles.js" defer></script>

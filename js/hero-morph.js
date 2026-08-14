@@ -105,7 +105,12 @@
      変形は全て 260ms・間は 90ms に揃え、テンポを一定にして
      ランダムな揺らぎを感じさせない。文字が出た後は従来どおり。 */
   const STATES = [
-    /* S04 */ { id: 's04', t: 400, e: 'soft', h: 90, list: [dotG(709.5, 292.5)] },
+    /* S04 ループの戻り(S20 の2本の棒+点 → 円)。棒が時計回りに振られながら
+       着地点の円へ吸い込まれる。spinIn は「到達形の中心まわりに回す角度」で、
+       u=0 で 0、u=1 で全角。u=1 では全員が同じ円になっているので、
+       回し切ったところで形が飛ぶことはない。 */
+    { id: 's04', t: 620, e: 'soft', h: 90, spinIn: 190 * Math.PI / 180,
+      list: [dotG(709.5, 292.5)] },
     /* S05 */ { id: 's05', t: 260, e: 'soft', h: 90,  list: [dotG(709.5, 423.5)] },
     /* S06 */ { id: 's06', t: 260, e: 'soft', h: 90,  list: [dotG(709.5, 192.5)] },
     /* S07 2x2 の点。円がひとつずつ「線の輪」から「塗りの円」へ変わり、
@@ -550,7 +555,7 @@
       let nx = 0, ny = 0;
       if (dist > 1) { nx = -mvy / dist; ny = mvx / dist; }
       const bulge = Math.min(64, dist * 0.13);
-      return { a: a.p, b: b.p, k: bestK, hA, hB, merge, nx, ny, bulge,
+      return { a: a.p, b: b.p, k: bestK, hA, hB, merge, nx, ny, bulge, cb,
                alphaA: a.a !== undefined ? a.a : 1,
                alphaB: merge ? 0 : (b.a !== undefined ? b.a : 1) };
     });
@@ -597,12 +602,16 @@
   /* soft: 速く出て長い尾で絹のように収まる(sun-asterisk 参考)。
      bold/over: 山なりに加速し、わずかに行き過ぎて戻る。
      いずれも u=1 で厳密に 1(最終形は崩れない)。 */
+  /* 変形のイージング。両端で速度 0 になる smootherstep を土台にする。
+     'soft' を ease-out(1-(1-u)^3.2)にしていた頃は、静止したホールドから
+     いきなり最高速で走り出すので出だしが弾かれて見えた。
+     溜め(overshoot)は残すが、uu を掛けて u=0 側の速度も 0 に落とす。 */
   const geoEase = (u, kind, strength) => {
     const uu = clamp01(u);
-    const base = kind === 'soft' ? 1 - Math.pow(1 - uu, 3.2) : smooth(uu);
+    const base = smooth(uu);
     const s = (kind === 'bold' ? 1.5 : kind === 'over' ? 2.1 : 0.7) * strength;
     const v = uu - 1;
-    return base + s * 0.045 * (v * v * v + v * v) * 6.75;
+    return base + s * 0.045 * (v * v * v + v * v) * 6.75 * uu;
   };
 
   const total = STATES.reduce((a, s) => a + s.t + s.h, 0);
@@ -662,6 +671,19 @@
       /* ホールド中も完全静止させない(sun-asterisk 参考)。
          各図形が位相をずらした呼吸(半径±1.2% + 2〜4pxのドリフト)を
          続ける。振幅は strength に従い、FV では一段静かになる */
+      /* ■ 揺らぎは「素の形」から立ち上げ、次の遷移前に必ず 0 へ戻す。
+         遷移の着地点は素の形(fvList)なのに、ホールドの揺らぎは自由な
+         時計で走っているため、そのまま繋ぐとホールドに入った1フレームで
+         揺らぎの分(バーなら長さ±14%、二重リングなら±15px)だけ図形が
+         飛ぶ。これが「変形とは別にかくっと位置がずれる」正体。
+         なお spin/meter/burst/swap は遷移側も実値で作り直しているので
+         連続しており、ここで絞ると逆にズレるため素の strength のまま。 */
+      const hs = into - st.t;                       /* ホールド内の経過 */
+      const RAMP = 300;
+      const liveSt = st.spin || st.meter || st.burst || st.swap;
+      const wob = liveSt ? strength : strength
+        * Math.min(1, hs / RAMP)
+        * Math.min(1, Math.max(0, st.h - hs) / RAMP);
       /* --- 点の群れ: それぞれが小さな軌道を巡り、位相差で脈動する --- */
       /* --- 点の群れ ---
          真円のまま扱う(輪郭点を個別に動かすと円が歪むため、中心と半径
@@ -699,9 +721,9 @@
         const ht0 = into - st.t;
         ds.forEach((d, i) => {
           /* 4点は同位相で揃って呼吸する(バラバラに漂わせない=規則的) */
-          const ox = Math.cos(bt0 * 1.3) * 3 * strength;
-          const oy = Math.sin(bt0 * 1.3) * 3 * strength;
-          const g = 1 + Math.sin(bt0 * 2.0) * 0.05 * strength;
+          const ox = Math.cos(bt0 * 1.3) * 3 * wob;
+          const oy = Math.sin(bt0 * 1.3) * 3 * wob;
+          const g = 1 + Math.sin(bt0 * 2.0) * 0.05 * wob;
           const el = pool[i];
           drawShape(el, circle(d[0] + ox, d[1] + oy, d[2] * g), null);
           el.style.opacity = '1';
@@ -733,8 +755,8 @@
           const x = cp[0], cy = cp[1], h0 = cp[2], r = cp[3];
           const ph = i * 1.15;
           const w = Math.sin(bt1 * 1.55 + ph);
-          const h = h0 * (1 + w * 0.14 * strength);
-          const dy = Math.sin(bt1 * 0.95 + ph * 1.4) * 5 * strength;
+          const h = h0 * (1 + w * 0.14 * wob);
+          const dy = Math.sin(bt1 * 0.95 + ph * 1.4) * 5 * wob;
           pool[i].setAttribute('d', meterPath(x, cy + dy, Math.max(r * 0.2, h), r));
           pool[i].style.opacity = '1';
         });
@@ -746,7 +768,7 @@
         needActors(hl1.length);
         const bt1 = nowRef / 1000;
         hl1.forEach((sh, i) => {
-          const g = Math.sin(bt1 * 1.25 + i * 1.6) * 12 * strength;
+          const g = Math.sin(bt1 * 1.25 + i * 1.6) * 12 * wob;
           drawShape(pool[i], sh.p.map(([x, y]) => [x + g * 0.707, y - g * 0.707]), null);
           pool[i].style.opacity = '1';
         });
@@ -757,13 +779,13 @@
         const hl2 = pick(st);
         needActors(hl2.length);
         const bt2r = nowRef / 1000;
-        const pull = Math.sin(bt2r * 0.78) * 15 * strength;
+        const pull = Math.sin(bt2r * 0.78) * 15 * wob;
         const mid = hl2.reduce((a2, sh) => a2 + centroid(sh.p)[0], 0) / hl2.length;
         hl2.forEach((sh, i) => {
           const c = sh.c || (sh.c = centroid(sh.p));
           const dir = c[0] < mid ? 1 : -1;                 /* 内側へ引き合う */
-          const g = 1 + Math.sin(bt2r * 1.05 + i * Math.PI) * 0.035 * strength;
-          const rot = Math.sin(bt2r * 0.52 + i) * 0.05 * strength;
+          const g = 1 + Math.sin(bt2r * 1.05 + i * Math.PI) * 0.035 * wob;
+          const rot = Math.sin(bt2r * 0.52 + i) * 0.05 * wob;
           const cs = Math.cos(rot), sn = Math.sin(rot);
           drawShape(pool[i], sh.p.map(([x, y]) => {
             const dx0 = (x - c[0]) * g, dy0 = (y - c[1]) * g;
@@ -818,7 +840,7 @@
             /* 輪郭に沿って進む2つの波。法線方向へごく浅く出入りする */
             const w = Math.sin(ang * 2 - bt3 * 1.25 + ph) * 0.030
                     + Math.sin(ang * 3 + bt3 * 0.85 + ph * 1.7) * 0.018;
-            const g = 1 + w * strength;
+            const g = 1 + w * wob;
             return [c[0] + (x - c[0]) * g, c[1] + (y - c[1]) * g];
           });
           drawShape(pool[i], pts, sh.hole);
@@ -839,7 +861,7 @@
         const draw = clamp01(ht3 / 760);
         const dr = 1 - Math.pow(1 - draw, 2.2);
         /* 外側の輪。描き切ってから波紋として少し外へ開く */
-        const g0 = 1 + smooth(clamp01((ht3 - 760) / 690)) * 0.075 * strength;
+        const g0 = 1 + smooth(clamp01((ht3 - 760) / 690)) * 0.075 * wob;
         const e0 = pool[0];
         drawShape(e0, hl6[0].p.map(([x, y]) =>
           [c[0] + (x - c[0]) * g0, c[1] + (y - c[1]) * g0]), null);
@@ -896,7 +918,7 @@
                          : [1160, 456];
         hlo.forEach((sh, i) => {
           const el = pool[i];
-          const rot = bt5 * SPD[i % SPD.length] * strength;
+          const rot = bt5 * SPD[i % SPD.length] * wob;
           const cs = Math.cos(rot), sn = Math.sin(rot);
           drawShape(el, sh.p.map(([x, y]) => {
             const dx0 = x - c[0], dy0 = y - c[1];
@@ -929,12 +951,15 @@
         /* バウンド中は共有の慣性を効かせない(垂直を保つため) */
         flow.x *= 0.55; flow.y *= 0.55;
         /* 残像(薄いオレンジ)は使わない。原色の円だけで動きを見せる */
-        const bl = burstList(st, st.t + into, strength, null);
+        /* 遷移側は burstList(st, into, ...) で駆動している。ホールドで
+           st.t を足すと、遷移からホールドへ移った1フレームで弾みの時計が
+           st.t(2100ms)ぶん飛び、円がまとめて瞬間移動していた。 */
+        const bl = burstList(st, into, strength, null);
         needActors(bl.length);
         const bt2 = nowRef / 1000;
         bl.forEach((sh, i) => {
           const c = centroid(sh.p);
-          const w = Math.sin(bt2 * 1.9 + i * 1.3) * 0.008 * strength;
+          const w = Math.sin(bt2 * 1.9 + i * 1.3) * 0.008 * wob;
           drawShape(pool[i], sh.p.map(([x, y]) =>
             [c[0] + (x - c[0]) * (1 + w), c[1] + (y - c[1]) * (1 + w)]), null);
           pool[i].style.opacity = '1';
@@ -945,7 +970,7 @@
       if (st.meter) {
         /* サウンドメーターは常時生きている。呼吸は掛けない */
         const ml = meterList(nowRef, geomFV ? (st.fdx || 0) : 0,
-                             geomFV ? ((st.fdy || 0) + (st.fvShift || 0)) : 0, strength);
+                             geomFV ? ((st.fdy || 0) + (st.fvShift || 0)) : 0, wob);
         needActors(ml.length);
         ml.forEach((sh, i) => { pool[i].setAttribute('d', sh.d); pool[i].style.opacity = '1'; });
         return;
@@ -962,19 +987,19 @@
         const ph = i * 1.7;
         const w1 = 0.5 + 0.5 * LFN(bt, ph);
         const w2 = 0.5 + 0.5 * LFN(bt * 0.62, ph * 2.3 + 4.1);
-        const grow = 1 + (w1 - 0.5) * 0.026 * strength;
+        const grow = 1 + (w1 - 0.5) * 0.026 * wob;
         /* 質量: 大きいものほど遅れて動く */
         let rad = 0;
         for (const q of s.p) rad = Math.max(rad, Math.hypot(q[0] - cx, q[1] - cy));
         const lag = lagOf(rad);
-        const dx = (w2 - 0.5) * 6 * strength + flow.x * (1.1 - lag) * 2.4
+        const dx = (w2 - 0.5) * 6 * wob + flow.x * (1.1 - lag) * 2.4
                  - antic * flow.x * 3.2;
-        const dy = (w1 - 0.5) * 4 * strength + flow.y * (1.1 - lag) * 2.4
+        const dy = (w1 - 0.5) * 4 * wob + flow.y * (1.1 - lag) * 2.4
                  - antic * flow.y * 3.2;
         /* 運動方向へわずかに引き伸ばす(後端が遅れて追いつく) */
         const sp = Math.hypot(flow.x, flow.y);
         const ux = sp > 0.01 ? flow.x / sp : 0, uy = sp > 0.01 ? flow.y / sp : 0;
-        const st2 = Math.min(0.10, sp * 0.014) * strength;
+        const st2 = Math.min(0.10, sp * 0.014) * wob;
         for (let j = 0; j < N; j++) {
           let px = (s.p[j][0] - cx) * grow, py = (s.p[j][1] - cy) * grow;
           const along = px * ux + py * uy;
@@ -1024,6 +1049,11 @@
     /* fv への切替: 最初の s11→s12 遷移で発動。出発点だけ原座標の S11 を
        使うので画面上の形はスナップしない(S12 以降は両変種で同一) */
     if (!geomFV && fvFired && st.id === 's12') { geomFV = true; switchSrcOnce = true; }
+    /* S12 は spin(実値で毎フレーム対応付けを作り直す)状態なので、出発点の
+       固定を「1回だけ」にすると2フレーム目から pick(prev) = FV 座標の
+       S11 に戻ってしまい、円が 421px 瞬間移動していた。
+       s11→s12 の遷移が終わるまで固定を保つ。 */
+    if (switchSrcOnce && !(st.id === 's12' && into < st.t)) switchSrcOnce = false;
     /* メーターへ入る/出る遷移は、到達側/出発側を毎フレームのライブ値に
        するため対応付けを作り直す(高さが飛ばない) */
     const liveMeter = st.meter || prev.meter || st.spin || prev.spin || prev.burst
@@ -1031,11 +1061,15 @@
     const key = prev.id + '>' + st.id + (geomFV ? '/fv' : '') + (liveMeter ? '/' + Math.round(into) : '');
     if (pairKey !== key) {
       let srcList = (switchSrcOnce && st.id === 's12') ? prev.list : pick(prev);
-      if (st.id === 's12') switchSrcOnce = false;
       let dstList = pick(st);
-      const mdx = geomFV ? 15 : 0;
-      if (st.meter) dstList = meterList(nowRef, mdx, 0, strength);
-      if (prev.meter) srcList = meterList(nowRef, mdx, 0, strength);
+      /* メーターの遷移は、ホールドと「同じ」オフセットで作る。
+         ここが固定値(15,0)だったため、着地した次のフレームで
+         fdx/fdy/fvShift の差だけメーターが横飛びしていた。 */
+      const mOff = (s) => (geomFV
+        ? [(s.fdx || 0), (s.fdy || 0) + (s.fvShift || 0)]
+        : [0, 0]);
+      if (st.meter) { const o = mOff(st); dstList = meterList(nowRef, o[0], o[1], strength); }
+      if (prev.meter) { const o = mOff(prev); srcList = meterList(nowRef, o[0], o[1], strength); }
       if (prev.burst) srcList = burstList(prev, prev.t + prev.h + into * 0.75, strength, null);
       if (st.spin) dstList = ringList(nowRef, strength, geomFV ? (st.fdy || 0) + (st.fvShift || 0) : 0,
                                      geomFV ? (st.fdx || 0) : 0);
@@ -1051,8 +1085,10 @@
     pairCache.forEach((pr, i) => {
       const local = clamp01((into - stag * i) / actDur);
       const ug = geoEase(local, st.e, strength);
-      /* 弧: 中間で最大、両端で0。u=1 では必ず消える */
-      const arc = pr.bulge * 4 * ug * (1 - ug) * (i % 2 ? -1 : 1) * strength;
+      /* 弧: 中間で最大、両端で0。u=1 では必ず消える。
+         回転で寄せる遷移(spinIn)では回転が曲線を担うので弧は掛けない */
+      const arc = st.spinIn ? 0
+        : pr.bulge * 4 * ug * (1 - ug) * (i % 2 ? -1 : 1) * strength;
       const ax = pr.nx * arc, ay = pr.ny * arc;
       for (let j = 0; j < N; j++) {
         const p = pr.a[(j + pr.k) % N], q = pr.b[j];
@@ -1065,6 +1101,19 @@
           tmpH[j] = [lerp(p[0], q[0], ug), lerp(p[1], q[1], ug)];
         }
         hole = tmpH;
+      }
+      /* 到達形の中心まわりに時計回り(SVG は y 下向きなので正が時計回り)。
+         角度は 0 → spinIn。着地時は全員が同じ円なので回転は見えなくなる。 */
+      if (st.spinIn) {
+        const ang = st.spinIn * ug;
+        const cs = Math.cos(ang), sn = Math.sin(ang);
+        const bx = pr.cb[0], by = pr.cb[1];
+        const rot = (pt) => {
+          const dx0 = pt[0] - bx, dy0 = pt[1] - by;
+          return [bx + dx0 * cs - dy0 * sn, by + dx0 * sn + dy0 * cs];
+        };
+        for (let j = 0; j < N; j++) tmp[j] = rot(tmp[j]);
+        if (hole) for (let j = 0; j < N; j++) tmpH[j] = rot(tmpH[j]);
       }
       drawShape(pool[i], tmp, hole);
       /* 合流組も色は原色のまま。相手の輪郭にぴたりと重なって畳まれるので、
