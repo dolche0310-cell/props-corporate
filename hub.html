@@ -59,7 +59,8 @@
      (325.33px × 3 + gap20 × 2 = 1016 = .wrap の内寸)。 */
   .carousel {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    /* A案は2色。1fr×2 でグレーの囲みがラップ幅いっぱいまで伸びる */
+    grid-template-columns: repeat(2, 1fr);
     gap: 20px;
   }
   /* カードは静止(浮遊・影なし。リンクのホバーのみ) */
@@ -360,8 +361,9 @@
     <!-- ============ Corporate Website Design(A案 / B案) ============ -->
     <section class="designs stage stage-2" aria-label="Corporate Website Design">
       <h2>Corporate Website Design</h2>
-      <!-- A案のカラーバリエーション3枚(参考: proto-review の C-1〜C-4 比較UI)。
-           名前の右の●が各案の色。3枚とも専用ページへ遷移する。 -->
+      <!-- A案のカラーバリエーション2枚(参考: proto-review の C-1〜C-4 比較UI)。
+           名前の右の●が各案の色。2枚とも専用ページへ遷移する。
+           カードは 2 列いっぱいに伸ばし、ラップのマージン内で完結させる。 -->
       <div class="carousel">
 
         <section class="card">
@@ -373,15 +375,7 @@
         </section>
 
         <section class="card">
-          <p class="name">Design A-2<span class="name__dot" style="--dot:#DD571C" aria-hidden="true"></span></p>
-          <p class="policy">Fire <span class="hex">#DD571C</span></p>
-          <div class="links">
-            <a href="fire.html">TOP <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
-          </div>
-        </section>
-
-        <section class="card">
-          <p class="name">Design A-3<span class="name__dot" style="--dot:#0D0D0D" aria-hidden="true"></span></p>
+          <p class="name">Design A-2<span class="name__dot" style="--dot:#0D0D0D" aria-hidden="true"></span></p>
           <p class="policy">Dark black <span class="hex">#0D0D0D</span></p>
           <div class="links">
             <a href="darkblack.html">TOP <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>

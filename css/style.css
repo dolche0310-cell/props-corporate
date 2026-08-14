@@ -798,7 +798,7 @@ body.fv-in .hero--brushup .hero__blob--2 {
   margin: 0 0 20px;
 }
 @media (min-width: 768px) {
-  .hero__title { font-size: 54px; margin-bottom: 24px; }
+  .hero__title { font-size: 54px; margin-bottom: 30px; }
 }
 .hero__highlight {
   display: inline-block;
@@ -859,8 +859,11 @@ body.fv-in .hero--brushup .hero__blob--2 {
   line-height: 1.7;
   letter-spacing: .06em;
   color: var(--color-ink);
-  max-width: 721px; /* Figma 232:27385 実測 */
+  max-width: 761px; /* Figma 412:32432 (277:34615) w=761 */
 }
+/* 見出しの「の」「を」と同じく、リードの助詞「と」だけ 4px 小さい
+   (Figma 277:34615: 24px に対して 20px / 字間 2.4px = 同じ .12em)。 */
+.hero__desc--brushup .kv-sm { font-size: .8333em; }
 @media (min-width: 768px) {
   .hero--brushup .hero__desc--brushup { font-size: 24px; letter-spacing: .12em; }
 }
@@ -2051,8 +2054,8 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
 .news__list--rows .news__item { position: relative; }
 .news__arrow {
   display: none;
-  color: #9A9A9A;
-  transition: color .3s ease, transform .45s cubic-bezier(.22, 1, .36, 1);
+  color: var(--color-ink);
+  transition: transform .45s cubic-bezier(.22, 1, .36, 1);
 }
 .news__arrow svg { width: 18px; height: 15px; max-width: 100%; display: block; }
 @media (min-width: 768px) {
@@ -2070,7 +2073,8 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
 }
 .news__list--rows .news__title { transition: color .3s ease; }
 @media (hover: hover) and (pointer: fine) {
-  .news__item:hover .news__arrow { color: var(--color-primary); transform: translateY(-50%) translateX(5px); }
+  /* 矢印は黒のまま。スライドのインタラクションだけ残す */
+  .news__item:hover .news__arrow { transform: translateY(-50%) translateX(5px); }
   .news__item:hover .news__title { color: var(--color-primary); }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -2434,9 +2438,11 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
    =========================================================== */
 .hero--brushup .kv-title {
   position: relative;
-  width: 13.8333em;   /* 747px = 産業のの左19 + Group 138(262:29138) の 728 */
+  /* Figma 412:32431(枠 x91 w745)。箱の原点は 産業の の 19px 左なので
+     19 + 745 = 764px。 */
+  width: 14.1481em;   /* 764px */
   height: 1.5926em;   /* 86px */
-  font-size: min(54px, calc((100vw - 48px) / 13.8333));
+  font-size: min(54px, calc((100vw - 48px) / 14.1481));
   font-family: var(--font-alata);
   font-weight: 400;
   line-height: 1.3;
@@ -2446,15 +2452,15 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
 }
 /* 産業の(232:27383): x=19 y=12。「の」だけ 50px・字間7px */
 .kv-title__prefix { position: absolute; left: .3519em; top: .2222em; white-space: nowrap; }
-/* を支援する(234:23891): x=518 y=11.672。「を」だけ 50px */
-.kv-title__suffix { position: absolute; left: 8.9074em; top: .2162em; white-space: nowrap; }
+/* を支援する(412:32431 内 x=479 → 箱の原点から 498)。「を」だけ 50px */
+.kv-title__suffix { position: absolute; left: 9.2222em; top: .2162em; white-space: nowrap; }
 .kv-title .kv-sm { font-size: .9259em; }            /* 50px */
 .kv-title__prefix .kv-sm { letter-spacing: .14em; } /* 7px @50px */
 /* カプセル(232:27381 / Group 138 262:29138): 299x78, r=200, #FF2400。
    幅は固定。auto / fit-content / shrink にしない(中身が消えても縮ませない) */
 .kv-pill {
   position: absolute;
-  left: 3.3519em;     /* 181px = 産業のの右端177 + 4 */
+  left: 3.4815em;     /* 188px = Figma 412:32431 内の 169 + 箱の原点 19 */
   top: .1606em;
   width: 5.5370em;    /* 299px */
   height: 1.4444em;   /* 78px */
@@ -2687,7 +2693,8 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   .hero--brushup .hero__desc--brushup {
     position: absolute;
     left: 92px;
-    top: 395px;
+    /* Figma 412:32432: カプセル天(359)からリード天(477)まで 118px */
+    top: 401px;
     margin: 0;
     width: 761px;
     max-width: none;
@@ -2771,10 +2778,12 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
 }
 /* 白カード(257:27658 x69 y274 680x425 pad24) */
 /* Frame 166 (257:27658): x=309 y=51 / 680x388 / 内側 24 */
+/* 情報パネル(Figma 408:24427 Frame 166): x92 y213 680x388 / padding 24。
+   見出し(Frame 151: x92 y51)の真下に置く。写真は全面の背景。 */
 .company--figma .cmp__card {
   position: absolute;
-  left: calc(var(--u) * 309);
-  top: calc(var(--u) * 51);
+  left: calc(var(--u) * 92);
+  top: calc(var(--u) * 213);
   width: calc(var(--u) * 680);
   height: calc(var(--u) * 388);
   padding: calc(var(--u) * 24);
@@ -2797,7 +2806,7 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
 }
 .company--figma .cmp__row:last-child { border-bottom: none; }
 .company--figma .cmp__row dt {
-  flex: 0 0 calc(var(--u) * 238);
+  flex: 0 0 calc(var(--u) * 238);   /* Figma 408:24430 ほか */
   font-family: var(--font-jp);
   font-weight: 700;
   font-size: calc(var(--u) * 16);
@@ -2865,13 +2874,15 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   transform-origin: center;
 }
 .kv-pill.is-drawing .kv-draw--dot {
-  animation: kv-dot-in 140ms cubic-bezier(.22,1,.36,1) var(--t, 0ms) both;
+  animation: kv-dot-in 100ms cubic-bezier(.22,1,.36,1) var(--t, 0ms) both;
 }
 @keyframes kv-dot-in { to { opacity: 1; transform: scale(1) } }
 /* ドットは kv-dot-in で出すので、dash アニメの対象から外す
    (同詳細度・後方だと kv-dot-in を上書きして opacity:0 のままになる) */
+/* 各画は「入りだけ速く、抜きでそっと止まる」。両端が緩む ease-in-out だと
+   画のつなぎ目で毎回止まって見えるので使わない。 */
 .kv-pill.is-drawing .kv-draw:not(.kv-draw--dot) {
-  animation: kv-draw var(--u, 250ms) cubic-bezier(.65, 0, .35, 1) var(--t, 0ms) both;
+  animation: kv-draw var(--u, 250ms) cubic-bezier(.26, .78, .3, 1) var(--t, 0ms) both;
 }
 @keyframes kv-draw { to { stroke-dashoffset: 0 } }
 
@@ -2880,9 +2891,9 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
 .kv-pen__line { opacity: 0; }
 .kv-pill.is-drawing .kv-pen__line:not(.kv-draw--dot) {
   animation:
-    kv-draw var(--u, 250ms) cubic-bezier(.65, 0, .35, 1) var(--t, 0ms) both,
+    kv-draw var(--u, 250ms) cubic-bezier(.26, .78, .3, 1) var(--t, 0ms) both,
     kv-pen-show var(--u, 250ms) linear var(--t, 0ms) both,
-    kv-pen-hide 130ms ease calc(var(--t, 0ms) + var(--u, 250ms)) both;
+    kv-pen-hide 90ms ease calc(var(--t, 0ms) + var(--u, 250ms)) both;
 }
 @keyframes kv-pen-show { from { opacity: 0 } 15%, 100% { opacity: 1 } }
 @keyframes kv-pen-hide { to { opacity: 0 } }

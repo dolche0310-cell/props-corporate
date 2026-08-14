@@ -101,36 +101,39 @@
   /* S12 の12点。Figma の実座標を中心(1125,377.5)まわりの角度に直したもの
      (半径はいずれも196)。回転させるので角度で持つ。 */
   const RING_A = [0.0, 29.4, 60.3, 88.7, 120.4, 150.6, 180.0, 209.4, 239.1, 271.3, 300.1, 330.6];
+  /* FV の文字が出るまで(S04〜S11)は「規則的なビート」で運ぶ。
+     変形は全て 260ms・間は 90ms に揃え、テンポを一定にして
+     ランダムな揺らぎを感じさせない。文字が出た後は従来どおり。 */
   const STATES = [
-    /* S04 */ { id: 's04', t: 496, e: 'soft', h: 120, list: [dotG(709.5, 292.5)] },
-    /* S05 */ { id: 's05', t: 256, e: 'bold', h: 72,  list: [dotG(709.5, 423.5)] },
-    /* S06 */ { id: 's06', t: 272, e: 'over', h: 96,  list: [dotG(709.5, 192.5)] },
+    /* S04 */ { id: 's04', t: 400, e: 'soft', h: 90, list: [dotG(709.5, 292.5)] },
+    /* S05 */ { id: 's05', t: 260, e: 'soft', h: 90,  list: [dotG(709.5, 423.5)] },
+    /* S06 */ { id: 's06', t: 260, e: 'soft', h: 90,  list: [dotG(709.5, 192.5)] },
     /* S07 2x2 の点。円がひとつずつ「線の輪」から「塗りの円」へ変わり、
        最後に4つとも塗りの円になる。形は真円のまま崩さない。 */
-    { id: 's07', t: 336, e: 'soft', h: 900, dotsFill: true,
+    { id: 's07', t: 260, e: 'soft', h: 640, dotsFill: true,
       dots: [[669.5, 308.5, 26.5], [768.5, 308.5, 26.5],
              [669.5, 393.5, 26.5], [768.5, 393.5, 26.5]],
       list: [dotG(669.5, 308.5), dotG(768.5, 308.5), dotG(669.5, 393.5), dotG(768.5, 393.5)] },
-    /* S08 */ { id: 's08', t: 304, e: 'soft', h: 300, elastic: true,
+    /* S08 */ { id: 's08', t: 260, e: 'soft', h: 180, elastic: true,
       caps: [[670.5, 352, 79.5, 26.5], [769.5, 352, 79.5, 26.5]],
       list: [S(capsule(670.5, 272.5, 670.5, 431.5, 26.5)), S(capsule(769.5, 272.5, 769.5, 431.5, 26.5))] },
     /* S08b 縦のバーが一度ほどけて円に戻り、斜めの位置へ移りながら
        また伸びる。これで S08 と S09 が「同じ2つの塊の移動」に見える。 */
     /* S08b 2つの円が交互にバウンドし、上下の高さが入れ替わる。
        左が上がれば右が下がる、を繰り返しながら斜めのバーへ向かう。 */
-    { id: 's08b', t: 300, e: 'soft', h: 900, swap: true,
+    { id: 's08b', t: 260, e: 'soft', h: 760, swap: true,
       dots: [[700, 320, 30], [824, 396, 30]],
       list: [S(circle(700, 320, 30)), S(circle(824, 396, 30))] },
-    /* S09 */ { id: 's09', t: 336, e: 'bold', h: 420, glide: true,
+    /* S09 */ { id: 's09', t: 260, e: 'soft', h: 240, glide: true,
       list: [S(capsule(778.68, 373.22, 891.12, 260.79, 26.5)),
              S(capsule(848.69, 443.22, 961.13, 330.79, 26.5))] },
     /* S10 縦長バー。Figma は y115.5..587.5 だが、上端がヘッダー(高さ137)の
        背面に潜って見切れるので、天地を詰めて y196..568 にする(半長236→186)。
        FV では fdy 34 が乗るので実際の上端は 230。 */
-    { id: 's10', t: 336, e: 'soft', h: 460, elastic: true,
+    { id: 's10', t: 260, e: 'soft', h: 260, elastic: true,
       caps: [[720.5, 382.5, 186, 26.5]],
       list: [S(capsule(720.5, 196.5, 720.5, 568.5, 26.5))] },
-    /* S11 */ { id: 's11', t: 416, e: 'bold', h: 256, fv: true,
+    /* S11 */ { id: 's11', t: 360, e: 'soft', h: 200, fv: true,
       list: [S(circle(703.5, 399.5, 262.5))] },
     /* S12 12点円環(中心1125,377.5 / 半径196 / 各r21.5)。
        ぐるぐる回りながら、円が順に大きく明るくなる(spin:true)。 */
@@ -362,8 +365,8 @@
 
   /* ---------- 回転する円環(S12) ----------
      ・全体が 5.2s で1周(ぐるぐる)
-     ・進行方向に走る位相で各点が明滅する(半径 0.6〜1.4倍 / 不透明度
-       0.35〜1.0)。ローダーのように光が回って見える。
+     ・進行方向に走る位相で各点が脈打つ。明滅は不透明度ではなく半径だけで
+       表す(0.47〜1.53倍)。オレンジは常に原色のまま薄くしない。
      ・中心(1125,377.5)と半径196はそのまま。角度だけを回す。 */
   const RING_C = [1125, 377.5], RING_R = 196, RING_DOT = 21.5;
   const ringList = (now, k, dy, dx) => {
@@ -388,9 +391,9 @@
       const rr = RING_R * breathe * (1 + Math.sin(t * 0.71 + i * 1.9) * 0.022 * k);
       out.push({ p: circle(RING_C[0] + sx + Math.cos(d) * rr * ex,
                            RING_C[1] + sy + Math.sin(d) * rr * ey,
-                           RING_DOT * (1 + (w - 0.5) * 0.8 * k)),
+                           RING_DOT * (1 + (w - 0.5) * 1.05 * k)),
                  hole: null,
-                 a: 1 - 0.65 * (1 - w) * k });
+                 a: 1 });
     }
     return out;
   };
@@ -692,25 +695,26 @@
         const bt0 = nowRef / 1000;
         const ht0 = into - st.t;
         ds.forEach((d, i) => {
-          const ph = i * (Math.PI * 2 / ds.length);
-          const ox = Math.cos(bt0 * 1.15 + ph) * 9 * strength;
-          const oy = Math.sin(bt0 * 1.15 + ph) * 9 * strength;
-          const g = 1 + Math.sin(bt0 * 2.0 + ph * 1.6) * 0.09 * strength;
+          /* 4点は同位相で揃って呼吸する(バラバラに漂わせない=規則的) */
+          const ox = Math.cos(bt0 * 1.3) * 3 * strength;
+          const oy = Math.sin(bt0 * 1.3) * 3 * strength;
+          const g = 1 + Math.sin(bt0 * 2.0) * 0.05 * strength;
           const el = pool[i];
           drawShape(el, circle(d[0] + ox, d[1] + oy, d[2] * g), null);
           el.style.opacity = '1';
           if (!st.dotsFill) return;
           /* 左上→右上→左下→右下 の順に、線が描かれてから塗りが差す */
-          const t0 = i * 150;
+          const t0 = i * 100;
           const len = el.getTotalLength ? el.getTotalLength() : 170;
-          const dr = 1 - Math.pow(1 - clamp01((ht0 - t0) / 300), 2.4);
+          const dr = 1 - Math.pow(1 - clamp01((ht0 - t0) / 220), 2.4);
           el.__stroked = true;
           el.setAttribute('stroke', COLOR);
           el.setAttribute('stroke-width', '2.4');
           el.style.strokeDasharray = len;
           el.style.strokeDashoffset = (len * (1 - dr)).toFixed(1);
+          /* 塗りは短く差し込む。半透明のオレンジを見せる間をつくらない */
           el.setAttribute('fill-opacity',
-            smooth(clamp01((ht0 - t0 - 260) / 260)).toFixed(3));
+            smooth(clamp01((ht0 - t0 - 170) / 110)).toFixed(3));
         });
         return;
       }
@@ -791,8 +795,8 @@
           e.setAttribute('stroke-width', '6');
           e.setAttribute('stroke-linejoin', 'round');
           /* 塗りは描き切ってから差し、ピークで一瞬だけベタ */
-          const fu = clamp01((ht - 620) / 280);
-          const fd = clamp01((ht - 900) / 250);
+          const fu = clamp01((ht - 620) / 110);
+          const fd = clamp01((ht - 900) / 110);
           e.setAttribute('fill-opacity', (smooth(fu) * (1 - smooth(fd))).toFixed(3));
           e.style.opacity = '1';
         });
@@ -858,7 +862,9 @@
         e1.style.strokeDasharray = '';
         e1.style.strokeDashoffset = '';
         e1.setAttribute('fill-opacity', '0');
-        e1.style.opacity = (ri > 0 ? 0.35 + 0.65 * smooth(ri) : 0).toFixed(3);
+        /* 薄いオレンジは使わない。出ている間は原色のまま、
+           大きさ(gi)だけで湧き上がりを見せる */
+        e1.style.opacity = ri > 0 ? '1' : '0';
         /* 描いている丸。1周したら溶ける */
         const e2 = pool[2];
         /* 丸は描画の先端に居る。丸が通った後だけ線が残るので、
@@ -868,7 +874,8 @@
         const fade = 1 - smooth(clamp01((ht3 - 700) / 260));
         drawShape(e2, circle(c[0] + Math.cos(th) * R0, c[1] + Math.sin(th) * R0,
                              Math.max(0.5, 13 * fade)), null);
-        e2.style.opacity = fade.toFixed(3);
+        /* 溶けるのは半径だけ。色は最後まで原色 */
+        e2.style.opacity = fade > 0.05 ? '1' : '0';
         return;
       }
       /* --- 円の軌跡 ---
@@ -903,7 +910,8 @@
           el.setAttribute('stroke-linejoin', 'round');
           el.style.strokeDasharray = len;
           el.style.strokeDashoffset = (len * (1 - dr)).toFixed(1);
-          el.setAttribute('fill-opacity', smooth(clamp01((ht2 - 640 - i * 90) / 300)).toFixed(3));
+          /* 塗りは一気に差す。半透明のオレンジを見せる時間をつくらない */
+          el.setAttribute('fill-opacity', smooth(clamp01((ht2 - 640 - i * 90) / 120)).toFixed(3));
         });
         return;
       }
@@ -917,10 +925,9 @@
       if (st.burst) {
         /* バウンド中は共有の慣性を効かせない(垂直を保つため) */
         flow.x *= 0.55; flow.y *= 0.55;
-        /* 弾み終えて軌跡が重なり、そのあとはごく弱い残響で息づく */
-        const ghosts = [];
-        const bl = burstList(st, st.t + into, strength, ghosts);
-        needActors(bl.length + ghosts.length);
+        /* 残像(薄いオレンジ)は使わない。原色の円だけで動きを見せる */
+        const bl = burstList(st, st.t + into, strength, null);
+        needActors(bl.length);
         const bt2 = nowRef / 1000;
         bl.forEach((sh, i) => {
           const c = centroid(sh.p);
@@ -930,11 +937,6 @@
           pool[i].style.opacity = '1';
         });
         updateFlowSkip = true;
-        ghosts.forEach((g, j) => {
-          const el = pool[bl.length + j];
-          drawShape(el, g.p, null);
-          el.style.opacity = Math.max(0, g.a).toFixed(3);
-        });
         return;
       }
       if (st.meter) {
@@ -993,9 +995,8 @@
     if (st.burst) {
       flow.x *= 0.55; flow.y *= 0.55;      /* 垂直を保つ */
       const prevList = pick(prev);
-      const ghosts = [];
-      const bl = burstList(st, into, strength, ghosts);
-      needActors(prevList.length + bl.length + ghosts.length);
+      const bl = burstList(st, into, strength, null);
+      needActors(prevList.length + bl.length);
       const collapse = smooth(clamp01(into / (st.t * 0.42)));
       prevList.forEach((sh, i) => {
         const c = sh.c || (sh.c = centroid(sh.p));
@@ -1005,17 +1006,13 @@
           lerp(BURST_O[1], c[1] + (y - c[1]) * sc, 1 - collapse * 0.85)
         ]);
         drawShape(pool[i], pts, null);
-        pool[i].style.opacity = (1 - collapse).toFixed(3);
+        /* sc→0 で大きさ自体が消えるので、色は原色のまま保つ */
+        pool[i].style.opacity = collapse < 0.995 ? '1' : '0';
       });
       bl.forEach((sh, i) => {
         const el = pool[prevList.length + i];
         drawShape(el, sh.p, null);
         el.style.opacity = '1';
-      });
-      ghosts.forEach((g, j) => {
-        const el = pool[prevList.length + bl.length + j];
-        drawShape(el, g.p, null);
-        el.style.opacity = Math.max(0, g.a).toFixed(3);
       });
       pairKey = '';                 /* 次の遷移で必ず作り直す */
       return;
@@ -1067,11 +1064,9 @@
         hole = tmpH;
       }
       drawShape(pool[i], tmp, hole);
-      /* 合流組は着地直前に静かに引く(重なりの版ズレを作らない)。
-         点滅する状態(S12)との出入りでは不透明度も補間する。 */
-      pool[i].style.opacity = pr.merge
-        ? String(1 - smooth(clamp01((local - 0.55) / 0.35)))
-        : lerp(pr.alphaA, pr.alphaB, smooth(local)).toFixed(3);
+      /* 合流組も色は原色のまま。相手の輪郭にぴたりと重なって畳まれるので、
+         半透明にしなくても版ズレにならない(同じ色が重なるだけ)。 */
+      pool[i].style.opacity = '1';
     });
   };
 
