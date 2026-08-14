@@ -9,7 +9,10 @@ import hashlib, json, os, sys, time, urllib.error, urllib.request
 ROOT = os.path.dirname(os.path.abspath(__file__))
 SITE_NAME = "miai-corporate"
 EXCLUDE_DIRS = {".claude", ".git", "__pycache__", "node_modules"}
-EXCLUDE_FILES = {"deploy.py", ".DS_Store"}
+EXCLUDE_FILES = {"deploy.py", ".DS_Store",
+                 # hub から参照していない旧ページは配信しない
+                 "fire.html", "old-index.html", "v2.html",
+                 "icon-layer-animation.html", "logo-animation.html"}
 
 CFG = json.load(open(os.path.expanduser("~/Library/Preferences/netlify/config.json")))
 TOKEN = CFG["users"][CFG["userId"]]["auth"]["token"]
