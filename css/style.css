@@ -2555,6 +2555,25 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
 /* ロゴの立ち上がり(js/about-logo-reveal.js)。
    形・比率・字間・黒は一切変えない。輪郭を鈍らせる処理も入れない。 */
 .abt__logo-wrap { position: absolute; }
+/* ロゴ背面の淡いグラデ(Figma 215:22664 "Ellipse 53")。
+   Figma と同じ作り = 455x461 の楕円 #FFEFE7 に blur 61.8。
+   ページ枠での中心(245.5, 1221.5)はロゴの中心から右へ 18.8 ずれるので、
+   ロゴ中央基準にその分だけ寄せて置く。
+   ロゴ本体(.abt__logo-mark)より後ろへ回すため z-index:-1。 */
+.about--figma .abt__logo-wrap::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--u) * 455);
+  height: calc(var(--u) * 461);
+  transform: translate(calc(-50% + var(--u) * 18.8), -50%);
+  background: #FFEFE7;
+  border-radius: 50%;
+  filter: blur(calc(var(--u) * 61.8));
+  z-index: -1;
+  pointer-events: none;
+}
 .abt__logo-mark {
   display: block;
   width: 100%;
