@@ -385,19 +385,57 @@
     /* ===== 最後にロックアップのワードマークを1文字ずつ描く ===== */
     /* マークと天地中央を揃える */
     const wordBox = placeArt(wordHost, word, X + markW + gap, X + (lockH - wordH) / 2, wordW, wordH);
+    /* 角丸矩形を path 化する。DESIGN D の "i"(点と軸)は <rect> なので、
+       path だけを集めていると描画の対象から外れ、他の字を書いている間
+       最初から出たままになってしまう(= i だけ先に見える)。 */
+    const rectToPath = (r) => {
+      const x = +r.getAttribute("x") || 0, y = +r.getAttribute("y") || 0;
+      const w = +r.getAttribute("width") || 0, h = +r.getAttribute("height") || 0;
+      let rx = r.getAttribute("rx") != null ? +r.getAttribute("rx") : 0;
+      let ry = r.getAttribute("ry") != null ? +r.getAttribute("ry") : rx;
+      rx = Math.min(rx, w / 2); ry = Math.min(ry, h / 2);
+      if (!rx && !ry) return `M${x} ${y}H${x + w}V${y + h}H${x}Z`;
+      return `M${x + rx} ${y}H${x + w - rx}A${rx} ${ry} 0 0 1 ${x + w} ${y + ry}` +
+             `V${y + h - ry}A${rx} ${ry} 0 0 1 ${x + w - rx} ${y + h}` +
+             `H${x + rx}A${rx} ${ry} 0 0 1 ${x} ${y + h - ry}` +
+             `V${y + ry}A${rx} ${ry} 0 0 1 ${x + rx} ${y}Z`;
+    };
+
     const letters = [];
-    Array.from(wordBox.querySelectorAll("path")).forEach((p) => {
+    Array.from(wordBox.querySelectorAll("path, rect")).forEach((p) => {
       const fill = resolveFill(p.getAttribute("fill"));
       if (!fill || fill === "none") return;
-      letters.push({ node: p, d: p.getAttribute("d"), fill });
+      const isRect = p.tagName.toLowerCase() === "rect";
+      const d = isRect ? rectToPath(p) : p.getAttribute("d");
+      if (!d) return;
+      const box = p.getBBox();
+      /* 白の下敷き矩形(字より広い)は字ではないので除く */
+      if (isRect && box.width > wordW * 0.5) return;
+      letters.push({ node: p, d, fill, x0: box.x, x1: box.x + box.width });
     });
     /* 画面座標で左→右に整列(入れ子svg/親transformのオフセットを含めるため) */
     letters.sort((a, b) => a.node.getBoundingClientRect().left - b.node.getBoundingClientRect().left);
 
-    /* ガイド線が完全に終わってから、間を置いて文字を書き始める */
-    const WORD_START = seqEnd + 0.25, STAG = 0.16, DRAW = 0.5, FILL = 0.4, LEAD = DRAW * 0.85;
-    letters.forEach((L, i) => {
+    /* 同じ字を構成する図形(i の点と軸など)は横位置が重なる。重なるものは
+       ひとまとまりにして、同じタイミングで書き出す。 */
+    const groups = [];
+    letters.forEach((L) => {
+      const g = groups[groups.length - 1];
+      if (g && L.x0 < g.x1 - 0.5) { g.items.push(L); g.x1 = Math.max(g.x1, L.x1); }
+      else groups.push({ items: [L], x0: L.x0, x1: L.x1 });
+    });
+
+    /* ガイド線の終わりを待ち切らず、最後の要素が描かれている間に書き始める。
+       1文字ごとの速さ(STAG/DRAW/FILL)は変えない。始まりだけを前へ出す。 */
+    const STAG = 0.16, DRAW = 0.5, FILL = 0.4, LEAD = DRAW * 0.85;
+    /* ロックアップの枠(1.35+0.95=2.3s)が引かれている最中に書き始める。
+       ガイド全体(seqEnd≒5.1s)の終わりを待つと体感で遅い。 */
+    const WORD_START = Math.max(0.35, Math.min(seqEnd - 1.35, 2.2));
+    groups.forEach((G, i) => {
       const t0 = WORD_START + i * STAG;
+      G.items.forEach((L) => armLetter(L, t0, DRAW, FILL, LEAD));
+    });
+    function armLetter(L, t0, DRAW, FILL, LEAD) {
       const parent = L.node.parentNode;
       /* 塗り: 未分割のdのまま(穴あきを維持) */
       const fillPath = el("path", { d: L.d, class: "lg2-word-fill", fill: L.fill });
@@ -425,7 +463,7 @@
         });
       }
       L.node.remove();
-    });
+    }
   }
 
   async function init(mount) {
@@ -440,7 +478,9 @@
       entries.forEach((e) => {
         if (e.isIntersecting) { mount.classList.add("is-play"); io.unobserve(mount); }
       });
-    }, { threshold: 0.3 });
+      /* 図解が画面に入り切るのを待たず、下から覗いた時点で走り出す
+         (threshold .3 + 余白なしだと再生開始が体感で遅い)。 */
+    }, { threshold: 0.05, rootMargin: "0px 0px 12% 0px" });
     io.observe(mount);
   }
 

@@ -326,14 +326,21 @@
     document.body.appendChild(aurora);
 
     var svcDarkTicking = false;
+    var clamp01 = function (v) { return v < 0 ? 0 : v > 1 ? 1 : v; };
     var updateSvcDark = function () {
       svcDarkTicking = false;
       var r = svcSection.getBoundingClientRect();
       var vh = window.innerHeight || 800;
-      // 入り: 上端が画面の 62% を越えたら。抜け: 下端が 12% を切ったら。
-      // ピン留めの範囲ぶんセクションが縦に長いので、掛かっている間ずっと沈む。
-      document.body.classList.toggle(
-        'is-svc-dark', r.top < vh * 0.62 && r.bottom > vh * 0.12);
+      // 二値で切り替えると、暗いパネルだけが先に入って白地との境界線が
+      // 見えてしまう。進行度で連続的に沈めることで画面全体が一緒に暗くなる。
+      //   入り: セクション上端が画面下端に来た時点から 0.65vh かけて 0→1。
+      //         文字が読める位置に来る頃には沈み切っている。
+      //   抜け: 下端が画面の 65% を切った時点から 0.55vh かけて 1→0。
+      //         次の News が主役になる前に白へ戻る。
+      var fadeIn = clamp01((vh - r.top) / (vh * 0.65));
+      var fadeOut = clamp01((r.bottom - vh * 0.10) / (vh * 0.55));
+      var p = Math.min(fadeIn, fadeOut);
+      document.documentElement.style.setProperty('--svc-dark', p.toFixed(3));
     };
     window.addEventListener('scroll', function () {
       if (!svcDarkTicking) {

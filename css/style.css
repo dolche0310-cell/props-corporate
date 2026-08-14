@@ -3050,11 +3050,14 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
      ここを 0 にすると四辺に明るい縁が出る。
    ■ 配色だけは MiAI のもの(ニュートラル＋#FF2400)。参照元の青は使わない。
    =========================================================== */
-body { transition: background-color .32s cubic-bezier(.4, 0, .2, 1); }
-/* #171717 @88% = 白地に重なって実効 #333 前後。パネルの #323232 と
-   ほぼ同じ明度なので、パネルを透明にしても段差が出ない。 */
-body.is-svc-dark { background-color: rgba(23, 23, 23, .88); }
-
+/* 暗転は「掛かった/掛からない」の二値ではなく、スクロール進行度で連続的に。
+   二値だと、暗いパネルの箱だけが先に画面へ入って白地との境界線が見え、
+   そのあとで画面が暗くなる…という順番になってしまう。
+   進行度 --svc-dark(0..1) は js/main.js が毎フレーム書き込む。 */
+body {
+  /* 1.0 で rgba(23,23,23,.88) を白に重ねたのと同じ実効色になる */
+  background-color: color-mix(in srgb, #171717 calc(var(--svc-dark, 0) * 88%), #ffffff);
+}
 .svc-aurora {
   position: fixed;
   inset: -12%;
@@ -3076,6 +3079,7 @@ body.is-svc-dark { background-color: rgba(23, 23, 23, .88); }
   filter: blur(80px) saturate(1.05);
   transform: translateZ(0);
   pointer-events: none;
+  opacity: var(--svc-dark, 0);
 }
 /* 仕上げの微増の黒幕(overlay 合成内で暗側を一段締める) */
 .svc-aurora::before {
@@ -3083,24 +3087,14 @@ body.is-svc-dark { background-color: rgba(23, 23, 23, .88); }
   position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, .05);
-  opacity: 0;
-  transition: opacity .2s ease;
+  opacity: var(--svc-dark, 0);
 }
-body.is-svc-dark .svc-aurora::before { opacity: 1; }
 
-/* 暗転中はパネル自身の箱をやめて地に溶かす。角丸の縁も出さない。
-   下地と同時に切り替わるので、文字が明るい地に乗る瞬間はできない。 */
-.service--brushup .service__panel {
-  transition: background-color .32s cubic-bezier(.4, 0, .2, 1),
-              border-radius .32s cubic-bezier(.4, 0, .2, 1);
-}
-body.is-svc-dark .service--brushup .service__panel {
-  background-color: transparent;
-  border-radius: 0;
-}
+/* パネルは箱を持たない。暗さは下地とメッシュだけが担う。
+   ここに背景色を置くと、その矩形の縁が白地との境界線として必ず見える。
+   (参照元も .at-product に section background を持たせていない) */
+.service--brushup .service__panel { background: none; }
 
 @media (prefers-reduced-motion: reduce) {
-  body,
-  .svc-aurora::before,
-  .service--brushup .service__panel { transition: none; }
+  .svc-aurora { transition: none; }
 }
