@@ -136,17 +136,20 @@
     ctx.setTransform(q, 0, 0, q, 0, 0);
     ctx.clearRect(0, 0, DW, DH);
 
-    /* ドット: ロゴ自身のドットの真上で黒→#FF2400、S04 へ移動して受け渡し */
+    /* ドット: ロゴ自身のドットの位置で黒→#FF2400 に灯るだけ。
+       以前はここから S04 の位置へ丸が単体で滑って行っていたが、
+       文字が消えたあとに丸ひとつが画面を移動する画は間が持たず粗く見える。
+       灯ったあとは他の字と同じ間合いで、その場で退場させる。
+       FV 側は hero-morph が S04 から自分で立ち上げる。 */
     if (t >= DIS && t < HANDOFF) {
       dotEl.style.display = '';
       const cu = smooth((t - DIS) / 280);
-      const mu = smooth((t - (HANDOFF - 350)) / 350);   /* S04 への移動 */
-      const x = lerp(IDOT.x, 709.5, mu);
-      const y = lerp(IDOT.y, 292.5, mu);
-      const r = lerp(IDOT.r, 26.5, mu);
-      dotEl.setAttribute('cx', x.toFixed(2));
-      dotEl.setAttribute('cy', y.toFixed(2));
-      dotEl.setAttribute('r', Math.max(0.1, r).toFixed(2));
+      /* 最後の字と同じタイミングで抜ける(i は2文字目なので stagger も合わせる) */
+      const o = smooth(clamp01((t - SCATTER - 1 * L_STAG) / 420));
+      dotEl.setAttribute('cx', IDOT.x.toFixed(2));
+      dotEl.setAttribute('cy', (IDOT.y - L_RISE * LS * o).toFixed(2));
+      dotEl.setAttribute('r', IDOT.r.toFixed(2));
+      dotEl.style.opacity = (1 - o).toFixed(3);
       dotEl.setAttribute('fill',
         'rgb(' + Math.round(lerp(25, ACCENT[0], cu)) + ',' + Math.round(lerp(25, ACCENT[1], cu)) + ',' + Math.round(lerp(25, ACCENT[2], cu)) + ')');
     } else if (t >= HANDOFF) {

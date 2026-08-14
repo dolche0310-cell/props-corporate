@@ -113,15 +113,15 @@
     const A = (el, kf, opt) => { const a = el.animate(kf, opt); anims.push(a); return a; };
 
     /* --- 粒子: 微細なドリフト → 弧を描いて収束 ---------------------
-       全体を 2900ms → 1750ms に短縮。粒子が着地したところへ間を置かず
-       面の形成を重ねるので、待ち時間が消えて流れが途切れない。 */
-    const TOTAL = 1750;
-    const SPAN = 1050;
+       さっと下へスクロールした時にも見終えられるよう、全体を 1050ms に。
+       粒子の収束と面の形成を重ね、待ち時間をつくらない。 */
+    const TOTAL = 1050;
+    const SPAN = 640;
     P.items.forEach((it) => {
       const { dx, dy, sc } = it;
       const at = (x, y, s) => 'translate(' + x.toFixed(2) + 'px, ' + y.toFixed(2) + 'px) scale(' + s.toFixed(3) + ')';
-      const gStart = 210 + rnd() * 70;                  /* 立ち上がりのばらつき */
-      const gDur = 760 + rnd() * 160 - 80;              /* 収束 0.68-0.84s */
+      const gStart = 120 + rnd() * 45;                  /* 立ち上がりのばらつき */
+      const gDur = 450 + rnd() * 110 - 55;              /* 収束 0.68-0.84s */
       const gEnd = Math.min(SPAN, gStart + gDur);
       const w1 = (rnd() - .5) * 6, w2 = (rnd() - .5) * 6;   /* ±3px のドリフト */
       /* 直線だけだと機械的なので、進行方向と直交する向きへ 10-20px 膨らませる */
@@ -152,20 +152,20 @@
 
     /* --- 粒子は面が出来上がるにつれて薄くなる ---------------------- */
     A(P.dust, [
-      { offset: 0, opacity: 1 }, { offset: 1080 / TOTAL, opacity: 1 },
-      { offset: 1560 / TOTAL, opacity: 0 }, { offset: 1, opacity: 0 }
+      { offset: 0, opacity: 1 }, { offset: 640 / TOTAL, opacity: 1 },
+      { offset: 940 / TOTAL, opacity: 0 }, { offset: 1, opacity: 0 }
     ], { duration: TOTAL, fill: 'both' });
 
     /* --- 面の形成: 中心から広がる遮蔽でロゴが実体化 ---------------- */
     A(P.reveal, [
       { offset: 0, transform: 'scale(0)' },
-      { offset: 1000 / TOTAL, transform: 'scale(0)' },
-      { offset: 1560 / TOTAL, transform: 'scale(1)' },
+      { offset: 600 / TOTAL, transform: 'scale(0)' },
+      { offset: 940 / TOTAL, transform: 'scale(1)' },
       { offset: 1, transform: 'scale(1)' }
     ], { duration: TOTAL, easing: 'linear', fill: 'both' });
     A(P.solid, [
-      { offset: 0, opacity: 0 }, { offset: 1000 / TOTAL, opacity: 0 },
-      { offset: 1440 / TOTAL, opacity: 1 }, { offset: 1, opacity: 1 }
+      { offset: 0, opacity: 0 }, { offset: 600 / TOTAL, opacity: 0 },
+      { offset: 870 / TOTAL, opacity: 1 }, { offset: 1, opacity: 1 }
     ], { duration: TOTAL, easing: 'linear', fill: 'both' });
 
     /* --- 最後に静止ロゴへ引き渡す(位置も色も形も同じものが残る) ---- */
@@ -208,7 +208,8 @@
         io.disconnect();
         run();
       });
-    }, { threshold: .4 });
+          /* さっと通過されても間に合うよう、下から覗いた時点で開始 */
+    }, { threshold: .12, rootMargin: '0px 0px 15% 0px' });
     io.observe(wrap);
   };
 

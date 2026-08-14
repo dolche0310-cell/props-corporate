@@ -2838,7 +2838,18 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
      05 (408:29664 office x-265 y-126 / 写真 1505x902) → 51% / 52%
    02/03/04 は Figma では右半分(628x813)の縦位置での使用なので全面の
    実データが無い。建築の水平を保ったまま被写体が残る帯を選ぶ。 --- */
-.company--figma .cmp__slide:nth-child(1) img { object-position: 55% 48%; }
+/* 1枚目だけは Figma 408:24551 に実配置がある。
+   office(408:25730) が 1442x813 のセクションに対して x-214 y-39 / 1711x921。
+   素材の比(1.858)と表示比が一致しているので、その寸法と位置をそのまま
+   置けば Figma と同じ画角になる(cover 任せより 13% 寄った絵)。 */
+.company--figma .cmp__slide:nth-child(1) img {
+  position: absolute;
+  left: calc(var(--u) * -214);
+  top: calc(var(--u) * -39);
+  width: calc(var(--u) * 1711);
+  height: calc(var(--u) * 921);
+  max-width: none;   /* 全体の img リセット(max-width:100%)が幅を殺すため */
+}
 .company--figma .cmp__slide:nth-child(2) img { object-position: 50% 45%; }
 .company--figma .cmp__slide:nth-child(3) img { object-position: 50% 48%; }
 .company--figma .cmp__slide:nth-child(4) img { object-position: 50% 46%; }

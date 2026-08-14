@@ -111,44 +111,24 @@
        回し切ったところで形が飛ぶことはない。 */
     { id: 's04', t: 620, e: 'soft', h: 90, spinIn: 190 * Math.PI / 180,
       list: [dotG(709.5, 292.5)] },
-    /* S05 */ { id: 's05', t: 260, e: 'soft', h: 90,  list: [dotG(709.5, 423.5)] },
-    /* S06 */ { id: 's06', t: 260, e: 'soft', h: 90,  list: [dotG(709.5, 192.5)] },
-    /* S07 2x2 の点。円がひとつずつ「線の輪」から「塗りの円」へ変わり、
-       最後に4つとも塗りの円になる。形は真円のまま崩さない。 */
-    { id: 's07', t: 260, e: 'soft', h: 640, dotsFill: true,
+    /* S05 */ { id: 's07', t: 260, e: 'soft', h: 560, dotsFill: true,
       dots: [[669.5, 308.5, 26.5], [768.5, 308.5, 26.5],
              [669.5, 393.5, 26.5], [768.5, 393.5, 26.5]],
       list: [dotG(669.5, 308.5), dotG(768.5, 308.5), dotG(669.5, 393.5), dotG(768.5, 393.5)] },
-    /* S08 */ { id: 's08', t: 260, e: 'soft', h: 180, elastic: true,
-      caps: [[670.5, 352, 79.5, 26.5], [769.5, 352, 79.5, 26.5]],
-      list: [S(capsule(670.5, 272.5, 670.5, 431.5, 26.5)), S(capsule(769.5, 272.5, 769.5, 431.5, 26.5))] },
-    /* S08b 縦のバーが一度ほどけて円に戻り、斜めの位置へ移りながら
-       また伸びる。これで S08 と S09 が「同じ2つの塊の移動」に見える。 */
-    /* S08b 2つの円が交互にバウンドし、上下の高さが入れ替わる。
-       左が上がれば右が下がる、を繰り返しながら斜めのバーへ向かう。 */
-    { id: 's08b', t: 260, e: 'soft', h: 760, swap: true,
-      dots: [[700, 320, 30], [824, 396, 30]],
-      list: [S(circle(700, 320, 30)), S(circle(824, 396, 30))] },
-    /* S09 */ { id: 's09', t: 260, e: 'soft', h: 240, glide: true,
-      list: [S(capsule(778.68, 373.22, 891.12, 260.79, 26.5)),
-             S(capsule(848.69, 443.22, 961.13, 330.79, 26.5))] },
-    /* S10 縦長バー。Figma は y115.5..587.5 だが、上端がヘッダー(高さ137)の
-       背面に潜って見切れるので、天地を詰めて y196..568 にする(半長236→186)。
-       FV では fdy 34 が乗るので実際の上端は 230。 */
-    { id: 's10', t: 260, e: 'soft', h: 260, elastic: true,
+    /* S08 */ { id: 's10', t: 260, e: 'soft', h: 260, elastic: true,
       caps: [[720.5, 382.5, 186, 26.5]],
       list: [S(capsule(720.5, 196.5, 720.5, 568.5, 26.5))] },
     /* S11 */ { id: 's11', t: 360, e: 'soft', h: 200, fv: true,
       list: [S(circle(703.5, 399.5, 262.5))] },
     /* S12 12点円環(中心1125,377.5 / 半径196 / 各r21.5)。
        ぐるぐる回りながら、円が順に大きく明るくなる(spin:true)。 */
-    { id: 's12', t: 448, e: 'soft', h: 900, spin: true,
+    { id: 's12', t: 448, e: 'soft', h: 600, spin: true,
       list: RING_A.map((d) => S(circle(1125 + Math.cos(d * Math.PI / 180) * 196,
                                        377.5 + Math.sin(d * Math.PI / 180) * 196, 21.5))) },
     /* S13 散在円。画面いっぱいに広がるパターンなので、FV でも
        Figma の原配置のまま(指示)。中心から弾けて外へ広がり、
        次々に現れる動きは burst:true で専用に駆動する(下の burstList)。 */
-    { id: 's13', t: 2100, e: 'soft', h: 620, burst: true, fullBleed: true,
+    { id: 's13', t: 1400, e: 'soft', h: 620, burst: true, fullBleed: true,
       list: [S(circle(414.5, 217.5, 21.5)), S(circle(1223.5, 482.5, 132.5)),
              S(circle(17.5, 243.5, 132.5)), S(circle(911.5, 256.5, 60.5)),
              S(circle(222.5, 712.5, 60.5)),
@@ -162,23 +142,23 @@
     /* S13b ひとつの円が巡り、その軌跡が円のラインになる。
        描き切ると波紋になって広がり、そのまま次の二重リングへ。
        到達形は同心の2本なので S14 へ素直に変形できる。 */
-    { id: 's13b', t: 560, e: 'soft', h: 1450, ripple: true,
+    { id: 's13b', t: 560, e: 'soft', h: 860, ripple: true,
       /* 輪郭は単純な円。stroke すると線は1本になる(リボンだと外周と
          内周の2本が描かれて二重線に見えるため使わない)。
          次の S14 は同じ円が2つなので、そのまま素直に変形できる。 */
       list: [S(circle(1160, 456, 246)), S(circle(1160, 456, 150))] },
-    /* S14 リング2 (外r113.5 / 内r98.64) */ { id: 's14', t: 448, e: 'soft', h: 660, resonate: true,
+    /* S14 リング2 (外r113.5 / 内r98.64) */ { id: 's14', t: 448, e: 'soft', h: 460, resonate: true,
       list: [S(circle(1044.5, 314.5, 113.5), circle(1044.5, 314.5, 98.64)),
              S(circle(1179.5, 314.5, 113.5), circle(1179.5, 314.5, 98.64))] },
-    /* S15 ブロブ */ { id: 's15', t: 448, e: 'soft', h: 520, jelly: true,
+    /* S15 ブロブ */ { id: 's15', t: 448, e: 'soft', h: 380, jelly: true,
       list: SHAPES.blob.map((p) => S(p)) },
-    /* S16 H形 */ { id: 's16', t: 416, e: 'soft', h: 520, jelly: true,
+    /* S16 H形 */ { id: 's16', t: 416, e: 'soft', h: 380, jelly: true,
       list: SHAPES.hshape.map((p) => S(p)) },
     /* S17 サウンドメーター。Figma の7要素(x/幅/角丸は不変)。
        高さだけが「ひとつの波が通過する」ように連続して伸縮し続ける。
        list は補間の対応付け用の基準形で、実際の描画は meterList() が
        毎フレーム作り直す(下の renderAt を参照)。 */
-    { id: 's17', t: 448, e: 'soft', h: 1180, meter: true,
+    { id: 's17', t: 448, e: 'soft', h: 760, meter: true,
       list: [S(circle(888.39, EQY, 23.3)),
              S(capsule(963.22, EQY - 25.4, 963.22, EQY + 25.4, 23.7)),
              S(capsule(1037.72, EQY - 62.66, 1037.72, EQY + 62.66, 23.7)),
@@ -188,8 +168,8 @@
              S(circle(1335.43, EQY, 23.3))] },
     /* S18a 中円 */ { id: 's18a', t: 384, e: 'soft', h: 112, list: [S(circle(720.5, 355.5, 117.5))] },
     /* S18b 巨大円 */ { id: 's18b', t: 496, e: 'bold', h: 208, list: [S(circle(1139.5, 355.5, 546.5))] },
-    /* S19 N形 */ { id: 's19', t: 496, e: 'soft', h: 1150, stroke: true, list: SHAPES.nshape.map((p) => S(p)) },
-    /* S20 最終モチーフ = Figma FV 完成形 */ { id: 's20', t: 480, e: 'soft', h: 900,
+    /* S19 N形 */ { id: 's19', t: 496, e: 'soft', h: 760, stroke: true, list: SHAPES.nshape.map((p) => S(p)) },
+    /* S20 最終モチーフ = Figma FV 完成形 */ { id: 's20', t: 480, e: 'soft', h: 700,
       list: [S(capsule(909.53, 521.37, 1053.51, 304.53, 44.3885)),
              S(capsule(1097.53, 521.37, 1241.51, 304.53, 44.3885)),
              S(circle(1285.5, 522.0, 44.5))] }
@@ -416,31 +396,26 @@
        残像は本体より十分薄く、動きの向きだけを感じさせる。 */
   const BURST_O = [720, 400];
   const GROUND = 690;                 /* 接地線 */
-  /* バスケットボールのリズム。落下は速く、跳ね返りは短くなっていく。
-     ダン…ダン・ダン と詰まっていく感じ(320 / 480 / 260)。 */
-  const D0 = 320;                     /* 画面上から接地までの落下 */
-  const B1 = 480, B2 = 260;           /* 1回目/2回目のバウンド */
-  const BOUNCE_END = D0 + B1 + B2;    /* 1060ms */
+  /* 弾みは1回だけ。以前は「落下 → 高く1回 → 低く1回」の2バウンドで、
+     同じ動きが繰り返されるぶん冗長だった。落ちて1度だけ跳ね、そのまま
+     広がりへ移る方が歯切れがよい。 */
+  const D0 = 300;                     /* 画面上から接地までの落下 */
+  const B1 = 460;                     /* 唯一のバウンド */
+  const BOUNCE_END = D0 + B1;         /* 760ms */
   /* 垂直バウンド。x は一切動かさない。
-     落下 → 接地 → 高く1回 → 低く1回 → 接地、というバスケットボールの
-     リズム。各区間は放物線で、接地の瞬間に速度が最大になる。 */
+     各区間は放物線で、接地の瞬間に速度が最大になる。 */
   const bounceY = (t, topY) => {
     const H = GROUND - topY;                       /* 落下高さ */
     if (t < D0) {                                  /* 落ちてくる(加速) */
       const u = clamp01(t / D0);
       return topY + H * u * u;
     }
-    if (t < D0 + B1) {                             /* 1回目のバウンド */
-      const u = clamp01((t - D0) / B1);
-      return GROUND - H * 0.55 * (1 - Math.pow(2 * u - 1, 2));
-    }
-    const u2 = clamp01((t - D0 - B1) / B2);        /* 2回目(低い) */
-    return GROUND - H * 0.22 * (1 - Math.pow(2 * u2 - 1, 2));
+    const u = clamp01((t - D0) / B1);              /* 跳ねて戻る */
+    return GROUND - H * 0.5 * (1 - Math.pow(2 * u - 1, 2));
   };
-  /* 接地の瞬間(D0 / D0+B1 / D0+B1+B2)だけ縦を潰す */
+  /* 接地の瞬間(D0 / BOUNCE_END)だけ縦を潰す */
   const squash = (t) => {
-    const near = Math.min(Math.abs(t - D0), Math.abs(t - (D0 + B1)),
-                          Math.abs(t - BOUNCE_END));
+    const near = Math.min(Math.abs(t - D0), Math.abs(t - BOUNCE_END));
     return near < 85 ? 1 - 0.17 * (1 - near / 85) : 1;
   };
   const burstDelay = (i, n) => (i / Math.max(1, n - 1)) * 90;
