@@ -2570,19 +2570,21 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
 /* ロゴの立ち上がり(js/about-logo-reveal.js)。
    形・比率・字間・黒は一切変えない。輪郭を鈍らせる処理も入れない。 */
 .abt__logo-wrap { position: absolute; }
-/* ロゴ背面の淡いグラデ(Figma 215:22664 "Ellipse 53")。
-   Figma と同じ作り = 455x461 の楕円 #FFEFE7 に blur 61.8。
-   ページ枠での中心(245.5, 1221.5)はロゴの中心から右へ 18.8 ずれるので、
-   ロゴ中央基準にその分だけ寄せて置く。
-   ロゴ本体(.abt__logo-mark)より後ろへ回すため z-index:-1。 */
-.about--figma .abt__logo-wrap::before {
+/* ロゴ背面の淡いグラデ(Figma 215:22664 "Ellipse 53" = 455x461 #FFEFE7
+   blur61.8)。ロゴの箱(.abt__logo-wrap)に付けると、箱自身が
+   opacity/will-change でスタッキングコンテキストを作る瞬間があり、
+   z-index:-1 でも「箱ごと」見出しの上に描かれて文字に被る。
+   セクションの箱(.abt)の負の層に置けば、.abt の中の全て(見出し・本文・
+   ロゴ)より必ず後ろ = 最背面になる。
+   位置はロゴ中心(133.2,144.4)基準で、指示により少し左下へ
+   (dx -20 / dy +50)。 */
+.about--figma .abt::before {
   content: "";
   position: absolute;
-  left: 50%;
-  top: 50%;
+  left: calc(var(--u) * -114.3);   /* 133.2 - 227.5 - 20 */
+  top: calc(var(--u) * -36.1);     /* 144.4 - 230.5 + 50 */
   width: calc(var(--u) * 455);
   height: calc(var(--u) * 461);
-  transform: translate(calc(-50% + var(--u) * 18.8), -50%);
   background: #FFEFE7;
   border-radius: 50%;
   filter: blur(calc(var(--u) * 61.8));
