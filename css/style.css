@@ -1613,11 +1613,13 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
               border-color .45s ease, background-color .45s ease;
 }
 .service--brushup .service__link-icon span:first-child { left: 3px; top: 0; }
-/* 手前の1枚は地の色で塗って、奥の1枚を隠す */
+/* 2枚とも塗りは持たない(線のみ)。以前は手前の1枚を地の色 #3A3330 で
+   塗って奥を隠していたが、パネルの背景を撤去した今その色は地と
+   合わず、黒い面が乗って見えていた。 */
 .service--brushup .service__link-icon span:last-child {
   left: 0;
   top: 3px;
-  background: #3A3330;
+  background: none;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -1629,7 +1631,6 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   .service--brushup .service__link:hover .service__link-icon span:first-child { transform: translate(1.5px, -1.5px); }
   .service--brushup .service__link:hover .service__link-icon span:last-child {
     transform: translate(-1.5px, 1.5px);
-    background: var(--color-primary);
   }
   /* 押した瞬間だけ面がわずかに沈み、離すと戻る。richka の手応えを参考に、
      見た目(円が満ちる)は props のままで、押下の反応だけを足している。 */
