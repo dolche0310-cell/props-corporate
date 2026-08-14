@@ -2904,43 +2904,47 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
 }
 /* 白カード(257:27658 x69 y274 680x425 pad24) */
 /* Frame 166 (257:27658): x=309 y=51 / 680x388 / 内側 24 */
-/* 情報パネル(Figma 408:24427 Frame 166): x92 y213 680x388 / padding 24。
-   見出し(Frame 151: x92 y51)の真下に置く。写真は全面の背景。 */
+/* 情報パネル(Figma 408:25739 Frame 166): x92 y213 636x396。
+   中の company-table は x24 y13 588x364(= padding 上13/左右24/下19)。
+   見出し(Frame 151: x92 y51)の真下に置く。写真は全面の背景。
+   半透明はやめ、ベタの面でひとかたまりに見せる。行間の罫は持たない。
+   面の色は、6枚の写真でパネルが乗る領域(x92..728 / y213..609)の平均輝度
+   139.5 から起こした中間グレー #5A5A5A。黒い板を置いた印象にせず、
+   写真と同じ階調の中に収める。白文字とのコントラストは 6.9:1 で、
+   いちばん明るい 01 でも暗い 05 でも本文が沈まない。 */
 .company--figma .cmp__card {
   position: absolute;
   left: calc(var(--u) * 92);
   top: calc(var(--u) * 213);
-  width: calc(var(--u) * 680);
-  height: calc(var(--u) * 388);
-  padding: calc(var(--u) * 24);
-  /* Figma 408:25739: rgba(255,255,255,0.8)。写真が透けることで
-     パネルが板に見えず、写真が主役のまま情報が乗る。 */
-  background: rgba(255, 255, 255, .8);
+  width: calc(var(--u) * 636);
+  height: calc(var(--u) * 396);
+  padding: calc(var(--u) * 13) calc(var(--u) * 24) calc(var(--u) * 19);
+  background: #5A5A5A;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .company--figma .cmp__table {
   margin: 0;
-  width: calc(var(--u) * 632);
-  color: #191919;
+  width: calc(var(--u) * 588);
+  color: #fff;
 }
 /* 行(72高 = 24pad + 内容 + 24pad)。区切りは #EBEBEB、最終行は無し */
 .company--figma .cmp__row {
   display: flex;
   align-items: center;
   padding-block: calc(var(--u) * 24);
-  /* 写真を主役にするため罫は弱く(指示: #D8D8D8〜#E5E5E5) */
-  border-bottom: 1px solid #E2E2E2;
+  /* Figma 408:25739 では行間の罫を持たない(ベタの面でまとめる) */
 }
-.company--figma .cmp__row:last-child { border-bottom: none; }
 .company--figma .cmp__row dt {
   flex: 0 0 calc(var(--u) * 238);   /* Figma 408:24430 ほか */
   font-family: var(--font-jp);
   font-weight: 700;
   font-size: calc(var(--u) * 16);
   letter-spacing: calc(var(--u) * 0.96);
-  line-height: normal;
+  /* Figma のテキストボックス実測 19px(16px に対して)。normal だと 23px に
+     なり、5行ぶんで table が 364 → 383 に膨らむ */
+  line-height: 1.19;
 }
 .company--figma .cmp__row dd {
   margin: 0;
@@ -2948,8 +2952,10 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   font-family: var(--font-jp);
   font-weight: 500;
   font-size: calc(var(--u) * 14);
-  line-height: 1.7;
+  /* 1行の行は Figma 実測 17px。所在地だけ2行 1.7(=48px)。 */
+  line-height: 1.21;
 }
+.company--figma .cmp__row:nth-child(4) dd { line-height: 1.7; }
 /* SP: 写真を上に、ラベル+表を下に縦積み(Desktop座標系はそのまま温存) */
 @media (max-width: 767px) {
   .company--figma .cmp { height: auto; border-radius: 0; }
