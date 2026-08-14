@@ -2604,7 +2604,7 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   top: calc(var(--u) * 153.9);
   width: calc(var(--u) * 455);
   height: calc(var(--u) * 461);
-  background: #FFEFE7;
+  background: var(--about-glow, #FFEFE7);
   border-radius: 50%;
   filter: blur(calc(var(--u) * 61.8));
   z-index: -1;
@@ -3137,16 +3137,21 @@ body {
   background-size: cover;
   background-repeat: no-repeat;
   background-image:
-    radial-gradient(40% 44% at 12% 10%, #000000 0%, transparent 72%),  /* 左上=黒(暗部) */
-    radial-gradient(48% 62% at 4% 78%, #2A2A2E 0%, transparent 72%),   /* 左下=墨 */
-    radial-gradient(32% 36% at 90% 48%, #1A1A1C 0%, transparent 70%),  /* 右中=黒(暗部) */
-    radial-gradient(42% 42% at 34% 16%, #FF2400 0%, transparent 72%),  /* 上=ブランド */
-    radial-gradient(36% 42% at 90% 92%, #C21B00 0%, transparent 72%),  /* 右下=深い朱 */
-    radial-gradient(48% 52% at 50% 62%, #FFFFFF 0%, transparent 74%);  /* 中央=白グロー */
+    radial-gradient(62% 68% at 12% 10%, #000000 0%, transparent 100%),  /* 左上=黒(暗部) */
+    radial-gradient(70% 86% at 4% 78%, #2A2A2E 0%, transparent 100%),   /* 左下=墨 */
+    radial-gradient(54% 60% at 90% 48%, #1A1A1C 0%, transparent 100%),  /* 右中=黒(暗部) */
+    radial-gradient(64% 64% at 34% 16%, var(--aurora-accent, #FF2400) 0%, transparent 100%),
+    radial-gradient(58% 64% at 90% 92%, var(--aurora-accent-2, #C21B00) 0%, transparent 100%),
+    radial-gradient(70% 74% at 50% 62%, #FFFFFF 0%, transparent 100%);  /* 中央=白グロー */
   background-color: #B9C0C4;   /* 中間の淡グレー地(image層には置けない) */
   mix-blend-mode: overlay;     /* 必須: 下地の明暗で鮮やか↔暗が決まる */
-  filter: blur(80px) saturate(1.05);
+  /* filter: blur() は使わない。全画面を毎スクロール再合成するため、
+     上方向へ戻るときにガタつく原因になっていた。グラデ自体の
+     stop を広く取ってあるので、ぼかさなくても継ぎ目は出ない。 */
   transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: opacity;
+  contain: paint;
   pointer-events: none;
   opacity: var(--svc-dark, 0);
 }

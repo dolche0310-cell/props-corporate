@@ -3,6 +3,34 @@
 
   var reducedMotionMq = window.matchMedia('(prefers-reduced-motion: reduce)');
 
+  // ---- スクロール処理の一本化 ----------------------------------------
+  // 個々の機能がそれぞれ scroll を購読して各自 rAF を回すと、1フレームに
+  // 複数回のレイアウト読み(getBoundingClientRect)と書き込みが交互に走り、
+  // 読み書きの往復でレイアウトが何度も再計算される(レイアウトスラッシング)。
+  // 上下に速く動かしたときのガタつきの主因。購読口をひとつにして、
+  // 1フレーム = 1回だけまとめて実行する。
+  var scrollSubs = [];
+  var scrollTicking = false;
+  var runScrollSubs = function () {
+    scrollTicking = false;
+    for (var i = 0; i < scrollSubs.length; i++) {
+      try { scrollSubs[i](); } catch (e) {}
+    }
+  };
+  var onSharedScroll = function () {
+    if (scrollTicking) return;
+    scrollTicking = true;
+    requestAnimationFrame(runScrollSubs);
+  };
+  function addScrollTask(fn) {
+    scrollSubs.push(fn);
+    fn();
+  }
+  window.addEventListener('scroll', onSharedScroll, { passive: true });
+  window.addEventListener('resize', onSharedScroll);
+  // 他ファイル(company-photos.js など)からも相乗りできるように公開
+  window.__miaiOnScroll = addScrollTask;
+
   // Page-load intro: a solid curtain covers the viewport from first paint
   // (pure CSS, no JS needed for that part) and, shortly after this script
   // runs, a circular hole grows from its center (via an animated mask)
@@ -123,12 +151,7 @@
       }
     };
 
-    window.addEventListener('scroll', function () {
-      if (!headerTicking) {
-        headerTicking = true;
-        requestAnimationFrame(updateHeaderVisibility);
-      }
-    }, { passive: true });
+    addScrollTask(updateHeaderVisibility);
 
     // Figma のヘッダーは面を持たない。最上部では素のまま出し、
     // スクロールして本文に重なっている間だけ半調の白を敷く。
@@ -137,13 +160,7 @@
       overlapTicking = false;
       siteHeader.classList.toggle('is-overlapping', window.scrollY > 8);
     };
-    updateHeaderPlate();
-    window.addEventListener('scroll', function () {
-      if (!overlapTicking) {
-        overlapTicking = true;
-        requestAnimationFrame(updateHeaderPlate);
-      }
-    }, { passive: true });
+    addScrollTask(updateHeaderPlate);
   }
 
   var form = document.getElementById('contact-form');
@@ -368,14 +385,7 @@
       }
     };
     var lastSvcDark = -1, lastMqWhite = -1;
-    window.addEventListener('scroll', function () {
-      if (!svcDarkTicking) {
-        svcDarkTicking = true;
-        requestAnimationFrame(updateSvcDark);
-      }
-    }, { passive: true });
-    window.addEventListener('resize', updateSvcDark);
-    updateSvcDark();
+    addScrollTask(updateSvcDark);
   }
 
   var serviceScroller = document.getElementById('service-scroller');
@@ -487,15 +497,7 @@
       }
     };
 
-    window.addEventListener('scroll', function () {
-      if (!serviceTicking) {
-        serviceTicking = true;
-        requestAnimationFrame(updateServiceProgress);
-      }
-    }, { passive: true });
-
-    window.addEventListener('resize', updateServiceProgress);
-    updateServiceProgress();
+    addScrollTask(updateServiceProgress);
   }
 })();
 

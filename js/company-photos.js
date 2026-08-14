@@ -87,24 +87,31 @@
   if (REDUCED) return;
 
   /* ---------- ごく弱い視差(写真 0.88 / 情報 1.0) ---------- */
-  let raf = 0;
+  /* 呼び出し元(共有ディスパッチャ)が既に rAF の中なので、ここでは
+     二重に rAF を挟まない。値も 0.5px 刻みに丸め、変化時だけ書く。 */
+  let lastPar = null;
   const onScroll = () => {
-    if (raf) return;
-    raf = requestAnimationFrame(() => {
-      raf = 0;
-      const r = section.getBoundingClientRect();
-      const vh = innerHeight || 800;
-      /* セクションが画面を通過する進捗 -1..1 。0.12 = 1 - 0.88 ぶんだけ
-         写真をスクロールに対して遅らせる。 */
-      const travel = vh + r.height;
-      const p = Math.max(-1, Math.min(1,
-        ((r.top + r.height / 2) - vh / 2) / (travel / 2)));
-      wrap.style.setProperty('--cmp-par', (-p * travel * 0.12 * 0.5).toFixed(1) + 'px');
-    });
+    const r = section.getBoundingClientRect();
+    const vh = innerHeight || 800;
+    const travel = vh + r.height;
+    const p = Math.max(-1, Math.min(1,
+      ((r.top + r.height / 2) - vh / 2) / (travel / 2)));
+    const px = Math.round(-p * travel * 0.12 * 0.5 * 2) / 2;
+    if (px !== lastPar) {
+      lastPar = px;
+      wrap.style.setProperty('--cmp-par', px + 'px');
+    }
   };
-  addEventListener('scroll', onScroll, { passive: true });
-  addEventListener('resize', onScroll);
-  onScroll();
+  /* main.js の共有ディスパッチャに相乗りする(1フレーム1回にまとめる)。
+     単独で動く場合は従来どおり自前で購読する。 */
+  if (window.__miaiOnScroll) {
+    window.__miaiOnScroll(onScroll);
+    addEventListener('resize', onScroll);
+  } else {
+    addEventListener('scroll', onScroll, { passive: true });
+    addEventListener('resize', onScroll);
+    onScroll();
+  }
 
   /* ---------- ポインタへの反応は最大3px。tilt はしない ---------- */
   if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
