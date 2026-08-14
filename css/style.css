@@ -2805,45 +2805,53 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   transform: var(--kb-b);
   transition: transform 6.5s linear;
 }
+/* 寄りすぎないよう、動きは全て scale 1.00 起点。最大でも +2.2% に留める
+   (Figma は写真が引きの構図なので、拡大で画角を削らない)。 */
 /* 01 ほとんど静止 */
 .company--figma .cmp__slide:nth-child(1) {
   --kb-a: translate3d(0, 0, 0) scale(1.000);
-  --kb-b: translate3d(-5px, 0, 0) scale(1.014);
+  --kb-b: translate3d(-5px, 0, 0) scale(1.012);
 }
 /* 02 わずかに横へ流れる */
 .company--figma .cmp__slide:nth-child(2) {
-  --kb-a: translate3d(10px, 0, 0) scale(1.010);
-  --kb-b: translate3d(-8px, 0, 0) scale(1.028);
+  --kb-a: translate3d(8px, 0, 0) scale(1.000);
+  --kb-b: translate3d(-8px, 0, 0) scale(1.016);
 }
 /* 03 ゆっくり引く */
 .company--figma .cmp__slide:nth-child(3) {
-  --kb-a: translate3d(0, -4px, 0) scale(1.040);
-  --kb-b: translate3d(0, 3px, 0) scale(1.006);
+  --kb-a: translate3d(0, -3px, 0) scale(1.022);
+  --kb-b: translate3d(0, 3px, 0) scale(1.000);
 }
 /* 04 わずかに縦へ */
 .company--figma .cmp__slide:nth-child(4) {
-  --kb-a: translate3d(0, -10px, 0) scale(1.008);
-  --kb-b: translate3d(0, 6px, 0) scale(1.026);
+  --kb-a: translate3d(0, -8px, 0) scale(1.000);
+  --kb-b: translate3d(0, 6px, 0) scale(1.014);
 }
 /* 05 静かに寄る */
 .company--figma .cmp__slide:nth-child(5) {
   --kb-a: translate3d(-4px, 0, 0) scale(1.000);
-  --kb-b: translate3d(4px, 0, 0) scale(1.032);
+  --kb-b: translate3d(4px, 0, 0) scale(1.018);
 }
 /* 06 ほぼ静止。終わりの値を 01 の入りに近づけて 6→1 を繋ぐ */
 .company--figma .cmp__slide:nth-child(6) {
-  --kb-a: translate3d(3px, 0, 0) scale(1.012);
-  --kb-b: translate3d(-2px, 0, 0) scale(1.018);
+  --kb-a: translate3d(3px, 0, 0) scale(1.008);
+  --kb-b: translate3d(-2px, 0, 0) scale(1.000);
 }
 
-/* --- 写真ごとの構図。中央 crop にせず、情報パネルが乗る左側に
-       余白が来るよう寄せる(建築の水平垂直は保つ) --- */
-.company--figma .cmp__slide:nth-child(1) img { object-position: 62% center; }
-.company--figma .cmp__slide:nth-child(2) img { object-position: 55% center; }
-.company--figma .cmp__slide:nth-child(3) img { object-position: 60% 45%; }
-.company--figma .cmp__slide:nth-child(4) img { object-position: 58% center; }
-.company--figma .cmp__slide:nth-child(5) img { object-position: 52% 55%; }
-.company--figma .cmp__slide:nth-child(6) img { object-position: 50% 60%; }
+/* --- 写真ごとの構図。
+   01/02/06 は Figma に全面配置の実データがあるので、その配置から
+   「セクション中心が写真のどこに当たるか」を割り出して写している。
+     01 (408:24418 office x-44 y-174 / 写真 1477x1097) → 50% / 53%
+     02 (408:25730 office x-214 y-39 / 写真 1711x921)  → 55% / 48%
+     06 (408:29664 office x-265 y-126 / 写真 1505x902) → 51% / 52%
+   03/04/05 は Figma では右半分(628x813)の縦位置での使用なので全面の
+   実データが無い。建築の水平を保ったまま被写体が残る帯を選ぶ。 --- */
+.company--figma .cmp__slide:nth-child(1) img { object-position: 50% 53%; }
+.company--figma .cmp__slide:nth-child(2) img { object-position: 55% 48%; }
+.company--figma .cmp__slide:nth-child(3) img { object-position: 50% 45%; }
+.company--figma .cmp__slide:nth-child(4) img { object-position: 50% 48%; }
+.company--figma .cmp__slide:nth-child(5) img { object-position: 50% 46%; }
+.company--figma .cmp__slide:nth-child(6) img { object-position: 51% 52%; }
 
 /* --- 情報パネルの登場。下からのフェードインにはしない --- */
 .company--figma .cmp__label,
@@ -2910,7 +2918,9 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   width: calc(var(--u) * 680);
   height: calc(var(--u) * 388);
   padding: calc(var(--u) * 24);
-  background: #fff;
+  /* Figma 408:25739: rgba(255,255,255,0.8)。写真が透けることで
+     パネルが板に見えず、写真が主役のまま情報が乗る。 */
+  background: rgba(255, 255, 255, .8);
   display: flex;
   align-items: center;
   justify-content: center;
