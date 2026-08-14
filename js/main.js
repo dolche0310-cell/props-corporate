@@ -351,8 +351,16 @@
         fadeOut = clamp01((r.bottom - vh * 0.10) / (vh * 0.55));
       }
       var p = Math.min(fadeIn, fadeOut);
-      document.documentElement.style.setProperty('--svc-dark', p.toFixed(3));
+      // 0.02 刻みに量子化し、値が変わったときだけ書く。毎フレームの書き込みは
+      // body の下地色と全画面メッシュ(blur 80px + overlay)の再合成を毎回誘発し、
+      // 特に上方向へ戻るスクロールでガタつきの原因になっていた。
+      p = Math.round(p * 50) / 50;
+      if (p !== lastSvcDark) {
+        lastSvcDark = p;
+        document.documentElement.style.setProperty('--svc-dark', String(p));
+      }
     };
+    var lastSvcDark = -1;
     window.addEventListener('scroll', function () {
       if (!svcDarkTicking) {
         svcDarkTicking = true;
@@ -367,6 +375,7 @@
   var servicePin = document.querySelector('.service__pin');
   var serviceTextList = document.getElementById('service-text-list');
   var serviceItems = document.querySelectorAll('.service__text-item');
+  var svcIndexCurrent = -1;   // 境界ヒステリシス用の現在値
 
   // Exposed for js/service-stage.js, which drives the floating image
   // layers off the same scroll progress without needing to duplicate
@@ -448,8 +457,18 @@
 
       var scrolledIntoPin = getStickyTopOffset() - scrollerRect.top;
       var progress = Math.min(1, Math.max(0, scrolledIntoPin / totalRange));
-      var index = Math.min(serviceItems.length - 1, Math.floor(progress * serviceItems.length));
-      setServiceActive(index);
+      // 境界ちょうどで上下すると index が行き来して 1s のフェードが
+      // 何度も掛かり直し、戻りスクロールが落ち着かない。境界に ±4.5% の
+      // 遊びを持たせ、はっきり越えたときだけ切り替える。
+      var n = serviceItems.length;
+      var rawIndex = Math.min(n - 1, Math.floor(progress * n));
+      if (svcIndexCurrent < 0) {
+        svcIndexCurrent = rawIndex;
+      } else if (rawIndex !== svcIndexCurrent) {
+        var boundary = Math.max(rawIndex, svcIndexCurrent) / n;
+        if (Math.abs(progress - boundary) > 0.045) svcIndexCurrent = rawIndex;
+      }
+      setServiceActive(svcIndexCurrent);
       window.__miaiServiceProgress = progress;
 
       // The text list slides up continuously with scroll progress (not a

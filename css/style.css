@@ -568,9 +568,16 @@ html.splash-lock, html.splash-lock body { overflow: hidden; }
   min-height: 700px;
   display: flex;
   align-items: center;
-  /* ブロブ/モチーフが下のセクション(About)や画面右へはみ出していたので
-     自セクション内に収める。clip なので position:sticky 等に影響しない。 */
-  overflow: clip;
+  /* 縦は切らない。FV の赤い円は About の領域まで貫通して落ちてくるのが
+     意図で、ここで clip すると About との境目に水平の切り口が出る。
+     横のはみ出しは body 側の overflow-x:hidden が受けるので、
+     ページに横スクロールは生まれない。 */
+  overflow: visible;
+  /* 後続の About(白背景・position:relative)より手前に置く。
+     これが無いと、はみ出した円が About の白で塗り潰されて
+     結局同じ切り口が見える。モチーフは pointer-events:none なので
+     About の操作は妨げない。 */
+  z-index: 1;
 }
 .hero > .wrap { width: 100%; }
 @media (min-width: 768px) {
@@ -1447,18 +1454,20 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
    2アイテムをふわっとクロスフェードで切り替える(main.js の
    setServiceActive が is-active を付け替える)。 */
 @media (min-width: 768px) {
+  /* 切替は不透明度だけの純粋なディゾルブ。translateY を掛けると
+     文字と映像が 14px 動いて「一瞬揺れた」ように見える。
+     2アイテムは同一座標に重なっているので、動かさなければ中身だけが
+     すーっと入れ替わって見える。 */
   .service--brushup .service__text-item {
     position: absolute;
     inset: 0;
     max-width: none;
     opacity: 0;
-    transform: translateY(14px);
-    transition: opacity 1s ease, transform 1s ease;
+    transition: opacity 1s ease;
     pointer-events: none;
   }
   .service--brushup .service__text-item.is-active {
     opacity: 1;
-    transform: translateY(0);
     pointer-events: auto;
   }
   @media (prefers-reduced-motion: reduce) {
@@ -1699,8 +1708,13 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   line-height: 1.7;
   /* Figma(253:27115)は #3D3430 → rgba(255,239,231,.23) → #4B4B4B の
      グラデーションだが、左端と中間に暖色が入って橙が混ざって見えるため、
-     指示によりグラデーションをやめて中立グレー1色にしている。 */
-  color: #4B4B4B;
+     指示によりグラデーションをやめて中立グレー1色にしている。
+     暗転が抜けて News の白地に掛かるところ(--svc-dark → 0)では
+     アクセント色へ寄せる。A-2(darkblack)はページ側で --mq-accent を
+     グレーに固定しているので変化しない。 */
+  color: color-mix(in srgb, #4B4B4B calc(var(--svc-dark, 0) * 100%),
+                   var(--mq-accent, var(--color-primary)));
+  transition: color .32s linear;
 }
 @keyframes service-marquee {
   from { transform: translateX(0); }
@@ -2016,11 +2030,11 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
 }
 .news__more-circle svg { width: 13px; height: 11px; max-width: 100%; }
 @media (hover: hover) and (pointer: fine) {
+  /* 位置は動かさない(translate すると右上へ逃げて見える)。色だけ変える */
   .news__more:hover .news__more-circle {
     background: var(--color-primary);
     border-color: var(--color-primary);
     color: #fff;
-    transform: translate(1px, -1px);
   }
 }
 
