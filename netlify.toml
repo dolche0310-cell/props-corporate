@@ -1,0 +1,5 @@
+# 生成物をそのまま配信する。Netlify の後処理(Pretty URLs)が有効だと
+# Red-orange.html → /red-orange のように .html を落として小文字化し、
+# hub.html からのリンクが毎回 301 を挟む。URL は書いたとおりに保つ。
+[build.processing]
+  skip_processing = true
