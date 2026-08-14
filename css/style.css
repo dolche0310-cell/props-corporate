@@ -1399,6 +1399,15 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   border-radius: 50%;
   pointer-events: none;
   z-index: 0;
+  /* パネルは overflow:hidden なので、外へはみ出したこの白いグラデが
+     箱の角で切られる。パネル自身に背景を持たせていた頃は同じ暗さの上に
+     乗っていて見えなかったが、地を透かすようにした今は切り口が
+     右上の境界線として出てしまう。
+     暗転中はビューポート全面のメッシュ(.svc-aurora)が同じ役目を果たすので、
+     沈むぶんだけこちらを引いて、切り口が現れないようにする。
+     2.2倍で効かせているのは、地が暗くなって切り口が目に付き始める前
+     (進行度 0.45)には消し切っておくため。 */
+  opacity: calc(1 - var(--svc-dark, 0) * 2.2);
 }
 .service--brushup .service__blob--1 {
   width: 508px; height: 508px; right: -160px; top: -180px;
