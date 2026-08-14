@@ -2505,7 +2505,17 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
    スケール単位は --u(=設計1px)。em を使うと要素自身の font-size に
    依存して座標が壊れるため、font-size 非依存の長さで統一している。
    =========================================================== */
-.about--figma { position: relative; padding: 0; overflow: visible; }
+.about--figma {
+  position: relative;
+  padding: 0;
+  overflow: visible;
+  /* 自前のスタッキングコンテキストを張る。これが無いと .abt::before
+     (z-index:-1 のグラデ)が文書全体の負の層まで落ち、このセクションの
+     白背景の「さらに後ろ」に塗られて見えなくなる。白が透けない
+     ヒーロー領域にだけ顔を出し、境界で水平に切れて見えていた。
+     isolate すると描画順が 白背景 → グラデ → 文字 に固定される。 */
+  isolation: isolate;
+}
 .about--figma .abt-frame {
   width: min(1253px, 100%);
   margin-inline: auto;
@@ -2581,8 +2591,11 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
 .about--figma .abt::before {
   content: "";
   position: absolute;
-  left: calc(var(--u) * -114.3);   /* 133.2 - 227.5 - 20 */
-  top: calc(var(--u) * -36.1);     /* 144.4 - 230.5 + 50 */
+  left: calc(var(--u) * -114.3);   /* ロゴ中心 - 半径227.5 - 20(左寄せ) */
+  /* ロゴは .abt__main の中に居るため .abt 直系の座標計算(95.9+48.5)より
+     実際は 140 下に居る。実測(グラデ中心-ロゴ中心 = -140)で補正し、
+     ロゴ中心より 50 下に置く。 */
+  top: calc(var(--u) * 153.9);
   width: calc(var(--u) * 455);
   height: calc(var(--u) * 461);
   background: #FFEFE7;
