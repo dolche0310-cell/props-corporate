@@ -218,22 +218,22 @@ body {
 }
 .lg2-box-faint { stroke: rgba(17, 17, 18, 0.22); }
 
-/* 寸法線(X / 1X)はアクセント色の実線 */
+/* 寸法線(X / 1X)は黒の実線 */
 .lg2-dim {
   fill: none;
-  stroke: #FF2400;
+  stroke: #111112;
   stroke-width: 1;
   stroke-linecap: butt;
   vector-effect: non-scaling-stroke;
 }
-.lg2-dim-head { fill: #FF2400; stroke: none; }
+.lg2-dim-head { fill: #111112; stroke: none; }
 
 /* マーク単体カードのX計測用引き出し線(Figma 585:12333)。
-   マークの外形端から寸法線へ伸ばす延長線。色は寸法線と同じティールにしつつ、
+   マークの外形端から寸法線へ伸ばす延長線。色は寸法線と同じ黒にしつつ、
    実線の寸法線と役割を区別するため細かい点線にする。 */
 .lg2-leader {
   fill: none;
-  stroke: #FF2400;
+  stroke: #111112;
   stroke-width: 1;
   stroke-linecap: butt;
   stroke-dasharray: 1.5 3;

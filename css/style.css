@@ -1485,19 +1485,19 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
     width: auto;
     min-width: min(calc(var(--su) * 218), 100%);
   }
-  /* 映像スロット (Figma 277:33354 "01" / 親は Frame 110 1440x784)。
-       Figma  x638 y103 707x445 r18
-       ステージ内 = x638-92 → 546 / y103
-     右端は 546+707=1253(ステージ幅1256のほぼ端)。
-     下端は 103+445=548 で、文字の段(Frame 139 y90..548)と揃う。
+  /* 映像スロット (Figma 237:27441 miai_image: x739 y236 552x311)。
+     707x445 は大きすぎたので Figma の 552x311 に戻す。
+     横: ステージ内 = 739-92 → 647。右に 57 の余白が残る。
+     縦: 文字の段(Frame 139 y90..548 / 中心319)の天地センターに合わせる。
+         311/2 = 155.5 なので top = 319 - 155.5 = 163.5。
      2枚の動画で共通のスロット。 */
   .service--brushup [data-service-item="0"] .service__image,
   .service--brushup [data-service-item="1"] .service__image {
     position: absolute;
-    left: calc(var(--su) * 546);
-    top: calc(var(--su) * 103);
-    width: calc(var(--su) * 707);
-    height: calc(var(--su) * 445);
+    left: calc(var(--su) * 647);
+    top: calc(var(--su) * 163.5);
+    width: calc(var(--su) * 552);
+    height: calc(var(--su) * 311);
     border-radius: calc(var(--su) * 18);
     max-width: none;
     aspect-ratio: auto;
@@ -2825,9 +2825,14 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   --kb-a: translate3d(-4px, 0, 0) scale(1.000);
   --kb-b: translate3d(4px, 0, 0) scale(1.018);
 }
-/* 05 ほぼ静止。終わりの値を 01 の入りに近づけて 5→1 を繋ぐ */
+/* 05 ゆるく横へ */
 .company--figma .cmp__slide:nth-child(5) {
   --kb-a: translate3d(3px, 0, 0) scale(1.008);
+  --kb-b: translate3d(-6px, 0, 0) scale(1.014);
+}
+/* 06 ほぼ静止。終わりの値を 01 の入りに近づけて 6→1 を繋ぐ */
+.company--figma .cmp__slide:nth-child(6) {
+  --kb-a: translate3d(4px, 0, 0) scale(1.010);
   --kb-b: translate3d(-2px, 0, 0) scale(1.000);
 }
 
@@ -2854,6 +2859,8 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
 .company--figma .cmp__slide:nth-child(3) img { object-position: 50% 48%; }
 .company--figma .cmp__slide:nth-child(4) img { object-position: 50% 46%; }
 .company--figma .cmp__slide:nth-child(5) img { object-position: 51% 52%; }
+/* 06 (Figma 422:33748) 手前の机と奥行きが残る帯 */
+.company--figma .cmp__slide:nth-child(6) img { object-position: 50% 52%; }
 
 /* --- 情報パネルの登場。下からのフェードインにはしない --- */
 .company--figma .cmp__label,
