@@ -40,6 +40,17 @@
     document.dispatchEvent(new CustomEvent('miai:fv-in'));
   };
 
+  /* 点灯色はページのアクセント(--color-primary)。darkblack 案(A-2)は
+     オレンジを使わないため、ここも #0D0D0D のまま灯る(=ほぼ黒)。 */
+  const ACCENT = (() => {
+    const v = (getComputedStyle(document.documentElement)
+      .getPropertyValue('--color-primary') || '#FF2400').trim();
+    const m = /^#?([0-9a-f]{6})$/i.exec(v);
+    if (!m) return [255, 36, 0];
+    const n = parseInt(m[1], 16);
+    return [n >> 16 & 255, n >> 8 & 255, n & 255];
+  })();
+
   const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (!stage || !canvas || !svg || REDUCED) {
     overlay.remove();
@@ -211,7 +222,7 @@
       dotEl.setAttribute('cy', y.toFixed(2));
       dotEl.setAttribute('r', Math.max(0.1, r).toFixed(2));
       dotEl.setAttribute('fill',
-        'rgb(' + Math.round(lerp(25, 255, cu)) + ',' + Math.round(lerp(25, 36, cu)) + ',' + Math.round(lerp(25, 0, cu)) + ')');
+        'rgb(' + Math.round(lerp(25, ACCENT[0], cu)) + ',' + Math.round(lerp(25, ACCENT[1], cu)) + ',' + Math.round(lerp(25, ACCENT[2], cu)) + ')');
     } else if (t >= HANDOFF) {
       dotEl.style.display = 'none';
     }

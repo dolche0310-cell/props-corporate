@@ -2464,7 +2464,9 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   top: .1606em;
   width: 5.5370em;    /* 299px */
   height: 1.4444em;   /* 78px */
-  background: #FF2400;
+  /* A案の色違い(darkblack 等)でも追従するようトークンで持つ。
+     Red-orange では従来どおり #FF2400。 */
+  background: var(--color-primary, #FF2400);
   border-radius: 3.7037em; /* 200px */
 }
 /* AI(254:27424): カプセル内 x=46.43 y=13.46, 54.664x50.096
