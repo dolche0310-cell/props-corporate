@@ -111,20 +111,20 @@
        回し切ったところで形が飛ぶことはない。 */
     { id: 's04', t: 720, e: 'soft', h: 140, spinIn: 190 * Math.PI / 180,
       list: [dotG(709.5, 292.5)] },
-    /* S05 */ { id: 's07', t: 400, e: 'soft', h: 720, dotsFill: true,
+    /* S05 */ { id: 's07', t: 540, e: 'soft', h: 680, dotsFill: true,
       dots: [[669.5, 308.5, 26.5], [768.5, 308.5, 26.5],
              [669.5, 393.5, 26.5], [768.5, 393.5, 26.5]],
       list: [dotG(669.5, 308.5), dotG(768.5, 308.5), dotG(669.5, 393.5), dotG(768.5, 393.5)] },
-    /* S08 */ { id: 's10', t: 400, e: 'soft', h: 400, elastic: true,
+    /* S08 */ { id: 's10', t: 540, e: 'soft', h: 360, elastic: true,
       caps: [[720.5, 382.5, 186, 26.5]],
       list: [S(capsule(720.5, 196.5, 720.5, 568.5, 26.5))] },
     /* S11。大きな円は画面中央に居るので、この時点ではまだ文字を出さない。
        出すと円と「産業の…」が重なる。 */
-    { id: 's11', t: 480, e: 'soft', h: 320,
+    { id: 's11', t: 620, e: 'soft', h: 320,
       list: [S(circle(703.5, 399.5, 262.5))] },
     /* S12 12点円環(中心1125,377.5 / 半径196 / 各r21.5)。
        ぐるぐる回りながら、円が順に大きく明るくなる(spin:true)。 */
-    { id: 's12', t: 520, e: 'soft', h: 880, spin: true, fv: true, fvAt: 0,
+    { id: 's12', t: 620, e: 'soft', h: 880, spin: true, fv: true, fvAt: 0,
       list: RING_A.map((d) => S(circle(1125 + Math.cos(d * Math.PI / 180) * 196,
                                        377.5 + Math.sin(d * Math.PI / 180) * 196, 21.5))) },
     /* S13 散在円。画面いっぱいに広がるパターンなので、FV でも
@@ -589,7 +589,7 @@
   const geoEase = (u, kind, strength) => {
     const uu = clamp01(u);
     const base = smooth(uu);
-    const s = (kind === 'bold' ? 1.5 : kind === 'over' ? 2.1 : 0.7) * strength;
+    const s = (kind === 'bold' ? 1.5 : kind === 'over' ? 2.1 : 0.4) * strength;
     const v = uu - 1;
     return base + s * 0.045 * (v * v * v + v * v) * 6.75 * uu;
   };
