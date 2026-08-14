@@ -1727,12 +1727,8 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
 .service--brushup .service__image--02 video {
   object-fit: cover;
   object-position: center;
-  filter: url(#miai-warm);
-  /* 素材の下 2 割ほどは暗いデスク面で、スロットに収めると黒い帯に
-     見える。上端を基準に 1.2 倍して画角を上へ寄せ、その帯を外す
-     (可視範囲は縦横とも中央〜上の 83%)。枠側が overflow:hidden。 */
-  transform: scale(1.2);
-  transform-origin: 50% 0;
+  /* 素材を差し替えたので、前の映像用だった上寄せ 1.2 倍のトリミングと
+     アクセント置換フィルタ(#miai-warm)は外す。16:9 をそのまま中央で。 */
 }
 /* filter の定義用。レイアウトに一切関与させない */
 .service__grade-def { position: absolute; width: 0; height: 0; overflow: hidden; }
