@@ -2515,6 +2515,11 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
      ヒーロー領域にだけ顔を出し、境界で水平に切れて見えていた。
      isolate すると描画順が 白背景 → グラデ → 文字 に固定される。 */
   isolation: isolate;
+  /* ヒーロー(z-index:1)から About へ貫通して落ちてくる円より
+     「文字が上」になるようセクションごと z-index:2 に。
+     背景は持たない(下の共通ルールで transparent)ので、円は
+     セクションの地の上には見えたまま、文字にだけ重ならない。 */
+  z-index: 2;
 }
 .about--figma .abt-frame {
   width: min(1253px, 100%);
@@ -2686,7 +2691,10 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
 
 /* MiAIロゴの下に十分な白余白を取り、次のダークなServiceが近づきすぎない
    ようにする(ロゴアニメーションの余韻を確保するため)。 */
-.about--figma { background: #fff; padding-bottom: clamp(160px, 14vw, 220px); }
+/* 背景は敷かない(body が白)。ここに #fff を敷くと、セクション全体が
+   z-index:2 でヒーローより手前に居るため、貫通してくる円が白で
+   塗り潰されて境界の水平線が再発する。 */
+.about--figma { padding-bottom: clamp(160px, 14vw, 220px); }
 
 /* SP: Desktopの座標再現を崩さないよう、切り替えは別クエリに分離する */
 @media (max-width: 900px) {
