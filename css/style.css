@@ -2366,7 +2366,8 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   outline: 2px solid var(--color-primary);
   outline-offset: 1px;
 }
-.field textarea { resize: vertical; min-height: 160px; }
+/* 右下のリサイズつまみ(斜線2本)は出さない */
+.field textarea { resize: none; min-height: 160px; }
 
 /* Same circular-reveal hover as the header's Contact button (.nav__cta):
    a ::before circle seeded near the left-center scales in on hover. */
