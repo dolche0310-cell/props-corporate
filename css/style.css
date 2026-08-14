@@ -2731,33 +2731,19 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
 /* Figma 232:27398。写真はセクション全面。ただしフレームは 1442px で
    頭打ちなので、それより広い画面では左右に白の余白が出るのが正。
    以前は負の right で画面端まで引き伸ばしていた。 */
-/* 写真スライドショー。1枚ずつ枠いっぱいに敷き、切替はマスクで行う。
-   情報パネルは切り替えないので、この層だけが入れ替わる。 */
 .company--figma .cmp__photo {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  background: #EFEFEF;            /* 読み込み前の下地(白飛びさせない) */
 }
-.company--figma .cmp__slides {
-  position: absolute;
-  inset: -2%;                     /* パララックスの余白 */
-  will-change: transform;
-}
-.company--figma .cmp__slide {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  will-change: clip-path, opacity;
-}
-.company--figma .cmp__slide img {
+.company--figma .cmp__photo img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  will-change: transform;
+  /* 書き出しはフレーム全幅(1440)なので、右側の絵柄が出るよう寄せる */
+  object-position: right center;
 }
-
 /* ラベル(215:23995 x92 y91)。en 24/1.8 が43.2高なので ja は自然に y43 に乗る */
 /* Frame 151 (215:23995): x=92 y=51 */
 .company--figma .cmp__label {
@@ -2785,31 +2771,6 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
 }
 /* 白カード(257:27658 x69 y274 680x425 pad24) */
 /* Frame 166 (257:27658): x=309 y=51 / 680x388 / 内側 24 */
-/* 情報パネルの登場。下からのフェードにせず、下端が開くように立ち上げる。
-   Company/会社概要 → 会社情報 の順に 80ms ずらす。 */
-.js-reveal .company--figma .cmp__label.reveal,
-.js-reveal .company--figma .cmp__card.reveal {
-  opacity: 0;
-  transform: translateY(18px);
-  clip-path: inset(0 0 12% 0);
-  transition:
-    opacity   1.05s cubic-bezier(.16, 1, .3, 1),
-    transform 1.05s cubic-bezier(.16, 1, .3, 1),
-    clip-path 1.05s cubic-bezier(.16, 1, .3, 1);
-}
-.js-reveal .company--figma .cmp__card.reveal { transition-delay: .08s; }
-.js-reveal .company--figma .cmp__label.reveal.is-visible,
-.js-reveal .company--figma .cmp__card.reveal.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-  clip-path: inset(0);
-}
-@media (prefers-reduced-motion: reduce) {
-  .js-reveal .company--figma .cmp__label.reveal,
-  .js-reveal .company--figma .cmp__card.reveal {
-    opacity: 1; transform: none; clip-path: none; transition: none;
-  }
-}
 .company--figma .cmp__card {
   position: absolute;
   left: calc(var(--u) * 309);
@@ -2859,7 +2820,7 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
     aspect-ratio: 1440 / 813;
     height: auto;
   }
-  .company--figma .cmp__slide img { object-position: center }
+  .company--figma .cmp__photo img { object-position: center }
   .company--figma .cmp__label,
   .company--figma .cmp__card {
     position: static;
