@@ -1797,7 +1797,9 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
 @media (min-width: 768px) {
   .news { padding: 0 0 96px; }
 }
-.news--brushup { padding-top: 120px; }
+/* Service の暗転が白へ戻り切るための助走。ここが詰まっていると、
+   まだ沈んでいる下地の上に News が乗って文字が読めなくなる。 */
+.news--brushup { padding-top: 200px; }
 .news__list {
   display: grid;
   grid-template-columns: 1fr;

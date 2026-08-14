@@ -175,13 +175,18 @@
       el.setAttribute('transform', 'translate(0 ' + (L_RISE * (1 - u)).toFixed(2) + ')');
     });
 
-    /* 粒子(タイル→粒に痩せながら散る) */
+    /* 崩壊(タイル → 進行方向へ伸びる細い線 → 消える)
+       黒い粉が飛び散る絵は粒が点にしか見えず粗い。動いている粒は
+       速度の向きへ尾を引いた「線」として描き、進むほど細く長くなって
+       溶けるようにする。字形はそのまま流れて薄い線の束になる。 */
     const q = canvas.__q || 1;
     const ctx = canvas.getContext('2d');
     ctx.setTransform(q, 0, 0, q, 0, 0);
     ctx.clearRect(0, 0, DW, DH);
     if (t >= SCATTER && t <= SCATTER + SCATTER_LEN) {
       ctx.fillStyle = '#191919';
+      ctx.strokeStyle = '#191919';
+      ctx.lineCap = 'round';
       for (const p of particles) {
         const lt = t - SCATTER - p.delay;
         if (lt < 0) {
@@ -202,10 +207,24 @@
         const fade = u < 0.14 ? 1 : Math.pow(1 - (u - 0.14) / 0.86, 2.1);
         const alpha = p.aMax * fade;
         if (alpha <= 0.010) continue;
-        /* 大きさ: タイルから粒へ痩せる。以後は 1px 前後の砂粒 */
-        const sz = lerp(STEP_F, p.size, smooth(clamp01(u * 3.0)));
         ctx.globalAlpha = alpha;
-        ctx.fillRect(px - sz / 2, py - sz / 2, sz, sz);
+        /* 尾の長さは「その瞬間の速さ」に比例(残像と同じ理屈)。
+           出た直後は短く、伸び切ってから細く消える。 */
+        const v0 = Math.hypot(p.vx, p.vy);
+        const spd = v0 * Math.exp(-sec * 1.25);
+        const grow = smooth(clamp01(u * 2.4));
+        const tail = Math.min(110, spd * 0.052) * (0.28 + 0.72 * grow);
+        const th = lerp(STEP_F * 0.85, 0.5, smooth(clamp01(u * 1.5)));
+        if (tail < 1.2) {
+          ctx.fillRect(px - th / 2, py - th / 2, th, th);
+          continue;
+        }
+        const ux = p.vx / (v0 || 1), uy = p.vy / (v0 || 1);
+        ctx.lineWidth = th;
+        ctx.beginPath();
+        ctx.moveTo(px - ux * tail, py - uy * tail);
+        ctx.lineTo(px, py);
+        ctx.stroke();
       }
       ctx.globalAlpha = 1;
     }

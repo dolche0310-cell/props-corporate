@@ -338,7 +338,18 @@
       //   抜け: 下端が画面の 65% を切った時点から 0.55vh かけて 1→0。
       //         次の News が主役になる前に白へ戻る。
       var fadeIn = clamp01((vh - r.top) / (vh * 0.65));
-      var fadeOut = clamp01((r.bottom - vh * 0.10) / (vh * 0.55));
+      // 抜けは「Service の下端」ではなく「次のセクション(News)の上端」で測る。
+      // Service はピン留めのぶん縦に長く、下端基準だと News に入っても
+      // まだ暗いままになる。News の頭が画面の 88% に来た時点から沈静を
+      // 始め、55% に達するまでに白へ戻し切る。
+      var nextSec = svcSection.nextElementSibling;
+      var fadeOut = 1;
+      if (nextSec) {
+        var nr = nextSec.getBoundingClientRect();
+        fadeOut = clamp01((nr.top - vh * 0.55) / (vh * 0.33));
+      } else {
+        fadeOut = clamp01((r.bottom - vh * 0.10) / (vh * 0.55));
+      }
       var p = Math.min(fadeIn, fadeOut);
       document.documentElement.style.setProperty('--svc-dark', p.toFixed(3));
     };
