@@ -1936,7 +1936,9 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
 .news__date-day { font-size: 20px; }
 .news__list--rows .news__body { flex: 1; min-width: 0; }
 @media (min-width: 768px) {
-  .news__list--rows .news__body { width: 55.87%; flex: none; }   /* 700 / 1253 */
+  /* 右の写真枠へ寄せるため本文段を 35px 広げる(700 → 735 / 1253)。
+     写真枠は絶対配置なので幅計算に入らず、他の要素は動かない */
+  .news__list--rows .news__body { width: 58.66%; flex: none; }   /* 735 / 1253 */
 }
 .news__list--rows .news__title {
   font-family: var(--font-alata);
