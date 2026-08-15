@@ -397,13 +397,23 @@ html.splash-lock, html.splash-lock body { overflow: hidden; }
        画面上端との間に隙間が出ないようにする */
     inset: -20px 0 0;
     z-index: -1;
-    background: rgba(255, 255, 255, .72);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    /* backdrop-filter は使わない。スクロールのたびに背後を再ぼかす
+       合成が走り、ページ全体の上下スクロールがガタつく主因だった。
+       ぼかしの代わりに白の濃度を上げて可読性を保つ */
+    background: rgba(255, 255, 255, .88);
     opacity: 0;
     transition: opacity .3s ease;
   }
   .site-header--brushup.is-overlapping::before { opacity: 1; }
+  /* Service の暗転中はヘッダーの白い板で背景を分断しない。
+     板は消し、ロゴ(黒1色のSVG img)とナビ文字を白へ反転する。
+     切替は暗転と同じ .32s で同調させる。 */
+  html.svc-dark .site-header--brushup.is-overlapping::before { opacity: 0; }
+  html.svc-dark .site-header--brushup .logo__mark {
+    filter: brightness(0) invert(1);
+  }
+  html.svc-dark .site-header--brushup .nav__link { color: #fff; }
+  .site-header--brushup .logo__mark { transition: filter .32s ease; }
   /* miai_logo 215:23935 */
   .site-header--brushup .logo__mark { width: 104.613px; height: 38.098px; }
   /* nav-links 215:23942 (611x28)。Alata Regular 16px / tracking .8px /
@@ -416,6 +426,7 @@ html.splash-lock, html.splash-lock body { overflow: hidden; }
     letter-spacing: .8px;
     text-transform: uppercase;
     color: #191919;
+    transition: color .32s ease;
     position: relative;
     line-height: 1;
     padding: 4px 0;
@@ -992,6 +1003,9 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   will-change: transform;
 }
 .site-header--brushup.is-hidden { transform: translateY(calc(-100% - 24px)); }
+/* Service のピン留め中は、上スクロールでも出さない(ステージ上部の
+   Service ラベルに被るため)。抜ければ通常の出没に戻る */
+.site-header--brushup.is-pin-locked { transform: translateY(calc(-100% - 24px)); }
 @media (prefers-reduced-motion: reduce) {
   .site-header--brushup { transition: none; }
   .site-header--brushup .site-header__inner { opacity: 1; transform: none; transition: none; }
@@ -1714,8 +1728,10 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
      沈み残りのグレー地の上でオレンジを出すと煉瓦色に濁って見えるため、
      中間値では変化させない(--mq-white は js/main.js が 0/1 で書く)。
      A-2(darkblack)はページ側で --mq-accent をグレーに固定している。 */
+  /* 暗転中のグレーは少し透かす(α.55)。下のダークグレーと
+     メッシュのオレンジがわずかに透けて、地の色と馴染む */
   color: color-mix(in srgb, var(--mq-accent, var(--color-primary))
-                   calc(var(--mq-white, 0) * 100%), #4B4B4B);
+                   calc(var(--mq-white, 0) * 100%), rgba(115, 115, 115, .55));
   transition: color .5s ease;
 }
 @keyframes service-marquee {

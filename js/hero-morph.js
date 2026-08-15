@@ -61,7 +61,7 @@
     .getPropertyValue('--color-primary') || '#FF2400').trim() || '#FF2400';
 
   /* ---------- アウトライン ---------- */
-  const N = 64;
+  const N = 128;   /* 輪郭の点数。64だと大きな図形の角がサンプル間に落ちて歪む */
   const clamp01 = (t) => (t < 0 ? 0 : t > 1 ? 1 : t);
   const smooth = (t) => { const u = clamp01(t); return u * u * u * (u * (u * 6 - 15) + 10); };
   const lerp = (a, b, u) => a + (b - a) * u;

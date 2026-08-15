@@ -375,6 +375,8 @@
       if (p !== lastSvcDark) {
         lastSvcDark = p;
         document.documentElement.style.setProperty('--svc-dark', String(p));
+        // ヘッダーの反転は中間色を作らず、半分沈んだところで切り替える
+        document.documentElement.classList.toggle('svc-dark', p >= 0.5);
         // マーキーの色変化は「地が完全に白」のときだけ(0/1 の二値)。
         // 沈み残りのグレー地でオレンジを出すと濁って見える。
         var white = p === 0 ? 1 : 0;
@@ -487,6 +489,13 @@
       }
       setServiceActive(svcIndexCurrent);
       window.__miaiServiceProgress = progress;
+
+      // ピン留めの最中(1〜2枚目の切替を含む)はグロナビを出さない。
+      // 出すとステージ上部の Service ラベルに被る。ピンを抜ければ従来どおり
+      if (siteHeader) {
+        siteHeader.classList.toggle('is-pin-locked',
+          progress > 0.02 && progress < 0.98);
+      }
 
       // The text list slides up continuously with scroll progress (not a
       // discrete jump), one "slot" (the first item's height) per item.
