@@ -377,16 +377,9 @@
         document.documentElement.style.setProperty('--svc-dark', String(p));
         // ヘッダーの反転は中間色を作らず、半分沈んだところで切り替える
         document.documentElement.classList.toggle('svc-dark', p >= 0.5);
-        // マーキーの色変化は「地が完全に白」のときだけ(0/1 の二値)。
-        // 沈み残りのグレー地でオレンジを出すと濁って見える。
-        var white = p === 0 ? 1 : 0;
-        if (white !== lastMqWhite) {
-          lastMqWhite = white;
-          document.documentElement.style.setProperty('--mq-white', String(white));
-        }
       }
     };
-    var lastSvcDark = -1, lastMqWhite = -1;
+    var lastSvcDark = -1;
     addScrollTask(updateSvcDark);
   }
 
@@ -422,25 +415,22 @@
          初速と終速が目に付いていた。 */
       easeXf: function (t) { return t * t * t * (t * (t * 6 - 15) + 10); },
 
-      stag: 0.18,   /* 行ごとの遅れ */
-      rise: 20,     /* 立ち上がりの持ち上げ(px)。主役はフェード */
+      stag: 0.22,   /* 行ごとの遅れ。段差があるほど「順に灯る」感じが出る */
 
       /* 映像を枠の中で流す。枠自体は動かさない。 */
       media: function (el, pct) {
         if (el) el.style.transform = 'translate3d(' + pct.toFixed(2) + '%,0,0)';
       },
 
-      /* 本文を1行ずつフェードで出し入れする。t=1 で出そろい、t=0 で消える。
-         入りは上の行から、抜けは下の行から順に。ほんの少しだけ持ち上げる。 */
+      /* 本文は動かさず、その場で1行ずつ濃度だけを変える。
+         t=1 で出そろい、t=0 で消える。入りは上の行から、
+         抜けは下の行から順に。位置は一切動かさない。 */
       lines: function (arr, t) {
         var span = 1 - (arr.length - 1) * SVC.stag;
         for (var i = 0; i < arr.length; i++) {
           var u = (t - i * SVC.stag) / span;
           u = u < 0 ? 0 : u > 1 ? 1 : u;
-          u = SVC.easeXf(u);
-          arr[i].style.opacity = u.toFixed(3);
-          arr[i].style.transform =
-            'translate3d(0,' + ((1 - u) * SVC.rise).toFixed(2) + 'px,0)';
+          arr[i].style.opacity = SVC.easeXf(u).toFixed(3);
         }
       }
     };

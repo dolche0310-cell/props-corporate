@@ -1531,11 +1531,10 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
     opacity: 1;
     pointer-events: none;
   }
-  /* 本文の行は1行ずつフェードで入れ替わる(値は js が書く)。
-     ここでは合成レイヤーだけ先に確保して、立ち上がりの初回で
-     レイヤーを作り直さないようにする。 */
+  /* 本文の行は位置を動かさず、1行ずつ濃度だけで入れ替わる
+     (値は js が書く)。合成レイヤーは先に確保しておく。 */
   .service--brushup .service__text > * {
-    will-change: transform, opacity;
+    will-change: opacity;
     backface-visibility: hidden;
   }
   /* 映像は枠を動かさず、枠の中を流す(枠は overflow:hidden 済み)。
@@ -1764,6 +1763,10 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
 }
 /* 右から左へ常にゆっくり流れるマーケー。同じ文言を2回並べて
    -50%まで送ることで、繋ぎ目のない無限ループにしている。 */
+/* 地が白へ戻るのに合わせてマーキーも一緒に引く。ピンが外れたあとも
+   マーキーだけが 270px ほど画面に残るため、地だけ白に戻すと
+   白地に帯が取り残される。--svc-dark は js/main.js が書く進行度。 */
+.service--brushup .service__marquee { opacity: var(--svc-dark, 0); }
 .service--brushup .service__marquee-track {
   display: inline-flex;
   width: max-content;
@@ -1784,15 +1787,13 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   /* Figma(253:27115)は #3D3430 → rgba(255,239,231,.23) → #4B4B4B の
      グラデーションだが、左端と中間に暖色が入って橙が混ざって見えるため、
      指示によりグラデーションをやめて中立グレー1色にしている。
-     アクセント色になるのは「背景が完全に白へ戻り切ったとき」だけ。
-     沈み残りのグレー地の上でオレンジを出すと煉瓦色に濁って見えるため、
-     中間値では変化させない(--mq-white は js/main.js が 0/1 で書く)。
-     A-2(darkblack)はページ側で --mq-accent をグレーに固定している。 */
-  /* 暗転中のグレーは少し透かす(α.55)。下のダークグレーと
-     メッシュのオレンジがわずかに透けて、地の色と馴染む */
-  color: color-mix(in srgb, var(--mq-accent, var(--color-primary))
-                   calc(var(--mq-white, 0) * 100%), rgba(115, 115, 115, .55));
-  transition: color .5s ease;
+     地の暗さに関係なく1色。以前は地が白へ戻り切ったところで
+     アクセント色へ反転させていたが、その状態が起きるのは
+     ピンが外れてパネルが流れ去ったあとの区間だけで、
+     白地に赤い帯だけが取り残されて見えていた。
+     暗転中のグレーは少し透かす(α.55)。下のダークグレーと
+     メッシュのオレンジがわずかに透けて、地の色と馴染む。 */
+  color: rgba(115, 115, 115, .55);
 }
 @keyframes service-marquee {
   from { transform: translateX(0); }
