@@ -11,15 +11,16 @@
    オレンジの発光とぼかしは安く見えるため使わない。粒子の集合と、
    そこから面が立ち上がるところだけで見せる。ぼかしは一切かけない。
 
-   時間軸(ms):
-     0-400      散開。ごく微細なドリフトのみ
-     400-1700   収束。粒ごとに 30-100ms ずらし、軽い弧を描いて集まる。
+   時間軸(ms) ※全体 1400ms:
+     0-160      散開。ごく微細なドリフトのみ
+     160-880    収束。粒ごとにずらし、ドリフトの先端から反転せず
+                そのまま軽い弧を描いて集まる。
                 同時に C 粒子が暖色 → 黒(02 Gather の色)へ
                 (色は --lm-particle-warm / --lm-particle-pale。
                  A-2 は無彩色に差し替える)
-     1700-1900  粒でできた MiAI を認識できる間
-     1900-2600  面の形成。中心から広がる遮蔽でロゴが実体化し、粒子が引く
-     2600-      完全静止。静止デザインと同一
+     820-1300   面の形成。中心から広がる遮蔽でロゴが実体化し、
+                粒子は 880-1290 で引いていく(収束の尾と重なる)
+     1400-      完全静止。静止デザインと同一
 
    終了後はステージを外し、元の静止ロゴだけが残る。
    IntersectionObserver で一度だけ。開発用に window.__replayAboutLogo()。 */
@@ -126,15 +127,18 @@
     const A = (el, kf, opt) => { const a = el.animate(kf, opt); anims.push(a); return a; };
 
     /* --- 粒子: 微細なドリフト → 弧を描いて収束 ---------------------
-       さっと下へスクロールした時にも見終えられるよう、全体を 1050ms に。
-       粒子の収束と面の形成を重ね、待ち時間をつくらない。 */
-    const TOTAL = 1050;
-    const SPAN = 640;
+       ピン留めで必ず頭から見てもらえるので、スプラッシュ/FV と同じ
+       呼吸(ゆったり入ってそっと止まる)に合わせて 1400ms とる。
+       以前はドリフトで流れたあと散開位置へ「戻って」から収束を始めて
+       いて、この方向反転がぎこちなさの正体だった。ドリフトの先端から
+       そのまま弧へ入る1本の連続した動きにする。 */
+    const TOTAL = 1400;
+    const SPAN = 880;
     P.items.forEach((it) => {
       const { dx, dy, sc } = it;
       const at = (x, y, s) => 'translate(' + x.toFixed(2) + 'px, ' + y.toFixed(2) + 'px) scale(' + s.toFixed(3) + ')';
-      const gStart = 120 + rnd() * 45;                  /* 立ち上がりのばらつき */
-      const gDur = 450 + rnd() * 110 - 55;              /* 収束 0.68-0.84s */
+      const gStart = 160 + rnd() * 60;                  /* 立ち上がりのばらつき */
+      const gDur = 620 + rnd() * 150 - 75;              /* 収束 0.55-0.70s */
       const gEnd = Math.min(SPAN, gStart + gDur);
       const w1 = (rnd() - .5) * 6, w2 = (rnd() - .5) * 6;   /* ±3px のドリフト */
       /* 直線だけだと機械的なので、進行方向と直交する向きへ 10-20px 膨らませる */
@@ -144,9 +148,9 @@
       const my = dy * .5 + (dx / len) * bow;
 
       A(it.el, [
+        /* ドリフトの先端(dx+w1)から戻らずにそのまま弧へ。反転しない */
         { offset: 0,                transform: at(dx, dy, sc), easing: 'ease-in-out' },
-        { offset: (gStart * .55) / SPAN, transform: at(dx + w1, dy + w2, sc), easing: 'ease-in-out' },
-        { offset: gStart / SPAN,    transform: at(dx, dy, sc), easing: EASE },
+        { offset: (gStart * .7) / SPAN, transform: at(dx + w1, dy + w2, sc), easing: EASE },
         { offset: (gStart + gEnd) / 2 / SPAN, transform: at(mx, my, 1 + (sc - 1) * .35) },
         { offset: gEnd / SPAN,      transform: at(0, 0, 1) },
         { offset: 1,                transform: at(0, 0, 1) }
@@ -165,21 +169,24 @@
 
     /* --- 粒子は面が出来上がるにつれて薄くなる ---------------------- */
     A(P.dust, [
-      { offset: 0, opacity: 1 }, { offset: 640 / TOTAL, opacity: 1 },
-      { offset: 940 / TOTAL, opacity: 0 }, { offset: 1, opacity: 0 }
+      { offset: 0, opacity: 1 }, { offset: 880 / TOTAL, opacity: 1, easing: 'ease-in-out' },
+      { offset: 1290 / TOTAL, opacity: 0 }, { offset: 1, opacity: 0 }
     ], { duration: TOTAL, fill: 'both' });
 
-    /* --- 面の形成: 中心から広がる遮蔽でロゴが実体化 ---------------- */
+    /* --- 面の形成: 中心から広がる遮蔽でロゴが実体化 ----------------
+       linear だと立ち上がりと止まりに角が立つ。FV と同じ
+       「そっと入ってそっと止まる」曲線で広げる。 */
     A(P.reveal, [
       { offset: 0, transform: 'scale(0)' },
-      { offset: 600 / TOTAL, transform: 'scale(0)' },
-      { offset: 940 / TOTAL, transform: 'scale(1)' },
+      { offset: 820 / TOTAL, transform: 'scale(0)', easing: 'cubic-bezier(.45, 0, .25, 1)' },
+      { offset: 1300 / TOTAL, transform: 'scale(1)' },
       { offset: 1, transform: 'scale(1)' }
-    ], { duration: TOTAL, easing: 'linear', fill: 'both' });
+    ], { duration: TOTAL, fill: 'both' });
     A(P.solid, [
-      { offset: 0, opacity: 0 }, { offset: 600 / TOTAL, opacity: 0 },
-      { offset: 870 / TOTAL, opacity: 1 }, { offset: 1, opacity: 1 }
-    ], { duration: TOTAL, easing: 'linear', fill: 'both' });
+      { offset: 0, opacity: 0 },
+      { offset: 820 / TOTAL, opacity: 0, easing: 'ease-in-out' },
+      { offset: 1180 / TOTAL, opacity: 1 }, { offset: 1, opacity: 1 }
+    ], { duration: TOTAL, fill: 'both' });
 
     /* --- 最後に静止ロゴへ引き渡す(位置も色も形も同じものが残る) ---- */
     const t = setTimeout(() => {
@@ -219,12 +226,37 @@
        (自前で scroll を購読して rAF を回すと1フレームに何度も
        レイアウトを読むことになるため)。 */
     const scroller = document.getElementById('about-scroller');
-    if (scroller && window.__miaiOnScroll &&
+    const pinEl = scroller && scroller.querySelector('.abt-pin');
+    if (scroller && pinEl && window.__miaiOnScroll &&
         matchMedia('(min-width: 768px)').matches) {
-      let fired = false;
+      let fired = false, unpinned = false, collapsed = false;
       window.__miaiOnScroll(() => {
-        if (fired) return;
-        if (scroller.getBoundingClientRect().top <= 0) { fired = true; run(); }
+        const r = scroller.getBoundingClientRect();
+        if (!fired) {
+          if (r.top > 0) return;
+          fired = true;
+          run();
+          return;
+        }
+        /* 止めるのは初回だけ。2回目からは普通に流す。
+           解除は「変化する場所が画面の外」でしか行わない。
+           1) セクションが画面より上へ抜けたら sticky を切る。
+              高さは変えないので文書の高さも変わらず、画面は動かない。 */
+        if (!unpinned && r.bottom <= 0) {
+          unpinned = true;
+          scroller.classList.add('is-unpinned');
+          return;
+        }
+        /* 2) 余った走行ぶんの高さを畳む。畳むのは pin より下の空きだけ
+              なので、About の見えは動かない。動くのは pin より下の要素
+              だけで、pin の下端が画面外にあればそれも見えない。 */
+        if (unpinned && !collapsed) {
+          const p = pinEl.getBoundingClientRect();
+          if (p.bottom >= innerHeight) {
+            collapsed = true;
+            scroller.classList.add('is-collapsed');
+          }
+        }
       });
       return;
     }

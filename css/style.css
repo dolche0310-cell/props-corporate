@@ -2616,6 +2616,17 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
     display: grid;
     align-content: center;
   }
+
+  /* 一度アニメーションを見せたら、以後は普通に流れるようにする。
+     解除は2段。どちらも「変化する場所が画面の外」でしか実行しない。
+     ・is-unpinned: セクションが画面より上へ抜けてから sticky を切る。
+       高さは 160svh のままなので文書の高さが変わらず、画面は動かない。
+     ・is-collapsed: 余った走行ぶんの高さを畳む。畳むのは pin より下の
+       空きだけで、pin 自体の高さ(100svh)と中身の位置は変えない。
+       だから About の見えは動かず、動くのは pin より下にある要素だけ。
+       それが画面の外にある時にしか実行しない。 */
+  .about--figma .abt-scroller.is-unpinned .abt-pin { position: static; }
+  .about--figma .abt-scroller.is-collapsed { height: auto; }
 }
 .about--figma .abt {
   position: relative;
