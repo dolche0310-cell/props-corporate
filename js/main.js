@@ -413,48 +413,15 @@
          動き出しと止まりに角が立たず、ふわりと入ってふわりと止まる。
          smoothstep(3t^2-2t^3)は2階微分が端で残るため、切り替わりの
          初速と終速が目に付いていた。 */
-      easeXf: function (t) { return t * t * t * (t * (t * 6 - 15) + 10); },
-
-      stag: 0.22,   /* 行ごとの遅れ。段差があるほど「順に灯る」感じが出る */
-
-      /* 映像を枠の中で流す。枠自体は動かさない。 */
-      media: function (el, pct) {
-        if (el) el.style.transform = 'translate3d(' + pct.toFixed(2) + '%,0,0)';
-      },
-
-      /* 本文は動かさず、その場で1行ずつ濃度だけを変える。
-         t=1 で出そろい、t=0 で消える。入りは上の行から、
-         抜けは下の行から順に。位置は一切動かさない。 */
-      lines: function (arr, t) {
-        var span = 1 - (arr.length - 1) * SVC.stag;
-        for (var i = 0; i < arr.length; i++) {
-          var u = (t - i * SVC.stag) / span;
-          u = u < 0 ? 0 : u > 1 ? 1 : u;
-          arr[i].style.opacity = SVC.easeXf(u).toFixed(3);
-        }
-      }
+      easeXf: function (t) { return t * t * t * (t * (t * 6 - 15) + 10); }
     };
-
-    /* 面ごとの本文行(見出し / 本文 / リンク)と映像 */
-    var serviceLines = [], serviceMedia = [];
-    serviceItems.forEach(function (el) {
-      serviceLines.push(Array.prototype.slice.call(
-        el.querySelectorAll('.service__text > *')));
-      serviceMedia.push(el.querySelector('.service__loop-video'));
-    });
 
     var svcLastP = -1;
     var updateServiceProgress = function () {
       if (!serviceDesktopMq.matches) {
         serviceItems.forEach(function (el, i) {
-          el.style.transform = '';
           el.style.opacity = '';
           el.classList.toggle('is-active', i === 0);
-          serviceLines[i].forEach(function (n) {
-            n.style.transform = '';
-            n.style.opacity = '';
-          });
-          if (serviceMedia[i]) serviceMedia[i].style.transform = '';
         });
         serviceDigits.forEach(function (n) { n.style.opacity = ''; });
         window.__miaiServiceProgress = 0;
@@ -473,38 +440,25 @@
       svcLastP = p;
 
       /* 切替は 28%→72% の区間。区間外は 0/1 に張り付くので、
-         前後の滞在では一切ちらつかない。走行距離の44%を切替に充てて
-         あるので、面の移動量とスクロール量はおおむね 1:1 になる。 */
+         前後の滞在では一切ちらつかない。 */
       var xf = (p - SVC.v1End) / (SVC.xfEnd - SVC.v1End);
       xf = xf < 0 ? 0 : xf > 1 ? 1 : xf;
       var o2 = SVC.easeXf(xf);
 
-      /* 映像: 01 が枠の左へ抜けるのと同じ量だけ 02 が右から入る。
-         枠の幅に対する % なので画面幅が変わっても端で揃う。 */
-      var shift = o2 * 100;
-      SVC.media(serviceMedia[0], -shift);
-      SVC.media(serviceMedia[1], 100 - shift);
-
-      /* 本文: 出る側が先に消え、入る側が後から立つ。重なって
-         二重に読める時間を作らないよう、前半と後半に分けている。 */
-      var outT = o2 / 0.5;
-      outT = outT < 0 ? 0 : outT > 1 ? 1 : outT;
-      var inT = (o2 - 0.5) / 0.5;
-      inT = inT < 0 ? 0 : inT > 1 ? 1 : inT;
-      SVC.lines(serviceLines[0], 1 - outT);
+      /* 面ごと重ねて溶かす。本文も映像もひとつの面として一緒に
+         入れ替わる。位置は動かさない。濃度は互いに補い合う値
+         (1-o2 / o2)なので、途中で画面が空になる瞬間がない。 */
+      serviceItems[0].style.opacity = (1 - o2).toFixed(3);
       serviceItems[0].classList.toggle('is-active', o2 < 0.5);
       if (serviceItems[1]) {
-        SVC.lines(serviceLines[1], inT);
+        serviceItems[1].style.opacity = o2.toFixed(3);
         serviceItems[1].classList.toggle('is-active', o2 >= 0.5);
       }
-      /* 番号は同じ位置でクロスフェード。切替区間の真ん中あたり
-         (o2 30%→70%)で入れ替える。両者に sqrt を掛けた等パワーの
-         配合にしてあるので、途中で薄くなって沈む瞬間がない。 */
+      /* 番号も同じ進行度で溶かす。sqrt を掛けた等パワーの配合に
+         してあるので、途中で薄くなって沈む瞬間がない。 */
       if (serviceDigits.length > 1) {
-        var dg = (o2 - 0.3) / 0.4;
-        dg = dg < 0 ? 0 : dg > 1 ? 1 : dg;
-        serviceDigits[0].style.opacity = Math.sqrt(1 - dg).toFixed(3);
-        serviceDigits[1].style.opacity = Math.sqrt(dg).toFixed(3);
+        serviceDigits[0].style.opacity = Math.sqrt(1 - o2).toFixed(3);
+        serviceDigits[1].style.opacity = Math.sqrt(o2).toFixed(3);
       }
       window.__miaiServiceProgress = p;
 

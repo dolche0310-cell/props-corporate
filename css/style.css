@@ -1520,37 +1520,24 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
      CSS の時間ベース transition は持たせない。持たせると途中で
      スクロールを反転したとき時間側と進行度側が食い違い、
      「方向と映像の切替が矛盾する」状態になる。 */
-  /* 2面はステージに重ねて置く。面そのものは動かさない。
-     面ごと横に流すと、固定されている見出し(Service / 事業内容)の上を
-     映像が横切って画面が混線するため。カルーセルは映像枠の中だけで
-     成立させ、本文はその場でフェードさせる。 */
+  /* 2面はステージにぴたりと重ねて置き、面ごと濃度で入れ替える。
+     本文も映像もひとつの面として一緒に溶ける(オーバーレイ)。
+     位置は一切動かさない。横に流すと、固定されている見出しの上を
+     映像が横切ったり、枠の中に次の映像の帯が覗いたりして汚れる。
+     z-index は触らない。入れ替えの途中で重なり順を変えると、
+     ちょうど半分溶けたところで前後が入れ替わって跳ねて見える。 */
   .service--brushup .service__text-item {
     position: absolute;
     inset: 0;
     max-width: none;
-    opacity: 1;
     pointer-events: none;
-  }
-  /* 本文の行は位置を動かさず、1行ずつ濃度だけで入れ替わる
-     (値は js が書く)。合成レイヤーは先に確保しておく。 */
-  .service--brushup .service__text > * {
     will-change: opacity;
     backface-visibility: hidden;
   }
-  /* 映像は枠を動かさず、枠の中を流す(枠は overflow:hidden 済み)。
-     01 が左へ抜けるのと同じ量だけ 02 が右から入る。 */
-  .service--brushup .service__loop-video { will-change: transform; }
-
   /* js が値を書くまでの初期状態。2面は同じ位置に重なっているので、
-     ここで 02 を伏せておかないと最初の1描画で本文が二重に出る。 */
-  .service--brushup [data-service-item="1"] .service__text > * { opacity: 0; }
-  .service--brushup [data-service-item="1"] .service__loop-video {
-    transform: translate3d(100%, 0, 0);
-  }
-  .service--brushup .service__text-item.is-active {
-    pointer-events: auto;
-    z-index: 2;
-  }
+     ここで 02 を伏せておかないと最初の1描画で二重に出る。 */
+  .service--brushup [data-service-item="1"] { opacity: 0; }
+  .service--brushup .service__text-item.is-active { pointer-events: auto; }
 
   /* パネルは背景なしの入れ物。ピン中に登場モーションの translateY が
      残っていると映像枠が上下に動くため、ここでは reveal を効かせない。
