@@ -395,6 +395,11 @@
   var serviceTextList = document.getElementById('service-text-list');
   var serviceItems = document.querySelectorAll('.service__text-item');
   var svcIndexCurrent = -1;   // 境界ヒステリシス用の現在値
+  var svcPrevIndex = -1;      // 視聴ロックの切替検知用
+  var svcLockY = null;        // ロック中の固定スクロール位置
+  var svcLockUntil = 0;       // ロック解除時刻
+  var svcLockDone = false;    // 1回だけ効かせる
+  var svcPrevScrollBehavior = '';
 
   // Exposed for js/service-stage.js, which drives the floating image
   // layers off the same scroll progress without needing to duplicate
@@ -487,6 +492,30 @@
         var boundary = Math.max(rawIndex, svcIndexCurrent) / n;
         if (Math.abs(progress - boundary) > 0.045) svcIndexCurrent = rawIndex;
       }
+      // [視聴ロック] 2枚目に切り替わった瞬間、下方向のスクロールを
+      // 2.6秒だけその場に留める(初回のみ)。ピン中はステージが静止して
+      // いるので、見た目は「切替の間」になり、勝手に流れてしまわない。
+      // ・上方向はいつでも即解放(シームレスに戻れる)
+      // ・時間が来たら解放。次のスクロールから通常どおり下へ進む
+      if (!svcLockDone && svcPrevIndex === 0 && svcIndexCurrent === 1 &&
+          !reducedMotionMq.matches) {
+        svcLockDone = true;
+        svcLockY = window.scrollY;
+        svcLockUntil = performance.now() + 2600;
+        svcPrevScrollBehavior = document.documentElement.style.scrollBehavior;
+        document.documentElement.style.scrollBehavior = 'auto';
+      }
+      if (svcLockY !== null) {
+        if (performance.now() >= svcLockUntil || window.scrollY < svcLockY - 4) {
+          // 解放(時間切れ、または上へ戻った)
+          svcLockY = null;
+          document.documentElement.style.scrollBehavior = svcPrevScrollBehavior;
+        } else if (window.scrollY > svcLockY) {
+          window.scrollTo(0, svcLockY);
+        }
+      }
+      svcPrevIndex = svcIndexCurrent;
+
       setServiceActive(svcIndexCurrent);
       window.__miaiServiceProgress = progress;
 

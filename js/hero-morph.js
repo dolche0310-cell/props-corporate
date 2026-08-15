@@ -111,11 +111,13 @@
        回し切ったところで形が飛ぶことはない。 */
     { id: 's04', t: 720, e: 'soft', h: 140, spinIn: 190 * Math.PI / 180,
       list: [dotG(709.5, 292.5)] },
-    /* S05 */ { id: 's07', t: 540, e: 'soft', h: 680, dotsFill: true,
+    /* S05。divide: 1点→4点の分裂。時差と弧を掛けると中間形が波打った
+       ナメクジ状になり分断して見えるため、4つ同時に真っ直ぐ割れる */
+    { id: 's07', t: 540, e: 'soft', h: 680, dotsFill: true, divide: true,
       dots: [[669.5, 308.5, 26.5], [768.5, 308.5, 26.5],
              [669.5, 393.5, 26.5], [768.5, 393.5, 26.5]],
       list: [dotG(669.5, 308.5), dotG(768.5, 308.5), dotG(669.5, 393.5), dotG(768.5, 393.5)] },
-    /* S08 */ { id: 's10', t: 540, e: 'soft', h: 360, elastic: true,
+    /* S08 */ { id: 's10', t: 540, divide: true, e: 'soft', h: 360, elastic: true,
       caps: [[720.5, 382.5, 186, 26.5]],
       list: [S(capsule(720.5, 196.5, 720.5, 568.5, 26.5))] },
     /* S11。大きな円は画面中央に居るので、この時点ではまだ文字を出さない。
@@ -1062,7 +1064,8 @@
       pairKey = key;
     }
     const nPairs = pairCache.length;
-    const stag = nPairs > 1 ? Math.min(64, (st.t * 0.18) / (nPairs - 1)) : 0;
+    const stag = (st.divide || nPairs <= 1) ? 0
+               : Math.min(64, (st.t * 0.18) / (nPairs - 1));
     const actDur = st.t - stag * (nPairs - 1);
     needActors(nPairs);
     pairCache.forEach((pr, i) => {
@@ -1070,7 +1073,7 @@
       const ug = geoEase(local, st.e, strength);
       /* 弧: 中間で最大、両端で0。u=1 では必ず消える。
          回転で寄せる遷移(spinIn)では回転が曲線を担うので弧は掛けない */
-      const arc = st.spinIn ? 0
+      const arc = (st.spinIn || st.divide) ? 0
         : pr.bulge * 4 * ug * (1 - ug) * (i % 2 ? -1 : 1) * strength;
       const ax = pr.nx * arc, ay = pr.ny * arc;
       for (let j = 0; j < N; j++) {
