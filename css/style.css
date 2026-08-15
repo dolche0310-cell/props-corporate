@@ -1348,11 +1348,14 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
        0-35% 1本目 / 35-50% 切替 / 50-80% 2本目 / 80-100% 抜け
      2本目に 30%(=72svh)を割いてあるので、同じ速さで回しても
      2本目を見る時間が自然に生まれる(時間では待たせない)。 */
-  /* 走行距離。面が1256px 動くので、切替区間(js の 28%→72% = 全体の44%)に
-     およそ同じだけの距離を割り当てると、スクロール量と面の移動量がほぼ
-     1:1 になる。ここが短いとホイールの1ノッチで面が数百px 飛び、
-     切り替えが速く・カクついて見える。 */
-  .service__scroller { position: relative; height: 420svh; }
+  /* 走行距離。420svh は面を1256px 横に流していた頃の値で、
+     移動量とスクロール量を 1:1 にするために必要だった。いまは
+     位置が動かず濃度だけで入れ替わるので、その長さは「ピンで
+     画面が固定されたまま3画面ぶんスクロールしても何も動かない」
+     区間になってしまう(=セクションで止まって見える)。
+     走行距離 = 240-100 = 140svh。前後の滞在が各 0.3 画面、
+     溶け合いに 0.8 画面。 */
+  .service__scroller { position: relative; height: 240svh; }
   /* 等身大(100svh)の箱を top:0 で貼り、中身は天地中央に置く。
      以前は top:50svh + translateY(-50%) で見た目だけ中央に寄せており、
      レイアウト箱と見た目のズレを JS が負のマージンで補正していた。
@@ -1538,6 +1541,9 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
      ここで 02 を伏せておかないと最初の1描画で二重に出る。 */
   .service--brushup [data-service-item="1"] { opacity: 0; }
   .service--brushup .service__text-item.is-active { pointer-events: auto; }
+  /* 文字は面の濃度に掛け算される別系統(値は js が書く)。
+     映像は面と一緒に溶けるが、文字だけは前後が重ならない。 */
+  .service--brushup .service__text { will-change: opacity; }
 
   /* パネルは背景なしの入れ物。ピン中に登場モーションの translateY が
      残っていると映像枠が上下に動くため、ここでは reveal を効かせない。
@@ -1750,10 +1756,6 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
 }
 /* 右から左へ常にゆっくり流れるマーケー。同じ文言を2回並べて
    -50%まで送ることで、繋ぎ目のない無限ループにしている。 */
-/* 地が白へ戻るのに合わせてマーキーも一緒に引く。ピンが外れたあとも
-   マーキーだけが 270px ほど画面に残るため、地だけ白に戻すと
-   白地に帯が取り残される。--svc-dark は js/main.js が書く進行度。 */
-.service--brushup .service__marquee { opacity: var(--svc-dark, 0); }
 .service--brushup .service__marquee-track {
   display: inline-flex;
   width: max-content;
@@ -1774,13 +1776,15 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   /* Figma(253:27115)は #3D3430 → rgba(255,239,231,.23) → #4B4B4B の
      グラデーションだが、左端と中間に暖色が入って橙が混ざって見えるため、
      指示によりグラデーションをやめて中立グレー1色にしている。
-     地の暗さに関係なく1色。以前は地が白へ戻り切ったところで
-     アクセント色へ反転させていたが、その状態が起きるのは
-     ピンが外れてパネルが流れ去ったあとの区間だけで、
-     白地に赤い帯だけが取り残されて見えていた。
-     暗転中のグレーは少し透かす(α.55)。下のダークグレーと
-     メッシュのオレンジがわずかに透けて、地の色と馴染む。 */
-  color: rgba(115, 115, 115, .55);
+     アクセント色になるのは「背景が完全に白へ戻り切ったとき」だけ。
+     沈み残りのグレー地の上でオレンジを出すと煉瓦色に濁って見えるため、
+     中間値では変化させない(--mq-white は js/main.js が 0/1 で書く)。
+     A-2(darkblack)はページ側で --mq-accent をグレーに固定している。 */
+  /* 暗転中のグレーは少し透かす(α.55)。下のダークグレーと
+     メッシュのオレンジがわずかに透けて、地の色と馴染む */
+  color: color-mix(in srgb, var(--mq-accent, var(--color-primary))
+                   calc(var(--mq-white, 0) * 100%), rgba(115, 115, 115, .55));
+  transition: color .5s ease;
 }
 @keyframes service-marquee {
   from { transform: translateX(0); }

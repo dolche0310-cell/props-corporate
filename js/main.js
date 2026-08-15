@@ -377,9 +377,16 @@
         document.documentElement.style.setProperty('--svc-dark', String(p));
         // ヘッダーの反転は中間色を作らず、半分沈んだところで切り替える
         document.documentElement.classList.toggle('svc-dark', p >= 0.5);
+        // マーキーの色変化は「地が完全に白」のときだけ(0/1 の二値)。
+        // 沈み残りのグレー地でオレンジを出すと濁って見える。
+        var white = p === 0 ? 1 : 0;
+        if (white !== lastMqWhite) {
+          lastMqWhite = white;
+          document.documentElement.style.setProperty('--mq-white', String(white));
+        }
       }
     };
-    var lastSvcDark = -1;
+    var lastSvcDark = -1, lastMqWhite = -1;
     addScrollTask(updateSvcDark);
   }
 
@@ -407,8 +414,8 @@
          スクロール位置が飛んでいたのがガタつきの主因だった
        --------------------------------------------------------------- */
     var SVC = {
-      v1End:   0.28,   /* 1本目を見せ切る */
-      xfEnd:   0.72,   /* 切替が終わる    */
+      v1End:   0.22,   /* 1本目を見せ切る */
+      xfEnd:   0.78,   /* 切替が終わる    */
       /* smootherstep。両端で1階・2階微分がどちらも 0 になるので、
          動き出しと止まりに角が立たず、ふわりと入ってふわりと止まる。
          smoothstep(3t^2-2t^3)は2階微分が端で残るため、切り替わりの
@@ -416,12 +423,21 @@
       easeXf: function (t) { return t * t * t * (t * (t * 6 - 15) + 10); }
     };
 
+    /* 面ごとの本文ブロック。映像は面と一緒に溶かしてよいが、
+       文字は溶けている最中に前後が二重に読めてしまうため、
+       ここだけ「出る側が消え切ってから入る側が出る」順送りにする。 */
+    var serviceText = [];
+    serviceItems.forEach(function (el) {
+      serviceText.push(el.querySelector('.service__text'));
+    });
+
     var svcLastP = -1;
     var updateServiceProgress = function () {
       if (!serviceDesktopMq.matches) {
         serviceItems.forEach(function (el, i) {
           el.style.opacity = '';
           el.classList.toggle('is-active', i === 0);
+          if (serviceText[i]) serviceText[i].style.opacity = '';
         });
         serviceDigits.forEach(function (n) { n.style.opacity = ''; });
         window.__miaiServiceProgress = 0;
@@ -439,7 +455,7 @@
       if (p === svcLastP) return;      /* 無変化なら書かない */
       svcLastP = p;
 
-      /* 切替は 28%→72% の区間。区間外は 0/1 に張り付くので、
+      /* 切替は 22%→78% の区間。区間外は 0/1 に張り付くので、
          前後の滞在では一切ちらつかない。 */
       var xf = (p - SVC.v1End) / (SVC.xfEnd - SVC.v1End);
       xf = xf < 0 ? 0 : xf > 1 ? 1 : xf;
@@ -453,6 +469,20 @@
       if (serviceItems[1]) {
         serviceItems[1].style.opacity = o2.toFixed(3);
         serviceItems[1].classList.toggle('is-active', o2 >= 0.5);
+      }
+
+      /* 文字だけは重ねない。面の濃度に掛け算されるので、ここを
+         前半で 0 にしておけば、溶けている最中に前後の文字が
+         二重に読めることがない。中点でちょうど受け渡す。 */
+      var tOut = o2 / 0.5;
+      tOut = tOut < 0 ? 0 : tOut > 1 ? 1 : tOut;
+      var tIn = (o2 - 0.5) / 0.5;
+      tIn = tIn < 0 ? 0 : tIn > 1 ? 1 : tIn;
+      if (serviceText[0]) {
+        serviceText[0].style.opacity = (1 - SVC.easeXf(tOut)).toFixed(3);
+      }
+      if (serviceText[1]) {
+        serviceText[1].style.opacity = SVC.easeXf(tIn).toFixed(3);
       }
       /* 番号も同じ進行度で溶かす。sqrt を掛けた等パワーの配合に
          してあるので、途中で薄くなって沈む瞬間がない。 */
