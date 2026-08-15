@@ -10,8 +10,12 @@
      <svg>
        <defs><mask id><path(センターライン, 太い白stroke)/>…</mask></defs>
        <g mask="url(#id)"> Figmaの完成Vector </g>   ← 露出していく
-       <g class="pen">      同じセンターライン(細い白) </g> ← ペン先
      </svg>
+
+   軌跡そのものを細い線で重ねて見せる「ペン先」は持たない。
+   センターラインは手起こしで字形の芯と完全には一致しないため、
+   露出した字形の上に細線が乗ると二重の輪郭に見えてしまう。
+   書いている感じは字形が画の順に伸びることだけで出す。
 
    センターラインは Figma に存在しない(字形はアウトライン化された面)ため、
    各グリフの骨格に沿って手で起こしている。座標は各SVGの viewBox 基準。  */
@@ -57,9 +61,6 @@
     mask.setAttribute('id', uid);
     mask.setAttribute('maskUnits', 'userSpaceOnUse');
 
-    const pen = document.createElementNS(NS, 'g');
-    pen.setAttribute('class', 'kv-pen');
-
     strokes.forEach((s) => {
       /* マスク側: 完成字形を確実に覆えるよう太めに引く */
       const m = document.createElementNS(NS, 'path');
@@ -72,20 +73,8 @@
       m.setAttribute('fill', 'none');
       mask.appendChild(m);
 
-      /* ペン先: 同じ軌跡を細い白で。描き終わったら消える */
-      const p = document.createElementNS(NS, 'path');
-      p.setAttribute('d', s.d);
-      p.setAttribute('class', s.dot ? 'kv-draw kv-draw--dot kv-pen__line' : 'kv-draw kv-pen__line');
-      p.setAttribute('stroke', 'rgba(255,255,255,.8)');
-      p.setAttribute('stroke-width', '1.3');
-      p.setAttribute('stroke-linecap', 'round');
-      p.setAttribute('fill', 'none');
-      pen.appendChild(p);
-
-      [m, p].forEach((el) => {
-        el.style.setProperty('--t', Math.round(s.t * SPEED) + 'ms');
-        el.style.setProperty('--u', Math.round(s.u * SPEED) + 'ms');
-      });
+      m.style.setProperty('--t', Math.round(s.t * SPEED) + 'ms');
+      m.style.setProperty('--u', Math.round(s.u * SPEED) + 'ms');
     });
 
     defs.appendChild(mask);
@@ -99,7 +88,6 @@
     );
     originals.forEach((n) => art.appendChild(n));
     svg.appendChild(art);
-    svg.appendChild(pen);
 
     /* 接続後にパス長を測って dash を設定 */
     svg.querySelectorAll('.kv-draw').forEach((el) => {

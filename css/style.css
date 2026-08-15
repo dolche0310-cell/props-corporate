@@ -2600,6 +2600,23 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   margin-inline: auto;
   container-type: inline-size;
 }
+/* 既定(モバイル)は素の入れ物。ピンはデスクトップだけ */
+.about--figma .abt-scroller,
+.about--figma .abt-pin { display: block; }
+@media (min-width: 768px) {
+  /* スクロールが一度ここで留まり、その瞬間からロゴの粒子が動き出す。
+     留めているのは sticky だけで、ホイールもスクロール位置も奪って
+     いない。上へ戻す操作はいつでもそのまま効く。
+     留まる距離は 0.6 画面ぶん。長くすると通り抜けが重くなる。 */
+  .about--figma .abt-scroller { position: relative; height: 160svh; }
+  .about--figma .abt-pin {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    display: grid;
+    align-content: center;
+  }
+}
 .about--figma .abt {
   position: relative;
   /* 1cqw = コンテナ幅の1%。1253px設計なので 100/1253 cqw = 設計1px */
@@ -3132,26 +3149,12 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
 }
 @keyframes kv-draw { to { stroke-dashoffset: 0 } }
 
-/* ペン先は描いている間だけ見せ、通過後すぐ消す */
-.kv-pen { opacity: 1; }
-.kv-pen__line { opacity: 0; }
-.kv-pill.is-drawing .kv-pen__line:not(.kv-draw--dot) {
-  animation:
-    kv-draw var(--u, 250ms) cubic-bezier(.26, .78, .3, 1) var(--t, 0ms) both,
-    kv-pen-show var(--u, 250ms) linear var(--t, 0ms) both,
-    kv-pen-hide 90ms ease calc(var(--t, 0ms) + var(--u, 250ms)) both;
-}
-@keyframes kv-pen-show { from { opacity: 0 } 15%, 100% { opacity: 1 } }
-@keyframes kv-pen-hide { to { opacity: 0 } }
-
 /* 完成後は演出レイヤーを完全に畳み、Figmaの完成形だけ残す */
-.kv-pill.is-drawn .kv-pen { display: none; }
 .kv-pill.is-drawn .kv-pill__ai [mask],
 .kv-pill.is-drawn .kv-pill__shift [mask] { mask: none !important; }
 
 @media (prefers-reduced-motion: reduce) {
   .kv-draw { stroke-dashoffset: 0 }
-  .kv-pen { display: none }
 }
 
 /* ===========================================================

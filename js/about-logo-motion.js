@@ -14,7 +14,9 @@
    時間軸(ms):
      0-400      散開。ごく微細なドリフトのみ
      400-1700   収束。粒ごとに 30-100ms ずらし、軽い弧を描いて集まる。
-                同時に C 粒子が #FF5A3C → 黒(02 Gather の色)へ
+                同時に C 粒子が暖色 → 黒(02 Gather の色)へ
+                (色は --lm-particle-warm / --lm-particle-pale。
+                 A-2 は無彩色に差し替える)
      1700-1900  粒でできた MiAI を認識できる間
      1900-2600  面の形成。中心から広がる遮蔽でロゴが実体化し、粒子が引く
      2600-      完全静止。静止デザインと同一
@@ -26,6 +28,17 @@
 
   const NS = 'http://www.w3.org/2000/svg';
   const EASE = 'cubic-bezier(.22, 1, .36, 1)';
+
+  /* 粒子の色。A-1(Red-orange)は暖色のまま、A-2(darkblack)は
+     ページ側で無彩色に差し替える。既定値は A-1 の値そのもの。 */
+  const cssVar = (name, fallback) => {
+    const v = getComputedStyle(document.documentElement)
+      .getPropertyValue(name).trim();
+    return v || fallback;
+  };
+  const C_WARM = cssVar('--lm-particle-warm', '#FF5A3C');  /* C 粒子 */
+  const C_PALE = cssVar('--lm-particle-pale', '#FFD9CE');  /* その他 */
+  const C_SOLID = '#040404';                               /* 収束後 */
 
   /* 乱数は固定シード。読み込みのたびに粒の挙動が変わらないようにする */
   let seed = 20260811;
@@ -93,13 +106,13 @@
       el.setAttribute('class', 'lm-p');
       el.setAttribute('data-particle', 'P ' + key);
       el.setAttribute('d', toPath(dots));
-      el.setAttribute('fill', key.slice(-1) === 'C' ? '#FF5A3C' : '#FFD9CE');
+      el.setAttribute('fill', key.slice(-1) === 'C' ? C_WARM : C_PALE);
       dust.appendChild(el);
       items.push({ el: el, dx: dx, dy: dy, sc: sc, warm: key.slice(-1) === 'C' });
     });
     stage.appendChild(dust);
 
-    const solid = logoGroup('lm-solid', '#040404', true);
+    const solid = logoGroup('lm-solid', C_SOLID, true);
     stage.appendChild(solid);
 
     return {
@@ -142,10 +155,10 @@
       /* C 粒子は集まるにつれて 02 Gather の黒へ変わる */
       if (it.warm) {
         A(it.el, [
-          { offset: 0, fill: '#FF5A3C' },
-          { offset: gStart / SPAN, fill: '#FF5A3C' },
-          { offset: gEnd / SPAN, fill: '#040404' },
-          { offset: 1, fill: '#040404' }
+          { offset: 0, fill: C_WARM },
+          { offset: gStart / SPAN, fill: C_WARM },
+          { offset: gEnd / SPAN, fill: C_SOLID },
+          { offset: 1, fill: C_SOLID }
         ], { duration: SPAN, fill: 'both' });
       }
     });
@@ -199,6 +212,22 @@
     };
     /* 開発確認用。毎回スクロールし直さずに見られるようにする */
     window.__replayAboutLogo = run;
+
+    /* デスクトップはピン留めに入った瞬間を起点にする。セクションが
+       画面いっぱいに収まって「止まった」その時から粒子が動き出す。
+       スクロールの購読は main.js の共有ディスパッチャに相乗りする
+       (自前で scroll を購読して rAF を回すと1フレームに何度も
+       レイアウトを読むことになるため)。 */
+    const scroller = document.getElementById('about-scroller');
+    if (scroller && window.__miaiOnScroll &&
+        matchMedia('(min-width: 768px)').matches) {
+      let fired = false;
+      window.__miaiOnScroll(() => {
+        if (fired) return;
+        if (scroller.getBoundingClientRect().top <= 0) { fired = true; run(); }
+      });
+      return;
+    }
 
     /* ステージが 4割ほど見えてから。読み込み直後に画面外で終わらせない */
     if (!('IntersectionObserver' in window)) { run(); return; }

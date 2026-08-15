@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Abril+Fatface&family=Alata&family=Belanosima:wght@600;700&family=Gugi&family=Inter:wght@400;700&family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20260815x">
+<link rel="stylesheet" href="css/style.css?v=20260816a">
 <style>
   :root { --color-primary: #FF2400; }
 </style>
@@ -34,8 +34,8 @@
     </svg>
   </div>
 </div>
-<script src="js/splash-shapes.js?v=20260815x"></script>
-<script src="js/splash.js?v=20260815x"></script>
+<script src="js/splash-shapes.js?v=20260816a"></script>
+<script src="js/splash.js?v=20260816a"></script>
 <noscript><style>.intro-overlay{display:none!important}.hero__intro-item,.kv-pill.hero__intro-item,.hero__desc--brushup p{opacity:1!important;transform:none!important;filter:none!important}.hero__blob{opacity:.8!important}.hero__motif .hm{opacity:1!important;stroke-dasharray:none!important;stroke-dashoffset:0!important}.site-header--brushup .site-header__inner{opacity:1!important;transform:none!important}</style></noscript>
 
 <header class="site-header site-header--brushup" id="site-header">
@@ -147,6 +147,11 @@
   <!-- About -->
   <section class="about about--figma" id="about">
     <div class="wrap">
+      <!-- スクロールが一度ここで留まり、その瞬間からロゴの粒子が動き出す。
+           留めているのは sticky だけ。ホイールもスクロール位置も一切
+           奪っていないので、上へ戻す操作はいつでもそのまま効く。 -->
+      <div class="abt-scroller" id="about-scroller">
+        <div class="abt-pin">
       <!-- Figma 240:27506 (1253x522) を座標そのままで再現。
            flex/grid の2カラムに再解釈しない。 -->
       <div class="abt-frame">
@@ -169,6 +174,8 @@
           <p class="abt__catch reveal">人の力を最大化するソフトウェアをつくる</p>
           <p class="abt__body reveal">MiAI株式会社は2023年6月に設立されました。ChatGPT等の普及によりAIが当たり前のように使われるようになってきた令和の時代に、人事・営業・カスタマーサポートなどの「企業と人のコミュニケーション」をサポートするAI技術の開発を進めています。</p>
         </div>
+        </div>
+      </div>
         </div>
       </div>
     </div>
@@ -422,12 +429,12 @@
   <p class="site-footer__copy">©️2025 props, Inc</p>
 </footer>
 
-<script src="js/company-photos.js?v=20260815x"></script>
-<script src="js/main.js?v=20260815x"></script>
-<script src="js/service-stage.js?v=20260815x"></script>
+<script src="js/company-photos.js?v=20260816a"></script>
+<script src="js/main.js?v=20260816a"></script>
+<script src="js/service-stage.js?v=20260816a"></script>
 <script src="assets/logos/miai-particles.js" defer></script>
-<script src="js/about-logo-motion.js?v=20260815x" defer></script>
-<script src="js/hero-morph.js?v=20260815x"></script>
-<script src="js/ai-shift-draw.js?v=20260815x"></script>
+<script src="js/about-logo-motion.js?v=20260816a" defer></script>
+<script src="js/hero-morph.js?v=20260816a"></script>
+<script src="js/ai-shift-draw.js?v=20260816a"></script>
 </body>
 </html>
