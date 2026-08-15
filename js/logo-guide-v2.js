@@ -429,8 +429,10 @@
        1文字ごとの速さ(STAG/DRAW/FILL)は変えない。始まりだけを前へ出す。 */
     const STAG = 0.16, DRAW = 0.5, FILL = 0.4, LEAD = DRAW * 0.85;
     /* ロックアップの枠(1.35+0.95=2.3s)が引かれている最中に書き始める。
-       ガイド全体(seqEnd≒5.1s)の終わりを待つと体感で遅い。 */
-    const WORD_START = Math.max(0.35, Math.min(seqEnd - 1.35, 2.2));
+       ガイド全体(seqEnd≒5.1s)の終わりを待つと体感で遅い。
+       最初の寸法矢印(1.75s)と同じ呼吸で入るところまで前へ出した。
+       これ以上早めると枠が立つ前に字が出て、順序が読めなくなる。 */
+    const WORD_START = Math.max(0.35, Math.min(seqEnd - 1.35, 1.7));
     groups.forEach((G, i) => {
       const t0 = WORD_START + i * STAG;
       G.items.forEach((L) => armLetter(L, t0, DRAW, FILL, LEAD));
