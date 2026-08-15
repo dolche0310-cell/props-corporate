@@ -999,13 +999,23 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
    sticky の待機位置(top:20px)と半調プレートの上への延長(20px)も含めて
    完全に画面外へ逃がすため -24px 余分に引き上げる。 */
 .site-header--brushup {
-  transition: transform .45s cubic-bezier(.22, 1, .36, 1);
-  will-change: transform;
+  /* 消えるときは「ふわっと」。透明度を先に落とし切り(.34s)、
+     移動はそれより長く(.5s)かけるので、上へ弾き出される印象にならない。
+     出るときは逆に、動き出しと同時に素早く戻す(.28s)。 */
+  transition:
+    transform .5s cubic-bezier(.22, 1, .36, 1),
+    opacity   .28s ease-out;
+  will-change: transform, opacity;
 }
-.site-header--brushup.is-hidden { transform: translateY(calc(-100% - 24px)); }
-/* Service のピン留め中は、上スクロールでも出さない(ステージ上部の
-   Service ラベルに被るため)。抜ければ通常の出没に戻る */
-.site-header--brushup.is-pin-locked { transform: translateY(calc(-100% - 24px)); }
+.site-header--brushup.is-hidden,
+.site-header--brushup.is-pin-locked {
+  transform: translateY(calc(-100% - 24px));
+  opacity: 0;
+  transition:
+    transform .5s cubic-bezier(.4, 0, .5, 1),
+    opacity   .34s ease-in;
+  pointer-events: none;
+}
 @media (prefers-reduced-motion: reduce) {
   .site-header--brushup { transition: none; }
   .site-header--brushup .site-header__inner { opacity: 1; transform: none; transition: none; }
@@ -1479,6 +1489,12 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
     opacity: 0;
     transition: opacity 1s ease;
     pointer-events: none;
+    /* 切替の瞬間にレイヤーを作り直すとそこで1フレーム落ちる(2本目が
+       始まるときのガタつき)。最初から自前の合成レイヤーに固定し、
+       不透明度だけが変わる状態にしておく。 */
+    transform: translateZ(0);
+    will-change: opacity;
+    backface-visibility: hidden;
   }
   .service--brushup .service__text-item.is-active {
     opacity: 1;
@@ -1688,6 +1704,9 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* 角丸で毎フレーム切り抜くと切替時に負荷が跳ねるので層を固定する */
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 /* 英字は画面幅いっぱいまで流す。パネルの左右余白ぶん内側で切れていたので、
    同じ量だけ負のマージンで打ち消して 100vw に広げる。 */
@@ -3169,21 +3188,7 @@ body {
   .svc-aurora { transition: none; }
 }
 
-/* ===========================================================
-   About / Service へのスクロールスナップ
-   2セクションはアニメーションの見せ場なので、近くで手を離したら
-   セクション頭へ静かに吸い付かせ、中途半端な位置でアニメーションが
-   流れてしまうのを防ぐ。
-   ・mandatory ではなく proximity。通り過ぎたい人の邪魔はしない
-   ・Service は暗いステージが画面いっぱいに出る設計なので、
-     アンカー用の scroll-padding(ヘッダー高)を打ち消して天面まで寄せる
-     (ピン留め中はヘッダー自体を出さないので隙間も出ない)
-   =========================================================== */
-@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
-  html { scroll-snap-type: y proximity; }
-  .about--figma { scroll-snap-align: start; }
-  .service--brushup {
-    scroll-snap-align: start;
-    scroll-margin-top: calc(var(--header-h) * -1);
-  }
-}
+/* About / Service のスクロールスナップは撤去(2026-08-15)。
+   proximity でもブラウザがスクロールを掴むため、セクション境界で
+   カチカチと引っ掛かる挙動になった。見せ場を長くしたい場合は
+   スクロールを奪わず、ピンの走行距離で調整する。 */
