@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Abril+Fatface&family=Alata&family=Belanosima:wght@600;700&family=Gugi&family=Inter:wght@400;700&family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20260815j">
+<link rel="stylesheet" href="css/style.css?v=20260815l">
 <style>
   :root { --color-primary: #FF2400; }
 </style>
@@ -34,8 +34,8 @@
     </svg>
   </div>
 </div>
-<script src="js/splash-shapes.js?v=20260815j"></script>
-<script src="js/splash.js?v=20260815j"></script>
+<script src="js/splash-shapes.js?v=20260815l"></script>
+<script src="js/splash.js?v=20260815l"></script>
 <noscript><style>.intro-overlay{display:none!important}.hero__intro-item,.kv-pill.hero__intro-item,.hero__desc--brushup p{opacity:1!important;transform:none!important;filter:none!important}.hero__blob{opacity:.8!important}.hero__motif .hm{opacity:1!important;stroke-dasharray:none!important;stroke-dashoffset:0!important}.site-header--brushup .site-header__inner{opacity:1!important;transform:none!important}</style></noscript>
 
 <header class="site-header site-header--brushup" id="site-header">
@@ -185,7 +185,8 @@
 
             <div class="service__list">
               <div class="label label--on-dark reveal">
-                <span class="label__eyebrow">Service</span>
+                <!-- 番号は Figma 215:23953。カルーセルの進行度で 01 <-> 02 -->
+                <span class="label__eyebrow">Service <span class="service__index" aria-hidden="true"><i class="service__index-ghost">01</i><span class="service__index-track" data-service-index><i>01</i><i>02</i></span></span></span>
                 <span class="label__heading">事業内容</span>
               </div>
 
@@ -198,7 +199,7 @@
                       <span class="service__link-label">サービスサイトはこちら</span>
                       <!-- Figma 262:29133。矢印ではなく12x8の角丸矩形を
                            3pxずらして重ねた別窓アイコン -->
-                      <span class="service__link-icon" aria-hidden="true"><span></span><span></span></span>
+                      <span class="service__link-icon" aria-hidden="true"><svg viewBox="0 0 15 11" width="15" height="11" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11 3.5H1C0.723858 3.5 0.5 3.72386 0.5 4V10C0.5 10.2761 0.723858 10.5 1 10.5H11C11.2761 10.5 11.5 10.2761 11.5 10V4C11.5 3.72386 11.2761 3.5 11 3.5Z" stroke="currentColor"/><path d="M14 0.5H4C3.72 0.5 3.5 0.72 3.5 1V3.5H11C11.28 3.5 11.5 3.72 11.5 4V7.5H14C14.28 7.5 14.5 7.28 14.5 7V1C14.5 0.72 14.28 0.5 14 0.5Z" stroke="currentColor"/></svg></span>
                     </a>
                   </div>
                   <!-- 01の面はループ動画。枠(.service__image)は変えず中身だけ差し替える。
@@ -421,12 +422,12 @@
   <p class="site-footer__copy">©️2025 props, Inc</p>
 </footer>
 
-<script src="js/company-photos.js?v=20260815j"></script>
-<script src="js/main.js?v=20260815j"></script>
-<script src="js/service-stage.js?v=20260815j"></script>
+<script src="js/company-photos.js?v=20260815l"></script>
+<script src="js/main.js?v=20260815l"></script>
+<script src="js/service-stage.js?v=20260815l"></script>
 <script src="assets/logos/miai-particles.js" defer></script>
-<script src="js/about-logo-motion.js?v=20260815j" defer></script>
-<script src="js/hero-morph.js?v=20260815j"></script>
-<script src="js/ai-shift-draw.js?v=20260815j"></script>
+<script src="js/about-logo-motion.js?v=20260815l" defer></script>
+<script src="js/hero-morph.js?v=20260815l"></script>
+<script src="js/ai-shift-draw.js?v=20260815l"></script>
 </body>
 </html>

@@ -392,9 +392,8 @@
 
   var serviceScroller = document.getElementById('service-scroller');
   var servicePin = document.querySelector('.service__pin');
-  var serviceTextList = document.getElementById('service-text-list');
   var serviceItems = document.querySelectorAll('.service__text-item');
-  var svcIndexCurrent = -1;   // 境界ヒステリシス用の現在値
+  var serviceIndex = document.querySelector('[data-service-index]');
 
   // Exposed for js/service-stage.js, which drives the floating image
   // layers off the same scroll progress without needing to duplicate
@@ -403,106 +402,76 @@
 
   if (serviceScroller && servicePin && serviceItems.length) {
     var serviceDesktopMq = window.matchMedia('(min-width: 768px)');
-    var serviceTicking = false;
 
-    var setServiceActive = function (index) {
-      var indexStr = String(index);
-      serviceItems.forEach(function (el) {
-        el.classList.toggle('is-active', el.dataset.serviceItem === indexStr);
-      });
+    /* ---------------------------------------------------------------
+       スクロール進行度だけを唯一の基準にする。
+       ・ユーザーのスクロールは一切奪わない(wheel も scrollTo も使わない)
+       ・時間ではなく距離で滞在を作る。だから上下どちらでも同じ式が成立し、
+         途中で反転しても位置は飛ばないし、方向と映像が矛盾しない
+       ・以前あった「見た目だけ中央に寄せる transform」と、その分を打ち消す
+         負のマージン補正は撤去済み。再計算のたびにページ高さが変わり、
+         スクロール位置が飛んでいたのがガタつきの主因だった
+       --------------------------------------------------------------- */
+    var SVC = {
+      v1End:   0.35,   /* 1本目を見せ切る    */
+      xfEnd:   0.50,   /* 切替が終わる       */
+      v2End:   0.80,   /* 2本目の滞在が終わる */
+      easeXf: function (t) { return t * t * (3 - 2 * t); }  /* smoothstep */
     };
 
-    // Matches .service__pin's CSS: top: 50svh (the translateY(-50%) that
-    // visually centers it is a post-layout transform and doesn't change
-    // where the sticky trigger itself sits, so this stays in sync with
-    // just the raw 50svh value). svh (not plain vh/innerHeight) is used
-    // deliberately: on browsers with a dynamic toolbar (mobile Chrome,
-    // some ChromeOS/Android builds), window.innerHeight shifts as the
-    // toolbar shows/hides mid-scroll, desyncing this progress calc from
-    // the CSS sticky offset and letting the pinned panel render at the
-    // wrong scroll position - overlapping the section above it.
-    var stableViewportH = null;
-    var measureStableViewportH = function () {
-      var probe = document.createElement('div');
-      probe.style.cssText = 'position:fixed;top:0;left:0;width:0;height:100svh;visibility:hidden;pointer-events:none;';
-      document.body.appendChild(probe);
-      stableViewportH = probe.getBoundingClientRect().height;
-      document.body.removeChild(probe);
-    };
-    measureStableViewportH();
-    window.addEventListener('resize', measureStableViewportH);
-
-    var getStickyTopOffset = function () {
-      return stableViewportH / 2;
-    };
-
-    // .service__pin は translateY(-50%) で自分の高さの半分だけ上へずれる。
-    // これは post-layout の変形なので、レイアウト上の箱は元の位置のままで、
-    // パネルの見た目の下端より下に「ずらした分」の空白が残る。
-    // 実測で 900px ビューポート時に 454px。News の手前がここまで空くのは
-    // これが原因なので、同じ量を scroller の下マージンで戻す。
-    // offsetHeight / getBoundingClientRect().top は変わらないので、
-    // 上の progress 計算には影響しない。
-    var syncPinShift = function () {
-      if (!serviceDesktopMq.matches) {
-        serviceScroller.style.marginBottom = '';
-        return;
-      }
-      serviceScroller.style.marginBottom = -Math.round(servicePin.offsetHeight / 2) + 'px';
-    };
-    syncPinShift();
-    window.addEventListener('resize', syncPinShift);
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncPinShift);
-    window.addEventListener('load', syncPinShift);
-
+    var svcLastP = -1;
     var updateServiceProgress = function () {
-      serviceTicking = false;
-
       if (!serviceDesktopMq.matches) {
-        setServiceActive(0);
-        if (serviceTextList) serviceTextList.style.transform = '';
+        serviceItems.forEach(function (el, i) {
+          el.style.transform = '';
+          el.style.opacity = '';
+          el.classList.toggle('is-active', i === 0);
+        });
+        if (serviceIndex) serviceIndex.style.transform = '';
         window.__miaiServiceProgress = 0;
+        if (siteHeader) siteHeader.classList.remove('is-pin-locked');
         return;
       }
 
-      var scrollerRect = serviceScroller.getBoundingClientRect();
-      var totalRange = serviceScroller.offsetHeight - servicePin.offsetHeight;
+      /* ピンは top:0 の等身大の箱なので、走行距離に対する進み具合は
+         「scroller の上端がどれだけ画面上端より上に出たか」そのもの。 */
+      var rect = serviceScroller.getBoundingClientRect();
+      var travel = serviceScroller.offsetHeight - servicePin.offsetHeight;
+      if (travel <= 0) return;
+      var p = -rect.top / travel;
+      p = p < 0 ? 0 : p > 1 ? 1 : p;
+      if (p === svcLastP) return;      /* 無変化なら書かない */
+      svcLastP = p;
 
-      if (totalRange <= 0) {
-        setServiceActive(0);
-        window.__miaiServiceProgress = 0;
-        return;
+      /* 切替は 35%→50% の区間だけ。区間外は 0/1 に張り付くので、
+         2本目の滞在(50-80%)では一切ちらつかない。 */
+      var xf = (p - SVC.v1End) / (SVC.xfEnd - SVC.v1End);
+      xf = xf < 0 ? 0 : xf > 1 ? 1 : xf;
+      var o2 = SVC.easeXf(xf);
+
+      /* カルーセル。01 が左へ抜けるのと同じ量だけ 02 が右から入る。
+         数値は面の幅(=ステージ幅)に対する % なので、画面幅が変わっても
+         「ちょうど窓の外」で揃う。上下どちらのスクロールでも同じ式。 */
+      var shift = o2 * 100;
+      serviceItems[0].style.transform =
+        'translate3d(' + (-shift).toFixed(2) + '%,0,0)';
+      serviceItems[0].classList.toggle('is-active', o2 < 0.5);
+      if (serviceItems[1]) {
+        serviceItems[1].style.transform =
+          'translate3d(' + (100 - shift).toFixed(2) + '%,0,0)';
+        serviceItems[1].classList.toggle('is-active', o2 >= 0.5);
       }
-
-      var scrolledIntoPin = getStickyTopOffset() - scrollerRect.top;
-      var progress = Math.min(1, Math.max(0, scrolledIntoPin / totalRange));
-      // 境界ちょうどで上下すると index が行き来して 1s のフェードが
-      // 何度も掛かり直し、戻りスクロールが落ち着かない。境界に ±4.5% の
-      // 遊びを持たせ、はっきり越えたときだけ切り替える。
-      var n = serviceItems.length;
-      var rawIndex = Math.min(n - 1, Math.floor(progress * n));
-      if (svcIndexCurrent < 0) {
-        svcIndexCurrent = rawIndex;
-      } else if (rawIndex !== svcIndexCurrent) {
-        var boundary = Math.max(rawIndex, svcIndexCurrent) / n;
-        if (Math.abs(progress - boundary) > 0.045) svcIndexCurrent = rawIndex;
+      /* 番号も同じ進行度・同じ向きで送る */
+      if (serviceIndex) {
+        serviceIndex.style.transform =
+          'translate3d(' + (-shift).toFixed(2) + '%,0,0)';
       }
-      setServiceActive(svcIndexCurrent);
-      window.__miaiServiceProgress = progress;
+      window.__miaiServiceProgress = p;
 
-      // ピン留めの最中(1〜2枚目の切替を含む)はグロナビを出さない。
-      // 出すとステージ上部の Service ラベルに被る。ピンを抜ければ従来どおり
+      /* ピン留めの最中はグロナビを出さない(ステージ上部の Service ラベルに
+         被るため)。境界は端に十分寄せてあるので出入りで point が揺れない。 */
       if (siteHeader) {
-        siteHeader.classList.toggle('is-pin-locked',
-          progress > 0.02 && progress < 0.98);
-      }
-
-      // The text list slides up continuously with scroll progress (not a
-      // discrete jump), one "slot" (the first item's height) per item.
-      if (serviceTextList && serviceItems.length > 1) {
-        var slotHeight = serviceItems[0].offsetHeight;
-        var maxOffset = slotHeight * (serviceItems.length - 1);
-        serviceTextList.style.transform = 'translateY(' + (-progress * maxOffset) + 'px)';
+        siteHeader.classList.toggle('is-pin-locked', p > 0.01 && p < 0.99);
       }
     };
 
