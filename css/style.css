@@ -3191,3 +3191,22 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .svc-aurora { transition: none; }
 }
+
+/* ===========================================================
+   About / Service へのスクロールスナップ
+   2セクションはアニメーションの見せ場なので、近くで手を離したら
+   セクション頭へ静かに吸い付かせ、中途半端な位置でアニメーションが
+   流れてしまうのを防ぐ。
+   ・mandatory ではなく proximity。通り過ぎたい人の邪魔はしない
+   ・Service は暗いステージが画面いっぱいに出る設計なので、
+     アンカー用の scroll-padding(ヘッダー高)を打ち消して天面まで寄せる
+     (ピン留め中はヘッダー自体を出さないので隙間も出ない)
+   =========================================================== */
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  html { scroll-snap-type: y proximity; }
+  .about--figma { scroll-snap-align: start; }
+  .service--brushup {
+    scroll-snap-align: start;
+    scroll-margin-top: calc(var(--header-h) * -1);
+  }
+}
