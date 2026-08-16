@@ -624,6 +624,9 @@
   });
   const SPEED = 1.15;
 
+  /* 融合のぼかし量の最大。SVG 側の初期値と同じ */
+  const GOO_MAX = 13;
+
   const total = STATES.reduce((a, s) => a + s.t + s.h, 0);
   let strength = 1;                 /* Splash 100% → FV idle 75% */
   let firstPassDone = false;
@@ -667,10 +670,22 @@
     }
     const st = STATES[idx];
     const prev = STATES[(idx - 1 + STATES.length) % STATES.length];
-    /* 遷移の 12%〜88% の間だけ融合させる(着地の瞬間は必ず素の形) */
     const inTrans = into < st.t;
     const tp = inTrans ? into / st.t : 1;
-    setGoo(inTrans && tp > 0.12 && tp < 0.88 && !st.stroke && !prev.stroke);
+    /* 融合(メタボール)の強さ。以前は 12%/88% でフィルタを丸ごと
+       着脱していたため、その1フレームで輪郭が太さごと入れ替わり、
+       形が切り替わったように見えていた(点滅の一因)。
+       強さを 0 から立ち上げて 0 へ戻し、0 のところで着脱する。
+       stdDeviation 0 のフィルタは素通しなので、着脱は目に見えない。 */
+    const gooBand = inTrans && !st.stroke && !prev.stroke;
+    let gooAmt = 0;
+    if (gooBand) {
+      const g = tp < 0.5 ? tp / 0.34 : (1 - tp) / 0.34;
+      gooAmt = GOO_MAX * smooth(clamp01(g));
+    }
+    /* 着脱の判定は量ではなく区間で行う。区間の端では量がちょうど 0 に
+       なるので、filter の付け外しは必ず「素通しの状態」で起きる。 */
+    setGoo(gooBand, gooAmt);
 
     /* 文字の解禁は「円が中央を離れて右の輪へ変わり始める」のと同時(S12
        遷移の頭 = fvAt:0)。以前は S11 の途中で出していたため、中央の
@@ -1240,8 +1255,18 @@
   /* 融合は「形から形へ移る途中」だけ。静止(ホールド)では必ず外し、
      Figma どおりの綺麗な輪郭に戻す。遷移の入りと出でも掛け外しを
      なめらかにするため、中盤だけ有効にする。 */
-  let gooOn = null;
-  const setGoo = (on) => {
+  let gooOn = null, gooSd = -1;
+  const gooBlur = svg.querySelector('#hm-goo feGaussianBlur');
+  const setGoo = (on, amount) => {
+    /* ぼかし量を先に書いてから着脱する。0 のときは素通しなので、
+       filter 属性が付いていても外れていても見えは変わらない。 */
+    if (gooBlur) {
+      const sd = on ? amount : 0;
+      if (Math.abs(sd - gooSd) > 0.04) {
+        gooSd = sd;
+        gooBlur.setAttribute('stdDeviation', sd.toFixed(2));
+      }
+    }
     if (gooOn === on) return;
     gooOn = on;
     if (on) liveG.setAttribute('filter', 'url(#hm-goo)');
