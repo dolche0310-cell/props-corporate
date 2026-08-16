@@ -2089,8 +2089,10 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   appearance: none;
   background: none;
   border: 0;
-  /* 以下は参考ボタンの実測値そのまま。幅だけ文言(More)に合わせる */
-  padding: 7px 14px 9.1px;
+  /* 参考の 7px/9.1px は向こうの書体(acumin-pro)の下がりを見込んだ
+     非対称な値。こちらは書体が違うので、上下を等しくして文字を
+     帯の天地中央に置く。合計の高さは参考と同じ 33px。 */
+  padding: 8.1px 14px;
   /* 遷移先がまだ無いので押しても何も起きない。見た目と手応えだけ残す */
   cursor: default;
   position: relative;
@@ -2121,11 +2123,6 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   display: inline-flex;
   align-items: center;
   gap: 11.2px;
-  /* 参考と同じ。行の高さは文字(16.8px)で決め、18px の矢印には
-     行を押し広げさせない。はみ出す 0.6px は参考どおり切る。
-     これが無いと矢印が行を 18px にして、ボタンが 1px 高くなる。 */
-  height: 16.8px;
-  overflow: hidden;
 }
 .news__more-arrow {
   display: inline-flex;
@@ -3290,7 +3287,7 @@ body {
   height: 64px;
   display: grid;
   place-items: center;
-  border: 0;
+  border: 1px solid var(--color-border);
   border-radius: 4px;
   background: #fff;
   color: var(--color-ink);
@@ -3301,14 +3298,16 @@ body {
   visibility: hidden;
   transform: translateY(8px);
   transition: opacity .3s ease, transform .3s ease, visibility 0s linear .3s,
-              color .3s ease;
+              color .3s ease,
+              border-color .4s cubic-bezier(.16, .5, .25, 1);
 }
 .to-top.is-show {
   opacity: 1;
   visibility: visible;
   transform: none;
   transition: opacity .3s ease, transform .3s ease, visibility 0s linear 0s,
-              color .3s ease;
+              color .3s ease,
+              border-color .4s cubic-bezier(.16, .5, .25, 1);
 }
 /* hover の色面。左端を軸に開く */
 .to-top__fill {
@@ -3322,7 +3321,7 @@ body {
 }
 .to-top__arrow { display: block; }
 @media (hover: hover) {
-  .to-top:hover { color: #fff; }
+  .to-top:hover { color: #fff; border-color: var(--color-primary); }
   .to-top:hover .to-top__fill { transform: scaleX(1); }
 }
 @media (max-width: 767px) {
