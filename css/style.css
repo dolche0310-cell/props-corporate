@@ -1534,6 +1534,10 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
     inset: 0;
     max-width: none;
     pointer-events: none;
+  }
+  /* 濃度を毎フレーム書くのは映像と本文。ここだけ層を確保しておく
+     (面そのものはもう動かさないので、面に will-change は要らない)。 */
+  .service--brushup .service__loop-video {
     will-change: opacity;
     backface-visibility: hidden;
   }
@@ -1709,7 +1713,7 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   }
   .service--brushup .service__link:active .service__link-label,
   .service--brushup .service__link:active .service__link-icon { transform: translateY(.5px); }
-  .news__more:active .news__more-circle { transform: scale(.92); }
+  .news__more:active .news__more-fill { transform: scale(.97); }
 }
 
 @media (max-width: 480px) {
@@ -2078,43 +2082,53 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   gap: 24px;
 }
 .news__head .label { margin-bottom: 28px; }
+/* More(参考: editora.jp の c-btn)。角丸いっぱいのピル、地はインク、
+   文字と矢印は白。矢印はピルの内側の右に置く。文字は 14px の
+   まま、幅は "More" + 矢印にちょうど収まるだけ取る。 */
 .news__more {
   appearance: none;
   background: none;
   border: 0;
-  padding: 0;
+  /* 参考の 7px 14px 9.1px を、この文字サイズに合わせて上下対称に */
+  padding: 9px 16px;
   /* 遷移先がまだ無いので押しても何も起きない。見た目と手応えだけ残す */
   cursor: default;
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
   margin-bottom: 32px;
   font-family: var(--font-display-en);
   font-size: 14px;
   letter-spacing: .08em;
-  color: var(--color-ink);
+  color: #fff;
   text-decoration: none;
+  border-radius: 200px;
+  isolation: isolate;
 }
-.news__more-circle {
+/* 地は別レイヤーに持たせる。ピルの形のまま色だけ差し替える */
+.news__more-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: 200px;
+  background: var(--color-ink);
+  z-index: -1;
+  transition: background-color .4s cubic-bezier(.16, .5, .25, 1),
+              transform .4s cubic-bezier(.16, .5, .25, 1);
+}
+.news__more-in {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  border: 1.5px solid var(--color-ink);
-  border-radius: 50%;
-  color: var(--color-ink);
-  transition: background-color .35s cubic-bezier(.22, 1, .36, 1),
-              border-color .35s ease, color .35s ease, transform .35s ease;
+  gap: 11px;              /* 参考の 11.2px */
 }
-.news__more-circle svg { width: 13px; height: 11px; max-width: 100%; }
+.news__more-arrow {
+  display: inline-flex;
+  transition: transform .4s cubic-bezier(.16, .5, .25, 1);
+}
+.news__more-arrow svg { display: block; }
 @media (hover: hover) and (pointer: fine) {
   /* 位置は動かさない(translate すると右上へ逃げて見える)。色だけ変える */
-  .news__more:hover .news__more-circle {
-    background: var(--color-primary);
-    border-color: var(--color-primary);
-    color: #fff;
-  }
+  .news__more:hover .news__more-fill { background: var(--color-primary); }
+  .news__more:hover .news__more-arrow { transform: translateX(3px); }
 }
 
 /* richka の Others のような、薄いグレーの面に細字のピル。
@@ -2173,7 +2187,7 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   .news__item:hover .news__title { color: var(--color-primary); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .news__more-circle, .news__arrow, .news__list--rows .news__title { transition: none; }
+  .news__more-fill, .news__more-arrow, .news__arrow, .news__list--rows .news__title { transition: none; }
 }
 
 /* ===========================================================
@@ -3250,3 +3264,60 @@ body {
    proximity でもブラウザがスクロールを掴むため、セクション境界で
    カチカチと引っ掛かる挙動になった。見せ場を長くしたい場合は
    スクロールを奪わず、ピンの走行距離で調整する。 */
+
+/* ===========================================================
+   画面右下の「先頭へ戻る」
+   参考(recruit.garage.co.jp)と同じ 64x64 / 右下 40px / 角丸4px。
+   地は白 + 細い罫。hover で色面が左から開き、矢印が白へ抜ける。
+   40px の余白があるので本文にも右端のグラフィックにも被らない。
+   =========================================================== */
+.to-top {
+  position: fixed;
+  right: 40px;
+  bottom: 40px;
+  z-index: 90;                 /* ヘッダー(100)より下、本文より上 */
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: #fff;
+  color: var(--color-ink);
+  overflow: hidden;
+  isolation: isolate;
+  /* 先頭付近では出さない。js が is-show を付ける */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px);
+  transition: opacity .3s ease, transform .3s ease, visibility 0s linear .3s,
+              color .3s ease;
+}
+.to-top.is-show {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: opacity .3s ease, transform .3s ease, visibility 0s linear 0s,
+              color .3s ease;
+}
+/* hover の色面。左端を軸に開く */
+.to-top__fill {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--color-primary);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform .4s cubic-bezier(.16, .5, .25, 1);
+}
+.to-top__arrow { display: block; }
+@media (hover: hover) {
+  .to-top:hover { color: #fff; }
+  .to-top:hover .to-top__fill { transform: scaleX(1); }
+}
+@media (max-width: 767px) {
+  .to-top { right: 16px; bottom: 16px; width: 52px; height: 52px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .to-top, .to-top__fill { transition: none; }
+}

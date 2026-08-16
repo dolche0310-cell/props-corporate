@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Abril+Fatface&family=Alata&family=Belanosima:wght@600;700&family=Gugi&family=Inter:wght@400;700&family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20260816h">
+<link rel="stylesheet" href="css/style.css?v=20260816j">
 <style>
   :root { --color-primary: #FF2400; }
 </style>
@@ -34,8 +34,8 @@
     </svg>
   </div>
 </div>
-<script src="js/splash-shapes.js?v=20260816h"></script>
-<script src="js/splash.js?v=20260816h"></script>
+<script src="js/splash-shapes.js?v=20260816j"></script>
+<script src="js/splash.js?v=20260816j"></script>
 <noscript><style>.intro-overlay{display:none!important}.hero__intro-item,.kv-pill.hero__intro-item,.hero__desc--brushup p{opacity:1!important;transform:none!important;filter:none!important}.hero__blob{opacity:.8!important}.hero__motif .hm{opacity:1!important;stroke-dasharray:none!important;stroke-dashoffset:0!important}.site-header--brushup .site-header__inner{opacity:1!important;transform:none!important}</style></noscript>
 
 <header class="site-header site-header--brushup" id="site-header">
@@ -296,7 +296,7 @@
           <span class="label__eyebrow">News</span>
           <span class="label__heading">お知らせ</span>
         </div>
-        <button class="news__more" type="button" aria-disabled="true"><span class="news__more-label">More</span><span class="news__more-circle" aria-hidden="true"><svg viewBox="0 0 14 12" fill="none" width="14" height="12"><path d="M1 6H13M8.6 1.6L13 6L8.6 10.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+        <button class="news__more" type="button" aria-disabled="true"><span class="news__more-fill" aria-hidden="true"></span><span class="news__more-in"><span class="news__more-label">More</span><span class="news__more-arrow" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" width="18" height="18"><path d="M2.4 10H18M10 2.4L17.6 10L10 17.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button>
       </div>
 
       <div class="news__list news__list--rows">
@@ -429,12 +429,22 @@
   <p class="site-footer__copy">©️2025 props, Inc</p>
 </footer>
 
-<script src="js/company-photos.js?v=20260816h"></script>
-<script src="js/main.js?v=20260816h"></script>
-<script src="js/service-stage.js?v=20260816h"></script>
+<script src="js/company-photos.js?v=20260816j"></script>
+<script src="js/main.js?v=20260816j"></script>
+<script src="js/service-stage.js?v=20260816j"></script>
 <script src="assets/logos/miai-particles.js" defer></script>
-<script src="js/about-logo-motion.js?v=20260816h" defer></script>
-<script src="js/hero-morph.js?v=20260816h"></script>
-<script src="js/ai-shift-draw.js?v=20260816h"></script>
+<script src="js/about-logo-motion.js?v=20260816j" defer></script>
+<script src="js/hero-morph.js?v=20260816j"></script>
+<script src="js/ai-shift-draw.js?v=20260816j"></script>
+
+  <!-- 画面右下の「先頭へ戻る」。参考(recruit.garage.co.jp)と同じ
+       64x64 / 右下 40px / 角丸4px。hover で色面が左から開き、
+       矢印が白へ抜ける。地の 40px はコンテンツに被らない余白。 -->
+  <a class="to-top" id="to-top" href="#top" aria-label="ページ先頭へ戻る">
+    <span class="to-top__fill" aria-hidden="true"></span>
+    <svg class="to-top__arrow" viewBox="0 0 20 20" width="20" height="20" fill="none" aria-hidden="true">
+      <path d="M10 17V3M4.4 8.6L10 3l5.6 5.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </a>
 </body>
 </html>

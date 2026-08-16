@@ -163,6 +163,16 @@
     addScrollTask(updateHeaderPlate);
   }
 
+  // 画面右下の「先頭へ戻る」。1画面ぶん送ってから出す。
+  // 先頭付近で出しっぱなしにすると、まだ戻る先が無いのに居座る。
+  var toTop = document.getElementById('to-top');
+  if (toTop) {
+    var updateToTop = function () {
+      toTop.classList.toggle('is-show', window.scrollY > window.innerHeight * 0.9);
+    };
+    addScrollTask(updateToTop);
+  }
+
   var form = document.getElementById('contact-form');
   var note = document.getElementById('contact-note');
 
@@ -421,10 +431,14 @@
          smoothstep(3t^2-2t^3)は2階微分が端で残るため、切り替わりの
          初速と終速が目に付いていた。 */
       easeXf: function (t) { return t * t * t * (t * (t * 6 - 15) + 10); },
-      /* 中点の直前まで 1 に近いまま保ち、そこで一気に 0 へ落とす。
-         2本の映像が同時に半透明で重なる時間をほぼ無くすための曲線。
-         t=0.9 でもまだ 0.34 残り、t=1 でちょうど 0 になる。 */
-      hold: function (t) { var u = t * t; return 1 - u * u; }
+      /* 中点の直前まで濃度を保ち、そこで落とす。2本の映像が同時に
+         半透明で重なる時間を作らないための曲線。
+         t^4 だと切替がホイール1ノッチ(約47px)で終わってしまい、
+         少し上下しただけで映像がカチッと入れ替わって見えた。
+         t^2 にして傾きを半分に落とし、約94px かけて渡す。
+         それでも 0 になるのは終端だけなので、暗く沈む区間は
+         前後 30px ほどしかない。 */
+      hold: function (t) { return 1 - t * t; }
     };
 
     /* 面ごとの本文ブロック。映像は面と一緒に溶かしてよいが、
@@ -436,6 +450,18 @@
       serviceMedia.push(el.querySelector('.service__loop-video'));
     });
 
+    /* 見えていない側の動画は止める。2本を常時デコードし続けると
+       スクロール中のフレーム落ちの原因になる。状態が変わった時
+       だけ呼ぶ(毎フレーム play/pause を叩くと逆に重くなる)。 */
+    var mediaOn = [true, true];
+    var setMediaPlaying = function (i, on) {
+      var v = serviceMedia[i];
+      if (!v || mediaOn[i] === on) return;
+      mediaOn[i] = on;
+      if (on) { var q = v.play(); if (q && q.catch) q.catch(function () {}); }
+      else { v.pause(); }
+    };
+
     var svcLastP = -1;
     var updateServiceProgress = function () {
       if (!serviceDesktopMq.matches) {
@@ -444,6 +470,7 @@
           el.classList.toggle('is-active', i === 0);
           if (serviceText[i]) serviceText[i].style.opacity = '';
           if (serviceMedia[i]) serviceMedia[i].style.opacity = '';
+          setMediaPlaying(i, true);
         });
         serviceDigits.forEach(function (n) { n.style.opacity = ''; });
         window.__miaiServiceProgress = 0;
@@ -494,6 +521,8 @@
       var vOut = SVC.hold(tOut), vIn = SVC.hold(1 - tIn);
       if (serviceMedia[0]) serviceMedia[0].style.opacity = vOut.toFixed(3);
       if (serviceMedia[1]) serviceMedia[1].style.opacity = vIn.toFixed(3);
+      setMediaPlaying(0, vOut > 0.01);
+      setMediaPlaying(1, vIn > 0.01);
       if (serviceDigits.length > 1) {
         serviceDigits[0].style.opacity = vOut.toFixed(3);
         serviceDigits[1].style.opacity = vIn.toFixed(3);
