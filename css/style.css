@@ -1539,7 +1539,12 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   }
   /* js が値を書くまでの初期状態。2面は同じ位置に重なっているので、
      ここで 02 を伏せておかないと最初の1描画で二重に出る。 */
-  .service--brushup [data-service-item="1"] { opacity: 0; }
+  .service--brushup [data-service-item="1"] .service__text,
+  .service--brushup [data-service-item="1"] .service__loop-video { opacity: 0; }
+  /* 受け渡しの一瞬だけ見える地。2本の映像が同時に薄くなる瞬間に
+     ここが無いと枠が抜けて背景が透ける。下になる 01 の枠にだけ敷き、
+     上に重なる 02 の枠は素通しにする(敷くと下の映像を隠すため)。 */
+  .service--brushup [data-service-item="0"] .service__image { background: #05070A; }
   .service--brushup .service__text-item.is-active { pointer-events: auto; }
   /* 文字は面の濃度に掛け算される別系統(値は js が書く)。
      映像は面と一緒に溶けるが、文字だけは前後が重ならない。 */
