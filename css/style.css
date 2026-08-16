@@ -2089,8 +2089,8 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   appearance: none;
   background: none;
   border: 0;
-  /* 参考の 7px 14px 9.1px を、この文字サイズに合わせて上下対称に */
-  padding: 9px 16px;
+  /* 以下は参考ボタンの実測値そのまま。幅だけ文言(More)に合わせる */
+  padding: 7px 14px 9.1px;
   /* 遷移先がまだ無いので押しても何も起きない。見た目と手応えだけ残す */
   cursor: default;
   position: relative;
@@ -2099,7 +2099,9 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   margin-bottom: 32px;
   font-family: var(--font-display-en);
   font-size: 14px;
-  letter-spacing: .08em;
+  font-weight: 500;
+  line-height: 16.8px;
+  letter-spacing: normal;
   color: #fff;
   text-decoration: none;
   border-radius: 200px;
@@ -2110,7 +2112,7 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   position: absolute;
   inset: 0;
   border-radius: 200px;
-  background: var(--color-ink);
+  background: #000;              /* 参考ボタンの地 */
   z-index: -1;
   transition: background-color .4s cubic-bezier(.16, .5, .25, 1),
               transform .4s cubic-bezier(.16, .5, .25, 1);
@@ -2118,12 +2120,20 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
 .news__more-in {
   display: inline-flex;
   align-items: center;
-  gap: 11px;              /* 参考の 11.2px */
+  gap: 11.2px;
+  /* 参考と同じ。行の高さは文字(16.8px)で決め、18px の矢印には
+     行を押し広げさせない。はみ出す 0.6px は参考どおり切る。
+     これが無いと矢印が行を 18px にして、ボタンが 1px 高くなる。 */
+  height: 16.8px;
+  overflow: hidden;
 }
 .news__more-arrow {
   display: inline-flex;
   transition: transform .4s cubic-bezier(.16, .5, .25, 1);
 }
+/* 参考は 20 枠の右向き矢印を -45 度回して右上向きにしている。
+   回転は svg の外側ではなく中の <g> に持たせる。外側に掛けると
+   外接ボックスが 18 -> 25px に膨らみ、行の高さが 1px 増える。 */
 .news__more-arrow svg { display: block; }
 @media (hover: hover) and (pointer: fine) {
   /* 位置は動かさない(translate すると右上へ逃げて見える)。色だけ変える */
@@ -3280,7 +3290,7 @@ body {
   height: 64px;
   display: grid;
   place-items: center;
-  border: 1px solid var(--color-border);
+  border: 0;
   border-radius: 4px;
   background: #fff;
   color: var(--color-ink);
