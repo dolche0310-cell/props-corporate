@@ -1,248 +1,233 @@
-/* ====== About の MiAI ロゴ: ひとつの円が字を描き出す ======
-   「黒い粒が集まってロゴになる」のはやめ、1個の円がロゴの骨格を
-   なぞり、その通ったあとから字の面が現れる作りにする。
-   最後にその円自身が i のドットとして着地するので、円が動いた結果
-   MiAI という字が生まれた、と読める。
+/* ====== About の MiAI ロゴ: 円が文字を生み出す ======
+   何もない白い余白から、小さな円が現れて左から右へ抜けていく。
+   円が通り過ぎた少し後ろから、黒い字面がマスクの奥から立ち上がる。
+   最後にその円自身が i のドットとして着地して完成する。
+
+   ■ やらないこと
+   ・輪郭を一筆書きでなぞる(ロゴ描画デモに見える)
+   ・粒子/点の集合
+   ・1文字ずつ順番に出す
+   見えるのは「円」と「MiAI ロゴ」だけ。線は一切見せない。
 
    ■ 仕掛け
-   文字ごとに「骨格の線」を1本ずつ持ち、それを太い白の stroke として
-   mask に入れる。stroke-dashoffset を詰めると、その文字の面だけが
-   骨格に沿って現れる。mask は文字ごとに独立しているので、線が多少
-   はみ出しても隣の字は出てこない。
-   円は同じ骨格の上を getPointAtLength で走らせ、面の先端に置く。
-   丸い線端のぶん(幅の半分)だけ手前を露出させるので、円が先、面が後。
+   1) 文字ごとに横へ開くマスク(白い矩形の幅)を持つ。円が到達した
+      あたりから幅が伸び、字面が左から押し出されるように現れる。
+      M の中央の谷も A の白い抜きも、この横の開きの中で自然に
+      後から形になる(別々に組まない)。
+   2) 開きと同時に、ごく小さな変形を効かせて収束させる。
+      M は scaleX .94→1 と +10px の沈み、A は scaleX .96→1 と 1度の
+      傾き、I は scaleY .85→1。最後は必ず正規ロゴと完全一致する。
+   3) 文字どうしは 30% 前後重ねる。M が 7割できた頃に i、i が
+      65% で A、A の終盤で I。左から右へ一つの波として伝わる。
+   4) 円は各文字の開き始めにちょうど到達する。前の文字はまだ
+      できあがっていないので、字面が円に引かれて追ってくる。
 
-   ■ 時間軸(ms / 全体 2000)
-        0- 200  何も無い。静かな間
-      200- 380  円が現れる(scale .85→1 / 濃度 0→1)
-      380- 770  M。左下→左上→中央下→右上→右下
-      880-1000  i の縦線
-     1080-1420  A。左下→頂点→右下
-     1530-1690  I
-     1690-1880  円が i のドットへ寄って縮む
-     1880-2000  着地の収まり(1.05→1.0)。ここで完成
-   各文字の面は、円が走り切る時間の 1.18 倍かけて追いつく。つまり
-   円が次の字へ移り始めても前の字はまだ描き終わっていない = 動きが
-   繋がって見える。
-
-   完成後はループしない。静止ロゴへ渡してステージを畳む。
-   IntersectionObserver で一度だけ。開発用に window.__replayAboutLogo()。 */
+   ■ 時間軸(ms / 全体 1700)
+        0- 100  何もない
+      100- 220  円が現れる
+      280- 740  M
+      520- 860  i   (M が 76% のところで始まる)
+      700-1120  A   (i が 77%)
+      980-1300  I   (A が 86%)
+     1300-1560  円が i のドットへ戻る
+     1560-1680  着地の収まり(1.05→1.0)
+   完成後はループしない。静止ロゴへ渡してステージを畳む。 */
 (() => {
   'use strict';
 
   const NS = 'http://www.w3.org/2000/svg';
+  const LW = 266.312;                        /* ロゴの座標系(mark と同じ) */
+  const DOT = { x: 125.66, y: 10.55, r: 9.62 };   /* i のドット(実測) */
+  const SWEEP_Y = -14;                       /* 抜けていく高さ(字の上) */
+  const GUIDE_R = 11;
 
-  /* ロゴの座標系(mark の viewBox と同じ) */
-  const LW = 266.312;
-
-  /* i のドット(splash と同じ実測値) */
-  const DOT = { x: 125.66, y: 10.55, r: 9.62 };
-
-  /* 文字ごとの骨格。実測の外形に合わせて引いた中心線。
-     M x0..94.6 / i x116..135 / A x147..236 / I x249..266 */
+  /* 文字ごと: 開く範囲(左右に少し余白)と、収束させる微小な変形。
+     x0/x1 は実測の外形から。M 0..94.6 / i 116..135.3 /
+     A 146.8..235.9 / I 248.7..266.3 */
   const LETTERS = [
-    { key: 'M', d: 'M8.5 96 L8.5 10 L47.3 74 L86 10 L86 96', w: 34, travel: 390 },
-    { key: 'i', d: 'M125.7 34 L125.7 96',                     w: 24, travel: 120 },
-    { key: 'A', d: 'M156 96 L191.4 6 L226.8 96',              w: 34, travel: 340 },
-    { key: 'I', d: 'M257.5 3 L257.5 96',                      w: 24, travel: 160 }
+    { key: 'M', x0: -18,   x1: 98.6,  s: 280,  d: 460, sx: 0.94, ty: 10, rot: 0 },
+    { key: 'i', x0: 112,   x1: 139.3, s: 520,  d: 340, sx: 1,    ty: 8,  rot: 0 },
+    { key: 'A', x0: 142.8, x1: 239.9, s: 700,  d: 420, sx: 0.96, ty: 0,  rot: 1 },
+    { key: 'I', x0: 244.7, x1: 272.3, s: 980,  d: 320, sx: 1,    ty: 0,  rot: 0, sy: 0.85 }
   ];
 
-  /* 進行の割り当て(ms)。字と字の間(渡り)にも十分な時間を置く。
-     ここを詰めすぎると、離れた字へ移る一瞬だけ円が飛んで見える
-     (A→I は 98 ある。50ms では 1 フレーム 60 以上動いてしまう)。 */
   const T = {
-    inAt: 200, inDur: 180,
-    starts: [380, 880, 1080, 1530],   /* 各文字の描き始め */
-    dotAt: 1690, dotDur: 190,
-    settleAt: 1880, settleDur: 120,
-    total: 2000,
-    catchUp: 1.18                     /* 面が円に追いつくまでの倍率 */
+    inAt: 100, inDur: 120,
+    toDot: 1300, toDotDur: 260,
+    settle: 1560, settleDur: 120,
+    total: 1720
   };
 
-  const GUIDE_R = 13;                 /* 描いている間の円の半径 */
+  /* 円の通り道。各文字が開き始める瞬間にちょうどその左端へ着く */
+  const WAY = [
+    [0, -30], [280, -18], [520, 112], [700, 142.8], [980, 244.7], [1300, 274]
+  ];
 
   const clamp01 = (t) => (t < 0 ? 0 : t > 1 ? 1 : t);
-  /* 立ち上がりが速く、終わりで丁寧に止まる。線を引く動きに使う */
-  const outCubic = (t) => 1 - Math.pow(1 - clamp01(t), 3);
-  /* 出入りともに寝かせる。円が字から字へ移るときに使う */
+  /* 動き出しは俊敏、止まる直前だけ丁寧に */
+  const out3 = (t) => 1 - Math.pow(1 - clamp01(t), 3);
+  /* 字面の開きはこれ。out3 だけだと時間 70% で見た目 97% まで進んで
+     しまい、次の字が始まる頃には前の字が出来上がって見える
+     (= 1文字ずつ順番に出しているのと同じになる)。等速を少し混ぜて、
+     見た目の進み方をなだらかにする。俊敏さは変形と円の運びで出す。 */
+  const reveal = (t) => { const u = clamp01(t); return u * 0.35 + out3(u) * 0.65; };
+  const out4 = (t) => 1 - Math.pow(1 - clamp01(t), 4);
+  /* 出入りを寝かせる。円の運びの合成に使う */
   const inOut = (t) => { const u = clamp01(t); return u * u * u * (u * (u * 6 - 15) + 10); };
-  /* 着地はさらに長く引く */
-  const outQuint = (t) => 1 - Math.pow(1 - clamp01(t), 5);
   const lerp = (a, b, u) => a + (b - a) * u;
 
-  /* d 属性をサブパスへ分ける。i はドットが別のサブパスになっている */
-  const splitSub = (d) => d.split(/(?=[Mm])/).filter((s) => s.trim());
+  /* 通り道を Catmull-Rom で通す。折れ点で速度が跳ねないようにする */
+  const pathX = (t) => {
+    const P = WAY;
+    if (t <= P[0][0]) return P[0][1];
+    if (t >= P[P.length - 1][0]) return P[P.length - 1][1];
+    let i = 0;
+    while (i < P.length - 2 && t > P[i + 1][0]) i++;
+    const p0 = P[Math.max(0, i - 1)], p1 = P[i], p2 = P[i + 1],
+          p3 = P[Math.min(P.length - 1, i + 2)];
+    const u = (t - p1[0]) / (p2[0] - p1[0]);
+    const u2 = u * u, u3 = u2 * u;
+    return 0.5 * ((2 * p1[1]) +
+      (-p0[1] + p2[1]) * u +
+      (2 * p0[1] - 5 * p1[1] + 4 * p2[1] - p3[1]) * u2 +
+      (-p0[1] + 3 * p1[1] - 3 * p2[1] + p3[1]) * u3);
+  };
 
   const build = (stage, mark) => {
-    const k = 233.661 / LW;                    /* ステージへ載せる倍率 */
-    const LX = 132.408, LY = 97.649;           /* ステージ内のロゴ矩形 */
+    const k = 233.661 / LW;
+    const LX = 132.408, LY = 97.649;
     stage.setAttribute('viewBox', '0 0 498.476 280.393');
     stage.textContent = '';
 
     const defs = document.createElementNS(NS, 'defs');
     stage.appendChild(defs);
-
     const root = document.createElementNS(NS, 'g');
     root.setAttribute('transform',
       'translate(' + LX + ' ' + LY + ') scale(' + k.toFixed(6) + ')');
     stage.appendChild(root);
 
     const fill = getComputedStyle(mark).color || '#040404';
-    const srcPaths = Array.from(mark.querySelectorAll('path'));
-
-    /* 元の4本を、描く順(M → i → A → I)に並べ替える。
-       id ではなく実測の x で判定するので、Figma 側の並びが変わっても効く */
-    const byX = srcPaths.map((p) => ({ p, x: p.getBBox().x }))
+    /* 左から右の並びで取る。Figma 側の順序が変わっても効く */
+    const src = Array.from(mark.querySelectorAll('path'))
+      .map((p) => ({ p, x: p.getBBox().x }))
       .sort((a, b) => a.x - b.x).map((o) => o.p);
 
     const letters = [];
-    byX.forEach((src, i) => {
-      const spec = LETTERS[i];
-      if (!spec) return;
-      let d = src.getAttribute('d');
+    src.forEach((sp, i) => {
+      const L = LETTERS[i];
+      if (!L) return;
+      let d = sp.getAttribute('d');
 
-      /* i はドットを切り離す。ドットは最後に円そのものが担うので、
-         骨格の露出では出さない */
-      if (spec.key === 'i') {
-        const subs = splitSub(d);
+      /* i のドットは切り離す。最後に円そのものが担うので字面には出さない */
+      if (L.key === 'i') {
+        const subs = d.split(/(?=[Mm])/).filter((s) => s.trim());
         if (subs.length > 1) {
           const probe = document.createElementNS(NS, 'path');
           root.appendChild(probe);
           const boxes = subs.map((s) => {
             probe.setAttribute('d', s);
-            const b = probe.getBBox();
-            return { s, b };
+            return { s, h: probe.getBBox().height };
           });
           probe.remove();
-          /* 背の低いほうがドット */
-          boxes.sort((a, b) => a.b.height - b.b.height);
+          boxes.sort((a, b) => a.h - b.h);
           d = boxes.slice(1).map((o) => o.s).join(' ');
         }
       }
 
-      /* 骨格 = mask の中の太い白線 */
+      /* 横へ開くマスク。線は見せない(見えるのは字面だけ) */
       const mid = 'lgm-' + i;
       const mask = document.createElementNS(NS, 'mask');
       mask.setAttribute('id', mid);
       mask.setAttribute('maskUnits', 'userSpaceOnUse');
-      const rev = document.createElementNS(NS, 'path');
-      rev.setAttribute('d', spec.d);
-      rev.setAttribute('stroke', '#fff');
-      rev.setAttribute('stroke-width', String(spec.w));
-      rev.setAttribute('stroke-linecap', 'round');
-      rev.setAttribute('stroke-linejoin', 'round');
-      rev.setAttribute('fill', 'none');
-      mask.appendChild(rev);
+      const rect = document.createElementNS(NS, 'rect');
+      rect.setAttribute('x', String(L.x0));
+      rect.setAttribute('y', '-40');
+      rect.setAttribute('height', '180');
+      rect.setAttribute('width', '0');
+      rect.setAttribute('fill', '#fff');
+      mask.appendChild(rect);
       defs.appendChild(mask);
 
-      const g = document.createElementNS(NS, 'g');
-      g.setAttribute('mask', 'url(#' + mid + ')');
+      /* 微小な変形は外側、マスクは内側。変形が収まれば正規ロゴと一致する */
+      const outer = document.createElementNS(NS, 'g');
+      const inner = document.createElementNS(NS, 'g');
+      inner.setAttribute('mask', 'url(#' + mid + ')');
       const glyph = document.createElementNS(NS, 'path');
       glyph.setAttribute('d', d);
       glyph.setAttribute('fill', fill);
-      glyph.setAttribute('fill-rule', src.getAttribute('fill-rule') || 'nonzero');
-      g.appendChild(glyph);
-      root.appendChild(g);
+      glyph.setAttribute('fill-rule', sp.getAttribute('fill-rule') || 'nonzero');
+      inner.appendChild(glyph);
+      outer.appendChild(inner);
+      root.appendChild(outer);
 
-      /* 円を走らせるための骨格(描画はしない) */
-      const rail = document.createElementNS(NS, 'path');
-      rail.setAttribute('d', spec.d);
-      rail.setAttribute('fill', 'none');
-      rail.style.display = 'none';
-      root.appendChild(rail);
-
-      const len = rev.getTotalLength();
-      rev.style.strokeDasharray = len;
-      rev.style.strokeDashoffset = len;
-      letters.push({ spec, rev, rail, len });
+      const b = sp.getBBox();
+      letters.push({ L, rect, outer,
+        cx: b.x + b.width / 2, cy: b.y + b.height / 2, by: b.y + b.height });
     });
 
-    /* 導く円。最後に i のドットとしてそのまま残る */
     const guide = document.createElementNS(NS, 'circle');
     guide.setAttribute('fill', fill);
     guide.setAttribute('r', String(GUIDE_R));
-    guide.setAttribute('cx', String(DOT.x));
-    guide.setAttribute('cy', String(DOT.y));
+    guide.setAttribute('cx', String(WAY[0][1]));
+    guide.setAttribute('cy', String(SWEEP_Y));
     guide.style.opacity = '0';
     root.appendChild(guide);
 
-    return { letters, guide, root };
+    return { letters, guide };
   };
 
   const play = (P, wrap, done) => {
     const { letters, guide } = P;
-    /* 円が字から字へ渡るときの出発点と到達点 */
-    const at = (L, s) => {
-      const p = L.rail.getPointAtLength(Math.max(0, Math.min(L.len, s)));
-      return [p.x, p.y];
-    };
-
     let raf = 0, t0 = 0, finished = false;
 
     const frame = (now) => {
       if (!t0) t0 = now;
       const t = now - t0;
 
-      /* --- 円の出現 --- */
-      const ap = clamp01((t - T.inAt) / T.inDur);
-      const appear = outCubic(ap);
-
-      /* --- 各文字の面。円が走る時間の catchUp 倍かけて追いつく --- */
-      letters.forEach((L, i) => {
-        const s = T.starts[i];
-        const u = inOut(clamp01((t - s) / (L.spec.travel * T.catchUp)));
-        L.rev.style.strokeDashoffset = (L.len * (1 - u)).toFixed(2);
+      /* --- 字面: 横に開きながら、微小な変形が収まっていく --- */
+      letters.forEach((o) => {
+        const L = o.L;
+        const p = reveal(clamp01((t - L.s) / L.d));
+        o.rect.setAttribute('width', ((L.x1 - L.x0) * p).toFixed(2));
+        /* 変形は開きよりわずかに遅れて収める。字面が円に引かれて
+           追ってくるように見せるための遅れ */
+        const q = out4(clamp01((t - L.s) / (L.d * 1.25)));
+        const sx = lerp(L.sx, 1, q);
+        const sy = lerp(L.sy !== undefined ? L.sy : 1, 1, q);
+        const ty = lerp(L.ty, 0, q);
+        const rot = lerp(L.rot, 0, q);
+        /* I の縦伸びだけは足元を軸にする。他は図形の中心 */
+        const ax = o.cx, ay = (L.sy !== undefined) ? o.by : o.cy;
+        o.outer.setAttribute('transform',
+          'translate(' + ax.toFixed(2) + ' ' + (ay + ty).toFixed(2) + ')' +
+          ' rotate(' + rot.toFixed(3) + ')' +
+          ' scale(' + sx.toFixed(4) + ' ' + sy.toFixed(4) + ')' +
+          ' translate(' + (-ax).toFixed(2) + ' ' + (-ay).toFixed(2) + ')');
       });
 
-      /* --- 円の位置 --- */
+      /* --- 円 --- */
+      const appear = out3(clamp01((t - T.inAt) / T.inDur));
       let cx, cy, r = GUIDE_R;
-      const last = letters.length - 1;
-      if (t < T.starts[0]) {
-        /* 出現中は M の描き始めに待機 */
-        const p = at(letters[0], 0);
-        cx = p[0]; cy = p[1];
-      } else if (t >= T.dotAt) {
-        /* i のドットへ寄って縮む。前半速く、終盤で滑らかに減速 */
-        const from = at(letters[last], letters[last].len);
-        /* 前半は少し速く、終盤で長く減速。静止から始めるので
-           出だしで位置が飛ばない(inOut と outCubic の合成) */
-        const mp = clamp01((t - T.dotAt) / T.dotDur);
-        const m = inOut(mp) * 0.35 + outCubic(mp) * 0.65;
-        cx = lerp(from[0], DOT.x, m);
-        cy = lerp(from[1], DOT.y, m);
+      if (t < T.toDot) {
+        cx = pathX(t);
+        cy = SWEEP_Y;
+      } else {
+        /* i のドットへ。前半は少し速く、終盤は長く引く。
+           静止から始めるので出だしで位置が飛ばない */
+        const mp = clamp01((t - T.toDot) / T.toDotDur);
+        const m = inOut(mp) * 0.35 + out3(mp) * 0.65;
+        cx = lerp(pathX(T.toDot), DOT.x, m);
+        cy = lerp(SWEEP_Y, DOT.y, m);
         r = lerp(GUIDE_R, DOT.r * 1.05, m);
-        if (t >= T.settleAt) {
-          const sm = outQuint(clamp01((t - T.settleAt) / T.settleDur));
+        if (t >= T.settle) {
+          const sm = out4(clamp01((t - T.settle) / T.settleDur));
           r = lerp(DOT.r * 1.05, DOT.r, sm);
         }
-      } else {
-        /* どの文字を走っているか、あるいは字の間を渡っているか */
-        let idx = 0;
-        for (let i = 0; i < letters.length; i++) if (t >= T.starts[i]) idx = i;
-        const L = letters[idx];
-        const into = t - T.starts[idx];
-        if (into <= L.spec.travel) {
-          /* 円も面と同じ曲線。面の時計だけ遅いので、面が円を追い越さない */
-          const p = at(L, L.len * inOut(into / L.spec.travel));
-          cx = p[0]; cy = p[1];
-        } else {
-          /* 次の字へ渡る。出発は今の字の終点、到達は次の字の始点 */
-          const nx = letters[idx + 1];
-          const a = at(L, L.len);
-          if (!nx) { cx = a[0]; cy = a[1]; }
-          else {
-            const b = at(nx, 0);
-            const gapStart = T.starts[idx] + L.spec.travel;
-            const gapDur = Math.max(1, T.starts[idx + 1] - gapStart);
-            const m = inOut(clamp01((t - gapStart) / gapDur));
-            cx = lerp(a[0], b[0], m);
-            cy = lerp(a[1], b[1], m);
-          }
-        }
       }
+      /* 出現は scale .85→1 相当。半径で表す */
       guide.setAttribute('cx', cx.toFixed(2));
       guide.setAttribute('cy', cy.toFixed(2));
-      guide.setAttribute('r', r.toFixed(2));
+      guide.setAttribute('r', (r * lerp(0.85, 1, appear)).toFixed(2));
       guide.style.opacity = appear.toFixed(3);
 
       if (t >= T.total) {
@@ -253,7 +238,10 @@
           guide.setAttribute('cx', String(DOT.x));
           guide.setAttribute('cy', String(DOT.y));
           guide.setAttribute('r', String(DOT.r));
-          letters.forEach((L) => { L.rev.style.strokeDashoffset = '0'; });
+          letters.forEach((o) => {
+            o.rect.setAttribute('width', String(o.L.x1 - o.L.x0));
+            o.outer.removeAttribute('transform');
+          });
           wrap.classList.add('is-done');
           done();
         }
@@ -284,11 +272,9 @@
       wrap.classList.add('is-playing');
       stop = play(P, wrap, () => { stop = null; });
     };
-    /* 開発確認用。毎回スクロールし直さずに見られるようにする */
     window.__replayAboutLogo = run;
 
-    /* ピン留めに入った瞬間を起点にする。セクションが画面いっぱいに
-       収まって「止まった」その時から描き始める。 */
+    /* ピン留めに入った瞬間を起点にする */
     const scroller = document.getElementById('about-scroller');
     const pinEl = scroller && scroller.querySelector('.abt-pin');
     if (scroller && pinEl && window.__miaiOnScroll &&
@@ -302,8 +288,7 @@
           run();
           return;
         }
-        /* 止めるのは初回だけ。2回目からは普通に流す。
-           解除は「変化する場所が画面の外」でしか行わない。 */
+        /* 止めるのは初回だけ。解除は変化する場所が画面の外のときだけ */
         if (!unpinned && r.bottom <= 0) {
           unpinned = true;
           scroller.classList.add('is-unpinned');
