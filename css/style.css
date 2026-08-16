@@ -2713,9 +2713,13 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   overflow: visible;
   pointer-events: none;
 }
-.abt__logo-wrap.is-playing .abt__logo-mark { visibility: hidden; }
+/* 静止ロゴ → 粒子の受け渡しは短い溶暗で。visibility を切ると実体の
+   ロゴが1フレームで消えて粒が湧き、そこが出だしの引っかかりになる。
+   粒側(js)も同じ 260ms で立ち上げてすれ違わせる。 */
+.abt__logo-mark { transition: opacity .26s ease; }
+.abt__logo-wrap.is-playing .abt__logo-mark { opacity: 0; }
 .abt__logo-wrap.is-done .abt__logo-fx { display: none; }
-.abt__logo-wrap.is-done .abt__logo-mark { visibility: visible; }
+.abt__logo-wrap.is-done .abt__logo-mark { opacity: 1; transition: none; }
 .lm-p { transform-box: fill-box; transform-origin: center; }
 .lm-reveal-c { transform-box: fill-box; transform-origin: center; transform: scale(0); }
 /* 止まったあとは変形を残さない。静止した形が最もシャープに出る状態にする */

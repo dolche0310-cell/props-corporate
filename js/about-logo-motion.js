@@ -12,9 +12,9 @@
    そこから面が立ち上がるところだけで見せる。ぼかしは一切かけない。
 
    時間軸(ms) ※全体 1400ms:
-     0-160      散開。ごく微細なドリフトのみ
-     160-880    収束。粒ごとにずらし、ドリフトの先端から反転せず
-                そのまま軽い弧を描いて集まる。
+     0-260      静止ロゴが淡く引き、入れ替わりに粒が立ち上がる
+     160-880    収束。粒ごとにずらし、静止から加速し減速して着地する
+                一本の速度曲線で、軽い弧を描いて集まる。
                 同時に C 粒子が暖色 → 黒(02 Gather の色)へ
                 (色は --lm-particle-warm / --lm-particle-pale。
                  A-2 は無彩色に差し替える)
@@ -126,12 +126,9 @@
     const anims = [];
     const A = (el, kf, opt) => { const a = el.animate(kf, opt); anims.push(a); return a; };
 
-    /* --- 粒子: 微細なドリフト → 弧を描いて収束 ---------------------
+    /* --- 粒子: 静止から弧を描いて収束 -----------------------------
        ピン留めで必ず頭から見てもらえるので、スプラッシュ/FV と同じ
-       呼吸(ゆったり入ってそっと止まる)に合わせて 1400ms とる。
-       以前はドリフトで流れたあと散開位置へ「戻って」から収束を始めて
-       いて、この方向反転がぎこちなさの正体だった。ドリフトの先端から
-       そのまま弧へ入る1本の連続した動きにする。 */
+       呼吸(ゆったり入ってそっと止まる)に合わせて 1400ms とる。 */
     const TOTAL = 1400;
     const SPAN = 880;
     P.items.forEach((it) => {
@@ -140,18 +137,24 @@
       const gStart = 160 + rnd() * 60;                  /* 立ち上がりのばらつき */
       const gDur = 620 + rnd() * 150 - 75;              /* 収束 0.55-0.70s */
       const gEnd = Math.min(SPAN, gStart + gDur);
-      const w1 = (rnd() - .5) * 6, w2 = (rnd() - .5) * 6;   /* ±3px のドリフト */
       /* 直線だけだと機械的なので、進行方向と直交する向きへ 10-20px 膨らませる */
       const len = Math.hypot(dx, dy) || 1;
       const bow = (rnd() < .5 ? -1 : 1) * (10 + rnd() * 10);
       const mx = dx * .5 + (-dy / len) * bow;
       const my = dy * .5 + (dx / len) * bow;
 
+      /* 静止 → 加速 → 減速 → 着地 を1本の速度曲線でつなぐ。
+         微細なドリフトは持たない。止まっているものが少し流れ、
+         そこから改めて動き出す形になると、その継ぎ目で必ず速度が
+         跳ねる。出だしの引っかかりはそこだった。
+         前半は出口に速度を残す曲線、後半は速度を 0 に落とす曲線で
+         受けるので、弧の頂点でも着地でも速度が跳ねない。 */
       A(it.el, [
-        /* ドリフトの先端(dx+w1)から戻らずにそのまま弧へ。反転しない */
-        { offset: 0,                transform: at(dx, dy, sc), easing: 'ease-in-out' },
-        { offset: (gStart * .7) / SPAN, transform: at(dx + w1, dy + w2, sc), easing: EASE },
-        { offset: (gStart + gEnd) / 2 / SPAN, transform: at(mx, my, 1 + (sc - 1) * .35) },
+        { offset: 0, transform: at(dx, dy, sc) },
+        { offset: gStart / SPAN, transform: at(dx, dy, sc),
+          easing: 'cubic-bezier(.5, 0, .75, .35)' },
+        { offset: (gStart + gEnd) / 2 / SPAN, transform: at(mx, my, 1 + (sc - 1) * .35),
+          easing: 'cubic-bezier(.25, .65, .3, 1)' },
         { offset: gEnd / SPAN,      transform: at(0, 0, 1) },
         { offset: 1,                transform: at(0, 0, 1) }
       ], { duration: SPAN, fill: 'both' });
@@ -168,8 +171,12 @@
     });
 
     /* --- 粒子は面が出来上がるにつれて薄くなる ---------------------- */
+    /* 静止ロゴが消えるのと同じ 260ms で立ち上げる。いきなり全開で
+       湧かせると、実体のロゴが1フレームで粒に置き換わって見える。 */
     A(P.dust, [
-      { offset: 0, opacity: 1 }, { offset: 880 / TOTAL, opacity: 1, easing: 'ease-in-out' },
+      { offset: 0, opacity: 0, easing: 'ease-in-out' },
+      { offset: 260 / TOTAL, opacity: 1, easing: 'ease-in-out' },
+      { offset: 880 / TOTAL, opacity: 1, easing: 'ease-in-out' },
       { offset: 1290 / TOTAL, opacity: 0 }, { offset: 1, opacity: 0 }
     ], { duration: TOTAL, fill: 'both' });
 
