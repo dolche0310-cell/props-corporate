@@ -76,6 +76,23 @@
   const inOut = (t) => { const u = clamp01(t); return u * u * u * (u * (u * 6 - 15) + 10); };
   const lerp = (a, b, u) => a + (b - a) * u;
 
+  /* 露出の先端に差すアクセント。A-2 は --color-primary が #0D0D0D
+     なので、そのまま無彩色になる(色味だけが抜ける) */
+  const ACCENT = (getComputedStyle(document.documentElement)
+    .getPropertyValue('--color-primary') || '#FF2400').trim() || '#FF2400';
+  const BAND = 58;                 /* オレンジが尾を引く長さ */
+
+  const toRGB = (c) => {
+    const r = /rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)/i.exec(c);
+    if (r) return [+r[1], +r[2], +r[3]];
+    const m = /^#?([0-9a-f]{6})$/i.exec(c);
+    if (!m) return [0, 0, 0];
+    const n = parseInt(m[1], 16);
+    return [n >> 16 & 255, n >> 8 & 255, n & 255];
+  };
+  const mixRGB = (a, b, u) => 'rgb(' + Math.round(lerp(a[0], b[0], u)) + ',' +
+    Math.round(lerp(a[1], b[1], u)) + ',' + Math.round(lerp(a[2], b[2], u)) + ')';
+
   /* 通り道を Catmull-Rom で通す。折れ点で速度が跳ねないようにする */
   const pathX = (t) => {
     const P = WAY;
@@ -106,11 +123,14 @@
       'translate(' + LX + ' ' + LY + ') scale(' + k.toFixed(6) + ')');
     stage.appendChild(root);
 
-    const fill = getComputedStyle(mark).color || '#040404';
     /* 左から右の並びで取る。Figma 側の順序が変わっても効く */
     const src = Array.from(mark.querySelectorAll('path'))
       .map((p) => ({ p, x: p.getBBox().x }))
       .sort((a, b) => a.x - b.x).map((o) => o.p);
+    /* 字面の色は静止ロゴのパスが実際に塗っている色をそのまま使う。
+       ラッパの color を使うと別の色(#0F172A)になり、静止ロゴへ
+       渡した瞬間に黒へ跳ねる */
+    const fill = src.length ? getComputedStyle(src[0]).fill : 'rgb(0,0,0)';
 
     const letters = [];
     src.forEach((sp, i) => {
@@ -148,6 +168,34 @@
       mask.appendChild(rect);
       defs.appendChild(mask);
 
+      /* 露出の先端に差すアクセント用。先頭が濃く、後ろへ尾を引く帯。
+         x1/x2 を毎フレーム動かして先端に追従させる */
+      const gid = 'lgg-' + i;
+      const grad = document.createElementNS(NS, 'linearGradient');
+      grad.setAttribute('id', gid);
+      grad.setAttribute('gradientUnits', 'userSpaceOnUse');
+      grad.setAttribute('y1', '0');
+      grad.setAttribute('y2', '0');
+      const s0 = document.createElementNS(NS, 'stop');
+      s0.setAttribute('offset', '0'); s0.setAttribute('stop-color', '#000');
+      const s1 = document.createElementNS(NS, 'stop');
+      s1.setAttribute('offset', '1'); s1.setAttribute('stop-color', '#fff');
+      grad.appendChild(s0); grad.appendChild(s1);
+      defs.appendChild(grad);
+
+      const wid = 'lgw-' + i;
+      const wmask = document.createElementNS(NS, 'mask');
+      wmask.setAttribute('id', wid);
+      wmask.setAttribute('maskUnits', 'userSpaceOnUse');
+      const wrect = document.createElementNS(NS, 'rect');
+      wrect.setAttribute('x', String(L.x0 - BAND));
+      wrect.setAttribute('y', '-40');
+      wrect.setAttribute('width', String(L.x1 - L.x0 + BAND * 2));
+      wrect.setAttribute('height', '180');
+      wrect.setAttribute('fill', 'url(#' + gid + ')');
+      wmask.appendChild(wrect);
+      defs.appendChild(wmask);
+
       /* 微小な変形は外側、マスクは内側。変形が収まれば正規ロゴと一致する */
       const outer = document.createElementNS(NS, 'g');
       const inner = document.createElementNS(NS, 'g');
@@ -157,27 +205,38 @@
       glyph.setAttribute('fill', fill);
       glyph.setAttribute('fill-rule', sp.getAttribute('fill-rule') || 'nonzero');
       inner.appendChild(glyph);
+
+      /* 同じ字形をアクセント色で重ね、帯のマスクで先端だけ見せる。
+         開き切ったら引いていくので、最後には正規の色だけが残る */
+      const warmG = document.createElementNS(NS, 'g');
+      warmG.setAttribute('mask', 'url(#' + wid + ')');
+      const warm = glyph.cloneNode();
+      warm.setAttribute('fill', ACCENT);
+      warmG.appendChild(warm);
+      inner.appendChild(warmG);
+
       outer.appendChild(inner);
       root.appendChild(outer);
 
       const b = sp.getBBox();
-      letters.push({ L, rect, outer,
+      letters.push({ L, rect, outer, grad, warmG,
         cx: b.x + b.width / 2, cy: b.y + b.height / 2, by: b.y + b.height });
     });
 
     const guide = document.createElementNS(NS, 'circle');
-    guide.setAttribute('fill', fill);
+    guide.setAttribute('fill', ACCENT);
     guide.setAttribute('r', String(GUIDE_R));
     guide.setAttribute('cx', String(WAY[0][1]));
     guide.setAttribute('cy', String(SWEEP_Y));
     guide.style.opacity = '0';
     root.appendChild(guide);
 
-    return { letters, guide };
+    return { letters, guide, fill };
   };
 
   const play = (P, wrap, done) => {
-    const { letters, guide } = P;
+    const { letters, guide, fill } = P;
+    const ACC_RGB = toRGB(ACCENT), FILL_RGB = toRGB(fill);
     let raf = 0, t0 = 0, finished = false;
 
     const frame = (now) => {
@@ -189,6 +248,13 @@
         const L = o.L;
         const p = reveal(clamp01((t - L.s) / L.d));
         o.rect.setAttribute('width', ((L.x1 - L.x0) * p).toFixed(2));
+        /* アクセントの帯を露出の先端に置く。開き切ってから 320ms で
+           じんわり引き、最後は正規の色だけが残る */
+        const front = L.x0 + (L.x1 - L.x0) * p;
+        o.grad.setAttribute('x1', (front - BAND).toFixed(2));
+        o.grad.setAttribute('x2', front.toFixed(2));
+        const warmFade = 1 - out3(clamp01((t - (L.s + L.d)) / 320));
+        o.warmG.style.opacity = warmFade.toFixed(3);
         /* 変形は開きよりわずかに遅れて収める。字面が円に引かれて
            追ってくるように見せるための遅れ */
         const q = out4(clamp01((t - L.s) / (L.d * 1.25)));
@@ -229,6 +295,10 @@
       guide.setAttribute('cy', cy.toFixed(2));
       guide.setAttribute('r', (r * lerp(0.85, 1, appear)).toFixed(2));
       guide.style.opacity = appear.toFixed(3);
+      /* 走っている間はアクセント。ドットへ着地しながら正規の色へ
+         連続で寄せる(差し替えないので途切れない) */
+      const cu = out3(clamp01((t - T.toDot) / (T.toDotDur + T.settleDur)));
+      guide.setAttribute('fill', mixRGB(ACC_RGB, FILL_RGB, cu));
 
       if (t >= T.total) {
         if (!finished) {
@@ -241,7 +311,9 @@
           letters.forEach((o) => {
             o.rect.setAttribute('width', String(o.L.x1 - o.L.x0));
             o.outer.removeAttribute('transform');
+            o.warmG.style.opacity = '0';
           });
+          guide.setAttribute('fill', fill);
           wrap.classList.add('is-done');
           done();
         }
