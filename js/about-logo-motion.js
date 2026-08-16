@@ -16,8 +16,9 @@
       この立ち上がりの中で自然に形になる。
    2) 字そのものも少し下から上がる。マスクより 15% 遅く収まるので、
       マスクの縁の内側で字が動き続け、面が起き上がって見える。
-   3) 色はアクセントで出て、立ち上がりの後半から正規の色へ引く。
-      塗りが後から入っていくように見える。最後は正規ロゴと一致。
+   3) 塗りは中心から四方へ広がる。放射のグラデーションの境目を
+      外へ送ることで、色づいた範囲がじんわり広がっていく。
+      広がり切ったら塗りが引いて、最後は正規ロゴと一致する。
    4) 4文字は 130ms ずつずらすだけ。尺は全部同じなので、左から右へ
       一続きの波として渡る(止まって次、にはならない)。
 
@@ -27,7 +28,8 @@
       250- 770  i
       380- 900  A
       510-1030  I
-      各文字は立ち上がりの 55% から 420ms かけて色が引く
+      300-1060  塗りが中心から四方へ広がる
+     1060-1520  塗りが引いて正規の色に収まる
    完成後はループしない。静止ロゴへ渡してステージを畳む。 */
 (() => {
   'use strict';
@@ -40,9 +42,12 @@
   const STEP = 130;
   const START = 120;
   const RISE = 0.17;                     /* 字が下から上がる量(高さ比) */
-  const TINT_AT = 0.55;                  /* 色が引き始める位置(尺の比) */
-  const TINT_DUR = 420;
-  const TOTAL = 1400;
+  /* 塗りは中心から四方へ広がる波。放射のグラデーションの
+     「白と黒の境目」を外へ送ることで、塗られた範囲が広がる。
+     SOFT が境目のぼけ幅で、これが「じんわり」の効き具合。 */
+  const WAVE_AT = 300, WAVE_DUR = 760, WAVE_SOFT = 0.30;
+  const TINT_OUT_AT = 1060, TINT_OUT_DUR = 460;   /* 塗りが正規色へ収まる */
+  const TOTAL = 1560;
 
   const clamp01 = (t) => (t < 0 ? 0 : t > 1 ? 1 : t);
   /* 立ち上がりは俊敏に出て、止まる直前だけ丁寧に */
@@ -53,16 +58,6 @@
   const ACCENT = (getComputedStyle(document.documentElement)
     .getPropertyValue('--color-primary') || '#FF2400').trim() || '#FF2400';
 
-  const toRGB = (c) => {
-    const r = /rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)/i.exec(c);
-    if (r) return [+r[1], +r[2], +r[3]];
-    const m = /^#?([0-9a-f]{6})$/i.exec(c);
-    if (!m) return [0, 0, 0];
-    const n = parseInt(m[1], 16);
-    return [n >> 16 & 255, n >> 8 & 255, n & 255];
-  };
-  const mixRGB = (a, b, u) => 'rgb(' + Math.round(lerp(a[0], b[0], u)) + ',' +
-    Math.round(lerp(a[1], b[1], u)) + ',' + Math.round(lerp(a[2], b[2], u)) + ')';
 
   const build = (stage, mark) => {
     const k = 233.661 / LW;
@@ -85,6 +80,43 @@
        ラッパの color を使うと別の色になり、渡した瞬間に跳ねる */
     const fill = src.length ? getComputedStyle(src[0]).fill : 'rgb(0,0,0)';
 
+    /* ロゴ全体の外形。塗りの波の中心と、端まで届く半径を出す */
+    let bx0 = Infinity, by0 = Infinity, bx1 = -Infinity, by1 = -Infinity;
+    src.forEach((p) => { const b = p.getBBox();
+      bx0 = Math.min(bx0, b.x); by0 = Math.min(by0, b.y);
+      bx1 = Math.max(bx1, b.x + b.width); by1 = Math.max(by1, b.y + b.height); });
+    const CX = (bx0 + bx1) / 2, CY = (by0 + by1) / 2;
+    const RMAX = Math.hypot(bx1 - CX, by1 - CY);
+
+    /* 中心から広がる塗りのマスク(全文字で共有)。
+       内側 = 白(塗られた) / 外側 = 黒(まだ)。境目を外へ送る */
+    const wave = document.createElementNS(NS, 'radialGradient');
+    wave.setAttribute('id', 'lgw');
+    wave.setAttribute('gradientUnits', 'userSpaceOnUse');
+    wave.setAttribute('cx', CX.toFixed(2));
+    wave.setAttribute('cy', CY.toFixed(2));
+    wave.setAttribute('r', RMAX.toFixed(2));
+    const w0 = document.createElementNS(NS, 'stop');
+    w0.setAttribute('offset', '0'); w0.setAttribute('stop-color', '#fff');
+    const w1 = document.createElementNS(NS, 'stop');
+    w1.setAttribute('offset', '0'); w1.setAttribute('stop-color', '#fff');
+    const w2 = document.createElementNS(NS, 'stop');
+    w2.setAttribute('offset', '0'); w2.setAttribute('stop-color', '#000');
+    wave.appendChild(w0); wave.appendChild(w1); wave.appendChild(w2);
+    defs.appendChild(wave);
+
+    const wmask = document.createElementNS(NS, 'mask');
+    wmask.setAttribute('id', 'lgwm');
+    wmask.setAttribute('maskUnits', 'userSpaceOnUse');
+    const wrect = document.createElementNS(NS, 'rect');
+    wrect.setAttribute('x', (CX - RMAX * 1.6).toFixed(2));
+    wrect.setAttribute('y', (CY - RMAX * 1.6).toFixed(2));
+    wrect.setAttribute('width', (RMAX * 3.2).toFixed(2));
+    wrect.setAttribute('height', (RMAX * 3.2).toFixed(2));
+    wrect.setAttribute('fill', 'url(#lgw)');
+    wmask.appendChild(wrect);
+    defs.appendChild(wmask);
+
     const letters = [];
     src.forEach((sp, i) => {
       const b = sp.getBBox();
@@ -106,28 +138,37 @@
       inner.setAttribute('mask', 'url(#' + mid + ')');
       const glyph = document.createElementNS(NS, 'path');
       glyph.setAttribute('d', sp.getAttribute('d'));
-      glyph.setAttribute('fill', ACCENT);
+      glyph.setAttribute('fill', fill);
       glyph.setAttribute('fill-rule', sp.getAttribute('fill-rule') || 'nonzero');
       inner.appendChild(glyph);
+
+      /* 同じ字形をアクセント色でもう1枚。放射のマスクで、中心から
+         広がった範囲だけが色づく。最後に引いて正規色だけが残る */
+      const tintG = document.createElementNS(NS, 'g');
+      tintG.setAttribute('mask', 'url(#lgwm)');
+      const tint = glyph.cloneNode();
+      tint.setAttribute('fill', ACCENT);
+      tintG.appendChild(tint);
+      inner.appendChild(tintG);
+
       outer.appendChild(inner);
       root.appendChild(outer);
 
       const bottom = b.y + b.height + 6;
       const top = b.y - 6;
       letters.push({
-        rect, outer, glyph,
+        rect, outer, glyph, tintG,
         s: START + STEP * i,
         top, bottom, h: bottom - top,
         rise: b.height * RISE
       });
     });
 
-    return { letters, fill };
+    return { letters, fill, w1, w2 };
   };
 
   const play = (P, wrap, done) => {
-    const { letters, fill } = P;
-    const ACC = toRGB(ACCENT), DST = toRGB(fill);
+    const { letters, fill, w1, w2 } = P;
     let raf = 0, t0 = 0, finished = false;
 
     const frame = (now) => {
@@ -147,10 +188,17 @@
         const ty = lerp(L.rise, 0, q);
         L.outer.setAttribute('transform', 'translate(0 ' + ty.toFixed(2) + ')');
 
-        /* 色: アクセントで出て、立ち上がりの後半から正規の色へ引く */
-        const c = out3(clamp01((t - (L.s + DUR * TINT_AT)) / TINT_DUR));
-        L.glyph.setAttribute('fill', mixRGB(ACC, DST, c));
       });
+
+      /* 塗りの波。中心から四方へ、境目をぼかしながら広がる */
+      const wp = out3(clamp01((t - WAVE_AT) / WAVE_DUR));
+      const front = lerp(-WAVE_SOFT, 1 + WAVE_SOFT, wp);
+      w1.setAttribute('offset', clamp01(front).toFixed(4));
+      w2.setAttribute('offset', clamp01(front + WAVE_SOFT).toFixed(4));
+
+      /* 広がり切ったら、塗りがじんわり引いて正規の色に収まる */
+      const fade = 1 - out3(clamp01((t - TINT_OUT_AT) / TINT_OUT_DUR));
+      letters.forEach((L) => { L.tintG.style.opacity = fade.toFixed(3); });
 
       if (t >= TOTAL) {
         if (!finished) {
@@ -162,6 +210,7 @@
             L.rect.setAttribute('height', L.h.toFixed(2));
             L.outer.removeAttribute('transform');
             L.glyph.setAttribute('fill', fill);
+            L.tintG.style.opacity = '0';
           });
           wrap.classList.add('is-done');
           done();
