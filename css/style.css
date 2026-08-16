@@ -3016,8 +3016,13 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
 
 /* --- ケンバーンズ。写真ごとに向きと量を変える(--kb-a → --kb-b) --- */
 .company--figma .cmp__slide img { transform: var(--kb-a); }
+/* is-leaving も同じ到達値を持たせる。ここを外すと、退場に入った
+   1フレームで transform も transition も失われ、画像が現在位置から
+   開始位置(--kb-a)へ瞬間的に戻る。次の写真が 1.3s かけて開いている
+   最中なので、この跳ねがはっきり見えていた。 */
 .company--figma .cmp__slide.is-active img,
-.company--figma .cmp__slide.is-entering img {
+.company--figma .cmp__slide.is-entering img,
+.company--figma .cmp__slide.is-leaving img {
   transform: var(--kb-b);
   transition: transform 6.5s linear;
 }
