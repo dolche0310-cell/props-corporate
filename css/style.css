@@ -1713,7 +1713,7 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   }
   .service--brushup .service__link:active .service__link-label,
   .service--brushup .service__link:active .service__link-icon { transform: translateY(.5px); }
-  .news__more:active .news__more-fill { transform: scale(1.02, 1.06); }
+  .news__more:active .news__more-fill { transform: scale(.98); }
 }
 
 @media (max-width: 480px) {
@@ -2110,7 +2110,7 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   isolation: isolate;
 }
 /* --- hover の挙動は参考ボタン(editora.jp の c-btn--hasicon)を踏襲 ---
-   ・地がわずかに膨らむ            scale(1.05, 1.1)
+   ・地の大きさは変えない(指示により参考の scale は入れない)
    ・文字が 1.8em 右へ寄る          = 矢印の幅(1em) + 間隔(0.8em)
    ・文字は上へ巻き上がり、同じ文字が下から入れ替わる
    ・末尾の矢印は自分の軸に沿って右上へ抜ける
@@ -2176,7 +2176,6 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
 .news__more-arrow--hover svg { transform: rotate(-45deg) translate(-140%); }
 @media (hover: hover) and (pointer: fine) {
   /* 位置は動かさない(translate すると右上へ逃げて見える)。色だけ変える */
-  .news__more:hover .news__more-fill { transform: scale(1.05, 1.1); }
   .news__more:hover .news__more-text { transform: translateX(1.8em); }
   .news__more:hover .news__more-label { transform: translateY(-100%); }
   .news__more:hover .news__more-arrow--default svg {
