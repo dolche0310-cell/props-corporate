@@ -3329,7 +3329,7 @@ body {
    ・白いセクションの上: 黒地に白矢印(反転)。輪郭が立つので罫は無し。
    ・暗いセクションの上: すりガラス。地をごく薄い白にして
      backdrop-filter でぼかすので、後ろを流れるマーキーの文字が
-     うっすら透けて動く。存在感を落とし、主役を邪魔しない。
+     うっすら透けて動く。罫は持たず、存在感を落として主役を邪魔しない。
    切り替えは html.svc-dark(暗転の進行を js が付ける)に乗せる。
    =========================================================== */
 .to-top {
@@ -3360,7 +3360,7 @@ html.svc-dark .to-top {
   background: rgba(255, 255, 255, .10);
   -webkit-backdrop-filter: blur(12px) saturate(140%);
   backdrop-filter: blur(12px) saturate(140%);
-  border-color: rgba(255, 255, 255, .16);
+  border-color: transparent;     /* 罫は持たない(指示) */
   color: rgba(255, 255, 255, .88);
 }
 .to-top.is-show {

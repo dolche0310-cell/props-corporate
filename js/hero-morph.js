@@ -599,11 +599,30 @@
      溜め(overshoot)は残すが、uu を掛けて u=0 側の速度も 0 に落とす。 */
   const geoEase = (u, kind, strength) => {
     const uu = clamp01(u);
-    const base = smooth(uu);
+    /* smootherstep は入りも出も同じだけ寝ているので、形が動き出す
+       までに「待ち」を感じる。入り側だけ ease-out 寄りに寄せて、
+       大きく変わる瞬間は素早く、着地の直前だけ丁寧に減速させる。
+       両者とも終端の傾きは 0 なので、止まり際の丁寧さは保たれる。 */
+    const eo = 1 - Math.pow(1 - uu, 3);
+    const base = smooth(uu) * 0.45 + eo * 0.55;
     const s = (kind === 'bold' ? 1.5 : kind === 'over' ? 2.1 : 0.4) * strength;
     const v = uu - 1;
     return base + s * 0.045 * (v * v * v + v * v) * 6.75 * uu;
   };
+
+  /* テンポ。形が完成してから次へ移るまでの「待ち」が長く、
+     全体が重く見えていた。
+     ・素の状態(ホールド中に固有の演出を持たないもの)は静止を 4 割まで
+       詰める。ここが「完成 → 停止 → 次」の間の正体。
+     ・波紋・メーター・バースト・回転など、ホールドの中で時間に沿った
+       演出を持つ状態は尺を触らない(内部の刻みが壊れるため)。
+     ・そのうえで時計そのものを 1.15 倍で回し、変形自体も速める。
+       こちらは全ての内部演出が同じ比率で速くなるので破綻しない。 */
+  const PLAIN_HOLD = ['s04', 's07', 's07b', 's11', 's18a', 's18b', 's19', 's20'];
+  STATES.forEach((st) => {
+    if (PLAIN_HOLD.indexOf(st.id) >= 0) st.h = Math.round(st.h * 0.4);
+  });
+  const SPEED = 1.15;
 
   const total = STATES.reduce((a, s) => a + s.t + s.h, 0);
   let strength = 1;                 /* Splash 100% → FV idle 75% */
@@ -881,9 +900,10 @@
         e1.style.strokeDasharray = '';
         e1.style.strokeDashoffset = '';
         e1.setAttribute('fill-opacity', '0');
-        /* 薄いオレンジは使わない。出ている間は原色のまま、
-           大きさ(gi)だけで湧き上がりを見せる */
-        e1.style.opacity = ri > 0 ? '1' : '0';
+        /* 薄いオレンジは使わない。色は原色のまま、大きさ(gi)で
+           湧き上がりを見せる。濃度は 0/1 で切らずに立ち上げる
+           (0 と 1 を跨ぐと、その一瞬が点滅として見える)。 */
+        e1.style.opacity = smooth(clamp01(ri / 0.15)).toFixed(3);
         /* 描いている丸。1周したら溶ける */
         const e2 = pool[2];
         /* 丸は描画の先端に居る。丸が通った後だけ線が残るので、
@@ -893,8 +913,9 @@
         const fade = 1 - smooth(clamp01((ht3 - 700) / 260));
         drawShape(e2, circle(c[0] + Math.cos(th) * R0, c[1] + Math.sin(th) * R0,
                              Math.max(0.5, 13 * fade)), null);
-        /* 溶けるのは半径だけ。色は最後まで原色 */
-        e2.style.opacity = fade > 0.05 ? '1' : '0';
+        /* 半径が縮んで消えるのに合わせ、濃度も連続で引く。
+           0.05 を境に 1→0 と切っていたため、最後に一瞬跳ねていた。 */
+        e2.style.opacity = smooth(clamp01(fade / 0.18)).toFixed(3);
         return;
       }
       /* --- 円の軌跡 ---
@@ -1028,8 +1049,9 @@
           lerp(BURST_O[1], c[1] + (y - c[1]) * sc, 1 - collapse * 0.85)
         ]);
         drawShape(pool[i], pts, null);
-        /* sc→0 で大きさ自体が消えるので、色は原色のまま保つ */
-        pool[i].style.opacity = collapse < 0.995 ? '1' : '0';
+        /* sc→0 で大きさ自体が消える。濃度も最後だけ連続で引く。
+           0.995 を境に 1→0 と切ると、その1フレームが点滅になる。 */
+        pool[i].style.opacity = smooth(clamp01((1 - collapse) / 0.08)).toFixed(3);
       });
       bl.forEach((sh, i) => {
         const el = pool[prevList.length + i];
@@ -1188,8 +1210,8 @@
   const START_OFFSET = STATES[0].t;
   let lastPhase = START_OFFSET;      /* 一時停止(画面外)からの復帰用 */
   const frame = (now) => {
-    if (t0 === null) t0 = now - (lastPhase - START_OFFSET);
-    let t = now - t0 + START_OFFSET;
+    if (t0 === null) t0 = now - (lastPhase - START_OFFSET) / SPEED;
+    let t = (now - t0) * SPEED + START_OFFSET;
     lastPhase = t;
     const cycleT = t % total;
     if (t >= total + START_OFFSET && !firstPassDone) { firstPassDone = true; strength = 0.75; }
@@ -1246,6 +1268,14 @@
       if (REDUCED) { showStatic(); document.dispatchEvent(new CustomEvent('miai:morph-fv')); return; }
       staticG.style.display = 'none';
       liveG.style.display = '';
+      /* 幕のドットは同じフレームで消える。ここで rAF を待つと、
+         どちらも描かれない空白が1枚できて丸が点滅して見える。
+         最初の1枚だけ同期で描いてから rAF に渡す。 */
+      nowRef = performance.now();
+      t0 = nowRef;
+      lastPhase = START_OFFSET;
+      renderAt(START_OFFSET % total);
+      applyStage(nowRef);
       raf = requestAnimationFrame(frame);
     }
   };
