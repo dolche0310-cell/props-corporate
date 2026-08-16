@@ -604,7 +604,7 @@
        大きく変わる瞬間は素早く、着地の直前だけ丁寧に減速させる。
        両者とも終端の傾きは 0 なので、止まり際の丁寧さは保たれる。 */
     const eo = 1 - Math.pow(1 - uu, 3);
-    const base = smooth(uu) * 0.45 + eo * 0.55;
+    const base = smooth(uu) * 0.3 + eo * 0.7;
     const s = (kind === 'bold' ? 1.5 : kind === 'over' ? 2.1 : 0.4) * strength;
     const v = uu - 1;
     return base + s * 0.045 * (v * v * v + v * v) * 6.75 * uu;
@@ -618,17 +618,28 @@
        演出を持つ状態は尺を触らない(内部の刻みが壊れるため)。
      ・そのうえで時計そのものを 1.15 倍で回し、変形自体も速める。
        こちらは全ての内部演出が同じ比率で速くなるので破綻しない。 */
-  const PLAIN_HOLD = ['s04', 's07', 's07b', 's11', 's18a', 's18b', 's19', 's20'];
+  /* 素の状態の静止はほぼ無くす。ここが「完成して止まっている時間」の
+     正体で、前の変形が終わるとすぐ次が始まる = オーバーラップして
+     見える。s20 だけは FV の完成形なので少し残す。 */
+  const HOLD_SCALE = { s04: 0.25, s07: 0.25, s07b: 0.25, s11: 0.25,
+                       s18a: 0.25, s18b: 0.25, s19: 0.25, s20: 0.45 };
   STATES.forEach((st) => {
-    if (PLAIN_HOLD.indexOf(st.id) >= 0) st.h = Math.round(st.h * 0.4);
+    const k = HOLD_SCALE[st.id];
+    if (k) st.h = Math.round(st.h * k);
   });
-  const SPEED = 1.15;
+  /* 時計そのものの倍率。内部の演出も同じ比率で速くなるので破綻しない */
+  const SPEED = 1.35;
 
   /* 融合のぼかし量の最大。SVG 側の初期値と同じ */
   const GOO_MAX = 13;
 
   const total = STATES.reduce((a, s) => a + s.t + s.h, 0);
-  let strength = 1;                 /* Splash 100% → FV idle 75% */
+  /* Splash 100% → FV idle 75%。1フレームで落とすと、揺らぎ・弧・
+     イージングの効きが同時に25%変わって全体が跳ねる(ループの
+     継ぎ目で「カチッ」と見えていた原因のひとつ)。目標値を置いて
+     毎フレーム近づけ、約700msかけて渡す。 */
+  let strength = 1;
+  let strengthTarget = 1;
   let firstPassDone = false;
   let fvFired = false;
 
@@ -1229,7 +1240,11 @@
     let t = (now - t0) * SPEED + START_OFFSET;
     lastPhase = t;
     const cycleT = t % total;
-    if (t >= total + START_OFFSET && !firstPassDone) { firstPassDone = true; strength = 0.75; }
+    if (t >= total + START_OFFSET && !firstPassDone) { firstPassDone = true; strengthTarget = 0.75; }
+    if (strength !== strengthTarget) {
+      strength += (strengthTarget - strength) * 0.045;
+      if (Math.abs(strengthTarget - strength) < 0.002) strength = strengthTarget;
+    }
     nowRef = now;
     renderAt(cycleT);
     if (!updateFlowSkip) updateFlow(pool.length);
