@@ -3323,8 +3323,14 @@ body {
 /* ===========================================================
    画面右下の「先頭へ戻る」
    参考(recruit.garage.co.jp)と同じ 64x64 / 右下 40px / 角丸4px。
-   地は白 + 細い罫。hover で色面が左から開き、矢印が白へ抜ける。
    40px の余白があるので本文にも右端のグラフィックにも被らない。
+
+   地はセクションの明るさで2通り。
+   ・白いセクションの上: 黒地に白矢印(反転)。輪郭が立つので罫は無し。
+   ・暗いセクションの上: すりガラス。地をごく薄い白にして
+     backdrop-filter でぼかすので、後ろを流れるマーキーの文字が
+     うっすら透けて動く。存在感を落とし、主役を邪魔しない。
+   切り替えは html.svc-dark(暗転の進行を js が付ける)に乗せる。
    =========================================================== */
 .to-top {
   position: fixed;
@@ -3335,10 +3341,10 @@ body {
   height: 64px;
   display: grid;
   place-items: center;
-  border: 1px solid var(--color-border);
+  border: 1px solid transparent;
   border-radius: 4px;
-  background: #fff;
-  color: var(--color-ink);
+  background: var(--color-ink);
+  color: #fff;
   overflow: hidden;
   isolation: isolate;
   /* 先頭付近では出さない。js が is-show を付ける */
@@ -3346,8 +3352,16 @@ body {
   visibility: hidden;
   transform: translateY(8px);
   transition: opacity .3s ease, transform .3s ease, visibility 0s linear .3s,
-              color .3s ease,
-              border-color .4s cubic-bezier(.16, .5, .25, 1);
+              color .45s ease, background-color .45s ease,
+              border-color .45s ease, backdrop-filter .45s ease;
+}
+/* 暗いセクションの上ではすりガラス。後ろの文字がうっすら透ける */
+html.svc-dark .to-top {
+  background: rgba(255, 255, 255, .10);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  backdrop-filter: blur(12px) saturate(140%);
+  border-color: rgba(255, 255, 255, .16);
+  color: rgba(255, 255, 255, .88);
 }
 .to-top.is-show {
   opacity: 1;
@@ -3361,13 +3375,13 @@ body {
 .to-top__fill {
   position: absolute;
   inset: 0;
-  z-index: -1;
+  z-index: 0;                  /* 半透明の地より前、矢印より後ろ */
   background: var(--color-primary);
   transform: scaleX(0);
   transform-origin: left center;
   transition: transform .4s cubic-bezier(.16, .5, .25, 1);
 }
-.to-top__arrow { display: block; }
+.to-top__arrow { display: block; position: relative; z-index: 1; }
 @media (hover: hover) {
   .to-top:hover { color: #fff; border-color: var(--color-primary); }
   .to-top:hover .to-top__fill { transform: scaleX(1); }
