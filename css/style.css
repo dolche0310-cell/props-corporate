@@ -2787,15 +2787,14 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   overflow: visible;
   pointer-events: none;
 }
-/* 静止ロゴ → 粒子の受け渡しは短い溶暗で。visibility を切ると実体の
-   ロゴが1フレームで消えて粒が湧き、そこが出だしの引っかかりになる。
-   粒側(js)も同じ 260ms で立ち上げてすれ違わせる。 */
-.abt__logo-mark { transition: opacity .26s ease; }
-.abt__logo-wrap.is-playing .abt__logo-mark { opacity: 0; }
+/* 最初はロゴを出さない。円が描き切ってから静止ロゴへ渡す。
+   js が動く環境でだけ伏せる(js-reveal は js が付ける)ので、
+   スクリプトが動かない場合はロゴがそのまま出る。
+   描き終わりの円はドットと寸分違わぬ位置・大きさで止まっているため、
+   ステージから静止ロゴへ渡しても1ピクセルも動かない。 */
+.js-reveal .abt__logo-wrap:not(.is-done) .abt__logo-mark { opacity: 0; }
 .abt__logo-wrap.is-done .abt__logo-fx { display: none; }
-.abt__logo-wrap.is-done .abt__logo-mark { opacity: 1; transition: none; }
-.lm-p { transform-box: fill-box; transform-origin: center; }
-.lm-reveal-c { transform-box: fill-box; transform-origin: center; transform: scale(0); }
+.abt__logo-wrap.is-done .abt__logo-mark { opacity: 1; }
 /* 止まったあとは変形を残さない。静止した形が最もシャープに出る状態にする */
 .abt__logo-wrap.is-done { opacity: 1; transform: none; }
 .abt__logo-wrap.is-playing { will-change: opacity, transform; }
