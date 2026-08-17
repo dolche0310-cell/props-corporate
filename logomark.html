@@ -51,13 +51,15 @@
     background: var(--pane);
     border-radius: 12px;
   }
-  /* 10案。列は 90px 固定で、余りを均等に割る(参考と同じ 5 列 x 2 行) */
+  /* Figma 494:23602。5案を1列(1行)に並べる。列は 90px 固定で余りを均等に
+     割ると間隔 80.5px になり、Figma の送り幅 170px(=スロット90+間隔80)と
+     一致する。カードの高さは padding 104 x2 + スロット67 = 275px で
+     Figma のカード高と同値。 */
   .lm-card--grid { padding: 104px 122px; }
   .lm-grid {
     display: grid;
     grid-template-columns: repeat(5, 90px);
     justify-content: space-between;
-    row-gap: 80px;
   }
   .lm-item {
     display: flex;
@@ -68,8 +70,10 @@
   /* マークの寸法は Figma 494:23602 のフレーム実測をそのまま渡す。
      4案とも図形が viewBox いっぱい(比率1.00)なので、高さがそのまま
      見た目の大きさになる。90pxのスロット内で中央に置く。 */
-  /* flex:none がないと、狭い幅で横だけ潰れて縦横比が崩れる */
-  .lm-item img { flex: none; height: var(--mk, 67px); width: auto; }
+  /* flex:none がないと、狭い幅で横だけ潰れて縦横比が崩れる。
+     4案とも図形が正方(比率1.00)なので、幅で指定しておけば
+     狭い画面では列幅に追従させるだけで比率が保てる。 */
+  .lm-item img { flex: none; width: var(--mk, 67px); height: auto; }
 
   /* ロゴマーク & ロゴタイプのセット。
      組み方は logo-a.html の上段カード(.ld-card--lockup)と同一にする。
@@ -222,7 +226,10 @@
     .lm-title { font-size: 22px; margin-bottom: 56px; }
     .lm-back { margin-bottom: 56px; }
     .lm-card--grid { padding: 56px 32px; }
-    .lm-grid { grid-template-columns: repeat(3, 1fr); row-gap: 48px; }
+    .lm-grid { grid-template-columns: repeat(5, 1fr); }
+    /* 狭い画面ではマークを列幅に収める(はみ出させない) */
+    .lm-item { height: auto; }
+    .lm-item img { width: 100%; }
     .lm-lockup { --lockup-mark: 52px; }
   }
   @media (prefers-reduced-motion: reduce) {
@@ -270,7 +277,7 @@
       </div>
       <div class="lm-spot-foot">
         <button class="lm-jump" type="button" id="lm-next">
-          View next logomark <span class="lm-num" id="lm-count">01 / 10</span>
+          View next logomark <span class="lm-num" id="lm-count">01 / 05</span>
           <span aria-hidden="true"><svg viewBox="0 0 14 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         </button>
       </div>
@@ -280,16 +287,16 @@
 <script>
   (() => {
     "use strict";
-    const COUNT = 10;
-    /* Figma 494:23602 の配置そのまま。キーが無い番号は空欄のまま。
+    const COUNT = 5;
+    /* Figma 494:23602 の並び順そのまま(1番と2番は同じ logo_1)。
        size は同ノードのフレーム実測(px)。4案とも図形が viewBox いっぱい
        なので、この高さがそのまま見た目の大きさになる。 */
     const MARKS = {
       1: { src: "assets/logos/mark-a.svg",           size: 66 },
-      6: { src: "assets/logos/mark-a.svg",           size: 67 },
-      7: { src: "assets/logos/logomark-square.svg",  size: 67 },
-      8: { src: "assets/logos/logomark-connect.svg", size: 67 },
-      9: { src: "assets/logos/logomark-round.svg",   size: 62 }
+      2: { src: "assets/logos/mark-a.svg",           size: 67 },
+      3: { src: "assets/logos/logomark-square.svg",  size: 67 },
+      4: { src: "assets/logos/logomark-connect.svg", size: 67 },
+      5: { src: "assets/logos/logomark-round.svg",   size: 62 }
     };
     /* ロゴタイプ(DESIGN A) */
     const WORD = "assets/logos/logotype-a.svg";
