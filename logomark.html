@@ -146,7 +146,7 @@
   .lm-foot {
     display: flex;
     justify-content: flex-end;
-    margin-top: 21px;
+    margin-top: 20px;
   }
   .lm-jump {
     appearance: none;
@@ -166,7 +166,9 @@
     transition: opacity 0.3s ease;
   }
   .lm-jump:hover { opacity: 0.55; }
-  .lm-jump svg { width: 11px; height: 11px; }
+  /* 矢印は文言・番号のあと gap(15px)ぶんだけ空けて置く(参考実装と同値) */
+  .lm-jump .arrow { display: inline-flex; }
+  .lm-jump .arrow svg { display: block; width: 11px; height: 11px; }
 
   /* --- Spotlight: 全画面で1案ずつ --- */
   /* --- Spotlight ---
@@ -295,10 +297,7 @@
     </div>
 
     <div class="lm-foot">
-      <button class="lm-jump" type="button" id="lm-spotlight">
-        Spotlight
-        <span aria-hidden="true"><svg viewBox="0 0 14 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-      </button>
+      <button class="lm-jump" type="button" id="lm-spotlight">Spotlight</button>
     </div>
   </div>
 
@@ -315,8 +314,7 @@
       </div>
       <div class="lm-spot-foot">
         <button class="lm-jump" type="button" id="lm-next">
-          View next logomark <span class="lm-num" id="lm-count">01 / 05</span>
-          <span aria-hidden="true"><svg viewBox="0 0 14 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+View next logomark <span class="lm-num" id="lm-count">01 / 05</span><span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="11" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         </button>
       </div>
     </div>
