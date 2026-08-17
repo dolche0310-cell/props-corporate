@@ -248,9 +248,10 @@
 
 
   /* --- Corporate Logomark ---
-     箱は上の Logomark & Logotype と同じ 4 列グリッドに 1 枚だけ置く。
-     幅も正方の比率もそのまま揃うので、並びが崩れない。
+     箱は上の Logomark & Logotype と同じ 4 列グリッド。2段に渡るので、
+     段の間だけ Figma 491:23512 の実測 28px にする(列間は 20px のまま)。
      押すと単独ページ(logomark.html)へ遷移する。モーダルではない。 */
+  .logo-grid--logomark { row-gap: 28px; }
 
   /* --- Design concept モーダル --- */
   .modal {
@@ -413,14 +414,30 @@
     </section>
 
     <!-- ============ Corporate Logomark ============
-         ロゴマーク単体の案出し。押すと 10 案とロゴマーク & ロゴタイプの
-         セットを見比べるモーダルが開く。中身のロゴは未確定なので、
-         いまは箱(スロット)だけを置いている。左上だけ DESIGN A のマーク。 -->
+         Figma 491:23512。パネルは上の Logomark & Logotype と同じ 239px 正方 ×
+         4列で、それを2段。段の間だけ 28px(Figma実測。列間は 20px)。
+         1段目は左端だけ、2段目に4案が並ぶ。空きスロットは無地のまま。
+         押すと単独ページ(logomark.html)へ遷移する。 -->
     <section class="logos stage stage-3" aria-label="Corporate Logomark">
       <h2>Corporate Logomark</h2>
-      <div class="logo-grid logo-grid--4">
-        <a class="pane pane-logo" href="logomark.html" aria-label="ロゴマーク案を見る">
-          <img src="assets/logos/mark-a.svg" alt="" width="99" height="99" style="--mark-w: 41.00%">
+      <div class="logo-grid logo-grid--4 logo-grid--logomark">
+        <a class="pane pane-logo" href="logomark.html" aria-label="ロゴマーク案01を見る">
+          <img src="assets/logos/mark-a.svg" alt="" width="98" height="98" style="--mark-w: 41.00%">
+        </a>
+        <div class="pane" aria-hidden="true"></div>
+        <div class="pane" aria-hidden="true"></div>
+        <div class="pane" aria-hidden="true"></div>
+        <a class="pane pane-logo" href="logomark.html" aria-label="ロゴマーク案06を見る">
+          <img src="assets/logos/mark-a.svg" alt="" width="98" height="98" style="--mark-w: 41.00%">
+        </a>
+        <a class="pane pane-logo" href="logomark.html" aria-label="ロゴマーク案07を見る">
+          <img src="assets/logos/logomark-square.svg" alt="" width="98" height="98" style="--mark-w: 41.00%">
+        </a>
+        <a class="pane pane-logo" href="logomark.html" aria-label="ロゴマーク案08を見る">
+          <img src="assets/logos/logomark-connect.svg" alt="" width="98" height="98" style="--mark-w: 41.00%">
+        </a>
+        <a class="pane pane-logo" href="logomark.html" aria-label="ロゴマーク案09を見る">
+          <img src="assets/logos/logomark-round.svg" alt="" width="98" height="98" style="--mark-w: 41.00%">
         </a>
       </div>
     </section>

@@ -63,9 +63,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 67px;
+    height: 67px;
   }
-  .lm-item img { width: 100%; height: auto; }
+  /* マークの寸法は Figma 494:23602 のフレーム実測をそのまま渡す。
+     4案とも図形が viewBox いっぱい(比率1.00)なので、高さがそのまま
+     見た目の大きさになる。90pxのスロット内で中央に置く。 */
+  /* flex:none がないと、狭い幅で横だけ潰れて縦横比が崩れる */
+  .lm-item img { flex: none; height: var(--mk, 67px); width: auto; }
 
   /* ロゴマーク & ロゴタイプのセット。
      組み方は logo-a.html の上段カード(.ld-card--lockup)と同一にする。
@@ -128,6 +132,11 @@
   .lm-jump svg { width: 11px; height: 11px; }
 
   /* --- Spotlight: 全画面で1案ずつ --- */
+  /* --- Spotlight ---
+     開閉の仕組み・間合い・台の見え方は参考実装
+     (proto-review-vict0a.pages.dev/logomark-patterns の css/logomark.css)に
+     合わせる。閉じる操作は「中身の外側クリック」と ESC だけで、
+     ばつボタンは置かない。 */
   .lm-spot {
     position: fixed;
     inset: 0;
@@ -137,45 +146,59 @@
     align-items: center;
     justify-content: center;
     opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.45s var(--ease-out-expo), visibility 0s linear 0.45s;
+    /* ここは「閉じるときの間合い」。滑らかなS字でゆっくり引く */
+    transition: opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1);
   }
+  .lm-spot[hidden] { display: none; }
   .lm-spot.is-open {
     opacity: 1;
-    visibility: visible;
-    transition: opacity 0.45s var(--ease-out-expo), visibility 0s linear 0s;
+    transition: opacity 0.34s var(--ease-out-expo);
   }
-  .lm-spot-inner { width: min(1100px, calc(100vw - 64px)); }
+  /* 中身は白幕と別に動かす。同じ速さで薄れさせると、消えかけの大きな
+     ロゴが裏の一覧に重なって残像になる。閉じるときは中身を先に(0.22s)
+     引かせ、白幕だけをゆっくり溶かす。開くときは逆に白幕が先。 */
+  .lm-spot-inner {
+    width: min(1100px, 86vw);
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+      opacity 0.22s cubic-bezier(0.4, 0, 1, 1),
+      transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .lm-spot.is-open .lm-spot-inner {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 0.4s var(--ease-out-expo) 0.1s,
+      transform 0.6s var(--ease-out-expo) 0.06s;
+  }
   /* Spotlight は一回り大きく見せる。比率は同じ */
   .lm-spot-stage .lm-lockup { --lockup-mark: 96px; }
   .lm-spot-stage {
-    height: 317px;
     display: flex;
     align-items: center;
     justify-content: center;
+    /* 高さは固定せず、上下の余白で展示空間を作る */
+    padding: clamp(64px, 13vh, 120px) 0;
+    /* 白幕の上に置くので、ページ内カードの #fafafa だと灰色がはっきり
+       出る。うっすら面があるとわかる程度まで上げる */
+    background: #fcfcfc;
+    /* 拡大表示の台は角を落とさず直角に */
+    border-radius: 0;
   }
+  /* 送りボタンは台の縁まで振り切らず、台幅の 8% だけ内側に置く */
   .lm-spot-foot {
+    width: 100%;
+    padding-right: 8%;
+    margin-top: 20px;
     display: flex;
     justify-content: flex-end;
-    margin-top: 21px;
   }
-  .lm-num { font-variant-numeric: tabular-nums; }
-  .lm-close {
-    position: fixed;
-    top: 28px;
-    right: 32px;
-    width: 40px;
-    height: 40px;
-    background: none;
-    border: 0;
-    cursor: pointer;
-    display: grid;
-    place-items: center;
-    color: var(--ink);
-    transition: opacity 0.3s ease;
+  /* 文言と番号は続けて読ませるので、間は gap ではなく1文字分だけ */
+  .lm-num {
+    margin-left: -11px;
+    font-variant-numeric: tabular-nums;
   }
-  .lm-close:hover { opacity: 0.55; }
-  .lm-close svg { width: 14px; height: 14px; }
 
   .lm-back {
     display: inline-flex;
@@ -203,7 +226,7 @@
     .lm-lockup { --lockup-mark: 52px; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .lm-spot, .lm-jump, .lm-back, .lm-close { transition: none; }
+    .lm-spot, .lm-spot-inner, .lm-jump, .lm-back { transition: none; transform: none; }
   }
 </style>
 </head>
@@ -237,10 +260,7 @@
   </div>
 
   <!-- Spotlight: 全画面でセットを1案ずつ送って見る -->
-  <div class="lm-spot" id="lm-spot" role="dialog" aria-modal="true" aria-label="ロゴマーク Spotlight">
-    <button class="lm-close" type="button" id="lm-close" aria-label="閉じる">
-      <svg viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-    </button>
+  <div class="lm-spot" id="lm-spot" role="dialog" aria-modal="true" aria-label="ロゴマーク Spotlight" hidden>
     <div class="lm-spot-inner">
       <div class="lm-card lm-spot-stage">
         <div class="lm-lockup">
@@ -261,13 +281,27 @@
   (() => {
     "use strict";
     const COUNT = 10;
-    /* 決まった案から順に足す。キーが無い番号は空欄のまま */
-    const MARKS = { 1: "assets/logos/mark-a.svg" };
+    /* Figma 494:23602 の配置そのまま。キーが無い番号は空欄のまま。
+       size は同ノードのフレーム実測(px)。4案とも図形が viewBox いっぱい
+       なので、この高さがそのまま見た目の大きさになる。 */
+    const MARKS = {
+      1: { src: "assets/logos/mark-a.svg",           size: 66 },
+      6: { src: "assets/logos/mark-a.svg",           size: 67 },
+      7: { src: "assets/logos/logomark-square.svg",  size: 67 },
+      8: { src: "assets/logos/logomark-connect.svg", size: 67 },
+      9: { src: "assets/logos/logomark-round.svg",   size: 62 }
+    };
     /* ロゴタイプ(DESIGN A) */
     const WORD = "assets/logos/logotype-a.svg";
 
     const pad = (n) => String(n).padStart(2, "0");
-    const art = (src) => { const i = document.createElement("img"); i.src = src; i.alt = ""; return i; };
+    const art = (m) => {
+      const i = document.createElement("img");
+      i.src = typeof m === "string" ? m : m.src;
+      i.alt = "";
+      if (m && m.size) i.style.setProperty("--mk", m.size + "px");
+      return i;
+    };
 
     const grid = document.getElementById("lm-grid");
     for (let i = 1; i <= COUNT; i++) {
@@ -309,23 +343,39 @@
     };
     show(1);
 
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const openBtn = document.getElementById("lm-spotlight");
+    const nextBtn = document.getElementById("lm-next");
+
     const open = () => {
       lastFocus = document.activeElement;
-      spot.classList.add("is-open");
+      spot.hidden = false;
       document.body.style.overflow = "hidden";
-      document.getElementById("lm-close").focus();
+      /* rAF は非表示タブで止まるのでタイマーでも保険をかける
+         (どちらが先に来ても class は1回しか付かない) */
+      requestAnimationFrame(() => spot.classList.add("is-open"));
+      setTimeout(() => spot.classList.add("is-open"), 60);
+      nextBtn.focus({ preventScroll: true });
     };
     const close = () => {
+      if (spot.hidden) return;
       spot.classList.remove("is-open");
-      document.body.style.overflow = "";
-      if (lastFocus) lastFocus.focus();
+      /* CSS の閉じ(白幕 0.55s)を待ってから消す。先に消すと途中で切れる */
+      setTimeout(() => {
+        spot.hidden = true;
+        document.body.style.overflow = "";
+        (lastFocus || openBtn).focus({ preventScroll: true });
+      }, reduced ? 0 : 560);
     };
 
-    document.getElementById("lm-spotlight").addEventListener("click", open);
-    document.getElementById("lm-close").addEventListener("click", close);
-    document.getElementById("lm-next").addEventListener("click", () => show(current + 1));
+    openBtn.addEventListener("click", open);
+    nextBtn.addEventListener("click", () => show(current + 1));
+    /* 閉じるのは中身の外側クリックと ESC だけ */
+    spot.addEventListener("click", (e) => {
+      if (!e.target.closest(".lm-spot-inner")) close();
+    });
     document.addEventListener("keydown", (e) => {
-      if (!spot.classList.contains("is-open")) return;
+      if (spot.hidden) return;
       if (e.key === "Escape") close();
       if (e.key === "ArrowRight") show(current + 1);
       if (e.key === "ArrowLeft") show(current - 1);
