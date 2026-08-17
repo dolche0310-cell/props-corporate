@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex" />
+<title>CORPORATE LOGOMARK — Design Patterns</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@500;600&display=swap" rel="stylesheet" />
+<style>
+  /* 参考(proto-review-vict0a/logomark-patterns.html)の実測値に合わせた
+     単独ページ。モーダルではない。
+     ・上のカード: 10案を 5 列 x 2 行で並べる(枠線も押下も持たない)
+     ・下のカード: ロゴマーク & ロゴタイプのセット
+     ・右下の Spotlight: 全画面でセットを1案ずつ送って見る
+     案は未確定なので、いま中身があるのは 01(DESIGN A)だけ。
+     残りは空欄のまま。MARKS に足せばそのまま枠が埋まる。 */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink: #111112;
+    --ink-2: #6b6b70;
+    --pane: #fafafa;
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  body {
+    background: #ffffff;
+    font-family: "Noto Sans JP", sans-serif;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  img { display: block; max-width: 100%; }
+
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 128px 32px 250px;
+  }
+  .lm-title {
+    font-family: "Inter", "Noto Sans JP", sans-serif;
+    font-weight: 600;
+    font-size: 30px;
+    letter-spacing: 0.03em;
+    line-height: 1.2;
+    margin-bottom: 96px;
+  }
+
+  .lm-card {
+    background: var(--pane);
+    border-radius: 12px;
+  }
+  /* 10案。列は 90px 固定で、余りを均等に割る(参考と同じ 5 列 x 2 行) */
+  .lm-card--grid { padding: 104px 122px; }
+  .lm-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 90px);
+    justify-content: space-between;
+    row-gap: 80px;
+  }
+  .lm-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 67px;
+  }
+  .lm-item img { width: 100%; height: auto; }
+
+  /* ロゴマーク & ロゴタイプのセット */
+  .lm-card--set {
+    margin-top: 60px;
+    padding: 76px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .lm-lockup {
+    display: flex;
+    align-items: center;
+    gap: 56px;
+  }
+  .lm-lockup-mark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 96px;
+    min-height: 75px;
+  }
+  .lm-lockup-mark img { width: 100%; height: auto; }
+  /* ロゴタイプは未確定。決まるまでは場所だけ確保しておく */
+  .lm-lockup-word { width: 420px; height: 60px; }
+
+  .lm-foot {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 21px;
+  }
+  .lm-jump {
+    appearance: none;
+    background: none;
+    border: 0;
+    padding: 2px 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-family: "Inter", sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink);
+    transition: opacity 0.3s ease;
+  }
+  .lm-jump:hover { opacity: 0.55; }
+  .lm-jump svg { width: 11px; height: 11px; }
+
+  /* --- Spotlight: 全画面で1案ずつ --- */
+  .lm-spot {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.45s var(--ease-out-expo), visibility 0s linear 0.45s;
+  }
+  .lm-spot.is-open {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.45s var(--ease-out-expo), visibility 0s linear 0s;
+  }
+  .lm-spot-inner { width: min(1100px, calc(100vw - 64px)); }
+  .lm-spot-stage {
+    height: 317px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .lm-spot-foot {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 21px;
+  }
+  .lm-num { font-variant-numeric: tabular-nums; }
+  .lm-close {
+    position: fixed;
+    top: 28px;
+    right: 32px;
+    width: 40px;
+    height: 40px;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    color: var(--ink);
+    transition: opacity 0.3s ease;
+  }
+  .lm-close:hover { opacity: 0.55; }
+  .lm-close svg { width: 14px; height: 14px; }
+
+  .lm-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 40px;
+    font-family: "Inter", sans-serif;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  .lm-back:hover { color: var(--ink); }
+  .lm-back svg { width: 11px; height: 9px; }
+
+  @media (max-width: 860px) {
+    .wrap { padding: 88px 24px 120px; }
+    .lm-title { font-size: 22px; margin-bottom: 56px; }
+    .lm-card--grid { padding: 56px 32px; }
+    .lm-grid { grid-template-columns: repeat(3, 1fr); row-gap: 48px; }
+    .lm-lockup { flex-direction: column; gap: 28px; }
+    .lm-lockup-word { width: 260px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lm-spot, .lm-jump, .lm-back, .lm-close { transition: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="lm-back" href="index.html">
+      <svg viewBox="0 0 14 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13.2 6H2M6 1.4L1.4 6L6 10.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back to dashboard
+    </a>
+    <h1 class="lm-title">CORPORATE LOGOMARK</h1>
+
+    <!-- 10案。中身が決まるまでは空欄のまま並ぶ -->
+    <div class="lm-card lm-card--grid">
+      <div class="lm-grid" id="lm-grid"></div>
+    </div>
+
+    <!-- 比較ビュー: ロゴタイプは固定で、左のマークだけが案ごとに替わる -->
+    <div class="lm-card lm-card--set">
+      <div class="lm-lockup">
+        <div class="lm-lockup-mark" id="lm-mark" role="img" aria-label="ロゴマーク案01"></div>
+        <div class="lm-lockup-word" id="lm-word"></div>
+      </div>
+    </div>
+
+    <div class="lm-foot">
+      <button class="lm-jump" type="button" id="lm-spotlight">
+        Spotlight
+        <span aria-hidden="true"><svg viewBox="0 0 14 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Spotlight: 全画面でセットを1案ずつ送って見る -->
+  <div class="lm-spot" id="lm-spot" role="dialog" aria-modal="true" aria-label="ロゴマーク Spotlight">
+    <button class="lm-close" type="button" id="lm-close" aria-label="閉じる">
+      <svg viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+    </button>
+    <div class="lm-spot-inner">
+      <div class="lm-card lm-spot-stage">
+        <div class="lm-lockup">
+          <div class="lm-lockup-mark" id="lm-spot-mark" role="img" aria-label="ロゴマーク案01"></div>
+          <div class="lm-lockup-word" id="lm-spot-word"></div>
+        </div>
+      </div>
+      <div class="lm-spot-foot">
+        <button class="lm-jump" type="button" id="lm-next">
+          View next logomark <span class="lm-num" id="lm-count">01 / 10</span>
+          <span aria-hidden="true"><svg viewBox="0 0 14 12" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  (() => {
+    "use strict";
+    const COUNT = 10;
+    /* 決まった案から順に足す。キーが無い番号は空欄のまま */
+    const MARKS = { 1: "assets/logos/mark-a.svg" };
+    /* ロゴタイプは未確定。決まったらここにパスを入れる */
+    const WORD = null;
+
+    const pad = (n) => String(n).padStart(2, "0");
+    const art = (src) => { const i = document.createElement("img"); i.src = src; i.alt = ""; return i; };
+
+    const grid = document.getElementById("lm-grid");
+    for (let i = 1; i <= COUNT; i++) {
+      const cell = document.createElement("div");
+      cell.className = "lm-item";
+      cell.setAttribute("role", "img");
+      cell.setAttribute("aria-label", "ロゴマーク案" + pad(i));
+      if (MARKS[i]) cell.appendChild(art(MARKS[i]));
+      grid.appendChild(cell);
+    }
+
+    const fillMark = (el, n) => {
+      el.textContent = "";
+      el.setAttribute("aria-label", "ロゴマーク案" + pad(n));
+      if (MARKS[n]) el.appendChild(art(MARKS[n]));
+    };
+    const fillWord = (el) => { if (WORD) { el.textContent = ""; el.appendChild(art(WORD)); } };
+
+    fillMark(document.getElementById("lm-mark"), 1);
+    fillWord(document.getElementById("lm-word"));
+    fillWord(document.getElementById("lm-spot-word"));
+
+    /* --- Spotlight --- */
+    const spot = document.getElementById("lm-spot");
+    const spotMark = document.getElementById("lm-spot-mark");
+    const countEl = document.getElementById("lm-count");
+    let current = 1, lastFocus = null;
+
+    const show = (n) => {
+      current = ((n - 1 + COUNT) % COUNT) + 1;
+      fillMark(spotMark, current);
+      countEl.textContent = pad(current) + " / " + pad(COUNT);
+    };
+    show(1);
+
+    const open = () => {
+      lastFocus = document.activeElement;
+      spot.classList.add("is-open");
+      document.body.style.overflow = "hidden";
+      document.getElementById("lm-close").focus();
+    };
+    const close = () => {
+      spot.classList.remove("is-open");
+      document.body.style.overflow = "";
+      if (lastFocus) lastFocus.focus();
+    };
+
+    document.getElementById("lm-spotlight").addEventListener("click", open);
+    document.getElementById("lm-close").addEventListener("click", close);
+    document.getElementById("lm-next").addEventListener("click", () => show(current + 1));
+    document.addEventListener("keydown", (e) => {
+      if (!spot.classList.contains("is-open")) return;
+      if (e.key === "Escape") close();
+      if (e.key === "ArrowRight") show(current + 1);
+      if (e.key === "ArrowLeft") show(current - 1);
+    });
+  })();
+</script>
+</body>
+</html>

@@ -247,59 +247,10 @@
   }
 
 
-  /* --- Corporate Logomark: 1枚の横長パネル --- */
-  .logo-grid--1 { grid-template-columns: 1fr; }
-  .logo-grid--1 .pane { height: 272px; }
-  .logo-grid .pane-mark {
-    appearance: none;
-    border: 0;
-    padding: 0;
-    cursor: pointer;
-    font: inherit;
-  }
-  .pane-mark img { width: 99px; }
-
-  /* --- ロゴマーク案モーダル ---
-     参考(proto-review-vict0a)と同じく「並べて見せるだけ」。
-     枠線も押下も持たない。未確定の案はそのまま空欄にしておく。 */
-  .modal.modal--wide .box { max-width: 1100px; padding: 48px 48px 44px; }
-  .mk-panel {
-    background: var(--pane);
-    border-radius: 12px;
-    padding: 56px 40px;
-    margin-bottom: 20px;
-  }
-  .mk-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 40px 20px;
-  }
-  .mk {
-    display: grid;
-    place-items: center;
-    aspect-ratio: 1;
-  }
-  .mk img { display: block; width: 56%; height: auto; }
-
-  /* ロゴマーク & ロゴタイプのセット */
-  .mk-set {
-    background: var(--pane);
-    border-radius: 12px;
-    height: 220px;
-    display: grid;
-    place-items: center;
-  }
-  .mk-set__in { display: flex; align-items: center; gap: 40px; }
-  .mk-set__mark { display: grid; place-items: center; width: 96px; height: 96px; }
-  .mk-set__mark img { display: block; width: 78%; height: auto; }
-  .mk-set__type { width: 300px; height: 60px; }
-
-  @media (max-width: 860px) {
-    .mk-grid { grid-template-columns: repeat(3, 1fr); }
-    .modal.modal--wide .box { padding: 40px 24px 32px; }
-    .mk-set__in { flex-direction: column; gap: 20px; }
-    .mk-set { height: auto; padding: 32px 0; }
-  }
+  /* --- Corporate Logomark ---
+     箱は上の Logomark & Logotype と同じ 4 列グリッドに 1 枚だけ置く。
+     幅も正方の比率もそのまま揃うので、並びが崩れない。
+     押すと単独ページ(logomark.html)へ遷移する。モーダルではない。 */
 
   /* --- Design concept モーダル --- */
   .modal {
@@ -467,41 +418,15 @@
          いまは箱(スロット)だけを置いている。左上だけ DESIGN A のマーク。 -->
     <section class="logos stage stage-3" aria-label="Corporate Logomark">
       <h2>Corporate Logomark</h2>
-      <div class="logo-grid logo-grid--1">
-        <button class="pane pane-logo pane-mark" type="button" id="open-marks"
-                aria-haspopup="dialog" aria-label="ロゴマーク案を見る">
-          <img src="assets/logos/mark-a.svg" alt="" width="99" height="99">
-        </button>
+      <div class="logo-grid logo-grid--4">
+        <a class="pane pane-logo" href="logomark.html" aria-label="ロゴマーク案を見る">
+          <img src="assets/logos/mark-a.svg" alt="" width="99" height="99" style="--mark-w: 41.00%">
+        </a>
       </div>
     </section>
 
   </div>
 
-
-  <!-- ============ ロゴマーク案モーダル ============
-       参考(proto-review-vict0a)と同じ見せ方。5 列 x 2 行に案を並べ、
-       その下にロゴマーク & ロゴタイプのセットを置く。
-       いま中身があるのは左上(DESIGN A)だけで、残りは空欄。
-       案が決まり次第 MARKS に足していけば枠が埋まる。 -->
-  <div class="modal modal--wide" id="marks-modal" role="dialog" aria-modal="true"
-       aria-labelledby="marks-title" hidden>
-    <div class="overlay" data-close></div>
-    <div class="box">
-      <button class="close" type="button" data-close aria-label="閉じる">
-        <svg viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-      </button>
-      <p class="m-name" id="marks-title">Corporate Logomark</p>
-      <div class="mk-panel">
-        <div class="mk-grid" id="mk-grid"></div>
-      </div>
-      <div class="mk-set">
-        <div class="mk-set__in">
-          <div class="mk-set__mark" id="mk-set-mark"></div>
-          <div class="mk-set__type" id="mk-set-type"></div>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- ============ Design concept モーダル ============ -->
   <div class="modal" id="concept-modal" role="dialog" aria-modal="true" aria-labelledby="concept-title" hidden>
@@ -608,55 +533,6 @@
           e.preventDefault(); first.focus();
         }
       }
-    });
-  })();
-  
-  /* ---- ロゴマーク案モーダル ----
-     並べて見せるだけ。枠の押下は持たない(指示)。
-     案が決まったら MARKS に足すと、その枠に入る。 */
-  (() => {
-    "use strict";
-    const COUNT = 10;
-    const MARKS = { 1: "assets/logos/mark-a.svg" };   /* 決まった案から順に足す */
-
-    const modal = document.getElementById("marks-modal");
-    if (!modal) return;
-    const grid = document.getElementById("mk-grid");
-    const setMark = document.getElementById("mk-set-mark");
-    const opener = document.getElementById("open-marks");
-    let lastFocus = null;
-
-    const art = (src) => { const i = document.createElement("img"); i.src = src; i.alt = ""; return i; };
-
-    for (let i = 1; i <= COUNT; i++) {
-      const cell = document.createElement("div");
-      cell.className = "mk";
-      if (MARKS[i]) cell.appendChild(art(MARKS[i]));
-      grid.appendChild(cell);
-    }
-    /* セットには確定している案(左上)のマークを置く。ロゴタイプは未確定 */
-    if (MARKS[1]) setMark.appendChild(art(MARKS[1]));
-
-    const open = () => {
-      lastFocus = document.activeElement;
-      modal.hidden = false;
-      requestAnimationFrame(() => modal.classList.add("is-open"));
-      setTimeout(() => modal.classList.add("is-open"), 60);
-      document.body.classList.add("modal-open");
-      modal.querySelector(".close").focus();
-    };
-    const close = () => {
-      modal.classList.remove("is-open");
-      document.body.classList.remove("modal-open");
-      const done = () => { modal.hidden = true; };
-      matchMedia("(prefers-reduced-motion: reduce)").matches ? done() : setTimeout(done, 480);
-      if (lastFocus) lastFocus.focus();
-    };
-    if (opener) opener.addEventListener("click", open);
-    modal.querySelectorAll("[data-close]").forEach((el) => el.addEventListener("click", close));
-    document.addEventListener("keydown", (e) => {
-      if (modal.hidden) return;
-      if (e.key === "Escape") close();
     });
   })();
   </script>
