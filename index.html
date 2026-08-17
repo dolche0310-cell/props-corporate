@@ -246,6 +246,112 @@
     .pane-logo:hover img { --mark-scale: 1; }
   }
 
+
+  /* --- Corporate Logomark: 1枚の横長パネル --- */
+  .logo-grid--1 { grid-template-columns: 1fr; }
+  .logo-grid--1 .pane { height: 272px; }
+  .logo-grid .pane-mark {
+    appearance: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    font: inherit;
+  }
+  .pane-mark img { width: 99px; }
+
+  /* --- ロゴマーク案モーダル --- */
+  /* .modal .box(560px)より後ろに書かれているので、クラスを2つ重ねて
+     詳細度で勝たせる */
+  .modal.modal--wide .box { max-width: 1100px; padding: 48px 48px 40px; }
+  .mk-panel {
+    background: var(--pane);
+    border-radius: 12px;
+    padding: 48px 40px;
+    margin-bottom: 20px;
+  }
+  .mk-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 24px 20px;
+  }
+  /* 案のスロット。中身が入るまでは「まだ空である」ことが分かるよう
+     破線で置いておく(ロゴが入ったらこの破線だけ外せばよい) */
+  .mk {
+    appearance: none;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    border-radius: 10px;
+    outline: 1px dashed rgba(17, 17, 18, 0.16);
+    outline-offset: -1px;
+    transition: outline-color 0.3s ease, background-color 0.3s ease;
+  }
+  .mk.has-art { outline-color: transparent; }
+  .mk img { display: block; width: 56%; height: auto; }
+  .mk.is-active { outline: 2px solid var(--ink); outline-offset: -2px; }
+  @media (hover: hover) {
+    .mk:hover { background: rgba(17, 17, 18, 0.04); }
+  }
+
+  /* 選んだ案のロゴマーク & ロゴタイプのセット */
+  .mk-set {
+    background: var(--pane);
+    border-radius: 12px;
+    height: 220px;
+    display: grid;
+    place-items: center;
+  }
+  .mk-set__in {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+  }
+  .mk-set__mark,
+  .mk-set__type {
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    outline: 1px dashed rgba(17, 17, 18, 0.16);
+    outline-offset: -1px;
+  }
+  .mk-set__mark { width: 96px; height: 96px; }
+  .mk-set__type { width: 300px; height: 60px; }
+  .mk-set__mark.has-art,
+  .mk-set__type.has-art { outline-color: transparent; }
+  .mk-set__mark img { display: block; width: 78%; height: auto; }
+
+  .mk-next {
+    appearance: none;
+    background: none;
+    border: 0;
+    padding: 0;
+    margin-top: 20px;
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    font-family: "Inter", sans-serif;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink);
+    transition: opacity 0.3s ease;
+  }
+  .mk-next:hover { opacity: 0.55; }
+  .mk-next svg { width: 16px; height: 12px; }
+  @media (max-width: 860px) {
+    .mk-grid { grid-template-columns: repeat(3, 1fr); }
+    .modal.modal--wide .box { padding: 40px 24px 32px; }
+    .mk-set__in { flex-direction: column; gap: 20px; }
+    .mk-set { height: auto; padding: 32px 0; }
+  }
+
   /* --- Design concept モーダル --- */
   .modal {
     position: fixed;
@@ -406,6 +512,49 @@
       </div>
     </section>
 
+    <!-- ============ Corporate Logomark ============
+         ロゴマーク単体の案出し。押すと 10 案とロゴマーク & ロゴタイプの
+         セットを見比べるモーダルが開く。中身のロゴは未確定なので、
+         いまは箱(スロット)だけを置いている。左上だけ DESIGN A のマーク。 -->
+    <section class="logos stage stage-3" aria-label="Corporate Logomark">
+      <h2>Corporate Logomark</h2>
+      <div class="logo-grid logo-grid--1">
+        <button class="pane pane-logo pane-mark" type="button" id="open-marks"
+                aria-haspopup="dialog" aria-label="ロゴマーク案を見る">
+          <img src="assets/logos/mark-a.svg" alt="" width="99" height="99">
+        </button>
+      </div>
+    </section>
+
+  </div>
+
+
+  <!-- ============ ロゴマーク案モーダル ============
+       上段: 案を 5 列 x 2 行の 10 枠。左上だけ DESIGN A のマークが入り、
+       残りは空のスロット(破線)。押すと下のセットのマークが入れ替わる。
+       下段: ロゴマーク & ロゴタイプのセット。ロゴタイプは未確定なので空枠。 -->
+  <div class="modal modal--wide" id="marks-modal" role="dialog" aria-modal="true"
+       aria-labelledby="marks-title" hidden>
+    <div class="overlay" data-close></div>
+    <div class="box">
+      <button class="close" type="button" data-close aria-label="閉じる">
+        <svg viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      </button>
+      <p class="m-name" id="marks-title">Logomark Design Patterns</p>
+      <div class="mk-panel">
+        <div class="mk-grid" id="mk-grid"></div>
+      </div>
+      <div class="mk-set">
+        <div class="mk-set__in">
+          <div class="mk-set__mark" id="mk-set-mark"></div>
+          <div class="mk-set__type" id="mk-set-type"></div>
+        </div>
+      </div>
+      <button class="mk-next" type="button" id="mk-next">
+        <span>View next logomark <span id="mk-count">01 / 10</span></span>
+        <svg viewBox="0 0 16 12" fill="none"><path d="M0.8 6h13.4M10 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
   </div>
 
   <!-- ============ Design concept モーダル ============ -->
@@ -515,6 +664,94 @@
       }
     });
   })();
+  
+  /* ---- ロゴマーク案モーダル ----
+     案は 10 枠。いま中身があるのは 1 番(DESIGN A)だけで、残りは空。
+     MARKS に画像のパスを足していけば、そのまま枠が埋まる。 */
+  (() => {
+    "use strict";
+    const COUNT = 10;
+    const MARKS = { 1: "assets/logos/mark-a.svg" };   /* 決まった案から順に足す */
+
+    const modal = document.getElementById("marks-modal");
+    if (!modal) return;
+    const grid = document.getElementById("mk-grid");
+    const setMark = document.getElementById("mk-set-mark");
+    const countEl = document.getElementById("mk-count");
+    const opener = document.getElementById("open-marks");
+    let current = 1, lastFocus = null;
+
+    const pad = (n) => String(n).padStart(2, "0");
+
+    for (let i = 1; i <= COUNT; i++) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "mk";
+      b.dataset.mark = String(i);
+      b.setAttribute("aria-label", "ロゴマーク案 " + pad(i));
+      if (MARKS[i]) {
+        b.classList.add("has-art");
+        const img = document.createElement("img");
+        img.src = MARKS[i];
+        img.alt = "";
+        b.appendChild(img);
+      }
+      grid.appendChild(b);
+    }
+
+    const select = (n) => {
+      current = ((n - 1 + COUNT) % COUNT) + 1;
+      grid.querySelectorAll(".mk").forEach((b) =>
+        b.classList.toggle("is-active", +b.dataset.mark === current));
+      setMark.innerHTML = "";
+      setMark.classList.toggle("has-art", !!MARKS[current]);
+      if (MARKS[current]) {
+        const img = document.createElement("img");
+        img.src = MARKS[current];
+        img.alt = "";
+        setMark.appendChild(img);
+      }
+      countEl.textContent = pad(current) + " / " + pad(COUNT);
+    };
+    select(1);
+
+    grid.addEventListener("click", (e) => {
+      const b = e.target.closest(".mk");
+      if (b) select(+b.dataset.mark);
+    });
+    document.getElementById("mk-next").addEventListener("click", () => select(current + 1));
+
+    const open = () => {
+      lastFocus = document.activeElement;
+      modal.hidden = false;
+      requestAnimationFrame(() => modal.classList.add("is-open"));
+      setTimeout(() => modal.classList.add("is-open"), 60);
+      document.body.classList.add("modal-open");
+      modal.querySelector(".close").focus();
+    };
+    const close = () => {
+      modal.classList.remove("is-open");
+      document.body.classList.remove("modal-open");
+      const done = () => { modal.hidden = true; };
+      matchMedia("(prefers-reduced-motion: reduce)").matches ? done() : setTimeout(done, 480);
+      if (lastFocus) lastFocus.focus();
+    };
+    if (opener) opener.addEventListener("click", open);
+    modal.querySelectorAll("[data-close]").forEach((el) => el.addEventListener("click", close));
+    document.addEventListener("keydown", (e) => {
+      if (modal.hidden) return;
+      if (e.key === "Escape") close();
+      if (e.key === "Tab") {
+        const f = [...modal.querySelectorAll("button, a, [tabindex]")]
+          .filter((el) => !el.disabled && el.offsetParent !== null);
+        if (!f.length) return;
+        const first = f[0], last = f[f.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    });
+  })();
+
   </script>
 </body>
 </html>
