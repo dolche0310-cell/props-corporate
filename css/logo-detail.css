@@ -25,7 +25,33 @@ body {
 .wrap {
   max-width: 1080px;
   margin: 0 auto;
-  padding: 128px 32px 160px;
+  /* 上の余白は戻るリンクのぶんだけ詰める。見出しの位置は
+     リンクの下マージン(96px)で吸収するので変わらない。 */
+  padding: 72px 32px 160px;
+}
+
+/* ダッシュボードへ戻るリンク。位置・体裁は logomark.html の .lm-back と同値。 */
+.ld-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 96px;
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+.ld-back:hover { color: var(--ink); }
+.ld-back svg { width: 11px; height: 9px; }
+@media (max-width: 860px) {
+  .ld-back { margin-bottom: 56px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ld-back { transition: none; }
 }
 
 .ld-title {
