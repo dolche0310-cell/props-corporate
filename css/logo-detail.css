@@ -27,7 +27,7 @@ body {
   margin: 0 auto;
   /* 上の余白は戻るリンクのぶんだけ詰める。見出しの位置は
      リンクの下マージン(96px)で吸収するので変わらない。 */
-  padding: 72px 32px 160px;
+  padding: 44px 32px 160px;
 }
 
 /* ダッシュボードへ戻るリンク。位置・体裁は logomark.html の .lm-back と同値。 */
@@ -35,10 +35,10 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 96px;
+  margin-bottom: 123px;
   font-family: "Inter", sans-serif;
   font-weight: 600;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ink-2);
@@ -46,7 +46,7 @@ body {
   transition: color 0.3s ease;
 }
 .ld-back:hover { color: var(--ink); }
-.ld-back svg { width: 11px; height: 9px; }
+.ld-back svg { width: 12px; height: 10px; }
 @media (max-width: 860px) {
   .ld-back { margin-bottom: 56px; }
 }
