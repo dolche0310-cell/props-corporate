@@ -38,7 +38,7 @@ body {
   margin-bottom: 123px;
   font-family: "Inter", sans-serif;
   font-weight: 600;
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ink-2);
@@ -46,7 +46,7 @@ body {
   transition: color 0.3s ease;
 }
 .ld-back:hover { color: var(--ink); }
-.ld-back svg { width: 12px; height: 10px; }
+.ld-back svg { width: 13px; height: 11px; }
 @media (max-width: 860px) {
   .ld-back { margin-bottom: 56px; }
 }
