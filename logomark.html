@@ -93,13 +93,46 @@
     display: flex;
     align-items: center;
   }
+  /* マークの枠は正方で固定する。枠を固定しているので、案を切り替えても
+     ロゴタイプの位置とサイズは 1px も動かない。 */
   .lm-lockup-mark {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: relative;
+    flex: none;
+    width: var(--lockup-mark);
     height: var(--lockup-mark);
   }
-  .lm-lockup-mark img { height: var(--lockup-mark); width: auto; }
+
+  /* --- 案の切り替え(参考実装 css/logomark.css と同値) ---
+     枠にぴったり重ねた2枚の濃さだけを入れ替える。裏の1枚に次の案を
+     入れてから表に出すので、表示中の絵は一度も消えず位置も動かない。
+     見比べる場面なので速く済ませずに一拍置く。伸ばしたぶん動きが
+     見えないと止まって見えるので、寄りは 0.95→1 と少し大きめに取る。 */
+  .mark-stack > img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    /* 待機はわずかに小さい。ここから実寸へ寄りながら現れる */
+    opacity: 0;
+    transform: scale(0.95);
+    transition:
+      opacity 0.56s cubic-bezier(0.4, 0, 0.35, 1) 0.3s,
+      transform 0.95s cubic-bezier(0.16, 1, 0.3, 1) 0.3s;
+    will-change: opacity, transform;
+  }
+  .mark-stack > img.is-front {
+    opacity: 1;
+    transform: scale(1);
+  }
+  /* 退場は動かさず、濃さだけを引く(動かすと去り際が騒がしくなる) */
+  .mark-stack > img.is-out {
+    opacity: 0;
+    transform: scale(1);
+    transition:
+      opacity 0.3s cubic-bezier(0.4, 0, 0.6, 1) 0s,
+      transform 0s 0.3s;
+  }
   .lm-lockup-word {
     display: flex;
     align-items: center;
@@ -234,6 +267,7 @@
   }
   @media (prefers-reduced-motion: reduce) {
     .lm-spot, .lm-spot-inner, .lm-jump, .lm-back { transition: none; transform: none; }
+    .mark-stack > img { transition: none; transform: none; }
   }
 </style>
 </head>
@@ -253,7 +287,9 @@
     <!-- 比較ビュー: ロゴタイプは固定で、左のマークだけが案ごとに替わる -->
     <div class="lm-card lm-card--set">
       <div class="lm-lockup">
-        <div class="lm-lockup-mark" id="lm-mark" role="img" aria-label="ロゴマーク案01"></div>
+        <div class="lm-lockup-mark mark-stack" id="lm-mark" role="img" aria-label="ロゴマーク案01">
+          <img alt="" /><img alt="" />
+        </div>
         <div class="lm-lockup-word" id="lm-word"></div>
       </div>
     </div>
@@ -271,7 +307,9 @@
     <div class="lm-spot-inner">
       <div class="lm-card lm-spot-stage">
         <div class="lm-lockup">
-          <div class="lm-lockup-mark" id="lm-spot-mark" role="img" aria-label="ロゴマーク案01"></div>
+          <div class="lm-lockup-mark mark-stack" id="lm-spot-mark" role="img" aria-label="ロゴマーク案01">
+            <img alt="" /><img alt="" />
+          </div>
           <div class="lm-lockup-word" id="lm-spot-word"></div>
         </div>
       </div>
@@ -320,11 +358,6 @@
       grid.appendChild(cell);
     }
 
-    const fillMark = (el, n) => {
-      el.textContent = "";
-      el.setAttribute("aria-label", "ロゴマーク案" + pad(n));
-      if (MARKS[n]) el.appendChild(art(MARKS[n]));
-    };
     const fillWord = (el) => {
       el.textContent = "";
       if (!WORD) return;
@@ -333,24 +366,75 @@
       el.appendChild(i);
     };
 
-    fillMark(document.getElementById("lm-mark"), 1);
     fillWord(document.getElementById("lm-word"));
     fillWord(document.getElementById("lm-spot-word"));
 
     /* --- Spotlight --- */
     const spot = document.getElementById("lm-spot");
-    const spotMark = document.getElementById("lm-spot-mark");
     const countEl = document.getElementById("lm-count");
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    /* ページ内のロックアップと拡大表示は同じ案番号を共有する。
+       どちらで送っても、開き直したときに番号がずれない。 */
+    const stacks = [document.getElementById("lm-mark"),
+                    document.getElementById("lm-spot-mark")];
+    const srcOf = (n) => (MARKS[n] ? MARKS[n].src : "");
     let current = 1, lastFocus = null;
 
-    const show = (n) => {
-      current = ((n - 1 + COUNT) % COUNT) + 1;
-      fillMark(spotMark, current);
-      countEl.textContent = pad(current) + " / " + pad(COUNT);
-    };
-    show(1);
+    /* 押した瞬間に描けるよう、全案を先に読み込んでデコードまで済ませておく。
+       これをやらないと、切り替えの頭で1フレーム白が入る。 */
+    for (let n = 1; n <= COUNT; n++) {
+      const im = new Image();
+      im.src = srcOf(n);
+      if (im.decode) im.decode().catch(() => {});
+    }
 
-    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    for (const st of stacks) {
+      st.querySelector("img").src = srcOf(1);
+      st.querySelector("img").classList.add("is-front");
+      st.dataset.front = "0";
+    }
+    countEl.textContent = pad(1) + " / " + pad(COUNT);
+
+    let busy = false;
+    /* --- クロスフェード ---
+       裏の1枚に次の案を入れてから表に出す。デコード済みを待ってから
+       動かす。待たないと絵の到着が遅れてフェードの途中でパッと現れる。 */
+    const crossfade = (stack, src) => {
+      const layers = stack.querySelectorAll("img");
+      const out = layers[stack.dataset.front === "1" ? 1 : 0];
+      const inc = out === layers[0] ? layers[1] : layers[0];
+      inc.src = src;
+      const run = () => {
+        inc.classList.remove("is-out");
+        out.classList.remove("is-front");
+        out.classList.add("is-out");
+        inc.classList.add("is-front");
+        stack.dataset.front = inc === layers[1] ? "1" : "0";
+      };
+      (inc.decode ? inc.decode() : Promise.resolve()).then(run, run);
+    };
+
+    const show = (n) => {
+      if (busy) return;
+      current = ((n - 1 + COUNT) % COUNT) + 1;
+      const label = "ロゴマーク案" + pad(current);
+      const text = pad(current) + " / " + pad(COUNT);
+      if (reduced) {
+        for (const st of stacks) {
+          st.querySelector("img.is-front").src = srcOf(current);
+          st.setAttribute("aria-label", label);
+        }
+        countEl.textContent = text;
+        return;
+      }
+      busy = true;
+      for (const st of stacks) { crossfade(st, srcOf(current)); st.setAttribute("aria-label", label); }
+      /* 数字は新しい案が出はじめる瞬間にそのまま差し替える。
+         薄れさせて戻すと、小さい文字なので点滅にしか見えない。 */
+      setTimeout(() => { countEl.textContent = text; }, 300);
+      setTimeout(() => { busy = false; }, 700);
+    };
+
     const openBtn = document.getElementById("lm-spotlight");
     const nextBtn = document.getElementById("lm-next");
 
