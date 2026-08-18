@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>名刺データ作成ツール | Business Card Builder</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="tool-header">
+  <div class="tool-header__title">
+    <span class="tool-header__mark"></span>
+    <div>
+      <h1>名刺データ作成ツール</h1>
+      <p>入力するとプレビューに反映され、そのまま入稿データとして書き出せます</p>
+    </div>
+  </div>
+  <div class="tool-header__actions">
+    <button type="button" class="btn btn--ghost" id="btn-load">読み込み</button>
+    <button type="button" class="btn btn--ghost" id="btn-save">保存</button>
+    <button type="button" class="btn btn--primary" id="btn-export">入稿データを書き出す</button>
+    <input type="file" id="file-load" accept="application/json" hidden>
+  </div>
+</header>
+
+<main class="tool">
+
+  <!-- ============ 左：入力パネル ============ -->
+  <section class="panel" aria-label="入力">
+
+    <div class="block">
+      <h2 class="block__title">表記パターン</h2>
+      <div class="seg" role="radiogroup" aria-label="表記パターン" id="seg-lang">
+        <button type="button" class="seg__item is-active" data-lang="ja">日本語</button>
+        <button type="button" class="seg__item" data-lang="en">英語</button>
+        <button type="button" class="seg__item" data-lang="both">日英併記</button>
+      </div>
+      <p class="hint">「日英併記」では日本語の下に英語表記が小さく入ります。</p>
+    </div>
+
+    <div class="block">
+      <h2 class="block__title">記載する要素</h2>
+      <p class="hint">スイッチで表示／非表示、矢印で並び替え、× で削除できます。</p>
+      <ul class="fields" id="fields"></ul>
+      <div class="addrow">
+        <select id="add-select" aria-label="追加する要素"></select>
+        <button type="button" class="btn btn--ghost btn--sm" id="btn-add">＋ 要素を追加</button>
+      </div>
+    </div>
+
+    <div class="block">
+      <h2 class="block__title">会社ロゴ</h2>
+      <div class="logo-drop" id="logo-drop">
+        <input type="file" id="logo-file" accept=".svg,.png,.jpg,.jpeg" hidden>
+        <div class="logo-drop__preview" id="logo-preview"><span>SVG / PNG をドラッグ&amp;ドロップ</span></div>
+        <div class="logo-drop__actions">
+          <button type="button" class="btn btn--ghost btn--sm" id="btn-logo-pick">ファイルを選択</button>
+          <button type="button" class="btn btn--ghost btn--sm" id="btn-logo-clear">クリア</button>
+        </div>
+      </div>
+      <div class="row">
+        <label class="field"><span>ロゴの幅（mm）</span>
+          <input type="range" id="logo-w" min="8" max="45" step="0.5" value="22">
+          <output id="logo-w-out">22.0</output>
+        </label>
+      </div>
+      <label class="check"><input type="checkbox" id="logo-white"><span>ロゴを白抜きにする（濃色背景・帯レイアウト用）</span></label>
+      <p class="hint">プリセット：
+        <button type="button" class="linkbtn" data-preset-logo="../assets/logos/logotype-a.svg">ロゴタイプ A</button>／
+        <button type="button" class="linkbtn" data-preset-logo="../assets/logos/mark-a.svg">マーク A</button>
+      </p>
+    </div>
+
+    <div class="block">
+      <h2 class="block__title">レイアウト</h2>
+      <div class="tpl" id="tpl"></div>
+      <div class="row row--2">
+        <label class="field"><span>用紙サイズ</span>
+          <select id="size">
+            <option value="jp91">日本標準 91 × 55 mm</option>
+            <option value="us89">欧米サイズ 89 × 51 mm</option>
+            <option value="jp85">小型 85 × 49 mm</option>
+          </select>
+        </label>
+        <label class="field"><span>向き</span>
+          <select id="orientation">
+            <option value="landscape">横</option>
+            <option value="portrait">縦</option>
+          </select>
+        </label>
+      </div>
+      <div class="row row--2">
+        <label class="field"><span>書体</span>
+          <select id="font">
+            <option value="gothic">ゴシック体</option>
+            <option value="mincho">明朝体</option>
+          </select>
+        </label>
+        <label class="field"><span>文字サイズ調整</span>
+          <input type="range" id="scale" min="0.8" max="1.25" step="0.01" value="1">
+          <output id="scale-out">100%</output>
+        </label>
+      </div>
+      <label class="check"><input type="checkbox" id="show-tags" checked><span>連絡先のラベル（TEL / MAIL など）を表示する</span></label>
+      <div class="row row--3">
+        <label class="field"><span>アクセント</span><input type="color" id="c-accent" value="#ED551B"></label>
+        <label class="field"><span>文字色</span><input type="color" id="c-ink" value="#111111"></label>
+        <label class="field"><span>背景</span><input type="color" id="c-bg" value="#FFFFFF"></label>
+      </div>
+    </div>
+
+    <div class="block">
+      <h2 class="block__title">裏面</h2>
+      <div class="seg" id="seg-back">
+        <button type="button" class="seg__item is-active" data-back="none">なし</button>
+        <button type="button" class="seg__item" data-back="logo">ロゴのみ</button>
+        <button type="button" class="seg__item" data-back="alt">別言語の面</button>
+      </div>
+      <p class="hint">「別言語の面」は、表が日本語なら裏を英語表記で組みます。</p>
+    </div>
+
+  </section>
+
+  <!-- ============ 右：プレビュー ============ -->
+  <section class="preview" aria-label="プレビュー">
+    <div class="preview__bar">
+      <div class="seg seg--sm" id="seg-side">
+        <button type="button" class="seg__item is-active" data-side="front">表面</button>
+        <button type="button" class="seg__item" data-side="back" id="side-back" disabled>裏面</button>
+      </div>
+      <div class="preview__tools">
+        <label class="check check--sm"><input type="checkbox" id="guides" checked><span>ガイド表示</span></label>
+        <label class="check check--sm"><input type="checkbox" id="marks"><span>トンボ</span></label>
+        <div class="zoom">
+          <button type="button" class="btn btn--ghost btn--sm" id="zoom-out">−</button>
+          <output id="zoom-out-label">100%</output>
+          <button type="button" class="btn btn--ghost btn--sm" id="zoom-in">＋</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview__stage" id="stage">
+      <div class="card-wrap" id="card-wrap"></div>
+    </div>
+
+    <ul class="legend">
+      <li><i class="legend__swatch legend__swatch--bleed"></i>塗り足し（3mm）</li>
+      <li><i class="legend__swatch legend__swatch--trim"></i>仕上がり</li>
+      <li><i class="legend__swatch legend__swatch--safe"></i>文字安全エリア</li>
+    </ul>
+    <p class="warn" id="warn" hidden></p>
+  </section>
+</main>
+
+<!-- 書き出しダイアログ -->
+<dialog class="modal" id="export-modal">
+  <form method="dialog" class="modal__inner">
+    <h2>入稿データの書き出し</h2>
+    <ul class="export-list">
+      <li>
+        <div><b>PDF（印刷 → PDFに保存）</b><span>塗り足し3mm込みの実寸ページで出力します。入稿の本命はこちら。</span></div>
+        <button type="button" class="btn btn--primary btn--sm" id="ex-pdf">PDFを作成</button>
+      </li>
+      <li>
+        <div><b>SVG（ベクター）</b><span>Illustratorで開いて文字のアウトライン化・CMYK変換ができます。</span></div>
+        <button type="button" class="btn btn--ghost btn--sm" id="ex-svg">SVGを保存</button>
+      </li>
+      <li>
+        <div><b>PNG（350dpi）</b><span>内容確認・社内共有用。印刷所によっては入稿可。</span></div>
+        <button type="button" class="btn btn--ghost btn--sm" id="ex-png">PNGを保存</button>
+      </li>
+    </ul>
+    <div class="note">
+      <b>入稿前チェック</b>
+      <ul>
+        <li>塗り足し 3mm ／ 文字の安全エリア 4mm を確保しています。</li>
+        <li>PDF書き出し時は「用紙サイズに合わせる」をオフ、余白なし（100%）で保存してください。</li>
+        <li>色は RGB です。CMYK指定の印刷所へはSVG/PDFをIllustratorで変換のうえ入稿してください。</li>
+        <li>フォントはお使いのPCのシステムフォントです。アウトライン化推奨。</li>
+      </ul>
+    </div>
+    <div class="modal__foot"><button class="btn btn--ghost btn--sm" value="close">閉じる</button></div>
+  </form>
+</dialog>
+
+<div class="print-root" id="print-root" aria-hidden="true"></div>
+<style id="print-page"></style>
+
+<script src="app.js"></script>
+</body>
+</html>
