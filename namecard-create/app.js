@@ -429,6 +429,7 @@ function cacheEls() {
   ['fields', 'size', 'font', 'card-wrap', 'guides', 'marks',
    'zoom-in', 'zoom-out', 'zoom-out-label', 'side-back', 'warn', 'export-modal',
    'print-root', 'print-page', 'btn-export', 'btn-save', 'btn-list', 'list-modal', 'card-list',
+   'confirm-modal',
    'stage', 'show-icons', 'use-back', 'btn-settings', 'settings-pop'].forEach(id => el[id] = $('#' + id));
 }
 
@@ -610,6 +611,27 @@ function storeList(a) {
 const fmtDate = ms => new Date(ms).toLocaleString('ja-JP',
   { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
 
+function flashSaved() {
+  const btn = el['btn-save'];
+  if (btn.dataset.busy) return;
+  btn.dataset.busy = '1';
+  const label = btn.textContent;
+  btn.textContent = '保存しました';
+  setTimeout(() => { btn.textContent = label; delete btn.dataset.busy; }, 1400);
+}
+
+function commitEntry(list, rec, dupIndex) {
+  if (dupIndex >= 0) { rec.id = list[dupIndex].id; list[dupIndex] = rec; }
+  else list.push(rec);
+  if (!storeList(list)) return;
+  flashSaved();
+}
+
+/**
+ * 重複時のみ確認モーダルを出し、「上書き保存する」を押した場合だけ保存する。
+ * <dialog> の close イベントに頼らず、ボタンの click で直接判定する
+ * （フォーム送信からの close はブラウザによって発火が不安定なため）。
+ */
 function saveEntry() {
   const title = valueOf('name', state.lang) || '（氏名未入力）';
   const list = loadList();
@@ -619,20 +641,24 @@ function saveEntry() {
     lang: state.lang, updated: Date.now(), data: snapshot(),
   };
   const i = list.findIndex(e => e.title === title && e.lang === state.lang);
-  if (i >= 0 && confirm(`「${title}」はすでに登録されています。上書きしますか？\n（いいえを選ぶと別のデータとして追加します）`)) {
-    rec.id = list[i].id; list[i] = rec;
-  } else {
-    list.push(rec);
-  }
-  if (!storeList(list)) return;
 
-  // 押したことが分かるようにボタンの文言を一瞬だけ変える
-  const btn = el['btn-save'];
-  if (btn.dataset.busy) return;
-  btn.dataset.busy = '1';
-  const label = btn.textContent;
-  btn.textContent = '保存しました';
-  setTimeout(() => { btn.textContent = label; delete btn.dataset.busy; }, 1400);
+  if (i < 0) { commitEntry(list, rec, -1); return; }
+
+  const modal = el['confirm-modal'];
+  $('#confirm-msg', modal).textContent = `「${title}」はすでに登録されています。上書き保存しますか？`;
+
+  const overwriteBtn = $('[value="overwrite"]', modal);
+  const cancelBtn = $('[value="cancel"]', modal);
+  const cleanup = () => {
+    overwriteBtn.removeEventListener('click', onOverwrite);
+    cancelBtn.removeEventListener('click', onCancel);
+    if (modal.open) modal.close();
+  };
+  const onOverwrite = () => { cleanup(); commitEntry(list, rec, i); };
+  const onCancel = () => { cleanup(); };   // 何もせず閉じるだけ
+  overwriteBtn.addEventListener('click', onOverwrite);
+  cancelBtn.addEventListener('click', onCancel);
+  modal.showModal();
 }
 
 function renderList() {

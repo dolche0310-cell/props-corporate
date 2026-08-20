@@ -70,7 +70,10 @@ button { font: inherit; }
   background: var(--nc-panel); border: 1px solid var(--nc-border);
   border-radius: var(--nc-radius); padding: 16px;
 }
-.block__title { font-size: 13px; font-weight: 700; letter-spacing: .04em; margin-bottom: 10px; }
+.block__title {
+  font-size: 13px; font-weight: 700; letter-spacing: .04em;
+  padding-bottom: 12px; margin-bottom: 16px; border-bottom: 1px solid var(--nc-border);
+}
 .hint { font-size: 11.5px; color: var(--nc-sub); line-height: 1.6; margin-top: 8px; }
 
 /* ---------- segmented ---------- */
@@ -83,25 +86,25 @@ button { font: inherit; }
 .seg__item:disabled { opacity: .35; cursor: not-allowed; }
 
 /* ---------- field rows ---------- */
-.fields { display: flex; flex-direction: column; gap: 8px; }
-.fi { border: 1px solid var(--nc-border); border-radius: 9px; background: #fff; transition: .15s; }
-.fi.is-off { background: #FAFAFA; }
+.fields { display: flex; flex-direction: column; gap: 22px; }
+.fi { transition: .15s; }
+.fi.is-off { opacity: .5; }
 .fi.is-off .fi__body { display: none; }
-.fi__head { display: flex; align-items: center; gap: 8px; padding: 8px 10px; }
-.fi__label { flex: 1; font-size: 12.5px; font-weight: 500; min-width: 0; }
+.fi__head { display: flex; align-items: center; gap: 10px; }
+.fi__label { flex: 1; font-size: 14px; font-weight: 500; color: var(--nc-ink); min-width: 0; }
 .fi.is-off .fi__label { color: var(--nc-muted); }
-.fi__body { padding: 0 10px 10px; display: flex; flex-direction: column; gap: 6px; }
+.fi__body { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
 
 /* トグルスイッチ */
-.sw { position: relative; width: 32px; height: 18px; flex: none; }
+.sw { position: relative; width: 38px; height: 22px; flex: none; }
 .sw input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
 .sw span { position: absolute; inset: 0; background: #D2D2D2; border-radius: 999px; transition: .18s; pointer-events: none; }
 .sw span::after {
-  content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px;
+  content: ""; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px;
   background: #fff; border-radius: 50%; transition: .18s;
 }
 .sw input:checked + span { background: var(--nc-btn); }
-.sw input:checked + span::after { transform: translateX(14px); }
+.sw input:checked + span::after { transform: translateX(16px); }
 .sw input:focus-visible + span { outline: 2px solid var(--nc-btn); outline-offset: 2px; }
 
 /* ---------- inputs ---------- */
@@ -114,6 +117,9 @@ input[type="text"], input[type="email"], input[type="tel"], select, textarea {
 }
 input:focus, select:focus, textarea:focus {
   outline: none; border-color: var(--nc-btn); box-shadow: 0 0 0 3px rgba(69,69,69,.12);
+}
+.fi__body input {
+  border-radius: 12px; padding: 13px 16px; font-size: 14px; border-color: #EAEAEA;
 }
 input[type="range"] { width: 100%; accent-color: var(--nc-btn); }
 .row { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
@@ -207,6 +213,9 @@ input[type="range"] { width: 100%; accent-color: var(--nc-btn); }
 .note b { display: block; color: var(--nc-ink); margin-bottom: 5px; font-size: 12px; }
 .note ul { list-style: disc; padding-left: 16px; display: flex; flex-direction: column; gap: 3px; }
 .modal__foot { margin-top: 16px; text-align: right; }
+.modal__foot--split { display: flex; justify-content: flex-end; gap: 8px; }
+.modal--sm { max-width: 380px; }
+.confirm-msg { font-size: 13px; color: var(--nc-sub); line-height: 1.6; }
 
 /* ---------- print ---------- */
 .print-root { display: none; }

@@ -134,7 +134,7 @@
         <li>フォントはアウトライン化を推奨します。</li>
       </ul>
     </div>
-    <div class="modal__foot"><button class="btn btn--ghost btn--sm" value="close">閉じる</button></div>
+    <div class="modal__foot"><button class="btn btn--primary btn--sm" value="close">閉じる</button></div>
   </form>
 </dialog>
 
@@ -143,7 +143,19 @@
   <form method="dialog" class="modal__inner">
     <h2>登録済の名刺データ</h2>
     <ul class="cardlist" id="card-list"></ul>
-    <div class="modal__foot"><button class="btn btn--ghost btn--sm" value="close">閉じる</button></div>
+    <div class="modal__foot"><button class="btn btn--primary btn--sm" value="close">閉じる</button></div>
+  </form>
+</dialog>
+
+<!-- 重複時の上書き確認 -->
+<dialog class="modal modal--sm" id="confirm-modal">
+  <form method="dialog" class="modal__inner">
+    <h2>上書き保存しますか？</h2>
+    <p class="confirm-msg" id="confirm-msg"></p>
+    <div class="modal__foot modal__foot--split">
+      <button type="button" class="btn btn--ghost btn--sm" value="cancel">キャンセル</button>
+      <button type="button" class="btn btn--primary btn--sm" value="overwrite">上書き保存する</button>
+    </div>
   </form>
 </dialog>
 
