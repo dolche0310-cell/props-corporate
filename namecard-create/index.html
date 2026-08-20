@@ -14,10 +14,9 @@
 
 <header class="tool-header">
   <div class="tool-header__actions">
-    <button type="button" class="btn btn--ghost" id="btn-load">読み込み</button>
+    <button type="button" class="btn btn--ghost" id="btn-list">登録済一覧</button>
     <button type="button" class="btn btn--ghost" id="btn-save">保存</button>
     <button type="button" class="btn btn--primary" id="btn-export">入稿データを書き出す</button>
-    <input type="file" id="file-load" accept="application/json" hidden>
   </div>
 </header>
 
@@ -135,6 +134,15 @@
         <li>フォントはアウトライン化を推奨します。</li>
       </ul>
     </div>
+    <div class="modal__foot"><button class="btn btn--ghost btn--sm" value="close">閉じる</button></div>
+  </form>
+</dialog>
+
+<!-- 登録済一覧 -->
+<dialog class="modal" id="list-modal">
+  <form method="dialog" class="modal__inner">
+    <h2>登録済の名刺データ</h2>
+    <ul class="cardlist" id="card-list"></ul>
     <div class="modal__foot"><button class="btn btn--ghost btn--sm" value="close">閉じる</button></div>
   </form>
 </dialog>

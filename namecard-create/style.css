@@ -116,7 +116,6 @@ input:focus, select:focus, textarea:focus {
   outline: none; border-color: var(--nc-btn); box-shadow: 0 0 0 3px rgba(69,69,69,.12);
 }
 input[type="range"] { width: 100%; accent-color: var(--nc-btn); }
-.inline-label { font-size: 10.5px; color: var(--nc-muted); font-weight: 500; }
 .row { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
 .row--2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .check { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--nc-sub); cursor: pointer; margin-top: 10px; }
@@ -190,6 +189,20 @@ input[type="range"] { width: 100%; accent-color: var(--nc-btn); }
 .export-list li { display: flex; align-items: center; gap: 12px; justify-content: space-between; border: 1px solid var(--nc-border); border-radius: 9px; padding: 11px 12px; }
 .export-list b { display: block; font-size: 13px; }
 .export-list span { display: block; font-size: 11.5px; color: var(--nc-sub); line-height: 1.55; }
+.cardlist { display: flex; flex-direction: column; gap: 8px; max-height: 58vh; overflow: auto; }
+.cardlist li {
+  display: flex; align-items: center; gap: 12px; justify-content: space-between;
+  border: 1px solid var(--nc-border); border-radius: 9px; padding: 10px 12px;
+}
+.cardlist__body { min-width: 0; }
+.cardlist b { display: block; font-size: 13px; }
+.cardlist__meta { display: block; font-size: 11.5px; color: var(--nc-sub); line-height: 1.55; }
+.cardlist__act { display: flex; gap: 6px; flex: none; }
+.cardlist__empty {
+  display: block; text-align: center; color: var(--nc-sub); font-size: 12px;
+  border: 1px dashed #CFCFCF; border-radius: 9px; padding: 22px 12px;
+}
+
 .note { margin-top: 16px; background: #F7F7F7; border-radius: 9px; padding: 12px 14px; font-size: 11.5px; color: var(--nc-sub); }
 .note b { display: block; color: var(--nc-ink); margin-bottom: 5px; font-size: 12px; }
 .note ul { list-style: disc; padding-left: 16px; display: flex; flex-direction: column; gap: 3px; }

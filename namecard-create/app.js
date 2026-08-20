@@ -428,7 +428,7 @@ const el = {};
 function cacheEls() {
   ['fields', 'size', 'font', 'card-wrap', 'guides', 'marks',
    'zoom-in', 'zoom-out', 'zoom-out-label', 'side-back', 'warn', 'export-modal',
-   'print-root', 'print-page', 'btn-export', 'btn-save', 'btn-load', 'file-load',
+   'print-root', 'print-page', 'btn-export', 'btn-save', 'btn-list', 'list-modal', 'card-list',
    'stage', 'show-icons', 'use-back', 'btn-settings', 'settings-pop'].forEach(id => el[id] = $('#' + id));
 }
 
@@ -447,10 +447,11 @@ function fieldRow(key) {
     <div class="fi__body"></div>`;
 
   const bodyEl = $('.fi__body', li);
+  // 項目名はトグル横に出ているので、入力欄の上には出さない（読み上げ用に aria-label だけ持たせる）
   const input = (label, k, val, type = 'text') => {
-    const w = document.createElement('label');
+    const w = document.createElement('div');
     w.className = 'field';
-    w.innerHTML = `<span class="inline-label">${esc(label)}</span><input type="${type}" data-k="${k}" value="${esc(val)}">`;
+    w.innerHTML = `<input type="${type}" data-k="${k}" value="${esc(val)}" aria-label="${esc(label)}">`;
     bodyEl.appendChild(w);
   };
 
@@ -567,7 +568,7 @@ function exportPDF() {
   setTimeout(() => window.print(), 120);
 }
 
-/* ---------- 保存・読み込み ---------- */
+/* ---------- 編集中の状態（リロードしても続きから） ---------- */
 const KEY = 'nc-builder-v4';
 function snapshot() {
   const { size, lang, font, showIcons, back, fields } = state;
@@ -597,6 +598,78 @@ function restore(data) {
   el['use-back'].checked = !!state.back;
   syncSeg('#seg-lang', 'lang', state.lang);
   renderFields();
+}
+
+/* ---------- 登録済の名刺データ（ツール内に保存） ---------- */
+const LIST_KEY = 'nc-cards-v1';
+const loadList = () => { try { return JSON.parse(localStorage.getItem(LIST_KEY) || '[]'); } catch (e) { return []; } };
+function storeList(a) {
+  try { localStorage.setItem(LIST_KEY, JSON.stringify(a)); return true; }
+  catch (e) { alert('保存できませんでした。ブラウザの保存領域がいっぱいの可能性があります。'); return false; }
+}
+const fmtDate = ms => new Date(ms).toLocaleString('ja-JP',
+  { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+
+function saveEntry() {
+  const title = valueOf('name', state.lang) || '（氏名未入力）';
+  const list = loadList();
+  const rec = {
+    id: 'c' + Date.now(), title,
+    company: valueOf('company', state.lang),
+    lang: state.lang, updated: Date.now(), data: snapshot(),
+  };
+  const i = list.findIndex(e => e.title === title && e.lang === state.lang);
+  if (i >= 0 && confirm(`「${title}」はすでに登録されています。上書きしますか？\n（いいえを選ぶと別のデータとして追加します）`)) {
+    rec.id = list[i].id; list[i] = rec;
+  } else {
+    list.push(rec);
+  }
+  if (!storeList(list)) return;
+
+  // 押したことが分かるようにボタンの文言を一瞬だけ変える
+  const btn = el['btn-save'];
+  if (btn.dataset.busy) return;
+  btn.dataset.busy = '1';
+  const label = btn.textContent;
+  btn.textContent = '保存しました';
+  setTimeout(() => { btn.textContent = label; delete btn.dataset.busy; }, 1400);
+}
+
+function renderList() {
+  const list = loadList().sort((a, b) => b.updated - a.updated);
+  if (!list.length) {
+    el['card-list'].innerHTML = '<li class="cardlist__empty">保存された名刺データはありません。</li>';
+    return;
+  }
+  el['card-list'].innerHTML = list.map(e => {
+    const meta = [e.company, e.lang === 'en' ? '英語' : '日本語', fmtDate(e.updated)].filter(Boolean).join('／');
+    return `<li data-id="${esc(e.id)}">
+      <div class="cardlist__body">
+        <b>${esc(e.title)}</b>
+        <span class="cardlist__meta">${esc(meta)}</span>
+      </div>
+      <div class="cardlist__act">
+        <button type="button" class="btn btn--ghost btn--sm" data-act="open">開く</button>
+        <button type="button" class="btn btn--ghost btn--sm" data-act="del">削除</button>
+      </div>
+    </li>`;
+  }).join('');
+}
+
+function bindList() {
+  el['btn-list'].addEventListener('click', () => { renderList(); el['list-modal'].showModal(); });
+  el['card-list'].addEventListener('click', e => {
+    const btn = e.target.closest('[data-act]'); if (!btn) return;
+    const id = btn.closest('li').dataset.id;
+    const list = loadList();
+    const i = list.findIndex(x => x.id === id);
+    if (i < 0) return;
+    if (btn.dataset.act === 'open') {
+      restore(list[i].data); update(); el['list-modal'].close();
+    } else if (confirm(`「${list[i].title}」を削除しますか？`)) {
+      list.splice(i, 1); storeList(list); renderList();
+    }
+  });
 }
 
 /* ============================================================
@@ -678,18 +751,9 @@ function init() {
   $('#ex-png').addEventListener('click', exportPNG);
   $('#ex-jpg').addEventListener('click', exportJPG);
 
-  // 保存・読み込み（JSON）
-  el['btn-save'].addEventListener('click', () => {
-    download(new Blob([JSON.stringify(snapshot(), null, 2)], { type: 'application/json' }), baseName() + '.json');
-  });
-  el['btn-load'].addEventListener('click', () => el['file-load'].click());
-  el['file-load'].addEventListener('change', e => {
-    const f = e.target.files[0]; if (!f) return;
-    const rd = new FileReader();
-    rd.onload = () => { try { restore(JSON.parse(rd.result)); update(); } catch (err) { alert('読み込めませんでした。'); } };
-    rd.readAsText(f);
-    e.target.value = '';
-  });
+  // 保存（ツール内）と登録済一覧
+  el['btn-save'].addEventListener('click', saveEntry);
+  bindList();
 
   setZoom(state.zoom);
 }
