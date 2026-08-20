@@ -1,76 +1,131 @@
 /* ============================================================
    名刺データ作成ツール
+   デザインベース：Figma props_Rebranding
+     おもて 526:23433 / うら 526:23452（縦 55 × 91 mm）
    入力 → SVG(実寸mm)で組版 → プレビュー / PDF・SVG・PNG 書き出し
    ・座標系は「mm」。viewBox も mm 単位で持たせ、そのまま入稿サイズになる
-   ・文字幅の実測は canvas.measureText。px を mm と読み替えても比率は同じ
+   ・Figma のアートボードは 251 × 415px。px÷4.5636 で mm に読み替えている
+   ・ロゴ・配色・組み方・裏面はデザイン固定。切り替えられるのは記載内容だけ
    ============================================================ */
 (() => {
 'use strict';
 
-/* ---------- 定数 ---------- */
+/* ---------- 用紙（向きは縦で固定） ---------- */
 const SIZES = {
-  jp91: { w: 91, h: 55 },
-  us89: { w: 89, h: 51 },
-  jp85: { w: 85, h: 49 },
+  jp91: { w: 55, h: 91 },
+  us89: { w: 51, h: 89 },
+  jp85: { w: 49, h: 85 },
 };
-const BLEED = 3;      // 塗り足し
-const SAFE  = 4;      // 文字安全エリア（仕上がりからの内側）
+const BLEED = 3;      // 塗り足し（書き出しには含めるが、プレビューには表記しない）
 const MARKM = 5;      // トンボを描くための追加マージン
 
-const GOTHIC = "'Noto Sans JP','Hiragino Kaku Gothic ProN','Hiragino Sans','Yu Gothic',sans-serif";
+const GOTHIC = "'Albert Sans','Noto Sans JP','Hiragino Kaku Gothic ProN','Hiragino Sans','Yu Gothic',sans-serif";
 const MINCHO = "'Hiragino Mincho ProN','Yu Mincho','YuMincho','Noto Serif JP',serif";
 
-/* 要素の定義。type: bi=日英2値 / single=1値 / custom=自由項目 */
-const DEFS = {
-  logo:    { label: '会社ロゴ',            type: 'image',  group: 'head' },
-  company: { label: '会社名',              type: 'bi',     group: 'head', ja: '株式会社サンプル', en: 'Sample Inc.' },
-  dept:    { label: '部署',                type: 'bi',     group: 'head', ja: '事業開発部',       en: 'Business Development' },
-  title:   { label: '役職',                type: 'bi',     group: 'body', ja: 'マネージャー',     en: 'Manager' },
-  name:    { label: '氏名',                type: 'bi',     group: 'body', ja: '山田 太郎',        en: 'Taro Yamada' },
-  reading: { label: 'ふりがな（ローマ字）', type: 'single', group: 'body', v: 'TARO YAMADA' },
-  address: { label: '会社住所',            type: 'bi',     group: 'foot', tag: 'ADDRESS',
-             ja: '〒150-0001 東京都渋谷区神宮前1-2-3 サンプルビル5F',
-             en: '5F Sample Bldg, 1-2-3 Jingumae, Shibuya-ku, Tokyo 150-0001' },
-  tel:     { label: '電話番号',            type: 'single', group: 'foot', tag: 'TEL',    v: '03-1234-5678' },
-  mobile:  { label: '携帯番号',            type: 'single', group: 'foot', tag: 'MOBILE', v: '090-1234-5678' },
-  fax:     { label: 'FAX',                 type: 'single', group: 'foot', tag: 'FAX',    v: '03-1234-5679' },
-  email:   { label: 'メールアドレス',      type: 'single', group: 'foot', tag: 'MAIL',   v: 'taro.yamada@example.co.jp' },
-  web:     { label: 'Webサイト',           type: 'single', group: 'foot', tag: 'WEB',    v: 'www.example.co.jp' },
-  custom:  { label: '自由項目',            type: 'custom', group: 'foot', tag: '', v: '' },
+/* Figma px → mm（251px = 55mm） */
+const PX = 55 / 251;
+
+/* 版面。用紙サイズが変わっても同じ見えになるよう比率で持つ */
+const LY = {
+  padL:   28 / 251,   // 左マージン
+  padR:   25 / 251,   // 右マージン（罫線の右端に合わせる）
+  logoT:  24 / 415,   // ロゴ上端
+  logoR:  24 / 251,   // ロゴ右マージン
+  nameT: 163 / 415,   // 氏名ブロックの上端
+  footB:  18 / 415,   // 会社情報ブロックの下端
+};
+const LOGO_W = 43 / 251;   // おもてのロゴマーク幅（カード幅に対する比）
+
+/* 裏面（Figma うら 526:23452 の実測。すべてカード寸法に対する比） */
+const BACK = {
+  markX: 44.536 / 251, markY: 105.014 / 415, markW:  39.051 / 251,
+  typeX: 93.472 / 251, typeY: 105.391 / 415, typeW: 104.720 / 251,
+  tagY:    171 / 415,
+  tagSize:  12 * PX,     // 2.63mm
+  tagLH:    22 / 12,     // 行送り 22px / 級数 12px
+  tagLS:  0.48 * PX,     // 字送り 0.48px
+  qrX:      95 / 251, qrY: 286 / 415, qrW: 62 / 251,
+};
+const TAGLINE = ['“うちに合う人”を逃さない。', '採用を加速する', 'カスタムAI面接'];
+
+/* 配色（Figma 実測。デザイン固定） */
+const C = {
+  name:  '#000000',
+  label: '#5C5C5C',
+  meta:  '#8A8A8A',
+  rule:  '#D8D8D8',
+  tag:   '#000000',   // 裏面タグライン
+  bg:    '#FFFFFF',
+  trim:  '#B4B4B4',   // 仕上がり線（プレビュー用・書き出しには含めない）
 };
 
-/* 初期表示する要素（ご指定の7項目 + 会社名） */
-const DEFAULT_ORDER = ['logo', 'company', 'title', 'name', 'reading', 'address', 'tel', 'email'];
+/* 級数（Figma px → mm） */
+const FS = {
+  name:  20 * PX,   // 4.38mm
+  label: 10 * PX,   // 2.19mm
+  meta:  10 * PX,
+  small:  8 * PX,   // 1.75mm
+};
 
-const TEMPLATES = [
-  { id: 'standard', name: '左揃え' },
-  { id: 'centered', name: '中央' },
-  { id: 'band',     name: '帯' },
-  { id: 'minimal',  name: '2分割' },
-];
+/* 行間・アキ（Figma 実測 px → mm） */
+const LH = { label: 1.2, name: 1.5, meta: 1.6, small: 1.25 };
+const GAP = {
+  titleName: 16 * PX,   // 役職 → 氏名
+  contact:   16 * PX,   // ローマ字 → 連絡先
+  compRule:   7 * PX,   // 会社名 → 罫線
+  ruleAddr:   7 * PX,   // 罫線 → 住所
+  item:       4 * PX,   // 小さい行どうし
+  logo:       8 * PX,   // ロゴ下端との最低アキ
+  icon:       1.2,      // アイコン → 値
+};
+const RULE_W = 1 * PX;  // 罫線の太さ
+
+/* 連絡先アイコン（24 × 24 グリッドの線画） */
+const ICONS = {
+  tel:    '<path d="M5.4 3.5h3.1l1.6 4-2.2 1.6a12.6 12.6 0 0 0 6.8 6.8l1.6-2.2 4 1.6v3.1a1.6 1.6 0 0 1-1.7 1.6C10.5 19.4 4.6 13.5 3.8 5.2A1.6 1.6 0 0 1 5.4 3.5z"/>',
+  mobile: '<rect x="6.8" y="2.6" width="10.4" height="18.8" rx="1.8"/><path d="M10.6 18.6h2.8"/>',
+  email:  '<rect x="2.4" y="5.2" width="19.2" height="13.6" rx="1.6"/><path d="M3 6.4 12 13l9-6.6"/>',
+};
+const ICON_STROKE = 2;   // 24 グリッド上の線幅
+
+/* 要素の定義。type: bi=日英2値 / single=1値
+   group: lead=氏名の上 / body=氏名まわり / contact=連絡先 / org=会社名 / addr=住所
+   on: 初期状態で表示するか（Figma おもて 526:23433 の構成） */
+const DEFS = {
+  dept:    { label: '部署',           type: 'bi',     group: 'lead', on: false, ja: '事業開発部',   en: 'Business Development' },
+  title:   { label: '役職',           type: 'bi',     group: 'lead', on: true,  ja: 'マネージャー', en: 'Manager' },
+  name:    { label: '氏名',           type: 'bi',     group: 'body', on: true,  ja: '山田 太郎',    en: 'Taro Yamada' },
+  reading: { label: 'ローマ字表記',   type: 'single', group: 'body', on: true,  v: 'Taro Yamada' },
+  tel:     { label: '電話番号',       type: 'single', group: 'contact', on: true,  icon: 'tel',    v: '03-1234-5678' },
+  mobile:  { label: '携帯番号',       type: 'single', group: 'contact', on: false, icon: 'mobile', v: '090-1234-5678' },
+  email:   { label: 'メールアドレス', type: 'single', group: 'contact', on: true,  icon: 'email',  v: 'taro.yamada@example.co.jp' },
+  company: { label: '会社名',         type: 'bi',     group: 'org',  on: true,  ja: '株式会社サンプル', en: 'Sample Inc.' },
+  postal:  { label: '郵便番号',       type: 'single', group: 'addr', on: true,  v: '〒150-0001' },
+  address: { label: '会社住所',       type: 'bi',     group: 'addr', on: true,
+             ja: '東京都渋谷区神宮前1-2-3 サンプルビル5F',
+             en: '5F Sample Bldg, 1-2-3 Jingumae, Shibuya-ku, Tokyo' },
+  web:     { label: 'Webサイト',      type: 'single', group: 'addr', on: true,  v: 'https://example.co.jp' },
+};
+const KEYS = Object.keys(DEFS);
 
 /* ---------- 状態 ---------- */
-let uid = 0;
 const state = {
-  size: 'jp91', orientation: 'landscape', template: 'standard',
-  lang: 'ja', font: 'gothic', scale: 1,
-  accent: '#ED551B', ink: '#111111', bg: '#FFFFFF',
-  logoW: 22, logoWhite: false, showTags: true,
-  back: 'none', side: 'front',
-  guides: true, marks: false, zoom: 1,
-  logo: null,           // { href, aspect }
-  fields: [],           // [{ id, key, enabled, label, ja, en, v, tag }]
+  size: 'jp91', lang: 'ja', font: 'gothic',
+  showIcons: false, back: true, side: 'front',
+  guides: true, marks: false, zoom: 1.4,
+  fields: {},           // key → { enabled, ja, en, v }
 };
 
-function makeField(key) {
-  const d = DEFS[key];
-  return {
-    id: 'f' + (++uid), key, enabled: true,
-    label: d.label, tag: d.tag || '',
-    ja: d.ja || '', en: d.en || '', v: d.v || '',
-  };
+function resetFields() {
+  state.fields = {};
+  for (const k of KEYS) {
+    const d = DEFS[k];
+    state.fields[k] = { enabled: d.on, ja: d.ja || '', en: d.en || '', v: d.v || '' };
+  }
 }
-function resetFields() { state.fields = DEFAULT_ORDER.map(makeField); }
+
+/* 図版（デザイン固定・app.js に内蔵） */
+const ART = { mark: null, type: null, qr: null };
 
 /* ---------- ちいさな道具 ---------- */
 const $  = (s, r = document) => r.querySelector(s);
@@ -78,14 +133,6 @@ const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
   .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const n = v => Math.round(v * 1000) / 1000;
-
-function mix(a, b, t) { // a,b: #rrggbb
-  const p = h => [1, 3, 5].map(i => parseInt(h.substr(i, 2), 16));
-  const [r1, g1, b1] = p(a), [r2, g2, b2] = p(b);
-  const c = (x, y) => Math.round(x + (y - x) * t).toString(16).padStart(2, '0');
-  return '#' + c(r1, r2) + c(g1, g2) + c(b1, b2);
-}
-const subColor = () => mix(state.ink, state.bg, 0.42);
 
 /* ---------- 文字の実測 ---------- */
 const _mc = document.createElement('canvas').getContext('2d');
@@ -134,189 +181,123 @@ function svgText(t, x, y, o = {}) {
   if (o.weight && o.weight !== 400) a.push(`font-weight="${o.weight}"`);
   if (o.ls) a.push(`letter-spacing="${n(o.ls)}"`);
   a.push(`fill="${o.fill}"`);
-  if (o.anchor && o.anchor !== 'start') a.push(`text-anchor="${o.anchor}"`);
+  if (o.anchor) a.push(`text-anchor="${o.anchor}"`);
   a.push('xml:space="preserve"');
   return `<text ${a.join(' ')}>${esc(t)}</text>`;
 }
+const svgImage = (art, x, y, w) =>
+  `<image href="${art.href}" x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(w / art.aspect)}"` +
+  ` preserveAspectRatio="xMidYMid meet"/>`;
+
+/** 24×24 のアイコンを size(mm) で描く */
+function svgIcon(name, x, y, size) {
+  const s = size / 24;
+  return `<g transform="translate(${n(x)} ${n(y)}) scale(${n(s)})" fill="none" stroke="${C.meta}"` +
+    ` stroke-width="${ICON_STROKE}" stroke-linecap="round" stroke-linejoin="round">${ICONS[name]}</g>`;
+}
 
 /* ============================================================
-   1. 入力値 → 行データ（表記パターンを反映）
+   1. 入力値 → 表示文字列（表記パターンを反映）
    ============================================================ */
-function valueLines(f, lang) {
-  const d = DEFS[f.key];
-  if (d.type === 'single') return f.v ? [{ t: f.v }] : [];
-  if (d.type === 'custom') return f.v ? [{ t: f.v }] : [];
+function valueOf(key, lang) {
+  const d = DEFS[key], f = state.fields[key];
+  if (!f || !f.enabled) return '';
+  if (d.type === 'single') return f.v.trim();
   const ja = f.ja.trim(), en = f.en.trim();
-  if (lang === 'ja')  return ja ? [{ t: ja }] : (en ? [{ t: en }] : []);
-  if (lang === 'en')  return en ? [{ t: en }] : (ja ? [{ t: ja }] : []);
-  const out = [];
-  if (ja) out.push({ t: ja });
-  if (en && en !== ja) out.push({ t: en, sub: true });
+  return lang === 'en' ? (en || ja) : (ja || en);
+}
+const iconOf = key => (state.showIcons && DEFS[key].icon ? DEFS[key].icon : '');
+const group = g => KEYS.filter(k => DEFS[k].group === g && state.fields[k].enabled);
+
+/* ============================================================
+   2. 組版：行を積み上げる
+   行 = { t, size, weight, fill, ls, lh, gap, ind, icon, iconSize }
+       gap … 直前に空けるアキ(mm) / ind … 値の字下げ(mm)
+       { rule:true } は罫線
+   ============================================================ */
+const lineH = l => (l.rule ? 0 : l.size * l.lh);
+const stackH = ls => ls.reduce((s, l) => s + (l.gap || 0) + lineH(l), 0);
+
+function drawLines(ls, x, y, boxW) {
+  let cy = y, out = '';
+  for (const l of ls) {
+    cy += l.gap || 0;
+    if (l.rule) {
+      out += `<rect x="${n(x)}" y="${n(cy)}" width="${n(boxW)}" height="${n(RULE_W)}" fill="${C.rule}"/>`;
+      continue;
+    }
+    const by = cy + l.size * 0.78;
+    if (l.icon) {
+      // 文字の視覚的な中心（ベースラインの少し上）にアイコンの中心を合わせる
+      out += svgIcon(l.icon, x, by - l.size * 0.30 - l.iconSize / 2, l.iconSize);
+    }
+    out += svgText(l.t, x + (l.ind || 0), by, { size: l.size, weight: l.weight, fill: l.fill, ls: l.ls });
+    cy += lineH(l);
+  }
   return out;
 }
-const tagOf = f => (state.showTags && f.tag ? f.tag : '');
-const active = g => state.fields.filter(f => f.enabled && DEFS[f.key].group === g);
-const byKey  = k => state.fields.find(f => f.key === k && f.enabled);
 
-/* ============================================================
-   2. 組版：ブロックを積み上げる
-   各ブロックは { h, w, render(x, y, align) } を返す
-   ============================================================ */
-function blockText(rows, maxW, align) {
-  // rows: [{ t, size, weight, fill, ls, lh }]
-  const items = rows.filter(r => r.t !== '');
-  const h = items.reduce((s, r) => s + r.size * (r.lh || 1.35), 0);
-  const w = Math.max(0, ...items.map(r => textW(r.t, r.size, r.weight, r.ls)));
-  return {
-    h, w,
-    render(x, y) {
-      let cy = y, out = '';
-      for (const r of items) {
-        const lh = r.size * (r.lh || 1.35);
-        const ax = align === 'middle' ? x + maxW / 2 : (align === 'end' ? x + maxW : x);
-        out += svgText(r.t, ax, cy + r.size * 0.78, {
-          size: r.size, weight: r.weight, fill: r.fill, ls: r.ls,
-          anchor: align === 'middle' ? 'middle' : (align === 'end' ? 'end' : 'start'),
-        });
-        cy += lh;
-      }
-      return out;
-    },
-  };
-}
-
-function blockLogo(maxW, align, white) {
-  if (!state.logo) return null;
-  const w = Math.min(state.logoW, maxW);
-  const h = w / state.logo.aspect;
-  return {
-    h, w,
-    render(x, y) {
-      const ax = align === 'middle' ? x + (maxW - w) / 2 : (align === 'end' ? x + maxW - w : x);
-      const f = white ? ' filter="url(#nc-white)"' : '';
-      return `<image href="${state.logo.href}" x="${n(ax)}" y="${n(y)}" width="${n(w)}" height="${n(h)}"` +
-             ` preserveAspectRatio="xMidYMid meet"${f}/>`;
-    },
-  };
-}
-
-/* 連絡先（foot）の1行：ラベル列 + 値 */
-function blockContact(fields, maxW, align, lang, sc) {
-  const size = 2.15 * sc;
-  const tagSize = size * 0.8;
-  const rows = [];   // [{tag, t, sub}]
-  for (const f of fields) {
-    const ls = valueLines(f, lang);
-    ls.forEach((l, i) => rows.push({ tag: i === 0 ? (f.key === 'custom' ? f.tag : tagOf(f)) : '', t: l.t, sub: !!l.sub }));
+/**
+ * 1要素を行配列に展開する
+ * @param {object} st { size, weight, fill, ls, lh, min }
+ */
+function pushField(out, key, lang, st, gap, boxW, ind = 0) {
+  const val = valueOf(key, lang);
+  if (!val) return out;
+  const avail = boxW - ind;
+  const size = st.min ? fit(val, avail, st.size, st.weight, st.ls, st.min) : st.size;
+  let first = true;
+  for (const t of wrap(val, avail, size, st.weight, st.ls)) {
+    out.push({ t, size, weight: st.weight, fill: st.fill, ls: st.ls, lh: st.lh, ind, gap: first ? gap : 0 });
+    first = false;
   }
-  if (!rows.length) return null;
+  return out;
+}
 
-  const tagW = Math.max(0, ...rows.map(r => textW(r.tag, tagSize, 700, 0.08)));
-  const colW = tagW ? tagW + 1.6 : 0;
-  const valMax = align === 'start' ? maxW - colW : maxW;
-
-  // 折り返し込みで行を展開
+/* --- 氏名の上（部署・役職） --- */
+function leadLines(lang, sc, boxW) {
   const out = [];
-  for (const r of rows) {
-    const s0 = r.sub ? size * 0.86 : size;
-    const parts = wrap(r.t, valMax, s0, 400, 0.02);
-    parts.forEach((p, i) => out.push({ tag: i === 0 ? r.tag : '', t: p, sub: r.sub, size: s0 }));
-  }
-  const lh = size * 1.5;
-  const h = out.length * lh;
-  const w = Math.max(0, ...out.map(r => (align === 'start' ? colW : (r.tag ? textW(r.tag + ' ', tagSize, 700, 0.08) : 0)) + textW(r.t, r.size, 400, 0.02)));
-
-  return {
-    h, w,
-    render(x, y) {
-      let cy = y, s = '';
-      for (const r of out) {
-        const by = cy + r.size * 0.8;
-        if (align === 'start') {
-          if (r.tag) s += svgText(r.tag, x, by, { size: tagSize, weight: 700, fill: state.accent, ls: 0.08 });
-          s += svgText(r.t, x + colW, by, { size: r.size, fill: r.sub ? subColor() : state.ink, ls: 0.02 });
-        } else {
-          const label = r.tag ? r.tag + '  ' : '';
-          const full = label + r.t;
-          const anchor = align === 'middle' ? 'middle' : 'end';
-          const ax = align === 'middle' ? x + maxW / 2 : x + maxW;
-          const fw = textW(label, tagSize, 700, 0.08) + textW(r.t, r.size, 400, 0.02);
-          let sx = anchor === 'middle' ? ax - fw / 2 : ax - fw;
-          if (label) {
-            s += svgText(r.tag, sx, by, { size: tagSize, weight: 700, fill: state.accent, ls: 0.08 });
-            sx += textW(label, tagSize, 700, 0.08);
-          }
-          s += svgText(r.t, sx, by, { size: r.size, fill: r.sub ? subColor() : state.ink, ls: 0.02 });
-        }
-        cy += lh;
-      }
-      return s;
-    },
-  };
+  const st = { size: FS.label * sc, weight: 500, fill: C.label, ls: 0.05, lh: LH.label, min: 1.5 };
+  for (const k of group('lead')) pushField(out, k, lang, st, out.length ? GAP.item : 0, boxW);
+  return out;
 }
 
-/* head / body / foot をまとめて作る */
-function composeBlocks(boxW, align, lang, sc, opts = {}) {
-  const sub = subColor();
-  const head = [], body = [], foot = [];
+/* --- 氏名・ローマ字・連絡先 --- */
+function bodyLines(lang, sc, boxW) {
+  const out = [];
+  pushField(out, 'name', lang, {
+    size: FS.name * sc, weight: 700, fill: C.name, ls: 2 * PX * sc, lh: LH.name, min: 2.6,
+  }, 0, boxW);
+  pushField(out, 'reading', lang, {
+    size: FS.label * sc, weight: 500, fill: C.label, ls: 0.02, lh: LH.label, min: 1.5,
+  }, 0, boxW);
 
-  /* --- head：ロゴ + 会社名 + 部署 --- */
-  const logoF = byKey('logo');
-  if (logoF && state.logo && !opts.skipLogo) {
-    const lb = blockLogo(boxW, align, opts.whiteLogo);
-    if (lb) head.push({ b: lb, gap: 2.2 });
+  const cf = group('contact');
+  if (cf.length) {
+    const size = FS.meta * sc;
+    const iconSize = size * 1.15;
+    const ind = cf.some(k => iconOf(k)) ? iconSize + GAP.icon : 0;
+    const st = { size, weight: 500, fill: C.meta, ls: 0.02, lh: LH.meta };
+    cf.forEach((k, i) => {
+      const at = out.length;
+      pushField(out, k, lang, st, (i === 0 && at) ? GAP.contact : 0, boxW, ind);
+      if (out[at] && iconOf(k)) { out[at].icon = iconOf(k); out[at].iconSize = iconSize; }
+    });
   }
-  const comp = byKey('company'), dept = byKey('dept');
-  const compRows = [];
-  if (comp) {
-    valueLines(comp, lang).forEach(l => compRows.push({
-      t: l.t, size: (l.sub ? 1.95 : 2.9) * sc, weight: l.sub ? 400 : 700,
-      fill: l.sub ? sub : state.ink, ls: l.sub ? 0.04 : 0.06, lh: l.sub ? 1.4 : 1.3,
-    }));
-  }
-  if (dept) {
-    valueLines(dept, lang).forEach(l => compRows.push({
-      t: l.t, size: 2.05 * sc, weight: 400, fill: sub, ls: 0.04, lh: 1.45,
-    }));
-  }
-  if (compRows.length) {
-    compRows.forEach(r => { r.size = fit(r.t, boxW, r.size, r.weight, r.ls, 1.5); });
-    head.push({ b: blockText(compRows, boxW, align), gap: 0 });
-  }
-
-  /* --- body：役職 → 氏名 → ローマ字 --- */
-  const title = byKey('title'), name = byKey('name'), reading = byKey('reading');
-  if (title) {
-    const rows = valueLines(title, lang).map(l => ({
-      t: l.t, size: (l.sub ? 1.85 : 2.2) * sc, weight: 400,
-      fill: sub, ls: 0.14, lh: 1.35,
-    }));
-    if (rows.length) body.push({ b: blockText(rows, boxW, align), gap: 1.0 });
-  }
-  if (name) {
-    const rows = valueLines(name, lang).map(l => ({
-      t: l.t, size: (l.sub ? 2.3 : 5.2) * sc, weight: l.sub ? 400 : 700,
-      fill: l.sub ? sub : state.ink, ls: l.sub ? 0.06 : 0.35, lh: l.sub ? 1.55 : 1.22,
-    }));
-    rows.forEach(r => { r.size = fit(r.t, boxW, r.size, r.weight, r.ls, 2.2); });
-    if (rows.length) body.push({ b: blockText(rows, boxW, align), gap: 0.8 });
-  }
-  if (reading && reading.v) {
-    const s0 = fit(reading.v, boxW, 1.85 * sc, 400, 0.28, 1.3);
-    body.push({ b: blockText([{ t: reading.v, size: s0, weight: 400, fill: sub, ls: 0.28, lh: 1.3 }], boxW, align), gap: 0 });
-  }
-
-  /* --- foot：連絡先 --- */
-  const fb = blockContact(active('foot'), boxW, align, lang, sc);
-  if (fb) foot.push({ b: fb, gap: 0 });
-
-  return { head, body, foot };
+  return out;
 }
 
-const stackH = arr => arr.reduce((s, it, i) => s + it.b.h + (i < arr.length - 1 ? it.gap : 0), 0);
-function drawStack(arr, x, y) {
-  let cy = y, out = '';
-  arr.forEach((it, i) => { out += it.b.render(x, cy); cy += it.b.h + (i < arr.length - 1 ? it.gap : 0); });
+/* --- 会社名 → 罫線 → 住所（下端そろえ） --- */
+function footLines(lang, sc, boxW) {
+  const out = [];
+  const stC = { size: FS.label * sc, weight: 900, fill: C.label, ls: 0.04, lh: LH.label, min: 1.5 };
+  for (const k of group('org')) pushField(out, k, lang, stC, out.length ? GAP.item : 0, boxW);
+  if (out.length) out.push({ rule: true, gap: GAP.compRule });
+
+  const stA = { size: FS.small * sc, weight: 500, fill: C.meta, ls: 0.02, lh: LH.small };
+  group('addr').forEach((k, i) => {
+    pushField(out, k, lang, stA, i === 0 ? (out.length ? GAP.ruleAddr : 0) : GAP.item, boxW);
+  });
   return out;
 }
 
@@ -325,102 +306,75 @@ function drawStack(arr, x, y) {
    ============================================================ */
 let overflow = false;
 
-function renderFace(lang, mode) {
+/* --- 裏面（Figma うら 526:23452・デザイン固定） --- */
+function renderBack(g) {
+  let out = '';
+  // ロゴマーク + ロゴタイプ
+  out += svgImage(ART.mark, g.w * BACK.markX, g.h * BACK.markY, g.w * BACK.markW);
+  out += svgImage(ART.type, g.w * BACK.typeX, g.h * BACK.typeY, g.w * BACK.typeW);
+
+  // タグライン（3行・中央ぞろえ）
+  const k = g.w / SIZES.jp91.w;
+  const size = BACK.tagSize * k, ls = BACK.tagLS * k;
+  const lh = size * BACK.tagLH;
+  const lead = (lh - size) / 2 + size * 0.78;   // 行ボックス上端 → ベースライン
+  TAGLINE.forEach((t, i) => {
+    // 字送りは最後の1文字ぶんも進むので、中央ぞろえの基準を半分だけ戻す
+    out += svgText(t, g.w / 2 + ls / 2, g.h * BACK.tagY + i * lh + lead,
+      { size, weight: 500, fill: C.tag, ls, anchor: 'middle' });
+  });
+
+  // QRコード
+  out += svgImage(ART.qr, g.w * BACK.qrX, g.h * BACK.qrY, g.w * BACK.qrW);
+  return out;
+}
+
+function renderFace(lang, side) {
   const g = geom();
-  const tpl = state.template;
   overflow = false;
 
-  let body = '';
-  // 背景（塗り足しまで塗る）
-  body += `<rect x="${-g.bleed}" y="${-g.bleed}" width="${g.w + g.bleed * 2}" height="${g.h + g.bleed * 2}" fill="${state.bg}"/>`;
+  let out = `<rect x="${-g.bleed}" y="${-g.bleed}" width="${g.w + g.bleed * 2}" height="${g.h + g.bleed * 2}" fill="${C.bg}"/>`;
+  if (side === 'back') return out + renderBack(g);
 
-  /* --- 裏面：ロゴのみ --- */
-  if (mode === 'logo') {
-    if (state.logo) {
-      const w = Math.min(state.logoW * 1.6, g.w * 0.55);
-      const h = w / state.logo.aspect;
-      body += `<image href="${state.logo.href}" x="${n((g.w - w) / 2)}" y="${n((g.h - h) / 2)}" width="${n(w)}" height="${n(h)}" preserveAspectRatio="xMidYMid meet"/>`;
-    }
-    const comp = byKey('company');
-    if (comp) {
-      const l = valueLines(comp, lang)[0];
-      if (l) body += svgText(l.t, g.w / 2, g.h - 6, { size: 2.4, weight: 500, fill: subColor(), ls: 0.1, anchor: 'middle' });
-    }
-    return body;
-  }
+  const padL = g.w * LY.padL, padR = g.w * LY.padR;
+  const boxW = g.w - padL - padR;
 
-  const padX = state.orientation === 'portrait' ? 5.5 : 6.5;
-  const padY = state.orientation === 'portrait' ? 6.5 : 5.5;
+  /* --- ロゴ（右上・固定） --- */
+  const lw = g.w * LOGO_W, lh = lw / ART.mark.aspect;
+  out += svgImage(ART.mark, g.w - g.w * LY.logoR - lw, g.h * LY.logoT, lw);
+  const logoBottom = g.h * LY.logoT + lh;
 
-  /* --- 帯レイアウト：アクセントの面を先に敷く --- */
-  let box = { x: padX, y: padY, w: g.w - padX * 2, h: g.h - padY * 2 };
-  let align = 'start';
-  let whiteLogo = state.logoWhite;
+  /* --- 収まるまで自動で詰める（重なり防止） --- */
+  const footBottom = g.h - g.h * LY.footB;
+  let sc = 1, lead, body, foot, nameTop = 0, leadTop = 0, footTop = 0, fits = false;
 
-  if (tpl === 'centered') align = 'middle';
+  for (let k = 0; k < 18; k++) {
+    lead = leadLines(lang, sc, boxW);
+    body = bodyLines(lang, sc, boxW);
+    foot = footLines(lang, sc, boxW);
 
-  if (tpl === 'band') {
-    if (state.orientation === 'portrait') {
-      const bh = g.h * 0.3;
-      body += `<rect x="${-g.bleed}" y="${-g.bleed}" width="${g.w + g.bleed * 2}" height="${bh + g.bleed}" fill="${state.accent}"/>`;
-      box = { x: padX, y: bh + padY, w: g.w - padX * 2, h: g.h - bh - padY * 2 };
-      if (state.logo) {
-        const lw = Math.min(state.logoW, g.w * 0.5), lh = lw / state.logo.aspect;
-        const f = state.logoWhite ? ' filter="url(#nc-white)"' : '';
-        body += `<image href="${state.logo.href}" x="${n((g.w - lw) / 2)}" y="${n((bh - lh) / 2)}" width="${n(lw)}" height="${n(lh)}" preserveAspectRatio="xMidYMid meet"${f}/>`;
-      }
-    } else {
-      const bw = g.w * 0.3;
-      body += `<rect x="${-g.bleed}" y="${-g.bleed}" width="${bw + g.bleed}" height="${g.h + g.bleed * 2}" fill="${state.accent}"/>`;
-      box = { x: bw + padX, y: padY, w: g.w - bw - padX * 1.8, h: g.h - padY * 2 };
-      if (state.logo) {
-        const lw = Math.min(state.logoW, bw - 6), lh = lw / state.logo.aspect;
-        const f = state.logoWhite ? ' filter="url(#nc-white)"' : '';
-        body += `<image href="${state.logo.href}" x="${n((bw - lw) / 2)}" y="${n((g.h - lh) / 2)}" width="${n(lw)}" height="${n(lh)}" preserveAspectRatio="xMidYMid meet"${f}/>`;
-      }
-    }
-  }
+    nameTop = g.h * LY.nameT;
+    leadTop = nameTop - (lead.length ? stackH(lead) + GAP.titleName : 0);
 
-  // 収まるまで自動で詰める（重なり防止）。詰めきれない場合だけ警告する
-  const extra = tpl === 'minimal' ? 6.4 : 0;
-  let sc = state.scale, b, hH, bH, fH;
-  let fits = false;
-  for (let k = 0; k < 14; k++) {
-    // 帯レイアウトではロゴを帯の中に置いたので、本文側では描かない
-    b = composeBlocks(box.w, align, lang, sc, { whiteLogo, skipLogo: tpl === 'band' });
-    hH = stackH(b.head); bH = stackH(b.body); fH = stackH(b.foot);
-    const gaps = (hH ? 3.0 : 0) + (fH ? 2.6 : 0) + extra;
-    if (hH + bH + fH + gaps <= box.h) { fits = true; break; }
-    sc *= 0.95;
+    // 上に伸びすぎたら氏名ブロックごと下へ逃がす
+    const minTop = logoBottom + GAP.logo;
+    if (leadTop < minTop) { const d = minTop - leadTop; leadTop += d; nameTop += d; }
+
+    footTop = footBottom - stackH(foot);
+    if (nameTop + stackH(body) <= footTop - 2.5) { fits = true; break; }
+    sc *= 0.96;
   }
   overflow = !fits;
 
-  if (tpl === 'minimal') {
-    // 上下2分割：上に会社まわり＋氏名、アクセント罫をはさんで下に連絡先
-    let y = box.y;
-    body += drawStack(b.head, box.x, y);
-    y += hH + (hH ? 3.5 : 0);
-    body += drawStack(b.body, box.x, y);
-    const ruleY = box.y + box.h - fH - 3.2;
-    body += `<rect x="${n(box.x)}" y="${n(ruleY)}" width="${n(box.w)}" height="0.25" fill="${state.accent}"/>`;
-    body += drawStack(b.foot, box.x, box.y + box.h - fH);
-  } else {
-    // 上=会社 / 下=連絡先 / 余った領域の中央に氏名ブロック
-    body += drawStack(b.head, box.x, box.y);
-    body += drawStack(b.foot, box.x, box.y + box.h - fH);
-    const top = box.y + hH + (hH ? 3.0 : 0);
-    const bottom = box.y + box.h - fH - (fH ? 2.6 : 0);
-    const free = bottom - top;
-    body += drawStack(b.body, box.x, free > bH ? top + (free - bH) / 2 : top);
-  }
-  return body;
+  out += drawLines(lead, padL, leadTop, boxW);
+  out += drawLines(body, padL, nameTop, boxW);
+  out += drawLines(foot, padL, footTop, boxW);
+  return out;
 }
 
 function geom() {
   const s = SIZES[state.size];
-  let w = s.w, h = s.h;
-  if (state.orientation === 'portrait') [w, h] = [h, w];
-  return { w, h, bleed: BLEED, safe: SAFE };
+  return { w: s.w, h: s.h, bleed: BLEED };
 }
 
 function trimMarks(g, m) {
@@ -430,21 +384,17 @@ function trimMarks(g, m) {
   let s = '';
   const corners = [[0, 0, -1, -1], [g.w, 0, 1, -1], [0, g.h, -1, 1], [g.w, g.h, 1, 1]];
   for (const [x, y, dx, dy] of corners) {
-    s += ln(x, y + dy * o, x, y + dy * (o + L));   // 縦
-    s += ln(x + dx * o, y, x + dx * (o + L), y);   // 横
+    s += ln(x, y + dy * o, x, y + dy * (o + L));
+    s += ln(x + dx * o, y, x + dx * (o + L), y);
     s += ln(x + dx * o, y + dy * o, x + dx * o, y + dy * (o + L));
     s += ln(x + dx * o, y + dy * o, x + dx * (o + L), y + dy * o);
   }
   return s;
 }
 
-function guideLayer(g) {
-  const d = (x, y, w, h, col) =>
-    `<rect x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" fill="none" stroke="${col}" stroke-width="0.15" stroke-dasharray="0.8 0.6"/>`;
-  return d(-g.bleed, -g.bleed, g.w + g.bleed * 2, g.h + g.bleed * 2, '#E11D48')
-    + `<rect x="0" y="0" width="${g.w}" height="${g.h}" fill="none" stroke="#94A3B8" stroke-width="0.15"/>`
-    + d(g.safe, g.safe, g.w - g.safe * 2, g.h - g.safe * 2, '#2563EB');
-}
+/* 仕上がりサイズだけを示す枠（プレビュー専用） */
+const trimLine = g =>
+  `<rect x="0" y="0" width="${g.w}" height="${g.h}" fill="none" stroke="${C.trim}" stroke-width="0.15"/>`;
 
 /**
  * @param {'front'|'back'} side
@@ -456,19 +406,12 @@ function buildSVG(side, opt = {}) {
   const pad = g.bleed + m;
   const W = g.w + pad * 2, H = g.h + pad * 2;
 
-  let lang = state.lang, mode = 'full';
-  if (side === 'back') {
-    if (state.back === 'logo') mode = 'logo';
-    else lang = state.lang === 'ja' ? 'en' : 'ja';
-  }
+  const defs = `<defs><clipPath id="nc-clip"><rect x="${-g.bleed}" y="${-g.bleed}"` +
+    ` width="${g.w + g.bleed * 2}" height="${g.h + g.bleed * 2}"/></clipPath></defs>`;
 
-  const defs = `<defs><filter id="nc-white" color-interpolation-filters="sRGB">` +
-    `<feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0"/></filter>` +
-    `<clipPath id="nc-clip"><rect x="${-g.bleed}" y="${-g.bleed}" width="${g.w + g.bleed * 2}" height="${g.h + g.bleed * 2}"/></clipPath></defs>`;
-
-  const content = renderFace(lang, mode);
+  const content = renderFace(state.lang, side);
   const marks = opt.marks ? trimMarks(g, m) : '';
-  const guides = opt.guides ? guideLayer(g) : '';
+  const guides = opt.guides ? trimLine(g) : '';
 
   return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" ` +
     `width="${n(W)}mm" height="${n(H)}mm" viewBox="${n(-pad)} ${n(-pad)} ${n(W)} ${n(H)}">` +
@@ -483,48 +426,36 @@ function buildSVG(side, opt = {}) {
    ============================================================ */
 const el = {};
 function cacheEls() {
-  ['fields', 'add-select', 'btn-add', 'logo-drop', 'logo-file', 'logo-preview', 'btn-logo-pick',
-   'btn-logo-clear', 'logo-w', 'logo-w-out', 'logo-white', 'tpl', 'size', 'orientation', 'font',
-   'scale', 'scale-out', 'c-accent', 'c-ink', 'c-bg', 'card-wrap', 'guides', 'marks', 'zoom-in',
-   'zoom-out', 'zoom-out-label', 'side-back', 'warn', 'export-modal', 'print-root', 'print-page',
-   'btn-export', 'btn-save', 'btn-load', 'file-load', 'stage', 'show-tags'].forEach(id => el[id] = $('#' + id));
+  ['fields', 'size', 'font', 'card-wrap', 'guides', 'marks',
+   'zoom-in', 'zoom-out', 'zoom-out-label', 'side-back', 'warn', 'export-modal',
+   'print-root', 'print-page', 'btn-export', 'btn-save', 'btn-load', 'file-load',
+   'stage', 'show-icons', 'use-back', 'btn-settings', 'settings-pop'].forEach(id => el[id] = $('#' + id));
 }
 
-/* --- 要素リスト --- */
-function fieldRow(f, i) {
-  const d = DEFS[f.key];
+/* --- 要素リスト（表示/非表示のみ） --- */
+function fieldRow(key) {
+  const d = DEFS[key], f = state.fields[key];
   const li = document.createElement('li');
   li.className = 'fi' + (f.enabled ? '' : ' is-off');
-  li.dataset.id = f.id;
+  li.dataset.key = key;
 
-  const last = state.fields.length - 1;
   li.innerHTML = `
     <div class="fi__head">
       <label class="sw"><input type="checkbox" ${f.enabled ? 'checked' : ''} data-act="toggle"><span></span></label>
-      <span class="fi__label">${esc(f.key === 'custom' ? (f.tag || '自由項目') : d.label)}</span>
-      <span class="fi__ord">
-        <button type="button" data-act="up" ${i === 0 ? 'disabled' : ''} aria-label="上へ">▲</button>
-        <button type="button" data-act="down" ${i === last ? 'disabled' : ''} aria-label="下へ">▼</button>
-      </span>
-      <button type="button" class="fi__del" data-act="del" aria-label="削除">✕</button>
+      <span class="fi__label">${esc(d.label)}</span>
     </div>
     <div class="fi__body"></div>`;
 
   const bodyEl = $('.fi__body', li);
-  const input = (label, key, val, type = 'text') => {
+  const input = (label, k, val, type = 'text') => {
     const w = document.createElement('label');
     w.className = 'field';
-    w.innerHTML = `<span class="inline-label">${esc(label)}</span><input type="${type}" data-k="${key}" value="${esc(val)}">`;
+    w.innerHTML = `<span class="inline-label">${esc(label)}</span><input type="${type}" data-k="${k}" value="${esc(val)}">`;
     bodyEl.appendChild(w);
   };
 
-  if (d.type === 'image') {
-    bodyEl.innerHTML = '<p class="hint" style="margin:0">「会社ロゴ」ブロックで画像を設定します。</p>';
-  } else if (d.type === 'custom') {
-    input('項目名（TEL / SNS など）', 'tag', f.tag);
-    input('内容', 'v', f.v);
-  } else if (d.type === 'single') {
-    input(d.label, 'v', f.v, f.key === 'email' ? 'email' : (f.key === 'tel' || f.key === 'mobile' || f.key === 'fax' ? 'tel' : 'text'));
+  if (d.type === 'single') {
+    input(d.label, 'v', f.v, key === 'email' ? 'email' : (/^(tel|mobile)$/.test(key) ? 'tel' : 'text'));
   } else {
     input('日本語', 'ja', f.ja);
     input('English', 'en', f.en);
@@ -534,116 +465,24 @@ function fieldRow(f, i) {
 
 function renderFields() {
   el.fields.innerHTML = '';
-  state.fields.forEach((f, i) => el.fields.appendChild(fieldRow(f, i)));
-
-  // 追加できる要素（未追加のもの + 自由項目）
-  const used = new Set(state.fields.map(f => f.key));
-  el['add-select'].innerHTML = Object.entries(DEFS)
-    .filter(([k]) => k === 'custom' || !used.has(k))
-    .map(([k, d]) => `<option value="${k}">${esc(d.label)}</option>`).join('');
-  el['btn-add'].disabled = !el['add-select'].options.length;
+  KEYS.forEach(k => el.fields.appendChild(fieldRow(k)));
 }
 
 function bindFields() {
-  el.fields.addEventListener('click', e => {
-    const btn = e.target.closest('[data-act]');
-    if (!btn || btn.tagName !== 'BUTTON') return;
-    const id = btn.closest('.fi').dataset.id;
-    const i = state.fields.findIndex(f => f.id === id);
-    const act = btn.dataset.act;
-    if (act === 'up' && i > 0) state.fields.splice(i - 1, 0, state.fields.splice(i, 1)[0]);
-    if (act === 'down' && i < state.fields.length - 1) state.fields.splice(i + 1, 0, state.fields.splice(i, 1)[0]);
-    if (act === 'del') state.fields.splice(i, 1);
-    renderFields(); update();
-  });
   el.fields.addEventListener('change', e => {
     const t = e.target;
     if (t.dataset.act !== 'toggle') return;
-    const f = state.fields.find(x => x.id === t.closest('.fi').dataset.id);
-    f.enabled = t.checked;
-    t.closest('.fi').classList.toggle('is-off', !f.enabled);
+    const li = t.closest('.fi');
+    state.fields[li.dataset.key].enabled = t.checked;
+    li.classList.toggle('is-off', !t.checked);
     update();
   });
   el.fields.addEventListener('input', e => {
     const t = e.target;
     if (!t.dataset.k) return;
-    const li = t.closest('.fi');
-    const f = state.fields.find(x => x.id === li.dataset.id);
-    f[t.dataset.k] = t.value;
-    if (t.dataset.k === 'tag' && f.key === 'custom') $('.fi__label', li).textContent = f.tag || '自由項目';
+    state.fields[t.closest('.fi').dataset.key][t.dataset.k] = t.value;
     update();
   });
-  el['btn-add'].addEventListener('click', () => {
-    const k = el['add-select'].value;
-    if (!k) return;
-    state.fields.push(makeField(k));
-    renderFields(); update();
-  });
-}
-
-/* --- テンプレートのサムネイル --- */
-function tplThumb(id) {
-  const c = '#CBD5E1', a = 'var(--nc-primary)';
-  const bar = (x, y, w, h, f) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${Math.min(h / 2, 1)}" fill="${f}"/>`;
-  const s = { standard: '', centered: '', band: '', minimal: '' };
-  s.standard = bar(6, 6, 14, 4, a) + bar(6, 17, 26, 5, '#94A3B8') + bar(6, 25, 16, 2.5, c) + bar(6, 33, 32, 2, c) + bar(6, 37, 26, 2, c);
-  s.centered = bar(26, 6, 14, 4, a) + bar(18, 17, 30, 5, '#94A3B8') + bar(24, 25, 18, 2.5, c) + bar(17, 33, 32, 2, c) + bar(22, 37, 22, 2, c);
-  s.band = `<rect x="0" y="0" width="20" height="46" fill="${a}"/>` + bar(26, 8, 14, 3, c) + bar(26, 17, 28, 5, '#94A3B8') + bar(26, 26, 16, 2.5, c) + bar(26, 33, 30, 2, c) + bar(26, 37, 24, 2, c);
-  s.minimal = bar(6, 6, 12, 3, a) + bar(6, 14, 30, 6, '#94A3B8') + bar(6, 23, 18, 2.5, c) + `<rect x="6" y="30" width="54" height="0.8" fill="${a}"/>` + bar(6, 34, 32, 2, c) + bar(6, 38, 26, 2, c);
-  return `<svg viewBox="0 0 66 46" xmlns="http://www.w3.org/2000/svg"><rect width="66" height="46" fill="#fff" stroke="#E2E8F0" stroke-width="0.6"/>${s[id]}</svg>`;
-}
-function renderTpl() {
-  el.tpl.innerHTML = TEMPLATES.map(t =>
-    `<button type="button" class="tpl__item${state.template === t.id ? ' is-active' : ''}" data-tpl="${t.id}">${tplThumb(t.id)}<span>${t.name}</span></button>`
-  ).join('');
-}
-
-/* --- ロゴ --- */
-function setLogoFromFile(file) {
-  if (!file) return;
-  const rd = new FileReader();
-  if (file.type === 'image/svg+xml' || /\.svg$/i.test(file.name)) {
-    rd.onload = () => {
-      const txt = rd.result;
-      const doc = new DOMParser().parseFromString(txt, 'image/svg+xml');
-      const svg = doc.documentElement;
-      let ar = 1;
-      const vb = (svg.getAttribute('viewBox') || '').split(/[\s,]+/).map(Number);
-      if (vb.length === 4 && vb[2] && vb[3]) ar = vb[2] / vb[3];
-      else {
-        const w = parseFloat(svg.getAttribute('width')), h = parseFloat(svg.getAttribute('height'));
-        if (w && h) ar = w / h;
-      }
-      applyLogo('data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(txt))), ar);
-    };
-    rd.readAsText(file);
-  } else {
-    rd.onload = () => {
-      const img = new Image();
-      img.onload = () => applyLogo(rd.result, img.naturalWidth / img.naturalHeight);
-      img.src = rd.result;
-    };
-    rd.readAsDataURL(file);
-  }
-}
-function applyLogo(href, aspect) {
-  state.logo = { href, aspect: aspect || 1 };
-  el['logo-preview'].innerHTML = `<img src="${href}" alt="">`;
-  if (!state.fields.some(f => f.key === 'logo')) { state.fields.unshift(makeField('logo')); renderFields(); }
-  update();
-}
-async function loadPresetLogo(path) {
-  try {
-    const res = await fetch(path);
-    if (!res.ok) throw new Error(res.status);
-    const txt = await res.text();
-    const vb = (txt.match(/viewBox="([^"]+)"/) || [])[1];
-    let ar = 1;
-    if (vb) { const p = vb.split(/[\s,]+/).map(Number); if (p[2] && p[3]) ar = p[2] / p[3]; }
-    applyLogo('data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(txt))), ar);
-  } catch (e) {
-    alert('プリセットロゴを読み込めませんでした。ローカルサーバー経由で開いてください。\n(' + path + ')');
-  }
 }
 
 /* --- プレビュー更新 --- */
@@ -657,15 +496,15 @@ function update() {
   node.setAttribute('width', Math.round(px));
   node.setAttribute('height', Math.round(px * (g.h + pad * 2) / (g.w + pad * 2)));
 
-  el['side-back'].disabled = state.back === 'none';
-  if (state.back === 'none' && state.side === 'back') { state.side = 'front'; syncSeg('#seg-side', 'side', 'front'); return update(); }
+  el['side-back'].disabled = !state.back;
+  if (!state.back && state.side === 'back') { state.side = 'front'; syncSeg('#seg-side', 'side', 'front'); return update(); }
 
   el.warn.hidden = !overflow;
-  if (overflow) el.warn.textContent = '文字量がカードに収まりきっていません。要素を減らすか、文字サイズ調整を小さくしてください。';
+  if (overflow) el.warn.textContent = '文字量がカードに収まりきっていません。表示する要素を減らしてください。';
   save();
 }
 function syncSeg(sel, key, val) {
-  $$(sel + ' .seg__item').forEach(b => b.classList.toggle('is-active', b.dataset[key] === val));
+  $$(sel + ' [data-' + key + ']').forEach(b => b.classList.toggle('is-active', b.dataset[key] === val));
 }
 
 /* ============================================================
@@ -678,22 +517,19 @@ function download(blob, name) {
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }
-const baseName = () => {
-  const f = byKey('name');
-  const s = f ? (f.ja || f.en) : 'namecard';
-  return 'namecard_' + s.replace(/\s+/g, '') ;
-};
-const sides = () => (state.back === 'none' ? ['front'] : ['front', 'back']);
+const baseName = () => 'namecard_' + (valueOf('name', state.lang) || 'untitled').replace(/\s+/g, '');
+const sides = () => (state.back ? ['front', 'back'] : ['front']);
 
 function exportSVG() {
-  sides().forEach((s, i) => {
+  sides().forEach(s => {
     const svg = buildSVG(s, { guides: false, marks: state.marks });
     download(new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n' + svg], { type: 'image/svg+xml' }),
       `${baseName()}_${s === 'front' ? 'omote' : 'ura'}.svg`);
   });
 }
 
-function exportPNG() {
+/** PNG / JPEG 共通のラスター書き出し */
+function exportRaster(mime, ext, quality) {
   const dpi = 350;
   sides().forEach(side => {
     const g = geom();
@@ -709,13 +545,15 @@ function exportPNG() {
       const ctx = cv.getContext('2d');
       ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);
       ctx.drawImage(img, 0, 0, cv.width, cv.height);
-      cv.toBlob(b => download(b, `${baseName()}_${side === 'front' ? 'omote' : 'ura'}_350dpi.png`), 'image/png');
+      cv.toBlob(b => download(b, `${baseName()}_${side === 'front' ? 'omote' : 'ura'}_350dpi.${ext}`), mime, quality);
       URL.revokeObjectURL(url);
     };
-    img.onerror = () => { URL.revokeObjectURL(url); alert('PNGの書き出しに失敗しました。'); };
+    img.onerror = () => { URL.revokeObjectURL(url); alert(ext.toUpperCase() + 'の書き出しに失敗しました。'); };
     img.src = url;
   });
 }
+const exportPNG = () => exportRaster('image/png', 'png');
+const exportJPG = () => exportRaster('image/jpeg', 'jpg', 0.95);
 
 function exportPDF() {
   const g = geom();
@@ -729,108 +567,114 @@ function exportPDF() {
 }
 
 /* ---------- 保存・読み込み ---------- */
-const KEY = 'nc-builder-v1';
+const KEY = 'nc-builder-v4';
 function snapshot() {
-  const { size, orientation, template, lang, font, scale, accent, ink, bg,
-          logoW, logoWhite, showTags, back, fields, logo } = state;
-  return { size, orientation, template, lang, font, scale, accent, ink, bg, logoW, logoWhite, showTags, back, fields, logo };
+  const { size, lang, font, showIcons, back, fields } = state;
+  return { size, lang, font, showIcons, back, fields };
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(snapshot())); } catch (e) {} }
 function restore(data) {
+  const fields = data.fields;
   Object.assign(state, data);
-  if (!Array.isArray(state.fields) || !state.fields.length) resetFields();
-  uid = state.fields.length;
-  state.fields.forEach((f, i) => { f.id = 'f' + (i + 1); uid = i + 1; });
-  if (state.logo) el['logo-preview'].innerHTML = `<img src="${state.logo.href}" alt="">`;
-  // UI へ反映
-  el.size.value = state.size; el.orientation.value = state.orientation; el.font.value = state.font;
-  el.scale.value = state.scale; el['scale-out'].value = Math.round(state.scale * 100) + '%';
-  el['c-accent'].value = state.accent; el['c-ink'].value = state.ink; el['c-bg'].value = state.bg;
-  el['logo-w'].value = state.logoW; el['logo-w-out'].value = Number(state.logoW).toFixed(1);
-  el['logo-white'].checked = state.logoWhite;
-  el['show-tags'].checked = state.showTags !== false;
+  resetFields();
+  if (fields) {
+    for (const k of KEYS) {
+      const s = fields[k];
+      if (!s) continue;
+      const f = state.fields[k];
+      f.enabled = !!s.enabled;
+      if (typeof s.ja === 'string') f.ja = s.ja;
+      if (typeof s.en === 'string') f.en = s.en;
+      if (typeof s.v  === 'string') f.v  = s.v;
+    }
+  }
+  if (state.lang !== 'en') state.lang = 'ja';
+  if (!SIZES[state.size]) state.size = 'jp91';
+
+  el.size.value = state.size; el.font.value = state.font;
+  el['show-icons'].checked = !!state.showIcons;
+  el['use-back'].checked = !!state.back;
   syncSeg('#seg-lang', 'lang', state.lang);
-  syncSeg('#seg-back', 'back', state.back);
-  renderTpl(); renderFields();
+  renderFields();
 }
 
 /* ============================================================
    6. 初期化
    ============================================================ */
+function svgArt(b64) {
+  const art = { href: 'data:image/svg+xml;base64,' + b64, aspect: 1 };
+  try {
+    const svg = new DOMParser().parseFromString(atob(b64), 'image/svg+xml').documentElement;
+    const vb = (svg.getAttribute('viewBox') || '').split(/[\s,]+/).map(Number);
+    if (vb.length === 4 && vb[2] && vb[3]) art.aspect = vb[2] / vb[3];
+    else {
+      const w = parseFloat(svg.getAttribute('width')), h = parseFloat(svg.getAttribute('height'));
+      if (w && h) art.aspect = w / h;
+    }
+  } catch (e) {}
+  return art;
+}
+
 function init() {
   cacheEls();
   resetFields();
 
+  ART.mark = svgArt(MARK_B64);
+  ART.type = svgArt(LOGOTYPE_B64);
+  ART.qr   = { href: 'data:image/png;base64,' + QR_B64, aspect: 1 };
+
   let saved = null;
   try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
-  if (saved) restore(saved); else { renderTpl(); renderFields(); }
+  if (saved) restore(saved); else renderFields();
 
   bindFields();
 
-  // セグメント
   $('#seg-lang').addEventListener('click', e => {
     const b = e.target.closest('[data-lang]'); if (!b) return;
     state.lang = b.dataset.lang; syncSeg('#seg-lang', 'lang', state.lang); update();
-  });
-  $('#seg-back').addEventListener('click', e => {
-    const b = e.target.closest('[data-back]'); if (!b) return;
-    state.back = b.dataset.back; syncSeg('#seg-back', 'back', state.back); update();
   });
   $('#seg-side').addEventListener('click', e => {
     const b = e.target.closest('[data-side]'); if (!b || b.disabled) return;
     state.side = b.dataset.side; syncSeg('#seg-side', 'side', state.side); update();
   });
-  el.tpl.addEventListener('click', e => {
-    const b = e.target.closest('[data-tpl]'); if (!b) return;
-    state.template = b.dataset.tpl; renderTpl(); update();
-  });
 
-  // 各種コントロール
   el.size.addEventListener('change', () => { state.size = el.size.value; update(); });
-  el.orientation.addEventListener('change', () => { state.orientation = el.orientation.value; update(); });
   el.font.addEventListener('change', () => { state.font = el.font.value; update(); });
-  el.scale.addEventListener('input', () => {
-    state.scale = +el.scale.value; el['scale-out'].value = Math.round(state.scale * 100) + '%'; update();
-  });
-  ['accent', 'ink', 'bg'].forEach(k => {
-    el['c-' + k].addEventListener('input', () => { state[k] = el['c-' + k].value; update(); });
-  });
-  el['logo-w'].addEventListener('input', () => {
-    state.logoW = +el['logo-w'].value; el['logo-w-out'].value = state.logoW.toFixed(1); update();
-  });
-  el['logo-white'].addEventListener('change', () => { state.logoWhite = el['logo-white'].checked; update(); });
-  el['show-tags'].addEventListener('change', () => { state.showTags = el['show-tags'].checked; update(); });
+  el['show-icons'].addEventListener('change', () => { state.showIcons = el['show-icons'].checked; update(); });
+  el['use-back'].addEventListener('change', () => { state.back = el['use-back'].checked; update(); });
 
-  // ロゴ入力
-  el['btn-logo-pick'].addEventListener('click', () => el['logo-file'].click());
-  el['logo-file'].addEventListener('change', e => setLogoFromFile(e.target.files[0]));
-  el['btn-logo-clear'].addEventListener('click', () => {
-    state.logo = null;
-    el['logo-preview'].innerHTML = '<span>SVG / PNG をドラッグ&ドロップ</span>';
-    update();
-  });
-  const drop = el['logo-drop'];
-  ['dragenter', 'dragover'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add('is-over'); }));
-  ['dragleave', 'drop'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove('is-over'); }));
-  drop.addEventListener('drop', e => setLogoFromFile(e.dataTransfer.files[0]));
-  $$('[data-preset-logo]').forEach(b => b.addEventListener('click', () => loadPresetLogo(b.dataset.presetLogo)));
+  // 表示設定（歯車 → ポップオーバー）
+  const pop = el['settings-pop'], popBtn = el['btn-settings'];
+  const showPop = v => {
+    pop.hidden = !v;
+    popBtn.classList.toggle('is-open', v);
+    popBtn.setAttribute('aria-expanded', v ? 'true' : 'false');
+  };
+  popBtn.addEventListener('click', e => { e.stopPropagation(); showPop(pop.hidden); });
+  pop.addEventListener('click', e => e.stopPropagation());
+  document.addEventListener('click', () => showPop(false));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') showPop(false); });
 
   // プレビュー操作
   el.guides.addEventListener('change', () => { state.guides = el.guides.checked; update(); });
   el.marks.addEventListener('change', () => { state.marks = el.marks.checked; update(); });
   const setZoom = v => {
-    state.zoom = Math.min(3, Math.max(0.6, v));
+    state.zoom = Math.min(3, Math.max(0.6, Math.round(v * 100) / 100));
     el['zoom-out-label'].value = Math.round(state.zoom * 100) + '%';
     update();
   };
   el['zoom-in'].addEventListener('click', () => setZoom(state.zoom + 0.2));
   el['zoom-out'].addEventListener('click', () => setZoom(state.zoom - 0.2));
 
+  // Webフォント読み込み後に実測がずれるので再描画
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(update);
+
   // 書き出し
   el['btn-export'].addEventListener('click', () => el['export-modal'].showModal());
   $('#ex-pdf').addEventListener('click', exportPDF);
   $('#ex-svg').addEventListener('click', exportSVG);
   $('#ex-png').addEventListener('click', exportPNG);
+  $('#ex-jpg').addEventListener('click', exportJPG);
 
   // 保存・読み込み（JSON）
   el['btn-save'].addEventListener('click', () => {
@@ -845,11 +689,13 @@ function init() {
     e.target.value = '';
   });
 
-  // Webフォント読み込み後に実測がずれるので再描画
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(update);
-
   setZoom(state.zoom);
 }
+
+/* ---------- 内蔵する図版（Figma 書き出し） ---------- */
+const MARK_B64     = 'PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjQ0LjY3OSIgaGVpZ2h0PSI0NC42NzkiIHZpZXdCb3g9IjAgMCA0NC42NzkgNDQuNjc5IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8ZyBpZD0ibG9nb18xIiBjbGlwLXBhdGg9InVybCgjY2xpcDBfMF85KSI+CjxwYXRoIGlkPSJWZWN0b3IiIGQ9Ik00My42NzM4IDYuMzE1NTVDNDIuOTIxMiA0LjU3NzEyIDQxLjc5NjggMy4xMDkzMSA0MC41MDY1IDIuMTgyNzVDMzguNjAwNiAwLjgxNDA1NSAzNi42MTg5IDAuMDgyMzc5MiAzNC42MTg0IDAuMDA2NjUwMkMzMy4wMDUzIC0wLjA1MzQ4NzYgMzEuMzk2NiAwLjMxMDY4IDI5LjgzNjkgMS4wOTEzNkMyNy40MzExIDIuMjk1MjMgMjUuOTM4MiA0LjA3NDg2IDI1LjY1MzIgNC40MzM0NkMyNS4zNDM3IDQuNzgyMDMgMjUuMTc3OCA1LjIyOTczIDI1LjE4NTYgNS42OTYzNUMyNS4xOTQ1IDYuMTkwODIgMjUuMzk0OSA2LjY1MTg3IDI1Ljc1IDYuOTk0ODhMMjcuODcxOSA5LjA0ODQ3QzI4LjIyNzEgOS4zOTE0OCAyOC42OTQ3IDkuNTc0MTIgMjkuMTkwMSA5LjU2NzQ0QzI5LjY4NDQgOS41NTg1MyAzMC4xNDY0IDkuMzU4MDcgMzAuNDg5MyA5LjAwMTdMMzAuNTg1IDguODg4MTFMMzAuNTkyOCA4Ljg3ODA4QzMwLjYwNzMgOC44NTgwNCAzMi4wODQ2IDYuOTE1ODEgMzQuMDU5NSA2Ljk4MTUySDM0LjA5NzRDMzYuMjI2IDYuOTgxNTIgMzcuOTU3MSA4LjcxNDM3IDM3Ljk1NzEgMTAuODQyNkMzNy45NTcxIDExLjc2MTQgMzcuNjI5OCAxMi42NTAxIDM3LjAyOTcgMTMuMzUyOEwzNi45ODUyIDEzLjQwODVDMzUuMjUxOCAxNS43MzE2IDMwLjYxNTEgMjAuNDk5MSAyOC4xMjM1IDIzLjA2MDZMMjguMTA2OCAyMy4wNzczQzI3LjgzNDEgMjMuMzU3OSAyNy41ODgxIDIzLjYxMDcgMjcuMzc2NSAyMy44MjlMMjYuNjUyOSAyNC41NzUxTDI2Ljc2NDIgMjQuNjgzMkwyNi42NTc0IDI0Ljc5MjNMMjcuMzg4OCAyNS41MTUxQzI3LjQwMjEgMjUuNTI4NCAyOC4yMTE1IDI2LjMyNDcgMjguOTg3NCAyNy4wODMxQzI5LjQ1MzkgMjcuNTM4NiAyOS44MjY5IDI3LjkwMTcgMzAuMDk2MyAyOC4xNjIzQzMwLjc2OTggMjguODEyNiAzMC45NTEzIDI4Ljk4NzUgMzEuNDQ1NiAyOC45ODc1TDMxLjk3MSAyOC45NzYzTDMzLjIzMjQgMjcuNjYyMkwzMy4yMjEyIDI3LjY1MzNDMzQuNjY1MSAyNi4xMjMxIDM2LjA0MjMgMjQuNzEzMiAzNy40OTczIDIzLjIyMjFMMzcuNTM3NCAyMy4xODA4QzM3Ljk3NzEgMjIuNzMwOSAzOC40MjI0IDIyLjI3MzIgMzguODc4OSAyMS44MDQ0TDM5LjIwMjggMjEuNDcyNUM0MS43MDIxIDE4LjkxMTEgNDQuMjg2MSAxNi4yNjM5IDQ0LjYzNjcgMTIuMDkzMkM0NC44MDA0IDEwLjE0NzcgNDQuNDY2NCA4LjE0ODYzIDQzLjY3MjYgNi4zMTIyTDQzLjY3MzggNi4zMTU1NVoiIGZpbGw9ImJsYWNrIi8+CjxwYXRoIGlkPSJWZWN0b3JfMiIgZD0iTTI4Ljk2OTYgMTIuODE1MkwyNy43Mjk0IDExLjYyMjRMMjcuNzM1NCAxMS42MjgyQzI2LjE3MjMgMTAuMTUzNyAyNC43MjAyIDguNzU0NzcgMjMuMTk2MiA3LjI2NThMMjMuMDQ1OSA3LjExODhDMjIuNjM4NCA2LjcyMDExIDIyLjIyNDMgNi4zMTU4NSAyMS44MDAxIDUuOTAyNjhMMjEuNDY4NCA1LjU3OTcyQzE4LjkwNzggMy4wODA2NiAxNi4yNjE2IDAuNDk1ODUgMTIuMDkyNCAwLjE0NTA0NkMxMC4xNDk3IC0wLjAxODY2MiA4LjE1MDI3IDAuMzE0MzIzIDYuMzEzMzcgMS4xMDk0OEM0LjU3NTU1IDEuODYyMzEgMy4xMDgyNiAyLjk4NzExIDIuMTgyMDEgNC4yNzc4NUMwLjgxMzc5OSA2LjE4NDQ0IDAuMDgyMzc4NSA4LjE2Njc2IDAuMDA2Njc1ODMgMTAuMTY4Qy0wLjA1MzQ0MSAxMS43ODE3IDAuMzEwNTk5IDEzLjM5MDkgMS4wOTEgMTQuOTUxMkMyLjI5MzM0IDE3LjM1NjcgNC4wNzM0NiAxOC44NTEyIDQuNDMxOTQgMTkuMTM2M0M0Ljc3MTQ5IDE5LjQzODEgNS4yMDc4OSAxOS42MDQxIDUuNjYzMjIgMTkuNjA0MUg1LjY5NTVDNi4xODk4IDE5LjU5NTIgNi42NTA2OSAxOS4zOTQ3IDYuOTkzNTggMTkuMDM5NEw5LjExOCAxNi45NzI0QzkuNDYyIDE2LjYxNzEgOS41NzQxNSAxNi4xNDQ3IDkuNTY1MjQgMTUuNjUwMkM5LjU1NjM0IDE1LjE1NTggOS4zNTU5NSAxNC42NzExIDguOTk5NyAxNC4zMjgxTDguODg2MTUgMTQuMjE4N0w4Ljg3NTAxIDE0LjIwOTZDOC44NTQ5OCAxNC4xOTUxIDYuOTEwMDkgMTIuNzA2IDYuOTgwMjIgMTAuNzI2VjEwLjY4N0M2Ljk4MDIyIDguNTU3NjUgOC43MTI0OCA2LjgyNTkxIDEwLjg0MTEgNi44MjU5MUMxMS43NTg0IDYuODI1OTEgMTIuNjQ3OSA3LjE1MzMyIDEzLjM1MDQgNy43NTM1OUwxMy40MDYgNy43OTgxM0MxNS43MjcyIDkuNTMwOTkgMjAuNDkzMSAxNC4xNzA1IDIzLjA1MzcgMTYuNjYyOUwyMy4wNzE1IDE2LjY3OTZDMjMuMzUyIDE2Ljk1MzYgMjMuNjA0NyAxNy4xOTg2IDIzLjgyMjkgMTcuNDEwMkwyNC41Njg4IDE4LjEzMjlMMjQuNjc2OCAxOC4wMjE2TDI0Ljc4NyAxOC4xMjg1TDI1LjUyNCAxNy4zODEyQzI1LjYyODcgMTcuMjc1NCAyNi4zNTY3IDE2LjUzMzcgMjcuMDc3IDE1Ljc5NzZDMjcuNTMyNCAxNS4zMzA5IDI3Ljg5NTMgMTQuOTU3OSAyOC4xNTU4IDE0LjY4ODRDMjguODEyNiAxNC4wMDY4IDI4Ljk4OTYgMTMuODI0MiAyOC45Nzk2IDEzLjMxMTlMMjguOTY4NSAxMi44MTQxTDI4Ljk2OTYgMTIuODE1MloiIGZpbGw9ImJsYWNrIi8+CjxwYXRoIGlkPSJWZWN0b3JfMyIgZD0iTTE4LjkyOSAzNy42ODE5TDE2LjgwODIgMzUuNjI4M0MxNi40NTc1IDM1LjI4OTcgMTUuOTkyMiAzNS4xMDkzIDE1LjQ5MDEgMzUuMTA5M0MxNC45OTU4IDM1LjExODIgMTQuNTMzOCAzNS4zMTg3IDE0LjE5MDkgMzUuNjc1TDE0LjA5NCAzNS43ODk3TDE0LjA4NjMgMzUuNzk5OEMxNC4wNzE4IDM1LjgxODcgMTIuNjQ5IDM3LjY5NzQgMTAuNzI5NyAzNy42OTc0QzEwLjY5NTIgMzcuNjk3NCAxMC42NTk2IDM3LjY5NzQgMTAuNjIxNyAzNy42OTUySDEwLjU4MjhDOC40NTQyIDM3LjY5NTIgNi43MjMwNiAzNS45NjI0IDYuNzIzMDYgMzMuODM0MkM2LjcyMzA2IDMyLjkxNTQgNy4wNTAzNyAzMi4wMjY3IDcuNjUwNDIgMzEuMzIyOEw3LjY5NDk1IDMxLjI2NzJDOS40MjcyMSAyOC45NDUyIDE0LjA2MjkgMjQuMTc4NyAxNi41NTU1IDIxLjYxNjJDMTYuODM2IDIxLjMyODggMTcuMDg3NiAyMS4wNjk0IDE3LjMwMzYgMjAuODQ2NkwxOC4wMjcyIDIwLjEwMDVMMTcuOTE3IDE5Ljk5MzZMMTguMDI1IDE5Ljg4MjJMMTcuMjM5IDE5LjExMDRDMTcuMDU1NCAxOC45Mjg5IDE2LjM3MTggMTguMjU3NCAxNS42OTE2IDE3LjU5MjVDMTUuMjI1MSAxNy4xMzcgMTQuODUyMiAxNi43NzQgMTQuNTc3MiAxNi41MDc4QzEzLjg5OTIgMTUuODUzIDEzLjcxODkgMTUuNjc3IDEzLjIwNDUgMTUuNjg4MUwxMi43MDggMTUuNjk4MkwxMS42ODcyIDE2Ljc2MjhMMTEuNTQ2OSAxNi45MjU0SDExLjU0OEMxMC4wNjYyIDE4LjQ5OSA4LjY1NTcxIDE5Ljk0MzQgNy4xNjE2OSAyMS40NzQ3QzYuNzE2MzggMjEuOTMxMyA2LjI2NDM5IDIyLjM5NDYgNS44MDAxNiAyMi44NzEzTDUuNDc3MzEgMjMuMjAzMUMyLjk3NTc4IDI1Ljc2MzQgMC4zOTE4NzYgMjguNDExNyAwLjA0MDA4MTEgMzIuNTgyNEMtMC4xMjM1NyAzNC41MjY5IDAuMjEwNDEyIDM2LjUyNyAxLjAwNDE4IDM4LjM2MzRDMS43NTY3NSA0MC4xMDE4IDIuODgxMTYgNDEuNTY5NiA0LjE3MTQ0IDQyLjQ5NjJDNi4wNzczNiA0My44NjQ5IDguMDU4OTkgNDQuNTk2NiAxMC4wNjA3IDQ0LjY3MjNDMTAuMTc1MyA0NC42NzY4IDEwLjI5IDQ0LjY3OSAxMC40MDQ3IDQ0LjY3OUMxMS45MDIgNDQuNjc5IDEzLjM5NDkgNDQuMzExNSAxNC44NDIyIDQzLjU4NzZDMTcuMjQ1NyA0Mi4zODQ5IDE4Ljc0MDkgNDAuNjA0MSAxOS4wMjU4IDQwLjI0NTVDMTkuNjc3MSAzOS41MTI3IDE5LjYzNDggMzguMzY0NSAxOC45MjkgMzcuNjgzVjM3LjY4MTlaIiBmaWxsPSJibGFjayIvPgo8cGF0aCBpZD0iVmVjdG9yXzQiIGQ9Ik00My41ODc5IDI5LjgzMDVDNDIuMzg2NyAyNy40MjczIDQwLjYwNTQgMjUuOTMxNiA0MC4yNDcgMjUuNjQ1NEMzOS45MDE5IDI1LjMzOCAzOS40NTc3IDI1LjE3NTQgMzguOTgzNCAyNS4xNzc3QzM4LjQ4OTEgMjUuMTg2NiAzOC4wMjgyIDI1LjM4NyAzNy42ODUzIDI1Ljc0MjNMMzUuNjMxMyAyNy44NjQ5QzM1LjI4ODUgMjguMjIxMyAzNS4xMDM2IDI4LjY4OSAzNS4xMTI2IDI5LjE4MzVDMzUuMTIxNSAyOS42NzggMzUuMzIxOSAzMC4xNDAxIDM1LjY3ODEgMzAuNDgzMkwzNS43OTI4IDMwLjU4TDM1LjgwMjggMzAuNTg3OEMzNS44MjI4IDMwLjYwMjMgMzcuNzY3NyAzMi4wNzY4IDM3LjY5NzYgMzQuMDU0N1YzNC4wOTI1QzM3LjY5NzYgMzYuMjIxOSAzNS45NjUzIDM3Ljk1MzYgMzMuODM2NyAzNy45NTM2QzMyLjkxOTQgMzcuOTUzNiAzMi4wMjk5IDM3LjYyNjIgMzEuMzI3NCAzNy4wMjU5TDMxLjI3MTggMzYuOTgxNEMyOC45NDk1IDM1LjI0NzQgMjQuMTg0NyAzMC42MDkgMjEuNjI0MSAyOC4xMTY2TDIxLjYwOTcgMjguMTAyMUMyMS4zMjggMjcuODI4MiAyMS4wNzUzIDI3LjU4MjEgMjAuODU2IDI3LjM2OTRMMjAuMTEwMSAyNi42NDU1TDIwLjAwMzIgMjYuNzU1N0wxOS44OTQxIDI2LjY0ODhMMTkuMTE3IDI3LjQzNjJDMTguOTMxMSAyNy42MjU1IDE4LjI2MzIgMjguMzA1OSAxNy42MDE5IDI4Ljk4MTlDMTcuMTQ2NSAyOS40NDg2IDE2Ljc4MzYgMjkuODIxNiAxNi41MjMxIDMwLjA5MTFDMTUuODY1MiAzMC43NzI3IDE1LjY4OTMgMzAuOTU2NSAxNS42OTkzIDMxLjQ2ODdMMTUuNzA5MyAzMS45NjY2TDE2Ljk2MTcgMzMuMTY4MkwxNi45NzA2IDMzLjE1ODJDMTguNTI3IDM0LjYyNzEgMTkuOTU3NiAzNi4wMjQ3IDIxLjQ3MDUgMzcuNTAxNUwyMS42Mzk3IDM3LjY2NjNDMjIuMDQ2MSAzOC4wNjI3IDIyLjQ1OCAzOC40NjQ4IDIyLjg3OTkgMzguODc2OEwyMy4yMTE3IDM5LjE5OThDMjUuNzcxMSA0MS43IDI4LjQxODQgNDQuMjg0OCAzMi41ODc3IDQ0LjYzNTZDMzIuOTA4MyA0NC42NjIzIDMzLjIzNDUgNDQuNjc2OCAzMy41NTg0IDQ0LjY3NjhDMzUuMTg0OSA0NC42NzY4IDM2Ljg0ODEgNDQuMzI5MyAzOC4zNjY3IDQzLjY3MTFDNDAuMTA0NSA0Mi45MTgzIDQxLjU3MTggNDEuNzkzNSA0Mi40OTggNDAuNTAyOEM0My44NjYyIDM4LjU5NTEgNDQuNTk3NiAzNi42MTM5IDQ0LjY3MzMgMzQuNjExNUM0NC43MzM1IDMyLjk5NzggNDQuMzY5NCAzMS4zODg2IDQzLjU4OSAyOS44MjgzTDQzLjU4NzkgMjkuODMwNVoiIGZpbGw9ImJsYWNrIi8+CjxwYXRoIGlkPSJWZWN0b3JfNSIgZD0iTTMwLjcyODMgMTQuNTAxTDI3LjY1NzkgMTEuNTM2NEwyMi44NzQxIDE2LjQ5MzNMMjUuOTQ0NiAxOS40NTc5QzI2LjI5MTkgMTkuNzkzMSAyNi43NDgzIDE5Ljk3OCAyNy4yMzE1IDE5Ljk3OEgyNy4yNjI3QzI3Ljc1NyAxOS45NjkxIDI4LjIxOSAxOS43Njg2IDI4LjU2MTkgMTkuNDEyMkwzMC43NzM5IDE3LjExOTJDMzEuNDgzMSAxNi4zODQyIDMxLjQ2MTkgMTUuMjA5MyAzMC43MjgzIDE0LjUwMVoiIGZpbGw9IiNGRjI0MDAiLz4KPHBhdGggaWQ9IlZlY3Rvcl82IiBkPSJNMjguMTkxNCAyMi45NzZMMjUuMjI3OCAyNi4wNDc1QzI0LjUxODcgMjYuNzgyNSAyNC41Mzk4IDI3Ljk1NjMgMjUuMjczNSAyOC42NjU3TDI3LjU2NTcgMzAuODc4NUMyNy45MTMxIDMxLjIxMzcgMjguMzY5NSAzMS4zOTg2IDI4Ljg1MjcgMzEuMzk4NkgyOC44ODM4QzI5LjM3ODEgMzEuMzg5NyAyOS44NDAxIDMxLjE4OTIgMzAuMTgzIDMwLjgzMjlMMzMuMTQ2NiAyNy43NjE0TDI4LjE5MTQgMjIuOTc2WiIgZmlsbD0iI0ZGMjQwMCIvPgo8cGF0aCBpZD0iVmVjdG9yXzciIGQ9Ik0xOS40MDU0IDE2LjAxMzRMMTcuMTEzMiAxMy43OTk0QzE2LjM3OTUgMTMuMDkgMTUuMjA1IDEzLjExMTIgMTQuNDk1OSAxMy44NDYyTDExLjUzMjMgMTYuOTE3NkwxNi40ODc1IDIxLjcwMzFMMTkuNDUxIDE4LjYzMTZDMTkuNzkzOSAxOC4yNzUyIDE5Ljk3ODcgMTcuODA3NSAxOS45Njk4IDE3LjMxM0MxOS45NjA5IDE2LjgxODUgMTkuNzYwNSAxNi4zNTc1IDE5LjQwNDMgMTYuMDEzNEgxOS40MDU0WiIgZmlsbD0iI0ZGMjQwMCIvPgo8cGF0aCBpZD0iVmVjdG9yXzgiIGQ9Ik0xOC42NDE3IDI1LjIyMTFDMTguMjg2NiAyNC44NzgxIDE3LjgxOSAyNC42OTU1IDE3LjMyMzYgMjQuNzAyMkMxNi44MjgyIDI0LjcxMTEgMTYuMzY3MyAyNC45MTE1IDE2LjAyNDQgMjUuMjY2OEwxMy44MTI0IDI3LjU1OThDMTMuNDY5NSAyNy45MTYyIDEzLjI4NDcgMjguMzgzOSAxMy4yOTM2IDI4Ljg3ODRDMTMuMzAyNSAyOS4zNzI5IDEzLjUwMjkgMjkuODM1IDEzLjg1OTEgMzAuMTc4TDE2LjkyOTUgMzMuMTQyNkwyMS43MTMzIDI4LjE4NTdMMTguNjQyOSAyNS4yMjExSDE4LjY0MTdaIiBmaWxsPSIjRkYyNDAwIi8+CjwvZz4KPGRlZnM+CjxjbGlwUGF0aCBpZD0iY2xpcDBfMF85Ij4KPHJlY3Qgd2lkdGg9IjQ0LjY3OSIgaGVpZ2h0PSI0NC42NzkiIGZpbGw9IndoaXRlIi8+CjwvY2xpcFBhdGg+CjwvZGVmcz4KPC9zdmc+Cg==';       // ロゴマーク（おもて右上 / うら）
+const LOGOTYPE_B64 = 'PHN2ZyBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBvdmVyZmxvdz0idmlzaWJsZSIgc3R5bGU9ImRpc3BsYXk6IGJsb2NrOyIgd2lkdGg9IjExOS44MTQiIGhlaWdodD0iNDMuODA4NiIgdmlld0JveD0iMCAwIDExOS44MTQgNDMuODA4NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgaWQ9Ikdyb3VwIDkiPgo8cGF0aCBpZD0iVmVjdG9yIiBkPSJNMTEyLjMyMSAxLjAwNzk4QzExMi4zMjEgMC4yNzkwNzggMTEyLjYgMCAxMTMuMzI5IDBIMTE4LjgwNkMxMTkuNTM1IDAgMTE5LjgxNCAwLjI3OTA3OCAxMTkuODE0IDEuMDA3OThDMTE5LjgxNCA0LjQ5MDEyIDExOS44MDQgNy45NzIyNiAxMTkuNzgzIDExLjQ1NDRDMTE5Ljc2MSAxNC45Mzc3IDExOS43NTEgMTguNDIxIDExOS43NTEgMjEuOTA0M0MxMTkuNzUxIDI1LjM4NzYgMTE5Ljc2MSAyOC44NzA5IDExOS43ODMgMzIuMzU0MkMxMTkuODA0IDM1LjgzNjQgMTE5LjgxNCAzOS4zMTg1IDExOS44MTQgNDIuODAwN0MxMTkuODE0IDQzLjUyOTYgMTE5LjUzNSA0My44MDg2IDExOC44MDYgNDMuODA4NkgxMTMuMzI5QzExMi42IDQzLjgwODYgMTEyLjMyMSA0My41Mjk2IDExMi4zMjEgNDIuODAwN0MxMTIuMzIxIDM5LjMxODUgMTEyLjMzMSAzNS44MzY0IDExMi4zNTMgMzIuMzU0MkMxMTIuMzc0IDI4Ljg3MDkgMTEyLjM4NCAyNS4zODc2IDExMi4zODQgMjEuOTA0M0MxMTIuMzg0IDE4LjQyMSAxMTIuMzc0IDE0LjkzNzcgMTEyLjM1MyAxMS40NTQ0QzExMi4zMzEgNy45NzIyNSAxMTIuMzIxIDQuNDkwMTIgMTEyLjMyMSAxLjAwNzk4WiIgZmlsbD0iYmxhY2siLz4KPHBhdGggaWQ9IlZlY3Rvcl8yIiBkPSJNNjYuODcxOCA0My42ODk4QzY2LjU5OTggNDMuNjg5OCA2Ni4yOTc1IDQzLjY2IDY1Ljk5MjcgNDMuNTc4M0M2NS43ODk1IDQzLjUyMzcgNjUuNjk4NyA0My40MTE5IDY1LjY5ODcgNDMuMTI5N0M2NS42OTg3IDQzLjAwNTkgNjUuNzIyNSA0Mi44ODEyIDY1Ljc3NDEgNDIuNzQ5OUM2NS44MzcgNDIuNTg5NiA2NS44OTY4IDQyLjQ0MTYgNjUuOTU3OCA0Mi4zMTFDNjcuNzY0MSAzOC40NDI0IDY5LjY1ODQgMzQuNjE3OCA3MS40OTE2IDMwLjc3MzhDNzMuMzI4MiAyNi45MjIzIDc1LjE1MTggMjMuMDU5MyA3Ni45MzI5IDE5LjE2OTVDNzguMzk3NCAxNS45NzEgNzkuODUzIDEyLjc3MjkgODEuMjkxNiA5LjU3MTcxQzgyLjczNjEgNi4zNTc1MiA4NC4xOTcyIDMuMTI4MzYgODUuNzY4OSAwLjAwNjQxMjY0Qzg1LjgzMDYgMC4wMDY0MTI2NCA4NS44NDgxIC0wLjAwMDU0NDM5NCA4NS44NTczIDAuMDE3NjgyQzg3LjQyOSAzLjEzOTYzIDg4Ljg2MDYgNi4zNTc1MiA5MC4zMDUxIDkuNTcxNzFDOTEuNzQzNyAxMi43NzI5IDkzLjE5OTQgMTUuOTcxIDk0LjY2MzggMTkuMTY5NUM5Ni40NDQxIDIzLjA1NzcgOTguMjQwMiAyNi45Mjk3IDEwMC4wNzMgMzAuNzczOEMxMDEuOTExIDM0LjYyNzQgMTAzLjgzMyAzOC40NDM0IDEwNS42MzkgNDIuMzExQzEwNS43IDQyLjQ0MTUgMTA1Ljc2IDQyLjU4OTYgMTA1LjgyMyA0Mi43NDk5QzEwNS44NzQgNDIuODgxMiAxMDUuODk4IDQzLjAwNTkgMTA1Ljg5OCA0My4xMjk3QzEwNS44OTggNDMuNDExOSAxMDUuODA3IDQzLjUyMzcgMTA1LjYwNCA0My41NzgzQzEwNS4yOTkgNDMuNjYgMTA0Ljk5NyA0My42ODk4IDEwNC43MjUgNDMuNjg5OEg5OC4yOTk0Qzk3Ljg3ODIgNDMuNjg5OCA5Ny41NzQ5IDQzLjUxMTYgOTcuMzQ2NiA0My4wODQxQzk3LjE4MDcgNDIuNzczNSA5Ny4wMjc3IDQyLjQzNjEgOTYuODgyMiA0Mi4wNzg4Qzk2LjczMjQgNDEuNzExMiA5Ni41ODI3IDQxLjM2MjkgOTYuNDMxOCA0MS4wMzQ3Qzk1Ljk2NyA0MC4wMjM0IDk1LjUwMjEgMzguOTk3NyA5NS4wNjg1IDM3Ljk0NzdDOTQuNjMwOSAzNi44ODc3IDk0LjE0NTggMzUuODY5NCA5My42OTg1IDM0Ljg0NDlDOTMuNTk1NSAzNC42MDkxIDkzLjM3MzQgMzQuNDI3OSA5My4wODI3IDM0LjQyNzlINzcuMzM3MUM3Ny4wNDQgMzQuNDI3OSA3Ni44MjU0IDM0LjYxMTggNzYuNzIyMyAzNC44NDI2Qzc2LjI2NjQgMzUuODYzMSA3NS43MjIyIDM2Ljg3MDUgNzUuMjU3NyAzNy45NDMxQzc0LjgwNCAzOC45OTA5IDc0LjM0MTkgNDAuMDMxIDczLjg2MTMgNDEuMDYzOEM3My43MTI3IDQxLjM4MzEgNzMuNTQ0OCA0MS43Mjc3IDczLjM4MTMgNDIuMTAyN0M3My4yMjU0IDQyLjQ2MDEgNzMuMDY4MyA0Mi43OTI2IDcyLjg4NzEgNDMuMTA1OUM3Mi42NDY0IDQzLjUyMjIgNzIuMzY2MyA0My42ODk4IDcxLjk2MTMgNDMuNjg5OEg2Ni44NzE4Wk03OS41Mjg0IDI4LjY2MTVIOTEuMDA1OUM4OS43NjQ5IDI1LjY5OTYgODkuMjM5OSAyNC40ODQ2IDg4LjI1OTYgMjIuMjEzNEM4Ny4yMTE3IDE5Ljc4NTYgODYuODcwNCAxOC45Nzg5IDg1LjM4OCAxNS41MjcyQzgzLjg3MjUgMTguOTcyIDgzLjUwMzQgMTkuNzc5OCA4Mi40MTYyIDIyLjIwOTlDODEuMzk5IDI0LjQ4MzQgODAuODY4OCAyNS42ODU2IDc5LjUyODQgMjguNjYxNVoiIGZpbGw9ImJsYWNrIi8+CjxwYXRoIGlkPSJWZWN0b3JfMyIgZD0iTTUxLjk3MzUgNC40NzEyNUM1MS45NzM1IDMuMzgyMTIgNTIuMzY5NyAyLjQ4NzI2IDUzLjE4MjggMS43MDQwNEM1NC4wMDkzIDAuOTA3Nzg3IDU0LjkyOTUgMC41MTg3ODEgNTYuMDIwOSAwLjUxODc4MUM1Ny4xMzc1IDAuNTE4NzgxIDU4LjA2NjYgMC45MjAxNCA1OC45MjM2IDEuNzM2NzlDNTkuNzc3MSAyLjU1MDE1IDYwLjE5NSAzLjQ2Mjk2IDYwLjE5NSA0LjU5Nzg5QzYwLjE5NSA1LjY4MjQ0IDU5Ljc5OTYgNi42MTQ1NSA1OC45ODE5IDcuNDMyMjFDNTguMTg3OSA4LjIyNjI2IDU3LjI1NjkgOC42MTM2OCA1Ni4xNDc2IDguNjEzNjhDNTUuMDIyNCA4LjYxMzY4IDU0LjA0NTQgOC4yMTc3MiA1My4yMTcgNy4zOTkzMkM1Mi4zNzgyIDYuNTcwNTEgNTEuOTczNSA1LjU5NDIzIDUxLjk3MzUgNC40NzEyNVpNNTIuNDQ4NCAyMy41NjI5VjE2LjU2NThDNTIuNDQ4NCAxNS44MzY5IDUyLjcyNzUgMTUuNTU3OCA1My40NTY0IDE1LjU1NzhINTguMzMyMkM1OS4wNjExIDE1LjU1NzggNTkuMzQwMiAxNS44MzY5IDU5LjM0MDIgMTYuNTY1OEM1OS4zNDAyIDIwLjkxNDQgNTkuMzUwNyAyNS4yNzM1IDU5LjM3MTkgMjkuNjQzMkM1OS4zOTI5IDMzLjk5MDkgNTkuNDAzNSAzOC4zMzg2IDU5LjQwMzUgNDIuNjg2MkM1OS40MDM1IDQzLjQxNTEgNTkuMTI0NCA0My42OTQyIDU4LjM5NTUgNDMuNjk0Mkg1My4zOTMxQzUyLjY2NDIgNDMuNjk0MiA1Mi4zODUxIDQzLjQxNTEgNTIuMzg1MSA0Mi42ODYyQzUyLjM4NTEgMzkuNDk5NiA1Mi4zOTU2IDM2LjMxMzEgNTIuNDE2NyAzMy4xMjY1QzUyLjQzNzkgMjkuOTM4NiA1Mi40NDg0IDI2Ljc1MDggNTIuNDQ4NCAyMy41NjI5WiIgZmlsbD0iYmxhY2siLz4KPHBhdGggaWQ9IlZlY3Rvcl80IiBkPSJNMS4wMDc5OCA0My42OTRDMC4yODQ1MSA0My42OTQgMCA0My40MDk4IDAgNDIuNjU0NEMwIDQxLjQ5NiAwLjAxMDYyNzUgNDAuMzM3NiAwLjA2MzAyMyAzOS4xODQ4QzAuMTE1ODY1IDM4LjAyMjIgMC4xNjQyMzggMzYuODYwNCAwLjE4OTg5NiAzNS42OTUzQzAuMjQzODI3IDMzLjI0NjMgMC4yOTU1NjEgMzAuODA3NyAwLjMxNjYgMjguMzc3N0MwLjMzNzgwNyAyNS45Mjg0IDAuMzQ4MjcyIDIzLjQ4OTcgMC4zNDgyNzIgMjEuMDYxNUMwLjM0ODI3MiAxNy45Nzg1IDAuMzI3MTU2IDE0Ljg5NTUgMC4yODQ5MjMgMTEuODEyNEMwLjI0MjY0NCA4LjcyNjEyIDAuMDk0OTgzNCA1LjY1Mjc5IDAuMDk0OTgzNCAyLjYwMzA0VjIuMjg2NDNDMC4wOTQ5ODM0IDIuMTMwNTEgMC4xMDUzMDcgMS43NTMzMiAwLjE1NzE1NyAxLjE3MjQyQzAuMjA3MjEyIDAuNjExNjIxIDAuMzc1NDk0IDAuNTUwMjM4IDAuNDY5NzQzIDAuNTUwMjM4QzAuNjIxMDM0IDAuNTUwMjM4IDAuODcyNzc3IDAuNjc0MjYgMS4xOTMwMyAxLjA3NDU4QzEuNTMwNzEgMS40OTY2NyAxLjc3NjU1IDEuODAxODIgMS45MTY0OCAxLjk4NjYzQzUuMjEzOTkgNi4zNDIwNCA4LjI5MDg1IDEwLjkxMDcgMTEuMzA4NCAxNS41MjEzQzE0LjMyMzIgMjAuMTI3OCAxNy40MTM1IDI0LjY3NDcgMjAuNTkxNCAyOS4xNDQ5QzIwLjcxNjQgMjkuMzIwNyAyMC44OTM1IDI5LjQ4ODUgMjEuMTQ0NSAyOS40ODg1QzIxLjM5NjkgMjkuNDg4NSAyMS41NzIzIDI5LjMxOTIgMjEuNjk2NyAyOS4xNDYxQzI0LjkzNjYgMjQuNjM3NiAyOC4xMDg5IDIwLjA4MjIgMzEuMjAwNSAxNS40NjA1QzM0LjI5MDUgMTAuODQxMyAzNy40Njc0IDYuMjgyMzIgNDAuODE1MSAxLjg5MjQ1QzQwLjk1NDEgMS43MTAxOSA0MS4xOTcgMS40MTU4NiA0MS41MzQxIDEuMDE3NEM0MS44NzcyIDAuNjExNzkxIDQyLjEzODQgMC40ODY5MTUgNDIuMjYyNCAwLjQ4NjkxNUM0Mi4zODgyIDAuNDg2OTE1IDQyLjUzNDQgMC41NDE5MSA0Mi41NzQ2IDEuMTAzOTdDNDIuNjE2NiAxLjY5MTQyIDQyLjYzNzIgMi4wNzM5MyA0Mi42MzcyIDIuMjIzMVYyLjUzOTcyQzQyLjYzNzIgNS42MTA2NSA0Mi40ODk3IDguNzA1MDkgNDIuNDQ3MiAxMS44MTI1QzQyLjQwNTEgMTQuODk1NSA0Mi4zODM5IDE3Ljk3ODUgNDIuMzgzOSAyMS4wNjE1QzQyLjM4MzkgMjMuNDg5NyA0Mi4zOTQ0IDI1LjkyODQgNDIuNDE1NiAyOC4zNzc3QzQyLjQzNjYgMzAuODA1MiA0Mi40NjYxIDMzLjI0NjYgNDIuNTQyMyAzNS42OTc5QzQyLjU3ODUgMzYuODYxIDQyLjYyNjkgMzguMDIyMyA0Mi42NjkgMzkuMTgyMkM0Mi43MTExIDQwLjMzOTYgNDIuNzMyMiA0MS40OTcgNDIuNzMyMiA0Mi42NTQ0QzQyLjczMjIgNDMuNDA5OCA0Mi40NDc3IDQzLjY5NCA0MS43MjQyIDQzLjY5NEgzNi4yNzg1QzM1Ljg1MjIgNDMuNjk0IDM1LjYxMTIgNDMuNTg5NCAzNS41MTgyIDQzLjQ3OThDMzUuNDA4OSA0My4zNTEgMzUuMzAyIDQzLjA3MzMgMzUuMjY5NCA0Mi42OTI5QzM1LjI0NTMgNDIuNDExNyAzNS4yMzg4IDQyLjEwMTMgMzUuMjM4OCA0MS43Njc4QzM1LjIzODggNDEuNDExNSAzNS4yNDMyIDQxLjA3MjcgMzUuMjM4OCA0MC43NTA3TDM1LjE3NTUgMzYuMTU5OEMzNS4xNDM3IDMzLjg1OCAzNS4xMDE2IDMxLjU1ODEgMzUuMDgwNSAyOS4yNTlDMzUuMDU5NCAyNi45NTkyIDM1LjA0ODkgMjQuNjU5NCAzNS4wNDg5IDIyLjM1OTZDMzUuMDQ4OSAyMi4yNTUgMzUuMDI3MiAyMi4xNzMyIDM1LjAxNjggMjEuOTY1MkMzNS4wMDg4IDIxLjgwMzUgMzQuOTkyNyAyMS4zNDEyIDM0LjU2ODggMjEuMzQxMkMzNC4yODIxIDIxLjM0MTIgMzQuMTQ2MyAyMS41Njg0IDM0LjA0MjYgMjEuNzIzNEMzMy45NTE3IDIxLjg1OTMgMzMuODg4MSAyMS45MjM2IDMzLjgzNjggMjEuOTg3QzMyLjI1OTggMjMuOTMzNSAzMS4wNDIgMjYuMzE3MiAyOS43MzE5IDI4LjQxMTNDMjguNDAwMSAzMC41NDAyIDI3LjA0NTUgMzIuNjY4MiAyNS42ODA4IDM0LjgwNDVDMjUuMTI3OSAzNS42NyAyNC41ODEyIDM2LjU0OTEgMjQuMDMyMiAzNy40MzU5QzIzLjQ4NTcgMzguMzE4NyAyMi45MzExIDM5LjE5MTEgMjIuMzM0MyA0MC4wMTQ1QzIyLjIxMzcgNDAuMTgwOSAyMi4wNzE2IDQwLjM2OTEgMjEuOTA0MiA0MC41Njc2QzIxLjc5OTggNDAuNjkxNCAyMS42Njc0IDQwLjc0OTUgMjEuNDkyNyA0MC43NDk1QzIxLjMzNzMgNDAuNzQ5NSAyMS4xNzY5IDQwLjY5MzUgMjEuMDY0NiA0MC41ODEyQzIwLjkwNjkgNDAuNDIzNCAyMC43NzE1IDQwLjI0MjMgMjAuNjUwNCA0MC4wNzY3QzIwLjExNzEgMzkuMzQ4MiAxOS41OTE0IDM4LjU5ODcgMTkuMDczMSAzNy44MzdDMTguNTYyMSAzNy4wODYxIDE4LjA2NzkgMzYuMzE4MSAxNy41NTM4IDM1LjU1OEMxNi4wODkgMzMuMzkyNSAxNC41ODUgMzEuMjQ3MyAxMy4xMjE4IDI5LjA2ODNDMTEuNjU0NSAyNi44ODMzIDkuOTg5OTUgMjQuNzkyNCA4LjY2NTMgMjIuNTlDOC42MTgyNyAyMi41MTE4IDguNTU5MTUgMjIuNDQyIDguNDU2MzYgMjIuMzA4OUM4LjM0ODc2IDIyLjE2OTYgOC4yMDc5MSAyMS45NzQ1IDcuOTQxNzcgMjEuOTc0NUM3LjU3MjA3IDIxLjk3NDUgNy40ODM2NSAyMi4zNDcgNy40NjMxMiAyMi41NTIzQzcuNDQxNDMgMjIuNzY5MiA3LjQzMDAyIDIyLjg4NTQgNy40MzAwMiAyMi45NjExQzcuNDMwMDIgMjUuMTk3NiA3LjQxOTU3IDI3LjQzNDEgNy4zOTgzNyAyOS42NzA1QzcuMzc3MzggMzEuODg1MSA3LjMzNTE1IDM0LjExMTIgNy4zMDM0IDM2LjM0OTdMNy4yNDAwOCA0MC44MTM5QzcuMjM1OTIgNDEuMTA3MSA3LjIyOTQgNDEuNDMxMSA3LjI0MDE5IDQxLjc3NjlDNy4yNTA1OSA0Mi4xMDk5IDcuMjQ0NDkgNDIuNDAyNyA3LjIxMDUgNDIuNjgyN0M3LjE2MTQxIDQzLjA4NzIgNy4wNzM4IDQzLjMzODIgNi45NTUzNSA0My40ODYzQzYuODc1MzQgNDMuNTg2MyA2LjY1NjQ5IDQzLjY5NCA2LjIwMDQxIDQzLjY5NEgxLjAwNzk4WiIgZmlsbD0iYmxhY2siLz4KPC9nPgo8L3N2Zz4K';   // MiAI ロゴタイプ（うら）
+const QR_B64       = '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';         // QRコード（うら）
 
 document.addEventListener('DOMContentLoaded', init);
 })();

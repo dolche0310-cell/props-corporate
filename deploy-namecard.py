@@ -5,9 +5,8 @@
   python3 deploy-namecard.py --draft    # ドラフト(プレビューURLのみ)
 
 コーポレートサイト本体(deploy.py / miai-corporate)とは別サイト・別アカウント。
-namecard-create/ の中身をサイト直下に置き、プリセットロゴだけを
-assets/logos/ に同じ相対位置で連れて行く。ツール内のパスは "../assets/logos/..." で、
-サイト直下でも /namecard-create/ 配下でも同じように解決される。
+namecard-create/ の中身をサイト直下に置くだけ。既定のロゴマークは app.js に
+埋め込んであるので、外部アセットへの依存はない。
 """
 import hashlib, json, os, sys, urllib.error, urllib.request
 
@@ -19,8 +18,6 @@ FILES = {
     "/index.html": "namecard-create/index.html",
     "/style.css":  "namecard-create/style.css",
     "/app.js":     "namecard-create/app.js",
-    "/assets/logos/logotype-a.svg": "assets/logos/logotype-a.svg",
-    "/assets/logos/mark-a.svg":     "assets/logos/mark-a.svg",
 }
 
 CFG = json.load(open(os.path.expanduser("~/Library/Preferences/netlify/config.json")))
