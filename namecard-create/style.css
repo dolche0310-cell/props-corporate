@@ -78,6 +78,7 @@ button { font: inherit; }
 
 /* ---------- segmented ---------- */
 .seg { display: inline-flex; background: #F1F1F1; border-radius: 8px; padding: 3px; gap: 2px; }
+.seg--lang { margin-bottom: 16px; }
 .seg__item {
   border: 0; background: none; border-radius: 6px; padding: 6px 14px;
   font-size: 12.5px; color: var(--nc-sub); cursor: pointer; transition: .15s;
@@ -91,20 +92,20 @@ button { font: inherit; }
 .fi.is-off { opacity: .5; }
 .fi.is-off .fi__body { display: none; }
 .fi__head { display: flex; align-items: center; gap: 10px; }
-.fi__label { flex: 1; font-size: 14px; font-weight: 500; color: var(--nc-ink); min-width: 0; }
+.fi__label { flex: 1; font-size: 12px; font-weight: 500; color: var(--nc-ink); min-width: 0; }
 .fi.is-off .fi__label { color: var(--nc-muted); }
 .fi__body { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
 
 /* トグルスイッチ */
-.sw { position: relative; width: 38px; height: 22px; flex: none; }
+.sw { position: relative; width: 33px; height: 19px; flex: none; }
 .sw input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
 .sw span { position: absolute; inset: 0; background: #D2D2D2; border-radius: 999px; transition: .18s; pointer-events: none; }
 .sw span::after {
-  content: ""; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px;
+  content: ""; position: absolute; top: 2px; left: 2px; width: 15px; height: 15px;
   background: #fff; border-radius: 50%; transition: .18s;
 }
 .sw input:checked + span { background: var(--nc-btn); }
-.sw input:checked + span::after { transform: translateX(16px); }
+.sw input:checked + span::after { transform: translateX(14px); }
 .sw input:focus-visible + span { outline: 2px solid var(--nc-btn); outline-offset: 2px; }
 
 /* ---------- inputs ---------- */
