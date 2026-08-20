@@ -457,8 +457,9 @@ function fieldRow(key) {
   if (d.type === 'single') {
     input(d.label, 'v', f.v, key === 'email' ? 'email' : (/^(tel|mobile)$/.test(key) ? 'tel' : 'text'));
   } else {
-    input('日本語', 'ja', f.ja);
-    input('English', 'en', f.en);
+    // 日英2値のうち、いま選んでいる表記の側だけを編集させる
+    const k = state.lang === 'en' ? 'en' : 'ja';
+    input(d.label, k, f[k]);
   }
   return li;
 }
@@ -631,7 +632,8 @@ function init() {
 
   $('#seg-lang').addEventListener('click', e => {
     const b = e.target.closest('[data-lang]'); if (!b) return;
-    state.lang = b.dataset.lang; syncSeg('#seg-lang', 'lang', state.lang); update();
+    state.lang = b.dataset.lang; syncSeg('#seg-lang', 'lang', state.lang);
+    renderFields(); update();
   });
   $('#seg-side').addEventListener('click', e => {
     const b = e.target.closest('[data-side]'); if (!b || b.disabled) return;
