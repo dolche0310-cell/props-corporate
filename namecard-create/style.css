@@ -67,7 +67,7 @@ button { font: inherit; }
 
 .panel { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
 .block {
-  background: var(--nc-panel); border: 1px solid var(--nc-border);
+  background: var(--nc-panel);
   border-radius: var(--nc-radius); padding: 16px;
 }
 .block__title {
@@ -126,7 +126,7 @@ input[type="range"] { width: 100%; accent-color: var(--nc-btn); }
 /* ---------- preview ---------- */
 .preview {
   position: sticky; top: 72px;
-  background: var(--nc-panel); border: 1px solid var(--nc-border);
+  background: var(--nc-panel);
   border-radius: var(--nc-radius); padding: 2px 16px 12px; min-width: 0;
 }
 @media (max-width: 1040px) { .preview { position: static; } }
