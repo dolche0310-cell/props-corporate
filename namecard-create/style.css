@@ -76,15 +76,9 @@ button { font: inherit; }
 }
 .hint { font-size: 11.5px; color: var(--nc-sub); line-height: 1.6; margin-top: 8px; }
 
-/* ---------- segmented ---------- */
-.seg { display: inline-flex; background: #F1F1F1; border-radius: 8px; padding: 3px; gap: 2px; }
-.seg--lang { margin-bottom: 16px; }
-.seg__item {
-  border: 0; background: none; border-radius: 6px; padding: 6px 14px;
-  font-size: 12.5px; color: var(--nc-sub); cursor: pointer; transition: .15s;
-}
-.seg__item.is-active { background: #fff; color: var(--nc-ink); font-weight: 700; box-shadow: 0 1px 2px rgba(0,0,0,.10); }
-.seg__item:disabled { opacity: .35; cursor: not-allowed; }
+/* ---------- lang tabs（表面/裏面と同じ見た目） ---------- */
+.lang-bar { padding: 0 12px 0; margin-bottom: 14px; }
+.lang-bar .tab { padding: 8px 18px; }
 
 /* ---------- field rows ---------- */
 .fields { display: flex; flex-direction: column; gap: 22px; }
@@ -170,7 +164,7 @@ input[type="range"] { width: 100%; accent-color: var(--nc-btn); }
 
 /* 名刺プレビュー本体 */
 .preview__stage {
-  margin-top: 16px; padding: 36px 20px; border-radius: 4px;
+  margin-top: 16px; padding: 20px; border-radius: 4px;
   background: #F2F2F2;
   display: flex; justify-content: center; overflow: auto;
 }

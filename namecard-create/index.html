@@ -26,21 +26,21 @@
   <section class="preview" aria-label="プレビュー">
     <div class="preview__bar">
       <div class="tabs" id="seg-side">
-        <button type="button" class="tab is-active" data-side="front">表面</button>
-        <button type="button" class="tab" data-side="back" id="side-back" disabled>裏面</button>
+        <button type="button" class="tab is-active" data-side="front">Front</button>
+        <button type="button" class="tab" data-side="back" id="side-back" disabled>Back</button>
       </div>
       <div class="popwrap">
         <button type="button" class="iconbtn" id="btn-settings"
                 aria-label="表示設定" aria-expanded="false" aria-controls="settings-pop">
-          <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true">
-            <g fill="currentColor">
-              <rect x="10.5" y="1.4" width="3" height="21.2" rx="1.5"/>
-              <rect x="10.5" y="1.4" width="3" height="21.2" rx="1.5" transform="rotate(45 12 12)"/>
-              <rect x="10.5" y="1.4" width="3" height="21.2" rx="1.5" transform="rotate(90 12 12)"/>
-              <rect x="10.5" y="1.4" width="3" height="21.2" rx="1.5" transform="rotate(135 12 12)"/>
-              <circle cx="12" cy="12" r="7.4"/>
+          <svg viewBox="0 0 18 18" width="19" height="19" fill="none" aria-hidden="true">
+            <g stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9.75 5.25 6.525 2.025C6.186 1.688 5.728 1.499 5.25 1.499c-.478 0-.936.189-1.275.526l-1.95 1.95c-.337.339-.526.797-.526 1.275 0 .478.189.936.526 1.275L5.25 9.75"/>
+              <path d="m6 4.5 1.5-1.5"/>
+              <path d="m13.5 12 1.5-1.5"/>
+              <path d="M12.75 8.25 15.975 11.475c.705.705.705 1.845 0 2.55l-1.95 1.95c-.705.705-1.845.705-2.55 0L8.25 12.75"/>
+              <path d="M15.8805 5.109c.397-.396.62-.934.62-1.495 0-.561-.223-1.099-.619-1.495-.397-.396-.935-.62-1.495-.62-.561 0-1.099.223-1.495.62L2.8815 12.1305c-.174.174-.303.387-.375.622l-.99 3.264a.25.25 0 0 0 .31.31l3.265-.99c.234-.072.448-.2.622-.374z"/>
+              <path d="m11.25 3.75 3 3"/>
             </g>
-            <circle cx="12" cy="12" r="3.1" fill="#fff"/>
           </svg>
         </button>
         <div class="popover" id="settings-pop" hidden>
@@ -68,17 +68,16 @@
   <!-- ============ 右：入力パネル ============ -->
   <section class="panel" aria-label="入力">
 
+    <div class="tabs lang-bar" role="radiogroup" aria-label="表記パターン" id="seg-lang">
+      <button type="button" class="tab is-active" data-lang="ja">JP</button>
+      <button type="button" class="tab" data-lang="en">EN</button>
+    </div>
+
     <div class="block">
-      <div class="seg seg--lang" role="radiogroup" aria-label="表記パターン" id="seg-lang">
-        <button type="button" class="seg__item is-active" data-lang="ja">日本語</button>
-        <button type="button" class="seg__item" data-lang="en">英語</button>
-      </div>
-      <h2 class="block__title">記載する要素</h2>
       <ul class="fields" id="fields"></ul>
     </div>
 
     <div class="block">
-      <h2 class="block__title">仕上がり</h2>
       <div class="row row--2">
         <label class="field"><span>用紙サイズ</span>
           <select id="size">
