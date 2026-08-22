@@ -94,7 +94,7 @@ const ICON_STROKE = 2;   // 24 グリッド上の線幅
 const DEFS = {
   dept:    { label: '部署',           type: 'bi',     group: 'lead', on: false, ja: '事業開発部',   en: 'Business Development' },
   title:   { label: '役職',           type: 'bi',     group: 'lead', on: true,  ja: 'マネージャー', en: 'Manager' },
-  name:    { label: '氏名',           type: 'bi',     group: 'body', on: true,  ja: '山田 太郎',    en: 'Taro Yamada' },
+  name:    { label: '氏名',           type: 'bi',     group: 'body', on: true,  ja: '山田 太郎',    en: 'Taro Yamada', sei: '山田', mei: '太郎' },
   reading: { label: 'ローマ字表記',   type: 'single', group: 'body', on: true,  v: 'Taro Yamada' },
   tel:     { label: '電話番号',       type: 'single', group: 'contact', on: true,  icon: 'tel',    v: '03-1234-5678' },
   mobile:  { label: '携帯番号',       type: 'single', group: 'contact', on: false, icon: 'mobile', v: '090-1234-5678' },
@@ -121,6 +121,7 @@ function resetFields() {
   for (const k of KEYS) {
     const d = DEFS[k];
     state.fields[k] = { enabled: d.on, ja: d.ja || '', en: d.en || '', v: d.v || '' };
+    if (k === 'name') { state.fields[k].sei = d.sei || ''; state.fields[k].mei = d.mei || ''; }
   }
 }
 
@@ -133,6 +134,56 @@ const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
   .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const n = v => Math.round(v * 1000) / 1000;
+
+/* ---------- ひらがな → ローマ字（ヘボン式・簡易） ----------
+   氏名（姓・名）をIME入力した際、変換前のひらがなをローマ字表記へ
+   自動反映するために使う。カタカナはひらがなへ寄せてから変換する。 */
+const KANA_MAP = {
+  'あ':'a','い':'i','う':'u','え':'e','お':'o',
+  'か':'ka','き':'ki','く':'ku','け':'ke','こ':'ko',
+  'が':'ga','ぎ':'gi','ぐ':'gu','げ':'ge','ご':'go',
+  'さ':'sa','し':'shi','す':'su','せ':'se','そ':'so',
+  'ざ':'za','じ':'ji','ず':'zu','ぜ':'ze','ぞ':'zo',
+  'た':'ta','ち':'chi','つ':'tsu','て':'te','と':'to',
+  'だ':'da','ぢ':'ji','づ':'zu','で':'de','ど':'do',
+  'な':'na','に':'ni','ぬ':'nu','ね':'ne','の':'no',
+  'は':'ha','ひ':'hi','ふ':'fu','へ':'he','ほ':'ho',
+  'ば':'ba','び':'bi','ぶ':'bu','べ':'be','ぼ':'bo',
+  'ぱ':'pa','ぴ':'pi','ぷ':'pu','ぺ':'pe','ぽ':'po',
+  'ま':'ma','み':'mi','む':'mu','め':'me','も':'mo',
+  'や':'ya','ゆ':'yu','よ':'yo',
+  'ら':'ra','り':'ri','る':'ru','れ':'re','ろ':'ro',
+  'わ':'wa','ゐ':'i','ゑ':'e','を':'o','ん':'n',
+};
+const KANA_YOON = {
+  'きゃ':'kya','きゅ':'kyu','きょ':'kyo', 'ぎゃ':'gya','ぎゅ':'gyu','ぎょ':'gyo',
+  'しゃ':'sha','しゅ':'shu','しょ':'sho', 'じゃ':'ja','じゅ':'ju','じょ':'jo',
+  'ちゃ':'cha','ちゅ':'chu','ちょ':'cho', 'にゃ':'nya','にゅ':'nyu','にょ':'nyo',
+  'ひゃ':'hya','ひゅ':'hyu','ひょ':'hyo', 'びゃ':'bya','びゅ':'byu','びょ':'byo',
+  'ぴゃ':'pya','ぴゅ':'pyu','ぴょ':'pyo', 'みゃ':'mya','みゅ':'myu','みょ':'myo',
+  'りゃ':'rya','りゅ':'ryu','りょ':'ryo',
+};
+function kataToHira(s) {
+  return s.replace(/[\u30a1-\u30f6]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60));
+}
+function kanaToRomaji(raw) {
+  const s = kataToHira(String(raw || ''));
+  let out = '', i = 0, lastVowel = '';
+  while (i < s.length) {
+    const two = s.slice(i, i + 2);
+    if (KANA_YOON[two]) { out += KANA_YOON[two]; lastVowel = KANA_YOON[two].slice(-1); i += 2; continue; }
+    const c = s[i];
+    if (c === 'っ') {                       // 促音：次の子音を重ねる
+      const next = KANA_YOON[s.slice(i + 1, i + 3)] || KANA_MAP[s[i + 1]] || '';
+      out += next.slice(0, 1); i += 1; continue;
+    }
+    if (c === 'ー') { out += lastVowel; i += 1; continue; }  // 長音符
+    if (KANA_MAP[c]) { out += KANA_MAP[c]; lastVowel = KANA_MAP[c].slice(-1); i += 1; continue; }
+    out += c; i += 1;                       // 未対応文字はそのまま（英数字など）
+  }
+  return out;
+}
+const capitalize = s => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
 /* ---------- 文字の実測 ---------- */
 const _mc = document.createElement('canvas').getContext('2d');
@@ -458,6 +509,14 @@ function fieldRow(key) {
 
   if (d.type === 'single') {
     input(d.label, 'v', f.v, key === 'email' ? 'email' : (/^(tel|mobile)$/.test(key) ? 'tel' : 'text'));
+  } else if (key === 'name' && state.lang !== 'en') {
+    // 氏名（日本語）だけは姓・名を分けて入力し、間の半角スペースは自動で入れる
+    const row = document.createElement('div');
+    row.className = 'field field--pair';
+    row.innerHTML =
+      `<input type="text" data-k="sei" value="${esc(f.sei)}" aria-label="姓" placeholder="姓">` +
+      `<input type="text" data-k="mei" value="${esc(f.mei)}" aria-label="名" placeholder="名">`;
+    bodyEl.appendChild(row);
   } else {
     // 日英2値のうち、いま選んでいる表記の側だけを編集させる
     const k = state.lang === 'en' ? 'en' : 'ja';
@@ -469,6 +528,24 @@ function fieldRow(key) {
 function renderFields() {
   el.fields.innerHTML = '';
   KEYS.forEach(k => el.fields.appendChild(fieldRow(k)));
+}
+
+/**
+ * 姓・名のひらがな読みから、ローマ字表記を自動で埋める。
+ * ユーザーがローマ字表記欄を直接編集した後は上書きしない。
+ */
+function autoFillReading(nameField) {
+  const reading = state.fields.reading;
+  if (!reading || reading.enabled === false || reading._auto === false) return;
+  const seiR = nameField.seiKana ? kanaToRomaji(nameField.seiKana) : '';
+  const meiR = nameField.meiKana ? kanaToRomaji(nameField.meiKana) : '';
+  if (!seiR && !meiR) return;
+  reading.v = [capitalize(meiR), capitalize(seiR)].filter(Boolean).join(' ');
+  reading._auto = true;
+  // .fi__head 内のトグルも input なので、値欄(.fi__body内)だけを狙って直接書き換える
+  // （renderFields()で全体を作り直すと、姓・名の入力中のフォーカスが切れてしまうため）
+  const input = $('.fi[data-key="reading"] .fi__body input');
+  if (input) input.value = reading.v;
 }
 
 function bindFields() {
@@ -483,7 +560,33 @@ function bindFields() {
   el.fields.addEventListener('input', e => {
     const t = e.target;
     if (!t.dataset.k) return;
-    state.fields[t.closest('.fi').dataset.key][t.dataset.k] = t.value;
+    const li = t.closest('.fi');
+    const key = li.dataset.key;
+    const f = state.fields[key];
+    f[t.dataset.k] = t.value;
+    if (key === 'name' && (t.dataset.k === 'sei' || t.dataset.k === 'mei')) {
+      // 姓・名の間は半角スペースを自動で入れる
+      f.ja = [f.sei, f.mei].filter(Boolean).join(' ');
+    }
+    if (key === 'reading' && t.dataset.k === 'v') {
+      state.fields.reading._auto = false;   // 手で編集したら自動入力を止める
+    }
+    update();
+  });
+  // IME変換前のひらがなを捕まえて、確定時にローマ字表記へ反映する
+  el.fields.addEventListener('compositionupdate', e => {
+    const t = e.target;
+    if (t.dataset.k !== 'sei' && t.dataset.k !== 'mei') return;
+    if (/^[\u3040-\u309F\u30FCー]*$/.test(e.data || '')) t._lastKana = e.data;
+  });
+  el.fields.addEventListener('compositionend', e => {
+    const t = e.target;
+    if (t.dataset.k !== 'sei' && t.dataset.k !== 'mei') return;
+    const kana = t._lastKana || ''; t._lastKana = '';
+    if (!kana) return;
+    const f = state.fields[t.closest('.fi').dataset.key];
+    f[t.dataset.k === 'sei' ? 'seiKana' : 'meiKana'] = kana;
+    autoFillReading(f);
     update();
   });
 }
@@ -589,6 +692,8 @@ function restore(data) {
       if (typeof s.ja === 'string') f.ja = s.ja;
       if (typeof s.en === 'string') f.en = s.en;
       if (typeof s.v  === 'string') f.v  = s.v;
+      if (typeof s.sei === 'string') f.sei = s.sei;
+      if (typeof s.mei === 'string') f.mei = s.mei;
     }
   }
   if (state.lang !== 'en') state.lang = 'ja';
@@ -675,7 +780,7 @@ function renderList() {
         <span class="cardlist__meta">${esc(meta)}</span>
       </div>
       <div class="cardlist__act">
-        <button type="button" class="btn btn--ghost btn--sm" data-act="open">開く</button>
+        <button type="button" class="btn btn--ghost btn--sm" data-act="open">編集する</button>
         <button type="button" class="btn btn--ghost btn--sm" data-act="del">削除</button>
       </div>
     </li>`;

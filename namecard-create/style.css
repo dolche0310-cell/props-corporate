@@ -124,6 +124,8 @@ input:focus, select:focus, textarea:focus {
 .fi__body input {
   border-radius: 12px; padding: 13px 16px; font-size: 14px; border-color: #EAEAEA;
 }
+.field--pair { display: flex; flex-direction: row; gap: 8px; }
+.field--pair input { min-width: 0; }
 input[type="range"] { width: 100%; accent-color: var(--nc-btn); }
 .row { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
 .row--2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px solid var(--nc-border); padding-top: 16px; }
@@ -197,11 +199,12 @@ input[type="range"] { width: 100%; accent-color: var(--nc-btn); }
 .export-list li { display: flex; align-items: center; gap: 12px; justify-content: space-between; border: 1px solid var(--nc-border); border-radius: 9px; padding: 11px 12px; }
 .export-list b { display: block; font-size: 13px; }
 .export-list span { display: block; font-size: 11.5px; color: var(--nc-sub); line-height: 1.55; }
-.cardlist { display: flex; flex-direction: column; gap: 8px; max-height: 58vh; overflow: auto; }
+.cardlist { display: flex; flex-direction: column; max-height: 58vh; overflow: auto; }
 .cardlist li {
   display: flex; align-items: center; gap: 12px; justify-content: space-between;
-  border: 1px solid var(--nc-border); border-radius: 9px; padding: 10px 12px;
+  border-bottom: 1px solid var(--nc-border); padding: 16px 0;
 }
+.cardlist li:last-child { border-bottom: 0; }
 .cardlist__body { min-width: 0; }
 .cardlist b { display: block; font-size: 13px; }
 .cardlist__meta { display: block; font-size: 11.5px; color: var(--nc-sub); line-height: 1.55; }
