@@ -86,7 +86,8 @@ button { font: inherit; }
 .hint { font-size: 11.5px; color: var(--nc-sub); line-height: 1.6; margin-top: 8px; }
 
 /* ---------- lang tabs（表面/裏面と同じ見た目） ---------- */
-.lang-bar { border-bottom: 1px solid var(--nc-border); }
+/* .block の左右padding(16px)と同じ分だけ内側に入れ、下線の幅を入力欄に揃える */
+.lang-bar { margin: 0 16px; border-bottom: 1px solid var(--nc-border); }
 
 /* ---------- field rows ---------- */
 .fields { display: flex; flex-direction: column; gap: 22px; }
