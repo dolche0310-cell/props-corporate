@@ -56,16 +56,25 @@ button { font: inherit; }
 .btn:focus-visible { outline: 2px solid var(--nc-btn); outline-offset: 2px; }
 
 /* ---------- layout（左：プレビュー / 右：入力） ---------- */
+/* .tool の高さをヘッダー分を除いた画面いっぱいに固定し、はみ出す分は
+   .panel だけが内部スクロールする（プレビューは完全に動かない） */
 .tool {
   display: grid;
   grid-template-columns: minmax(460px, 640px) minmax(340px, 430px);
   justify-content: center;
   align-items: start;
   gap: 20px; padding: 20px; max-width: 1500px; margin: 0 auto;
+  height: calc(100vh - 65px); overflow: hidden;
 }
-@media (max-width: 1040px) { .tool { grid-template-columns: 1fr; } }
+@media (max-width: 1040px) {
+  .tool { grid-template-columns: 1fr; height: auto; overflow: visible; }
+}
 
-.panel { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.panel {
+  display: flex; flex-direction: column; gap: 14px; min-width: 0;
+  height: 100%; overflow-y: auto;
+}
+@media (max-width: 1040px) { .panel { height: auto; overflow-y: visible; } }
 .block {
   background: var(--nc-panel);
   border-radius: var(--nc-radius); padding: 16px;
@@ -123,13 +132,11 @@ input[type="range"] { width: 100%; accent-color: var(--nc-btn); }
 .check--sm { font-size: 11.5px; margin: 0; }
 
 /* ---------- preview ---------- */
+/* .tool 自体がスクロールしないので、プレビューは常に完全固定になる */
 .preview {
-  position: sticky; top: 72px;
   background: var(--nc-panel);
   border-radius: var(--nc-radius); padding: 2px 16px 12px; min-width: 0;
-  will-change: transform; /* 速いスクロールでsticky要素が一瞬遅れて動く(ホップする)のを防ぐ */
 }
-@media (max-width: 1040px) { .preview { position: static; } }
 
 /* タブ + 設定アイコン */
 .preview__bar {
