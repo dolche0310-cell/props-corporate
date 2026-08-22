@@ -129,6 +129,8 @@ input:focus, select:focus, textarea:focus {
 input[type="range"] { width: 100%; accent-color: var(--nc-btn); }
 .row { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
 .row--2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px solid var(--nc-border); }
+.block--finish { padding-top: 0; }
+.block--finish .row--2 { margin-top: 0; }
 .check { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--nc-sub); cursor: pointer; margin-top: 10px; }
 .check input { accent-color: var(--nc-btn); }
 .check--sm { font-size: 11.5px; margin: 0; }
