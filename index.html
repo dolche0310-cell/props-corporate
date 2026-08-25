@@ -253,9 +253,24 @@
      押すと単独ページ(logomark.html)へ遷移する。モーダルではない。 */
 
   /* --- Business Card Design ---
-     中身が空でも押せることが分かるよう、ホバーで地をわずかに沈ませる。
-     他のパネル(.pane-logo)は中の絵が寄るので、そちらには影響しない。 */
-  .logo-grid .pane-card { transition: background-color 0.4s ease; }
+     箱の中身は絵ではなく文言。何の箱かが箱だけで分かるようにする。
+     字面はカード内の説明文(.card .policy)と同じ指定に揃える。
+     ホバーで地をわずかに沈ませるのは、.pane-logo の「絵が寄る」に代わる
+     押せることの合図(こちらは絵が無いので寄せるものが無い)。 */
+  .logo-grid .pane-card {
+    display: grid;
+    place-items: center;
+    padding-inline: 20px;
+    text-align: center;
+    transition: background-color 0.4s ease;
+  }
+  .pane-card__label {
+    font-family: "Inter", "Noto Sans JP", sans-serif;
+    font-size: 13.5px;
+    letter-spacing: 0.03em;
+    line-height: 1.6;
+    color: var(--ink-2);
+  }
   @media (hover: hover) {
     .logo-grid .pane-card:hover { background: #f2f2f2; }
   }
@@ -446,7 +461,9 @@
       <h2>Business Card Design</h2>
       <div class="logo-grid logo-grid--4">
         <a class="pane pane-card" href="https://miai-namecard-create.netlify.app/"
-           target="_blank" rel="noopener noreferrer" aria-label="名刺デザインを見る(別タブで開く)"></a>
+           target="_blank" rel="noopener noreferrer" aria-label="名刺データ作成ツールを開く(別タブ)">
+          <span class="pane-card__label">名刺データ作成ツール</span>
+        </a>
       </div>
     </section>
 
