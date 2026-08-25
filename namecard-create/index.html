@@ -27,7 +27,7 @@
     <div class="preview__bar">
       <div class="tabs" id="seg-side">
         <button type="button" class="tab is-active" data-side="front">Front</button>
-        <button type="button" class="tab" data-side="back" id="side-back" disabled>Back</button>
+        <button type="button" class="tab" data-side="back" id="side-back">Back</button>
       </div>
       <div class="popwrap">
         <button type="button" class="iconbtn" id="btn-settings"
@@ -73,28 +73,10 @@
       <button type="button" class="tab" data-lang="en">EN</button>
     </div>
 
-    <div class="block">
-      <ul class="fields" id="fields"></ul>
-    </div>
-
-    <div class="block block--finish">
-      <div class="row row--2">
-        <label class="field"><span>用紙サイズ</span>
-          <select id="size">
-            <option value="jp91">日本標準 55 × 91 mm</option>
-            <option value="us89">欧米サイズ 51 × 89 mm</option>
-            <option value="jp85">小型 49 × 85 mm</option>
-          </select>
-        </label>
-        <label class="field"><span>書体</span>
-          <select id="font">
-            <option value="gothic">ゴシック体</option>
-            <option value="mincho">明朝体</option>
-          </select>
-        </label>
+    <div class="panel__scroll" id="panel-scroll">
+      <div class="block">
+        <ul class="fields" id="fields"></ul>
       </div>
-      <label class="check"><input type="checkbox" id="show-icons"><span>連絡先にアイコンを表示する</span></label>
-      <label class="check"><input type="checkbox" id="use-back" checked><span>裏面も書き出す</span></label>
     </div>
 
   </section>
@@ -125,8 +107,9 @@
     <div class="note">
       <b>入稿前チェック</b>
       <ul>
-        <li>PDF書き出し時は「用紙サイズに合わせる」をオフ、余白なし（100%）で保存してください。</li>
-        <li>色は RGB です。CMYK指定の印刷所へはSVG/PDFをIllustratorで変換のうえ入稿してください。</li>
+        <li>塗り足し3mm・トンボは自動で付加されます（プレビューの表示設定に関わらず書き出しには常に含まれます）。</li>
+        <li>PDF書き出し時は、印刷ダイアログで「用紙サイズに合わせる」をオフ、余白なし（100%）で保存してください。</li>
+        <li>色は RGB です。CMYK指定の印刷会社へは、書き出したSVG/PDFをIllustratorで開き、Adobe PDFプリセットから「PDF/X-1a:2001(日本)」を選択して保存し直してから入稿してください。</li>
         <li>フォントはアウトライン化を推奨します。</li>
       </ul>
     </div>

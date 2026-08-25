@@ -5,7 +5,7 @@
 :root {
   --nc-ink: #1A1A1A;
   --nc-sub: #6E6E6E;
-  --nc-muted: #9A9A9A;
+  --nc-muted: #757575;
   --nc-border: #E3E3E3;
   --nc-bg: #FFFFFF;
   --nc-panel: #FFFFFF;
@@ -70,11 +70,20 @@ button { font: inherit; }
   .tool { grid-template-columns: 1fr; height: auto; overflow: visible; }
 }
 
+/* JP/EN タブは常に固定表示。その下の入力欄だけを内部スクロールさせ、
+   スクロール領域の開始Y位置をプレビューのグレー背景（.preview__stage）の
+   上端に揃える（.preview は padding-top:2px、.preview__stage は
+   margin-top:16px でグレー背景が始まるため、こちらも同じ値で合わせる） */
 .panel {
-  display: flex; flex-direction: column; gap: 14px; min-width: 0;
-  height: 100%; overflow-y: auto;
+  display: flex; flex-direction: column; min-width: 0;
+  height: 100%; padding-top: 2px; overflow: hidden;
 }
-@media (max-width: 1040px) { .panel { height: auto; overflow-y: visible; } }
+@media (max-width: 1040px) { .panel { height: auto; overflow: visible; } }
+.panel__scroll {
+  display: flex; flex-direction: column; gap: 14px; flex: 1 1 auto;
+  margin-top: 16px; min-height: 0; overflow-y: auto;
+}
+@media (max-width: 1040px) { .panel__scroll { overflow-y: visible; } }
 .block {
   background: var(--nc-panel);
   border-radius: var(--nc-radius); padding: 16px;
@@ -84,25 +93,31 @@ button { font: inherit; }
   padding-bottom: 12px; margin-bottom: 16px; border-bottom: 1px solid var(--nc-border);
 }
 .hint { font-size: 11.5px; color: var(--nc-sub); line-height: 1.6; margin-top: 8px; }
+.fi__body .hint { margin-top: 0; }   /* .fi__body は既に gap で間隔を持つため、二重に余白をつけない */
 
 /* ---------- lang tabs（表面/裏面と同じ見た目） ---------- */
 /* .block の左右padding(16px)と同じ分だけ内側に入れ、下線の幅を入力欄に揃える */
-.lang-bar { margin: 0 16px; border-bottom: 1px solid var(--nc-border); }
+.lang-bar { flex: none; margin: 0 16px; border-bottom: 1px solid var(--nc-border); }
 
 /* ---------- field rows ---------- */
 .fields { display: flex; flex-direction: column; gap: 22px; }
 .fi { transition: .15s; }
-.fi.is-off { opacity: .5; }
+.fi.is-off { opacity: .65; }
 .fi.is-off .fi__body { display: none; }
 .fi__head { display: flex; align-items: center; gap: 10px; }
 .fi__label { flex: 1; font-size: 12px; font-weight: 500; color: var(--nc-ink); min-width: 0; }
 .fi.is-off .fi__label { color: var(--nc-muted); }
 .fi__body { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
 
+/* 電話番号の上・メールアドレスの下の区切り線、アイコン表示チェックボックスの行 */
+.fi--border-top { border-top: 1px solid var(--nc-border); padding-top: 20px; }
+.fi-icons-row { border-bottom: 1px solid var(--nc-border); padding-bottom: 20px; }
+.fi-icons-row .check { margin-top: 0; }
+
 /* トグルスイッチ */
 .sw { position: relative; width: 33px; height: 19px; flex: none; }
 .sw input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
-.sw span { position: absolute; inset: 0; background: #D2D2D2; border-radius: 999px; transition: .18s; pointer-events: none; }
+.sw span { position: absolute; inset: 0; background: #ADADAD; border-radius: 999px; transition: .18s; pointer-events: none; }
 .sw span::after {
   content: ""; position: absolute; top: 2px; left: 2px; width: 15px; height: 15px;
   background: #fff; border-radius: 50%; transition: .18s;
@@ -128,10 +143,7 @@ input:focus, select:focus, textarea:focus {
 .field--pair { display: flex; flex-direction: row; gap: 8px; }
 .field--pair input { min-width: 0; }
 input[type="range"] { width: 100%; accent-color: var(--nc-btn); }
-.row { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
-.row--2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px solid var(--nc-border); padding-top: 16px; }
-.block--finish { padding-top: 0; }
-.block--finish .row--2 { margin-top: 0; }
+
 .check { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--nc-sub); cursor: pointer; margin-top: 10px; }
 .check input { accent-color: var(--nc-btn); }
 .check--sm { font-size: 11.5px; margin: 0; }
@@ -224,11 +236,15 @@ input[type="range"] { width: 100%; accent-color: var(--nc-btn); }
 .modal--sm { max-width: 380px; }
 .confirm-msg { font-size: 13px; color: var(--nc-sub); line-height: 1.6; }
 
-/* ---------- print ---------- */
+/* ---------- print（入稿用PDF書き出し） ---------- */
 .print-root { display: none; }
 @media print {
+  /* body の padding-top（固定ヘッダー分のオフセット）が残っていると、
+     カード1面分のページ内に収まらず2ページ目に少しはみ出してしまうため、
+     印刷時は完全にリセットする */
+  html, body { height: auto !important; margin: 0 !important; padding: 0 !important; }
   body > *:not(.print-root) { display: none !important; }
-  .print-root { display: block; }
-  .print-root svg { display: block; page-break-after: always; }
+  .print-root { display: block; margin: 0; padding: 0; }
+  .print-root svg { display: block; margin: 0; page-break-after: always; page-break-inside: avoid; }
   .print-root svg:last-child { page-break-after: auto; }
 }

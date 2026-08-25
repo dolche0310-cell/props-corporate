@@ -10,17 +10,12 @@
 (() => {
 'use strict';
 
-/* ---------- 用紙（向きは縦で固定） ---------- */
-const SIZES = {
-  jp91: { w: 55, h: 91 },
-  us89: { w: 51, h: 89 },
-  jp85: { w: 49, h: 85 },
-};
+/* ---------- 名刺サイズ（日本標準 55×91mm・縦固定。用紙サイズの選択UIは廃止） ---------- */
+const CARD = { w: 55, h: 91 };
 const BLEED = 3;      // 塗り足し（書き出しには含めるが、プレビューには表記しない）
 const MARKM = 5;      // トンボを描くための追加マージン
 
 const GOTHIC = "'Albert Sans','Noto Sans JP','Hiragino Kaku Gothic ProN','Hiragino Sans','Yu Gothic',sans-serif";
-const MINCHO = "'Hiragino Mincho ProN','Yu Mincho','YuMincho','Noto Serif JP',serif";
 
 /* Figma px → mm（251px = 55mm） */
 const PX = 55 / 251;
@@ -37,16 +32,24 @@ const LY = {
 const LOGO_W = 43 / 251;   // おもてのロゴマーク幅（カード幅に対する比）
 
 /* 裏面（Figma うら 526:23452 の実測。すべてカード寸法に対する比） */
+/* Figma node 526:23452（うら）実測値（2026-08 リブランディング版レイアウトに合わせて更新） */
 const BACK = {
-  markX: 44.536 / 251, markY: 105.014 / 415, markW:  39.051 / 251,
-  typeX: 93.472 / 251, typeY: 105.391 / 415, typeW: 104.720 / 251,
-  tagY:    171 / 415,
+  markY: 89.466 / 415, markW:  38.304 / 251,
+  typeY: 89.590 / 415, typeW: 104.212 / 251,
+  gapX:    9.452 / 251,   // ロゴマークとロゴタイプの間隔（Figma実測）
+  tagY:    152 / 415,
   tagSize:  12 * PX,     // 2.63mm
   tagLH:    22 / 12,     // 行送り 22px / 級数 12px
-  tagLS:  0.48 * PX,     // 字送り 0.48px
-  qrX:      95 / 251, qrY: 286 / 415, qrW: 62 / 251,
+  qrX:      92 / 251, qrY: 264 / 415, qrW: 62 / 251,
 };
-const TAGLINE = ['“うちに合う人”を逃さない。', '採用を加速する', 'カスタムAI面接'];
+/* タグライン（3行）。Figma実測では引用符や「ム」「AI」だけ字送りが広く、
+   区間ごとに分けると不自然に見えるため、各行とも1文にまとめ、
+   字送りはフォントサイズの8%で統一する */
+const TAGLINE = [
+  [{ t: '“うちに合う人”を逃さない。', lsPct: 0.08 }],
+  [{ t: '採用を加速する', lsPct: 0.08 }],
+  [{ t: 'カスタムAI面接', lsPct: 0.08 }],
+];
 
 /* 配色（Figma 実測。デザイン固定） */
 const C = {
@@ -100,7 +103,7 @@ const DEFS = {
   mobile:  { label: '携帯番号',       type: 'single', group: 'contact', on: false, icon: 'mobile', v: '090-1234-5678' },
   email:   { label: 'メールアドレス', type: 'single', group: 'contact', on: true,  icon: 'email',  v: 'taro.yamada@example.co.jp' },
   company: { label: '会社名',         type: 'bi',     group: 'org',  on: true,  ja: '株式会社サンプル', en: 'Sample Inc.' },
-  postal:  { label: '郵便番号',       type: 'single', group: 'addr', on: true,  v: '〒150-0001' },
+  postal:  { label: '郵便番号',       type: 'single', group: 'addr', on: true,  v: '150-0001' },
   address: { label: '会社住所',       type: 'bi',     group: 'addr', on: true,
              ja: '東京都渋谷区神宮前1-2-3 サンプルビル5F',
              en: '5F Sample Bldg, 1-2-3 Jingumae, Shibuya-ku, Tokyo' },
@@ -110,8 +113,8 @@ const KEYS = Object.keys(DEFS);
 
 /* ---------- 状態 ---------- */
 const state = {
-  size: 'jp91', lang: 'ja', font: 'gothic',
-  showIcons: false, back: true, side: 'front',
+  lang: 'ja',
+  showIcons: false, side: 'front',
   guides: true, marks: false, zoom: 1.4,
   fields: {},           // key → { enabled, ja, en, v }
 };
@@ -187,7 +190,7 @@ const capitalize = s => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
 /* ---------- 文字の実測 ---------- */
 const _mc = document.createElement('canvas').getContext('2d');
-const family = () => (state.font === 'mincho' ? MINCHO : GOTHIC);
+const family = () => GOTHIC;   // 書体選択は廃止。常にゴシック体で統一する
 
 function textW(str, size, weight = 400, ls = 0) {
   if (!str) return 0;
@@ -209,15 +212,46 @@ function tokenize(s) {
   if (buf) out.push(buf);
   return out;
 }
-function wrap(str, maxW, size, weight, ls) {
+/* 禁則処理：住所などが2行になったとき、中途半端な位置（行頭禁則文字が
+   行頭に来る／行末禁則文字が行末に来る）で改行されないようにする */
+const KINSOKU_NO_START = '、。，．・：；？！ー々〆〇’”）〉》」』】〕｝］!?)]}' +
+  'っゃゅょぁぃぅぇぉゕゖゎゝゞ' +           // ひらがな小書き
+  'ッャュョァィゥェォヵヶヮヽヾ';           // カタカナ小書き
+const KINSOKU_NO_END   = '（〈《「『【〔｛［‘“([{';
+
+/* 住所欄専用：入力に「/」（全角「／」も可）が含まれる場合は、そこを
+   改行位置の指定とみなして必ずそこで改行する（例：番地とビル名の間に
+   「/」を入れておくと、その位置で自動改行される）。「/」自体は印字しない。
+   ※他の項目（Webサイトの URL 等）には適用しない。 */
+const ADDR_HINT = /[\/／]/;
+function wrap(str, maxW, size, weight, ls, useAddrHint = false) {
+  if (!str) return [];
+  if (useAddrHint && ADDR_HINT.test(str)) {
+    const parts = str.split(ADDR_HINT).map(s => s.trim()).filter(Boolean);
+    if (parts.length > 1) return parts.flatMap(p => wrapSegment(p, maxW, size, weight, ls));
+  }
+  return wrapSegment(str, maxW, size, weight, ls);
+}
+
+function wrapSegment(str, maxW, size, weight, ls) {
   if (!str) return [];
   if (textW(str, size, weight, ls) <= maxW) return [str];
   const lines = []; let cur = '';
   for (const t of tokenize(str)) {
     if (t === ' ' && !cur) continue;
     const next = cur + t;
-    if (cur && textW(next, size, weight, ls) > maxW) { lines.push(cur.trimEnd()); cur = t === ' ' ? '' : t; }
-    else cur = next;
+    if (cur && textW(next, size, weight, ls) > maxW) {
+      // 行頭禁則：区切った先頭が行頭禁止文字なら、まだ改行せずいまの行に含める
+      if (t.length === 1 && KINSOKU_NO_START.includes(t)) { cur = next; continue; }
+      // 行末禁則：区切った行の末尾が行末禁止文字なら、その文字を次行側へ送る
+      const lastCh = cur[cur.length - 1];
+      if (lastCh && KINSOKU_NO_END.includes(lastCh)) {
+        lines.push(cur.slice(0, -1).trimEnd());
+        cur = lastCh + t;
+        continue;
+      }
+      lines.push(cur.trimEnd()); cur = t === ' ' ? '' : t;
+    } else cur = next;
   }
   if (cur.trim()) lines.push(cur.trimEnd());
   return lines;
@@ -253,7 +287,12 @@ function svgIcon(name, x, y, size) {
 function valueOf(key, lang) {
   const d = DEFS[key], f = state.fields[key];
   if (!f || !f.enabled) return '';
-  if (d.type === 'single') return f.v.trim();
+  if (key === 'reading' && lang === 'en') return '';   // 英語表記ではローマ字表記は不要
+  if (d.type === 'single') {
+    const v = f.v.trim();
+    if (key === 'postal' && v) return v.startsWith('〒') ? v : '〒' + v;   // 「〒」は必須表示
+    return v;
+  }
   const ja = f.ja.trim(), en = f.en.trim();
   return lang === 'en' ? (en || ja) : (ja || en);
 }
@@ -298,7 +337,7 @@ function pushField(out, key, lang, st, gap, boxW, ind = 0) {
   const avail = boxW - ind;
   const size = st.min ? fit(val, avail, st.size, st.weight, st.ls, st.min) : st.size;
   let first = true;
-  for (const t of wrap(val, avail, size, st.weight, st.ls)) {
+  for (const t of wrap(val, avail, size, st.weight, st.ls, key === 'address')) {
     out.push({ t, size, weight: st.weight, fill: st.fill, ls: st.ls, lh: st.lh, ind, gap: first ? gap : 0 });
     first = false;
   }
@@ -360,19 +399,33 @@ let overflow = false;
 /* --- 裏面（Figma うら 526:23452・デザイン固定） --- */
 function renderBack(g) {
   let out = '';
-  // ロゴマーク + ロゴタイプ
-  out += svgImage(ART.mark, g.w * BACK.markX, g.h * BACK.markY, g.w * BACK.markW);
-  out += svgImage(ART.type, g.w * BACK.typeX, g.h * BACK.typeY, g.w * BACK.typeW);
+  // ロゴマーク + ロゴタイプ（間隔はFigma実測を保持しつつ、
+  // 結合した横幅をカード中央に揃える＝タグラインと視覚的な中心を一致させる）
+  const markW = g.w * BACK.markW;
+  const typeW = g.w * BACK.typeW;
+  const gapX  = g.w * BACK.gapX;
+  const markX = g.w / 2 - (markW + gapX + typeW) / 2;
+  const typeX = markX + markW + gapX;
+  out += svgImage(ART.mark, markX, g.h * BACK.markY, markW);
+  out += svgImage(ART.type, typeX, g.h * BACK.typeY, typeW);
 
-  // タグライン（3行・中央ぞろえ）
-  const k = g.w / SIZES.jp91.w;
-  const size = BACK.tagSize * k, ls = BACK.tagLS * k;
+  // タグライン（3行・中央ぞろえ。行ごとに字送りの異なる区間をつなげて配置する）
+  const k = g.w / CARD.w;
+  const size = BACK.tagSize * k;
   const lh = size * BACK.tagLH;
   const lead = (lh - size) / 2 + size * 0.78;   // 行ボックス上端 → ベースライン
-  TAGLINE.forEach((t, i) => {
-    // 字送りは最後の1文字ぶんも進むので、中央ぞろえの基準を半分だけ戻す
-    out += svgText(t, g.w / 2 + ls / 2, g.h * BACK.tagY + i * lh + lead,
-      { size, weight: 500, fill: C.tag, ls, anchor: 'middle' });
+  const cx = g.w / 2;
+  TAGLINE.forEach((segs, i) => {
+    const y = g.h * BACK.tagY + i * lh + lead;
+    // lsPct はフォントサイズに対する割合（例: 0.08 = 8%）、ls は Figma実測のmm固定値
+    const lsOf = s => s.lsPct != null ? size * s.lsPct : s.ls * k;
+    const widths = segs.map(s => textW(s.t, size, 500, lsOf(s)));
+    const total = widths.reduce((a, b) => a + b, 0);
+    let x = cx - total / 2;
+    segs.forEach((s, j) => {
+      out += svgText(s.t, x, y, { size, weight: 500, fill: C.tag, ls: lsOf(s) });
+      x += widths[j];
+    });
   });
 
   // QRコード
@@ -424,8 +477,7 @@ function renderFace(lang, side) {
 }
 
 function geom() {
-  const s = SIZES[state.size];
-  return { w: s.w, h: s.h, bleed: BLEED };
+  return { w: CARD.w, h: CARD.h, bleed: BLEED };
 }
 
 function trimMarks(g, m) {
@@ -477,18 +529,18 @@ function buildSVG(side, opt = {}) {
    ============================================================ */
 const el = {};
 function cacheEls() {
-  ['fields', 'size', 'font', 'card-wrap', 'guides', 'marks',
+  ['fields', 'card-wrap', 'guides', 'marks',
    'zoom-in', 'zoom-out', 'zoom-out-label', 'side-back', 'warn', 'export-modal',
    'print-root', 'print-page', 'btn-export', 'btn-save', 'btn-list', 'list-modal', 'card-list',
    'confirm-modal',
-   'stage', 'show-icons', 'use-back', 'btn-settings', 'settings-pop'].forEach(id => el[id] = $('#' + id));
+   'stage', 'btn-settings', 'settings-pop'].forEach(id => el[id] = $('#' + id));
 }
 
 /* --- 要素リスト（表示/非表示のみ） --- */
 function fieldRow(key) {
   const d = DEFS[key], f = state.fields[key];
   const li = document.createElement('li');
-  li.className = 'fi' + (f.enabled ? '' : ' is-off');
+  li.className = 'fi' + (f.enabled ? '' : ' is-off') + (key === 'tel' ? ' fi--border-top' : '');
   li.dataset.key = key;
 
   li.innerHTML = `
@@ -508,7 +560,7 @@ function fieldRow(key) {
   };
 
   if (d.type === 'single') {
-    input(d.label, 'v', f.v, key === 'email' ? 'email' : (/^(tel|mobile)$/.test(key) ? 'tel' : 'text'));
+    input(d.label, 'v', f.v, key === 'email' ? 'email' : (/^(tel|mobile|postal)$/.test(key) ? 'tel' : 'text'));
   } else if (key === 'name' && state.lang !== 'en') {
     // 氏名（日本語）だけは姓・名を分けて入力し、間の半角スペースは自動で入れる
     const row = document.createElement('div');
@@ -522,12 +574,31 @@ function fieldRow(key) {
     const k = state.lang === 'en' ? 'en' : 'ja';
     input(d.label, k, f[k]);
   }
+  if (key === 'address') {
+    const hint = document.createElement('p');
+    hint.className = 'hint';
+    hint.textContent = '「/」を入れると、その位置で改行されます。「/」自体は印字されません。';
+    bodyEl.appendChild(hint);
+  }
   return li;
 }
 
 function renderFields() {
   el.fields.innerHTML = '';
-  KEYS.forEach(k => el.fields.appendChild(fieldRow(k)));
+  for (const k of KEYS) {
+    if (k === 'reading' && state.lang === 'en') continue;   // 英語表記ではローマ字表記欄は不要
+    el.fields.appendChild(fieldRow(k));
+    if (k === 'email') el.fields.appendChild(iconsToggleRow());   // 電話番号上〜メール下の枠内、下線の上に配置
+  }
+}
+
+/* 「連絡先にアイコンを表示する」の行。#fields 内で毎回作り直されるため、
+   チェック状態は state.showIcons から復元し、変更は #fields への委譲（bindFields）で拾う */
+function iconsToggleRow() {
+  const li = document.createElement('li');
+  li.className = 'fi-icons-row';
+  li.innerHTML = `<label class="check"><input type="checkbox" id="show-icons"${state.showIcons ? ' checked' : ''}><span>連絡先にアイコンを表示する</span></label>`;
+  return li;
 }
 
 /**
@@ -548,9 +619,32 @@ function autoFillReading(nameField) {
   if (input) input.value = reading.v;
 }
 
+/**
+ * 電話番号（数字だけの入力）に自動でハイフンを入れる（簡易版）。
+ * 携帯電話・フリーダイヤル・市外局番2桁（03/06）・一般加入電話の代表的な
+ * 桁区切りに対応する。既にハイフン等が含まれる入力には手を加えない。
+ */
+function formatPhoneJP(digits) {
+  const d = digits.slice(0, 11);
+  const join = (...parts) => parts.filter(Boolean).join('-');
+  let m;
+  if ((m = d.match(/^(0[789]0)(\d{0,4})(\d{0,4})$/))) return join(m[1], m[2], m[3]);
+  if ((m = d.match(/^(0120|0800)(\d{0,3})(\d{0,3})$/))) return join(m[1], m[2], m[3]);
+  if ((m = d.match(/^(0[36])(\d{0,4})(\d{0,4})$/))) return join(m[1], m[2], m[3]);
+  if ((m = d.match(/^(0\d{0,2})(\d{0,3})(\d{0,4})$/))) return join(m[1], m[2], m[3]);
+  return d;
+}
+
+/** 郵便番号（数字だけの入力）に自動でハイフンを入れる（3桁-4桁）。 */
+function formatPostalJP(digits) {
+  const d = digits.slice(0, 7);
+  return d.length > 3 ? d.slice(0, 3) + '-' + d.slice(3) : d;
+}
+
 function bindFields() {
   el.fields.addEventListener('change', e => {
     const t = e.target;
+    if (t.id === 'show-icons') { state.showIcons = t.checked; update(); return; }
     if (t.dataset.act !== 'toggle') return;
     const li = t.closest('.fi');
     state.fields[li.dataset.key].enabled = t.checked;
@@ -563,7 +657,19 @@ function bindFields() {
     const li = t.closest('.fi');
     const key = li.dataset.key;
     const f = state.fields[key];
-    f[t.dataset.k] = t.value;
+    let val = t.value;
+    if (t.type === 'tel') {
+      // 数字だけ入力した場合にも、自動でハイフンを入れて表示する（電話番号・郵便番号）
+      const digits = val.replace(/[^\d]/g, '');
+      if (digits) {
+        val = key === 'postal' ? formatPostalJP(digits) : formatPhoneJP(digits);
+        if (val !== t.value) {
+          t.value = val;
+          t.setSelectionRange(val.length, val.length);   // カーソルを末尾に保つ
+        }
+      }
+    }
+    f[t.dataset.k] = val;
     if (key === 'name' && (t.dataset.k === 'sei' || t.dataset.k === 'mei')) {
       // 姓・名の間は半角スペースを自動で入れる
       f.ja = [f.sei, f.mei].filter(Boolean).join(' ');
@@ -602,9 +708,6 @@ function update() {
   node.setAttribute('width', Math.round(px));
   node.setAttribute('height', Math.round(px * (g.h + pad * 2) / (g.w + pad * 2)));
 
-  el['side-back'].disabled = !state.back;
-  if (!state.back && state.side === 'back') { state.side = 'front'; syncSeg('#seg-side', 'side', 'front'); return update(); }
-
   el.warn.hidden = !overflow;
   if (overflow) el.warn.textContent = '文字量がカードに収まりきっていません。表示する要素を減らしてください。';
   save();
@@ -624,11 +727,12 @@ function download(blob, name) {
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }
 const baseName = () => 'namecard_' + (valueOf('name', state.lang) || 'untitled').replace(/\s+/g, '');
-const sides = () => (state.back ? ['front', 'back'] : ['front']);
+const sides = () => ['front', 'back'];   // 常に両面を書き出す（「裏面も書き出す」の切替は廃止）
 
 function exportSVG() {
+  // 入稿用データなので、プレビューのトンボ表示設定に関わらず常にトンボを付けて書き出す
   sides().forEach(s => {
-    const svg = buildSVG(s, { guides: false, marks: state.marks });
+    const svg = buildSVG(s, { guides: false, marks: true });
     download(new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n' + svg], { type: 'image/svg+xml' }),
       `${baseName()}_${s === 'front' ? 'omote' : 'ura'}.svg`);
   });
@@ -662,12 +766,13 @@ const exportPNG = () => exportRaster('image/png', 'png');
 const exportJPG = () => exportRaster('image/jpeg', 'jpg', 0.95);
 
 function exportPDF() {
+  // 入稿用PDFなので、プレビューのトンボ表示設定に関わらず常に塗り足し3mm＋トンボ付きで書き出す
   const g = geom();
-  const pad = g.bleed + (state.marks ? MARKM : 0);
+  const pad = g.bleed + MARKM;
   const W = g.w + pad * 2, H = g.h + pad * 2;
   el['print-page'].textContent = `@page { size: ${n(W)}mm ${n(H)}mm; margin: 0; }`;
   el['print-root'].innerHTML = sides()
-    .map(s => buildSVG(s, { guides: false, marks: state.marks })).join('');
+    .map(s => buildSVG(s, { guides: false, marks: true })).join('');
   el['export-modal'].close();
   setTimeout(() => window.print(), 120);
 }
@@ -675,8 +780,8 @@ function exportPDF() {
 /* ---------- 編集中の状態（リロードしても続きから） ---------- */
 const KEY = 'nc-builder-v4';
 function snapshot() {
-  const { size, lang, font, showIcons, back, fields } = state;
-  return { size, lang, font, showIcons, back, fields };
+  const { lang, showIcons, fields } = state;
+  return { lang, showIcons, fields };
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(snapshot())); } catch (e) {} }
 function restore(data) {
@@ -697,13 +802,9 @@ function restore(data) {
     }
   }
   if (state.lang !== 'en') state.lang = 'ja';
-  if (!SIZES[state.size]) state.size = 'jp91';
 
-  el.size.value = state.size; el.font.value = state.font;
-  el['show-icons'].checked = !!state.showIcons;
-  el['use-back'].checked = !!state.back;
   syncSeg('#seg-lang', 'lang', state.lang);
-  renderFields();
+  renderFields();   // #show-icons はここで再生成され、state.showIcons から復元される
 }
 
 /* ---------- 登録済の名刺データ（ツール内に保存） ---------- */
@@ -844,10 +945,7 @@ function init() {
     state.side = b.dataset.side; syncSeg('#seg-side', 'side', state.side); update();
   });
 
-  el.size.addEventListener('change', () => { state.size = el.size.value; update(); });
-  el.font.addEventListener('change', () => { state.font = el.font.value; update(); });
-  el['show-icons'].addEventListener('change', () => { state.showIcons = el['show-icons'].checked; update(); });
-  el['use-back'].addEventListener('change', () => { state.back = el['use-back'].checked; update(); });
+  // 「連絡先にアイコンを表示する」は #fields 内で再生成されるため、変更は bindFields() 側の委譲で拾う
 
   // 表示設定（歯車 → ポップオーバー）
   const pop = el['settings-pop'], popBtn = el['btn-settings'];
