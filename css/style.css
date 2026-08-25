@@ -1500,8 +1500,12 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   .service--brushup .service__list {
     position: relative;
     display: block;
-    /* .wrap と同じ最大幅の内側(1440 - 92*2)に収める */
-    max-width: 1256px;
+    /* .wrap と同じ最大幅の内側(1440 - 92*2)に収める。
+       ただし幅だけで決めると、パネル(=100svh)より中身(1440x784の比率)が
+       高くなる画面で下の英字が切られる。高さでも頭打ちにして、
+       同じ比率のまま縮める(1256 / 784 = 1.602 → 余裕を見て 158svh)。
+       縦 795px 以上の画面では 1256px 側が効くので、従来と変わらない。 */
+    max-width: min(1256px, 158svh);
     margin-inline: auto;
     margin-top: 0;
     min-height: 0;
@@ -1776,7 +1780,10 @@ body.fv-in .site-header--brushup .site-header__inner { opacity: 1; transform: no
   flex-shrink: 0;
   padding-right: .5em;
   font-family: var(--font-display-en);
-  font-size: clamp(40px, 11vw, 96px);
+  /* 帯の高さ(= font x 1.7)もステージと同じ比率で縮める。
+     そうしないとステージだけ小さくなって英字だけが下からはみ出す。
+     96px / 1256px x 158svh = 12svh。縦 800px 以上では 96px 側が効く。 */
+  font-size: clamp(40px, min(11vw, 12svh), 96px);
   /* Figma 232:27402 は 1877x163。163/1.7 = 95.9 ≒ font-size 96px。
      Chillax の字送り 0 での自然幅が 1775.6px なので、1877px に
      収まる送りは 2.6px = .027em。従来の .12em は開きすぎだった。 */

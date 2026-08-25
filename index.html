@@ -75,7 +75,8 @@
        (44 + 名前29 + 色名20 + 間42 + TOP27 + 40 = 202)。 */
     min-height: 202px;
   }
-  .card .name {
+  .card .name,
+  .pane-card .name {
     font-family: "Inter", sans-serif;
     font-weight: 600;
     font-size: 11px;
@@ -96,7 +97,8 @@
     margin-left: 6px;
     vertical-align: -1px;
   }
-  .card .policy {
+  .card .policy,
+  .pane-card .policy {
     /* 色名が欧字になったので、カード内の他の欧字(案名・TOP・カラーコード)と
        同じ Inter に揃える。日本語が入った場合の保険で Noto Sans JP を後置。 */
     font-family: "Inter", "Noto Sans JP", sans-serif;
@@ -251,6 +253,26 @@
      箱は上の Logomark & Logotype と同じ 4 列グリッドに 1 枚だけ置く。
      幅も正方の比率もそのまま揃うので、並びが崩れない。
      押すと単独ページ(logomark.html)へ遷移する。モーダルではない。 */
+
+  /* --- Business Card Design ---
+     箱の組みは上の .card と同じ(アイブロー → 名称 → テキストリンク)。
+     字面と間は .card の指定をそのまま共有しているので、別々に育たない。
+     箱ごと押させず、.card と同じくリンクだけを押させる。 */
+  .logo-grid .pane-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 44px 32px 40px;
+  }
+  /* 中身が上から積まれるので、リンクは箱の下端ではなく名称の直後に置く。
+     .card の 42px は最小値として残しつつ、余った高さは下に流す */
+  .logo-grid .pane-card .links { margin-top: auto; }
+  @media (hover: hover) {
+    .logo-grid .pane-card:hover { background: #f2f2f2; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .logo-grid .pane-card { transition: none; }
+  }
 
   /* --- Design concept モーダル --- */
   .modal {
@@ -422,6 +444,25 @@
         <a class="pane pane-logo" href="logomark.html" aria-label="ロゴマーク案を見る">
           <img src="assets/logos/mark-a.svg" alt="" width="98" height="98" style="--mark-w: 41.00%">
         </a>
+      </div>
+    </section>
+
+    <!-- ============ Business Card Design ============
+         上の Corporate Logomark と同じ 4 列グリッドに 1 枚。幅も正方の比率も
+         同じなので、縦に並べたときに箱の大きさが揃う。
+         中身(名刺の絵)は未確定なのでいまは空のまま。
+         遷移先は別サイトの名刺作成ツールなので、このダッシュボードを
+         残したまま見られるよう別タブで開く。 -->
+    <section class="logos stage stage-3" aria-label="Business Card Design">
+      <h2>Business Card Design</h2>
+      <div class="logo-grid logo-grid--4">
+        <section class="pane pane-card">
+          <p class="name">WEB TOOL</p>
+          <p class="policy">Name Card Generator</p>
+          <div class="links">
+            <a href="https://miai-namecard-create.netlify.app/" target="_blank" rel="noopener noreferrer">VIEW TOOL <span class="arrow" aria-hidden="true"><svg viewBox="0 0 14 12" width="11" height="9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 6h11.2M8 1.4l4.6 4.6-4.6 4.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
+          </div>
+        </section>
       </div>
     </section>
 
