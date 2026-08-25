@@ -252,6 +252,17 @@
      幅も正方の比率もそのまま揃うので、並びが崩れない。
      押すと単独ページ(logomark.html)へ遷移する。モーダルではない。 */
 
+  /* --- Business Card Design ---
+     中身が空でも押せることが分かるよう、ホバーで地をわずかに沈ませる。
+     他のパネル(.pane-logo)は中の絵が寄るので、そちらには影響しない。 */
+  .logo-grid .pane-card { transition: background-color 0.4s ease; }
+  @media (hover: hover) {
+    .logo-grid .pane-card:hover { background: #f2f2f2; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .logo-grid .pane-card { transition: none; }
+  }
+
   /* --- Design concept モーダル --- */
   .modal {
     position: fixed;
@@ -422,6 +433,20 @@
         <a class="pane pane-logo" href="logomark.html" aria-label="ロゴマーク案を見る">
           <img src="assets/logos/mark-a.svg" alt="" width="98" height="98" style="--mark-w: 41.00%">
         </a>
+      </div>
+    </section>
+
+    <!-- ============ Business Card Design ============
+         上の Corporate Logomark と同じ 4 列グリッドに 1 枚。幅も正方の比率も
+         同じなので、縦に並べたときに箱の大きさが揃う。
+         中身(名刺の絵)は未確定なのでいまは空のまま。
+         遷移先は別サイトの名刺作成ツールなので、このダッシュボードを
+         残したまま見られるよう別タブで開く。 -->
+    <section class="logos stage stage-3" aria-label="Business Card Design">
+      <h2>Business Card Design</h2>
+      <div class="logo-grid logo-grid--4">
+        <a class="pane pane-card" href="https://miai-namecard-create.netlify.app/"
+           target="_blank" rel="noopener noreferrer" aria-label="名刺デザインを見る(別タブで開く)"></a>
       </div>
     </section>
 
