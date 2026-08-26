@@ -59,8 +59,9 @@
      (325.33px × 3 + gap20 × 2 = 1016 = .wrap の内寸)。 */
   .carousel {
     display: grid;
-    /* A案は2色。1fr×2 でグレーの囲みがラップ幅いっぱいまで伸びる */
-    grid-template-columns: repeat(2, 1fr);
+    /* 箱の大きさは Cuolega のダッシュボードと同じ 325x272。
+       案は2つだが、3列のうちの2つとして置く */
+    grid-template-columns: repeat(3, 1fr);
     gap: 20px;
   }
   /* カードは静止(浮遊・影なし。リンクのホバーのみ) */
@@ -70,10 +71,9 @@
     background: var(--pane);
     border-radius: 12px;
     padding: 44px 32px 40px;
-    /* ABOUT US を外して1行になったぶん低くする。フォント読み込みで中身の
-       高さが揺れてもセクション位置が波及しないよう、実測の自然高で固定
-       (44 + 名前29 + 色名20 + 間42 + TOP27 + 40 = 202)。 */
-    min-height: 202px;
+    /* 高さは Cuolega のダッシュボードの箱と同じ 272px にそろえる。
+       フォント読み込みで中身の高さが揺れてもセクション位置が波及しない。 */
+    min-height: 272px;
   }
   .card .name,
   .pane-card .name {
@@ -210,8 +210,6 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
   }
-  /* Figma 246:26439。4案なので4列、パネルは正方(1016 - gap20×3 = 956 / 4 = 239)。 */
-  .logo-grid--4 { grid-template-columns: repeat(4, 1fr); }
   .logo-grid .pane {
     display: block;
     position: relative;
@@ -221,10 +219,11 @@
     height: 272px;
     text-decoration: none;
   }
-  .logo-grid--4 .pane { height: auto; aspect-ratio: 1; }
 
   /* ロゴは幅だけ指定し、高さは画像の縦横比に任せる(案ごとに比率が違う)。
-     幅はパネル239px基準の実測値を % で渡す(--mark-w)。
+     幅は Figma の実測値を、箱(325px)に対する % にして渡す(--mark-w)。
+     箱を Cuolega と同じ 325 幅にそろえた際、マークの実寸が変わらないよう
+     239 基準の値に 239/325 を掛けてある。
      セレクタを .logo-grid 起点にしているのは、上の
      `.logo-grid .pane { display: block }` に詳細度で勝つため。 */
   .logo-grid .pane-logo {
@@ -357,8 +356,7 @@
   @media (max-width: 900px) {
     /* 3列/4列が収まらない幅は、どちらのグリッドも2列に落とす */
     .carousel,
-    .logo-grid,
-    .logo-grid--4 { grid-template-columns: repeat(2, 1fr); }
+    .logo-grid { grid-template-columns: repeat(2, 1fr); }
   }
   @media (max-width: 760px) {
     .wrap { padding: 88px 24px 112px; }
@@ -418,18 +416,18 @@
          各パネルはアイソレーション図解のページへ遷移する。 -->
     <section class="logos stage stage-3" aria-label="Corporate Logomark &amp; Logotype">
       <h2>Corporate Logomark &amp; Logotype</h2>
-      <div class="logo-grid logo-grid--4">
+      <div class="logo-grid">
         <a class="pane pane-logo" href="logo-a.html">
-          <img src="assets/logos/mark-a.svg" alt="ロゴマーク案A" width="99" height="99" style="--mark-w: 41.00%">
+          <img src="assets/logos/mark-a.svg" alt="ロゴマーク案A" width="99" height="99" style="--mark-w: 30.15%">
         </a>
         <a class="pane pane-logo" href="logo-b.html">
-          <img src="assets/logos/mark-b.svg" alt="ロゴマーク案B" width="88" height="88" style="--mark-w: 36.82%">
+          <img src="assets/logos/mark-b.svg" alt="ロゴマーク案B" width="88" height="88" style="--mark-w: 27.08%">
         </a>
         <a class="pane pane-logo" href="logo-c.html">
-          <img src="assets/logos/mark-c.svg" alt="ロゴマーク案C" width="141" height="86" style="--mark-w: 57.74%">
+          <img src="assets/logos/mark-c.svg" alt="ロゴマーク案C" width="141" height="86" style="--mark-w: 42.46%">
         </a>
         <a class="pane pane-logo" href="logo-d.html">
-          <img src="assets/logos/mark-d.svg" alt="ロゴマーク案D" width="155" height="102" style="--mark-w: 82.01%">
+          <img src="assets/logos/mark-d.svg" alt="ロゴマーク案D" width="155" height="102" style="--mark-w: 60.31%">
         </a>
       </div>
     </section>
@@ -440,9 +438,9 @@
          案の一覧(Figma 494:23602 の4案)は遷移先の logomark.html 側に置く。 -->
     <section class="logos stage stage-3" aria-label="Corporate Logomark">
       <h2>Corporate Logomark</h2>
-      <div class="logo-grid logo-grid--4">
+      <div class="logo-grid">
         <a class="pane pane-logo" href="logomark.html" aria-label="ロゴマーク案を見る">
-          <img src="assets/logos/mark-a.svg" alt="" width="98" height="98" style="--mark-w: 41.00%">
+          <img src="assets/logos/mark-a.svg" alt="" width="98" height="98" style="--mark-w: 30.15%">
         </a>
       </div>
     </section>
@@ -455,7 +453,7 @@
          残したまま見られるよう別タブで開く。 -->
     <section class="logos stage stage-3" aria-label="Business Card Design">
       <h2>Business Card Design</h2>
-      <div class="logo-grid logo-grid--4">
+      <div class="logo-grid">
         <section class="pane pane-card">
           <p class="name">WEB TOOL</p>
           <p class="policy">Name Card Generator</p>
