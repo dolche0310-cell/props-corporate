@@ -60,10 +60,16 @@
   .carousel {
     display: grid;
     /* 箱の大きさは Cuolega のダッシュボードと同じ 325x272。
-       案は2つだが、3列のうちの2つとして置く */
-    grid-template-columns: repeat(3, 1fr);
+       3枚ぶんで列幅を固定し、収まらない分は下に改行せず横スクロールで送る
+       (Cuolega の .carousel / .logo-grid--cv と同じ作り)。 */
+    grid-auto-flow: column;
+    grid-auto-columns: calc((100% - 40px) / 3);
     gap: 20px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
   }
+  .carousel > .card { scroll-snap-align: start; }
   /* カードは静止(浮遊・影なし。リンクのホバーのみ) */
   .card {
     display: flex;
@@ -207,9 +213,17 @@
   }
   .logo-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    /* 箱の大きさは Cuolega のダッシュボードと同じ 325x272。
+       3枚ぶんで列幅を固定し、収まらない分は下に改行せず横スクロールで送る
+       (Cuolega の .carousel / .logo-grid--cv と同じ作り)。 */
+    grid-auto-flow: column;
+    grid-auto-columns: calc((100% - 40px) / 3);
     gap: 20px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
   }
+  .logo-grid > .pane { scroll-snap-align: start; }
   .logo-grid .pane {
     display: block;
     position: relative;
@@ -354,13 +368,20 @@
   body.modal-open { overflow: hidden; }
 
   @media (max-width: 900px) {
-    /* 3列/4列が収まらない幅は、どちらのグリッドも2列に落とす */
+    /* 3枚が収まらない幅は2枚見せ。ここでも改行はせず、残りは横に送る */
     .carousel,
-    .logo-grid { grid-template-columns: repeat(2, 1fr); }
+    .logo-grid { grid-auto-columns: calc((100% - 20px) / 2); }
   }
   @media (max-width: 760px) {
     .wrap { padding: 88px 24px 112px; }
-    .carousel { grid-template-columns: 1fr; } /* 狭幅は縦積み(はみ出し防止) */
+    /* 狭幅は横送りをやめて縦積み(はみ出し防止)。Cuolega も同じ切り替え */
+    .carousel,
+    .logo-grid {
+      grid-auto-flow: row;
+      grid-auto-columns: auto;
+      grid-template-columns: 1fr;
+      overflow-x: visible;
+    }
     h1 {
       font-size: 24px;
       line-height: 1.35;
