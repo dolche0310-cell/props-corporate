@@ -234,6 +234,30 @@
     text-decoration: none;
   }
 
+  /* Corporate Logomark & Logotype 比較セクションだけの専用グリッド。
+     .logo-grid(Cuolega準拠のカルーセル型)とは共有せず独立させてある
+     (このセクションだけ意図的に正方形パネル3列のまま残す例外のため、
+     他セクションの .logo-grid を書き換えずに済むようにしている)。 */
+  .logo-compare-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .logo-compare-grid .pane {
+    display: block;
+    position: relative;
+    overflow: hidden;
+    background: var(--pane);
+    border-radius: 12px;
+    height: auto;
+    aspect-ratio: 1;
+    text-decoration: none;
+  }
+  .logo-compare-grid .pane-logo {
+    display: grid;
+    place-items: center;
+  }
+
   /* ロゴは幅だけ指定し、高さは画像の縦横比に任せる(案ごとに比率が違う)。
      幅は Figma の実測値を、箱(325px)に対する % にして渡す(--mark-w)。
      箱を Cuolega と同じ 325 幅にそろえた際、マークの実寸が変わらないよう
@@ -371,6 +395,7 @@
     /* 3枚が収まらない幅は2枚見せ。ここでも改行はせず、残りは横に送る */
     .carousel,
     .logo-grid { grid-auto-columns: calc((100% - 20px) / 2); }
+    .logo-compare-grid { grid-template-columns: repeat(2, 1fr); }
   }
   @media (max-width: 760px) {
     .wrap { padding: 88px 24px 112px; }
@@ -382,6 +407,7 @@
       grid-template-columns: 1fr;
       overflow-x: visible;
     }
+    .logo-compare-grid { grid-template-columns: 1fr; }
     h1 {
       font-size: 24px;
       line-height: 1.35;
@@ -433,19 +459,20 @@
     </section>
 
     <!-- ============ Corporate Logomark & Logotype ============
-         Figma 246:26437。D案は削除済み、3案を .logo-grid(325x272)で並べる。
+         Figma 246:26437。D案は削除済み、3案を正方パネル3列(logo-compare-grid)で並べる。
+         このセクションだけ意図的に他の .logo-grid とは見た目を変えている。
          各パネルはアイソレーション図解のページへ遷移する。 -->
     <section class="logos stage stage-3" aria-label="Corporate Logomark &amp; Logotype">
       <h2>Corporate Logomark &amp; Logotype</h2>
-      <div class="logo-grid">
+      <div class="logo-compare-grid">
         <a class="pane pane-logo" href="logo-a.html">
-          <img src="assets/logos/mark-a.svg" alt="ロゴマーク案A" width="99" height="99" style="--mark-w: 30.15%">
+          <img src="assets/logos/mark-a.svg" alt="ロゴマーク案A" width="99" height="99" style="--mark-w: 41.00%">
         </a>
         <a class="pane pane-logo" href="logo-b.html">
-          <img src="assets/logos/mark-b.svg" alt="ロゴマーク案B" width="99" height="99" style="--mark-w: 30.15%">
+          <img src="assets/logos/mark-b.svg" alt="ロゴマーク案B" width="99" height="99" style="--mark-w: 41.00%">
         </a>
         <a class="pane pane-logo" href="logo-c.html">
-          <img src="assets/logos/mark-c.svg" alt="ロゴマーク案C" width="99" height="94" style="--mark-w: 30.15%">
+          <img src="assets/logos/mark-c.svg" alt="ロゴマーク案C" width="99" height="94" style="--mark-w: 41.00%">
         </a>
       </div>
     </section>
