@@ -96,14 +96,15 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
 .kv-orb--3{width:28px;height:28px;left:7%;bottom:88px;background:radial-gradient(circle at 30% 30%,#ff7a5c,var(--accent))}
 .kv-inner{position:relative;display:flex;align-items:center;justify-content:space-between;gap:48px}
 .kv-copy{flex:1 1 560px}
-.kv-ttl{font-size:52px;font-weight:700;line-height:1.35;letter-spacing:.04em}
+.kv-ttl{font-size:38px;font-weight:700;line-height:1.35;letter-spacing:.04em;white-space:nowrap}
 .kv-ttl .hl{display:inline-block;color:var(--accent);background:#fff;border-radius:10px;
   padding:0 .12em;margin:0 .06em;box-shadow:var(--shadow-s)}
-.kv-ttl .product{display:flex;align-items:baseline;gap:12px;margin-top:10px;margin-bottom:36px;font-size:64px;font-weight:800;letter-spacing:.01em}
+.kv-ttl .product{display:flex;align-items:baseline;gap:12px;margin-top:10px;margin-bottom:36px;font-size:64px;font-weight:800;letter-spacing:.01em;white-space:normal}
 .kv-ttl .product small{font-size:14px;font-weight:700;color:var(--ink-2);letter-spacing:.1em}
 .scope{display:flex;align-items:center;flex-wrap:wrap;gap:6px 18px;font-size:14px;color:var(--ink-2)}
+.scope-note{font-size:16px;color:#101010}
 /* ボタンに見えないよう、箱ではなく手書き風の線で見せる */
-.chip{display:inline-block;position:relative;padding:0 2px 4px;color:var(--ink);font-weight:700;font-size:15px}
+.chip{display:inline-block;position:relative;padding:0 2px 4px;color:var(--ink);font-weight:700;font-size:18px}
 .chip::after{content:"";position:absolute;left:-2px;right:-2px;bottom:0;height:6px;
   background:var(--accent);opacity:.22;border-radius:6px 8px 5px 7px;transform:rotate(-.6deg)}
 .chip:nth-of-type(2n)::after{transform:rotate(.5deg);border-radius:8px 5px 7px 6px}
@@ -115,8 +116,10 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
 /* ロゴ画像の地が白なので、帯も白でそろえる */
 .clients{background:#fff;padding-block:36px;overflow:hidden}
 .clients-track{display:flex;width:max-content;animation:marquee 46s linear infinite}
-.clients-set{display:flex;align-items:center;gap:56px;padding-right:56px}
-.clients-set img{height:56px;width:auto;max-width:none;object-fit:contain}
+.clients-set{display:flex;align-items:center;gap:32px;padding-right:32px}
+/* 各社ロゴは原寸の縦横比がバラバラなので、lp.miai-app.com と同じ
+   180x82.5 の箱に object-fit:contain で収めて見た目のサイズを揃える */
+.clients-set img{width:180px;height:82.5px;object-fit:contain}
 @keyframes marquee{to{transform:translateX(-50%)}}
 
 /* ---------- お悩み ---------- */
@@ -329,7 +332,7 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
   /* FV */
   .kv{padding-block:48px 56px}
   .kv-inner{flex-direction:column;align-items:stretch;gap:32px}
-  .kv-ttl{font-size:29px;line-height:1.45}
+  .kv-ttl{font-size:29px;line-height:1.45;white-space:normal}
   .kv-ttl .product{font-size:36px;margin-top:6px;gap:8px}
   .kv-ttl .product small{font-size:11px}
   .scope{gap:8px;font-size:12px}
@@ -343,8 +346,6 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
   /* 導入企業ロゴ */
   .clients{padding-block:24px}
   .clients-track{animation-duration:32s}
-  .clients-set{gap:36px;padding-right:36px}
-  .clients-set img{height:40px}
 
   /* お悩み */
   .pain .grid{grid-template-columns:1fr;gap:16px;margin-top:32px}
@@ -487,14 +488,14 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
     <div class="wrap kv-inner">
       <div class="kv-copy" data-reveal>
         <h1 class="kv-ttl">
-          組織の<span class="hl">「本音」</span>を、<br>正しく引き出す。
+          組織の<span class="hl">「本音」</span>を、正しく引き出す。
           <span class="product en">MiAI面談<small>ミアイ</small></span>
         </h1>
         <div class="scope">
           <span class="chip">評価面談</span>
           <span class="chip en">1on1</span>
           <span class="chip">キャリア面談</span>
-          <span>など、社内面談全般に対応</span>
+          <span class="scope-note">など、社内面談全般に対応</span>
         </div>
         <div class="kv-actions">
           <a class="btn btn--primary btn--lg" aria-disabled="true">無料デモ体験</a>
