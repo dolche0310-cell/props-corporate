@@ -92,12 +92,10 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
 .kv{position:relative;overflow:hidden;padding-block:120px 128px;
   background:radial-gradient(1200px 600px at 80% 20%,#fff 0%,rgba(255,255,255,0) 60%),var(--paper-2)}
 .kv-orb{position:absolute;border-radius:50%;pointer-events:none}
-.kv-orb--1{width:520px;height:520px;right:-120px;top:-140px;
-  background:radial-gradient(circle at 35% 35%,rgba(255,106,72,.5),rgba(255,36,0,.16) 55%,rgba(255,36,0,0) 72%);filter:blur(8px)}
 .kv-orb--2{width:56px;height:56px;right:34%;top:64px;background:radial-gradient(circle at 30% 30%,#ff7a5c,var(--accent))}
 .kv-orb--3{width:28px;height:28px;left:7%;bottom:88px;background:radial-gradient(circle at 30% 30%,#ff7a5c,var(--accent))}
 .kv-inner{position:relative;display:flex;align-items:center;justify-content:space-between;gap:48px}
-.kv-copy{flex:1 1 auto}
+.kv-copy{flex:1 1 560px}
 .kv-ttl{font-size:52px;font-weight:700;line-height:1.35;letter-spacing:.04em}
 .kv-ttl .hl{display:inline-block;color:var(--accent);background:#fff;border-radius:10px;
   padding:0 .12em;margin:0 .06em;box-shadow:var(--shadow-s)}
@@ -109,7 +107,9 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
 .chip::after{content:"";position:absolute;left:-2px;right:-2px;bottom:0;height:6px;
   background:var(--accent);opacity:.22;border-radius:6px 8px 5px 7px;transform:rotate(-.6deg)}
 .chip:nth-of-type(2n)::after{transform:rotate(.5deg);border-radius:8px 5px 7px 6px}
-.kv-actions{flex:0 0 auto;display:flex;flex-direction:column;gap:16px}
+.kv-actions{display:flex;flex-wrap:wrap;gap:16px;margin-top:36px}
+.kv-image{flex:1 1 380px;max-width:420px}
+.kv-image img{display:block;width:100%;height:auto}
 
 /* ---------- 導入企業ロゴ ---------- */
 /* ロゴ画像の地が白なので、帯も白でそろえる */
@@ -335,8 +335,8 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
   .scope{gap:8px;font-size:12px}
   .chip{font-size:13px;padding-bottom:3px}
   .chip::after{height:5px}
-  .kv-actions{flex-direction:column}
-  .kv-orb--1{width:300px;height:300px;right:-110px;top:-90px}
+  .kv-actions{flex-direction:column;margin-top:28px}
+  .kv-image{max-width:280px;margin-inline:auto}
   /* 小さい丸は文字に重なるので、スマホでは出さない */
   .kv-orb--2,.kv-orb--3{display:none}
 
@@ -482,7 +482,6 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
 <main>
   <!-- ========== FV ========== -->
   <section class="kv">
-    <span class="kv-orb kv-orb--1" aria-hidden="true"></span>
     <span class="kv-orb kv-orb--2" aria-hidden="true"></span>
     <span class="kv-orb kv-orb--3" aria-hidden="true"></span>
     <div class="wrap kv-inner">
@@ -497,10 +496,13 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
           <span class="chip">キャリア面談</span>
           <span>など、社内面談全般に対応</span>
         </div>
+        <div class="kv-actions">
+          <a class="btn btn--primary btn--lg" aria-disabled="true">無料デモ体験</a>
+          <a class="btn btn--ghost btn--lg" aria-disabled="true">資料請求</a>
+        </div>
       </div>
-      <div class="kv-actions" data-reveal>
-        <a class="btn btn--primary btn--lg" aria-disabled="true">無料デモ体験</a>
-        <a class="btn btn--ghost btn--lg" aria-disabled="true">資料請求</a>
+      <div class="kv-image" data-reveal>
+        <img src="imgs/LP_kv_image.png" alt="" width="1331" height="1182">
       </div>
     </div>
   </section>
