@@ -1,0 +1,940 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>MiAI面談｜組織の「本音」を、正しく引き出す。</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<style>
+/* =========================================================
+   MiAI面談（社内用LP）
+   ワイヤー：Figma「MiAI社内用LP」node 21:326
+   トンマナ：MiAIプロダクトサイト（lp.miai-app.com）の色・書体・ボタンに合わせる
+   ========================================================= */
+:root{
+  --ink:#101010;            /* 本文・見出し */
+  --ink-2:#5e5e5e;          /* 説明文 */
+  --muted:#888;             /* 補足・コピーライト */
+  --paper:#f4f2ef;          /* 地（温かみのあるオフホワイト） */
+  --paper-2:#faf9f7;        /* 地の明るい方 */
+  --card:#fff;
+  --line:rgba(98,98,98,.18);
+  --ph:#ebe8e4;             /* 画像の仮置き */
+  --accent:#FF2400;         /* コーポレートカラー（刷新後・miai-corporate と同じ） */
+  --accent-2:#ff6a48;       /* グラデーションの明るい側 */
+  --accent-soft:#ffebe7;
+
+  --font:"Inter Tight","Noto Sans JP",-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN",sans-serif;
+  --shadow:0 10px 40px rgba(0,0,0,.08);
+  --shadow-s:0 6px 20px rgba(0,0,0,.06);
+  --neu:-6px 7px 10px rgba(0,0,0,.05),inset -2px 2px 3px rgba(255,255,255,.9);
+  --neu-hover:-6px 9px 14px rgba(0,0,0,.08),inset -2px 2px 3px rgba(255,255,255,.9);
+  --r-s:8px; --r:16px; --r-l:24px; --r-xl:40px;
+  --w:1152px;
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:88px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font);
+  font-size:15px;line-height:1.8;letter-spacing:.02em;-webkit-font-smoothing:antialiased;
+  font-feature-settings:"palt"}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+h1,h2,h3,p{margin:0}
+p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防ぐ */
+.wrap{max-width:calc(var(--w) + 128px);margin:0 auto;padding-inline:64px}
+.sec{padding-block:96px}
+.sec-ttl{font-size:32px;font-weight:700;line-height:1.4;letter-spacing:.04em;text-align:center}
+.sec-ttl em{font-style:normal;color:var(--accent)}
+.en{font-family:"Inter Tight",sans-serif}
+
+/* ---------- ボタン（プロダクトサイトと同じ：黒の塗り／白のふくらみ） ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  height:48px;padding:0 32px;border-radius:999px;font-weight:700;font-size:14px;
+  letter-spacing:.06em;white-space:nowrap;cursor:pointer;
+  transition:transform .3s var(--ease),box-shadow .3s var(--ease),background .3s}
+.btn--primary{background:var(--ink);color:#fff;box-shadow:0 6px 16px rgba(0,0,0,.16)}
+.btn--primary:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(0,0,0,.2)}
+.btn--ghost{background:#fbfbfb;color:var(--accent);box-shadow:var(--neu)}
+.btn--ghost:hover{transform:translateY(-2px);box-shadow:var(--neu-hover)}
+.btn--lg{height:60px;min-width:220px;font-size:15px}
+.btn--sm{height:40px;padding:0 22px;font-size:13px}
+/* 遷移先が未定のボタンは押せない状態にしておく（README「先方から集めるもの」） */
+.btn[aria-disabled="true"]{cursor:default}
+.btn-row{display:flex;gap:16px;flex-wrap:wrap}
+
+/* ---------- ヘッダー ---------- */
+.site-header{position:sticky;top:0;z-index:50;height:72px;
+  background:rgba(250,249,247,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid transparent;transition:border-color .3s,background .3s}
+.site-header.is-scrolled{border-bottom-color:var(--line);background:rgba(250,249,247,.94)}
+.site-header .wrap{height:100%;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.brand{display:flex;align-items:center;gap:14px}
+.logo{display:flex;align-items:center;gap:14px}
+.logo .mark{width:31px;height:31px}
+.logo .type{width:87px;height:32px}
+/* ヘッダーのロゴだけ小さく。フッターは上の大きさのまま */
+.site-header .logo{gap:10px}
+.site-header .logo .mark{width:24px;height:24px}
+.site-header .logo .type{width:67px;height:25px}
+.brand-sub{font-size:13px;font-weight:700;color:var(--ink-2);letter-spacing:.06em}
+.gnav{display:flex;align-items:center;gap:32px}
+.gnav-links{display:flex;gap:28px;font-size:14px;font-weight:600}
+.gnav-links a{position:relative;padding:4px 0}
+.gnav-links a::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:2px;background:var(--accent);
+  transform:scaleX(0);transform-origin:left;transition:transform .35s var(--ease)}
+.gnav-links a:hover::after{transform:scaleX(1)}
+
+/* ---------- FV ---------- */
+.kv{position:relative;overflow:hidden;padding-block:120px 128px;
+  background:radial-gradient(1200px 600px at 80% 20%,#fff 0%,rgba(255,255,255,0) 60%),var(--paper-2)}
+.kv-orb{position:absolute;border-radius:50%;pointer-events:none}
+.kv-orb--1{width:520px;height:520px;right:-120px;top:-140px;
+  background:radial-gradient(circle at 35% 35%,rgba(255,106,72,.5),rgba(255,36,0,.16) 55%,rgba(255,36,0,0) 72%);filter:blur(8px)}
+.kv-orb--2{width:56px;height:56px;right:34%;top:64px;background:radial-gradient(circle at 30% 30%,#ff7a5c,var(--accent))}
+.kv-orb--3{width:28px;height:28px;left:7%;bottom:88px;background:radial-gradient(circle at 30% 30%,#ff7a5c,var(--accent))}
+.kv-inner{position:relative;display:flex;align-items:center;justify-content:space-between;gap:48px}
+.kv-copy{flex:1 1 auto}
+.kv-ttl{font-size:52px;font-weight:700;line-height:1.35;letter-spacing:.04em}
+.kv-ttl .hl{display:inline-block;color:var(--accent);background:#fff;border-radius:10px;
+  padding:0 .12em;margin:0 .06em;box-shadow:var(--shadow-s)}
+.kv-ttl .product{display:flex;align-items:baseline;gap:12px;margin-top:10px;margin-bottom:36px;font-size:64px;font-weight:800;letter-spacing:.01em}
+.kv-ttl .product small{font-size:14px;font-weight:700;color:var(--ink-2);letter-spacing:.1em}
+.scope{display:flex;align-items:center;flex-wrap:wrap;gap:6px 18px;font-size:14px;color:var(--ink-2)}
+/* ボタンに見えないよう、箱ではなく手書き風の線で見せる */
+.chip{display:inline-block;position:relative;padding:0 2px 4px;color:var(--ink);font-weight:700;font-size:15px}
+.chip::after{content:"";position:absolute;left:-2px;right:-2px;bottom:0;height:6px;
+  background:var(--accent);opacity:.22;border-radius:6px 8px 5px 7px;transform:rotate(-.6deg)}
+.chip:nth-of-type(2n)::after{transform:rotate(.5deg);border-radius:8px 5px 7px 6px}
+.kv-actions{flex:0 0 auto;display:flex;flex-direction:column;gap:16px}
+
+/* ---------- 導入企業ロゴ ---------- */
+/* ロゴ画像の地が白なので、帯も白でそろえる */
+.clients{background:#fff;padding-block:36px;overflow:hidden}
+.clients-track{display:flex;width:max-content;animation:marquee 46s linear infinite}
+.clients-set{display:flex;align-items:center;gap:56px;padding-right:56px}
+.clients-set img{height:56px;width:auto;max-width:none;object-fit:contain}
+@keyframes marquee{to{transform:translateX(-50%)}}
+
+/* ---------- お悩み ---------- */
+.pain .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:56px}
+.pain-card{background:var(--card);border-radius:var(--r);padding:32px;box-shadow:var(--shadow)}
+.pain-card .ph{height:120px}
+.pain-card h3{margin-top:24px;font-size:18px;font-weight:700;line-height:1.55;text-align:center}
+.pain-card p{margin-top:12px;font-size:14px;color:var(--ink-2);line-height:1.8}
+.bridge{margin-top:72px;text-align:center}
+.bridge p{font-size:26px;font-weight:700;letter-spacing:.04em}
+.bridge p .hl{color:var(--accent)}
+.bridge .arrow{width:88px;height:40px;margin:24px auto 0;background:linear-gradient(180deg,var(--accent-2),var(--accent));
+  clip-path:polygon(0 0,100% 0,50% 100%)}
+
+/* 画像の仮置き（写真・図版が届いたら <img> に差し替える） */
+.ph{display:grid;place-items:center;background:var(--ph);border-radius:12px;color:var(--muted)}
+.ph img{width:24px;height:24px;opacity:.55}
+
+/* ---------- 解決 ---------- */
+.solution{padding-top:24px}
+.solution .ttl-wrap{text-align:center}
+.solution-list{max-width:960px;margin:48px auto 0;background:var(--card);border-radius:var(--r-l);
+  box-shadow:var(--shadow);overflow:hidden}
+.solution-row{display:grid;grid-template-columns:80px 1fr 420px;gap:28px;align-items:center;padding:30px 44px}
+.solution-row + .solution-row{border-top:1px solid var(--line)}
+.solution-row .no{font-size:36px;font-weight:800;color:var(--accent);line-height:1}
+.solution-row h3{font-size:19px;font-weight:700;line-height:1.5}
+.solution-row p{font-size:14px;color:var(--ink-2)}
+
+/* ---------- 導入効果（カルーセル） ---------- */
+.usecase{overflow:hidden;background:var(--paper-2)}
+.carousel{position:relative;margin-top:56px}
+.carousel-view{position:relative;height:380px}
+.carousel-track{position:absolute;top:0;left:50%;display:flex;gap:24px;will-change:transform}
+.carousel-track.is-anim{transition:transform .7s var(--ease)}
+.voice{flex:0 0 720px;height:360px;display:flex;background:var(--card);border-radius:var(--r-l);overflow:hidden;
+  box-shadow:var(--shadow);opacity:.45;transform:scale(.94);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.voice.is-active{opacity:1;transform:none}
+.voice .ph{flex:0 0 280px;border-radius:0}
+.voice-body{padding:40px 36px;display:flex;flex-direction:column;gap:16px}
+.role{align-self:flex-start;font-size:11px;font-weight:700;letter-spacing:.14em;color:#fff;background:var(--accent);
+  border-radius:4px;padding:4px 10px;line-height:1.4}
+.voice h3{font-size:21px;font-weight:700;line-height:1.5}
+.voice p{font-size:14px;color:var(--ink-2);line-height:1.9}
+.carousel-btn{position:absolute;top:157px;z-index:2;width:48px;height:48px;border-radius:50%;border:0;
+  background:#fbfbfb;box-shadow:var(--neu);cursor:pointer;display:grid;place-items:center;
+  transition:transform .3s var(--ease),box-shadow .3s}
+.carousel-btn:hover{transform:scale(1.06);box-shadow:var(--neu-hover)}
+.carousel-btn::before{content:"";width:10px;height:10px;border-top:2px solid var(--accent);border-right:2px solid var(--accent)}
+.carousel-btn--prev{left:calc(50% - 384px)}
+.carousel-btn--prev::before{transform:translateX(2px) rotate(-135deg)}
+.carousel-btn--next{right:calc(50% - 384px)}
+.carousel-btn--next::before{transform:translateX(-2px) rotate(45deg)}
+.dots{display:flex;justify-content:center;gap:12px;margin-top:20px}
+.dots button{width:8px;height:8px;padding:0;border:0;border-radius:999px;background:#d6d2cd;cursor:pointer;
+  transition:width .4s var(--ease),background .4s}
+.dots button.is-active{width:28px;background:var(--accent)}
+
+/* ---------- 中間CV ---------- */
+.cv-mid{padding-block:0 96px;background:var(--paper-2)}
+.cv-mid-box{background:var(--card);border-radius:var(--r-xl);padding:64px;text-align:center;box-shadow:var(--shadow);
+  position:relative;overflow:hidden}
+.cv-mid-box::before{content:"";position:absolute;width:280px;height:280px;left:-90px;bottom:-140px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,106,72,.3),rgba(255,36,0,0) 70%)}
+.cv-mid-box::after{content:"";position:absolute;width:220px;height:220px;right:-60px;top:-100px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,106,72,.26),rgba(255,36,0,0) 70%)}
+.cv-mid h2{position:relative;font-size:26px;font-weight:700;line-height:1.5}
+.cv-mid h2 .hl{color:var(--accent)}
+.cv-mid p{position:relative;margin-top:14px;font-size:15px;color:var(--ink-2)}
+.cv-mid .btn-row{position:relative;justify-content:center;margin-top:32px}
+
+/* ---------- できること ---------- */
+.feature-rows{display:flex;flex-direction:column;gap:72px;margin-top:64px}
+.feature-row{display:grid;grid-template-columns:520px 1fr;gap:64px;align-items:center}
+.feature-row.is-rev{grid-template-columns:1fr 520px}
+.feature-row.is-rev .feature-fig{order:2}
+.feature-fig{position:relative}
+.feature-fig .ph{height:320px;border-radius:var(--r-l);background:#fff;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.feature-fig .ph::before{content:"";position:absolute;width:200px;height:200px;border-radius:50%;left:-60px;top:-70px;
+  background:linear-gradient(135deg,var(--accent-2),var(--accent));opacity:.9}
+.feature-row.is-rev .feature-fig .ph::before{left:auto;right:-60px;top:auto;bottom:-70px}
+.feature-fig .ph img{position:relative}
+.feature-head{display:flex;align-items:center;gap:14px}
+.feature-head .no{font-size:40px;font-weight:800;color:var(--accent);line-height:1}
+.feature-head h3{font-size:26px;font-weight:700;line-height:1.45}
+.feature-txt p{margin-top:20px;font-size:15px;color:var(--ink-2);line-height:1.95}
+
+/* ---------- 特徴 ---------- */
+.strength{background:var(--paper-2)}
+.strength .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:56px}
+.strength-card{background:var(--card);border-radius:var(--r);padding:24px 24px 32px;box-shadow:var(--shadow)}
+.strength-card .ph{height:180px}
+.strength-card h3{margin-top:20px;font-size:17px;font-weight:700}
+.strength-card p{margin-top:8px;font-size:14px;color:var(--ink-2)}
+
+/* ---------- 採用面談バナー ---------- */
+.recruit{padding-block:24px 96px;background:var(--paper-2)}
+.recruit-banner{display:flex;align-items:center;justify-content:space-between;gap:32px;padding:48px 56px;
+  border-radius:var(--r-l);color:#fff;position:relative;overflow:hidden;
+  background:linear-gradient(110deg,var(--accent) 0%,var(--accent-2) 100%)}
+.recruit-banner::after{content:"";position:absolute;right:220px;top:-80px;width:240px;height:240px;border-radius:50%;
+  background:rgba(255,255,255,.12)}
+.recruit-tag{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--accent);
+  background:#fff;border-radius:4px;padding:3px 10px}
+.recruit-banner h2{margin-top:12px;font-size:26px;font-weight:700;letter-spacing:.04em}
+.recruit-banner .btn{position:relative;z-index:1;background:#fff;color:var(--ink);box-shadow:0 8px 20px rgba(0,0,0,.12)}
+.recruit-banner .btn:hover{transform:translateY(-2px)}
+.recruit-banner .btn .arw{color:var(--accent)}
+
+/* ---------- 導入までの流れ ---------- */
+.flow-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:64px;position:relative}
+.flow-steps::before{content:"";position:absolute;top:32px;left:12.5%;right:12.5%;height:2px;
+  background:repeating-linear-gradient(90deg,var(--accent) 0 8px,transparent 8px 16px);opacity:.5}
+.step{position:relative;text-align:center}
+.step .num{width:64px;height:64px;margin:0 auto;border-radius:50%;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--accent-2),var(--accent));color:#fff;font-size:24px;font-weight:800;
+  box-shadow:0 8px 18px rgba(255,36,0,.26)}
+.step h3{margin-top:20px;font-size:17px;font-weight:700}
+.step p{margin-top:8px;font-size:13px;color:var(--ink-2);line-height:1.75;padding-inline:8px}
+
+/* ---------- FAQ ---------- */
+.faq{background:var(--paper-2)}
+.faq-list{max-width:960px;margin:56px auto 0;display:flex;flex-direction:column;gap:12px}
+.faq-item{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow-s)}
+.faq-item summary{list-style:none;display:flex;align-items:center;gap:16px;padding:22px 28px;cursor:pointer;
+  font-size:16px;font-weight:700}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-q,.faq-a-label{flex:0 0 auto;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;
+  font-size:14px;font-weight:800}
+.faq-q{background:var(--accent);color:#fff}
+.faq-item summary .t{flex:1 1 auto}
+.faq-toggle{position:relative;flex:0 0 auto;width:16px;height:16px}
+.faq-toggle::before,.faq-toggle::after{content:"";position:absolute;left:0;top:7px;width:16px;height:2px;background:var(--ink);
+  transition:transform .35s var(--ease)}
+.faq-toggle::after{transform:rotate(90deg)}
+.faq-item[open] .faq-toggle::after{transform:rotate(0)}
+.faq-a{display:flex;gap:16px;padding:0 28px 24px;font-size:14px;color:var(--ink-2)}
+.faq-a-label{background:var(--accent-soft);color:var(--accent)}
+.faq-a p{padding-top:4px}
+
+/* ---------- 最終CV ---------- */
+.cv-final{position:relative;overflow:hidden;background:var(--accent);color:#fff;text-align:center;
+  border-radius:var(--r-xl) var(--r-xl) 0 0;padding-block:104px}
+.cv-final::before{content:"";position:absolute;width:560px;height:560px;left:-180px;top:-260px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,128,104,.65),rgba(255,128,104,0) 70%)}
+.cv-final::after{content:"";position:absolute;width:420px;height:420px;right:-120px;bottom:-240px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,128,104,.55),rgba(255,128,104,0) 70%)}
+.cv-final .wrap{position:relative;z-index:1}
+.cv-final h2{font-size:34px;font-weight:700;line-height:1.5;letter-spacing:.04em}
+.cv-final p{margin-top:16px;font-size:15px;opacity:.92}
+.cv-final .btn-row{justify-content:center;margin-top:40px}
+.cv-final .btn--ghost{color:var(--accent)}
+
+/* ---------- フッター ---------- */
+.footer{background:var(--ink);color:#fff;padding-block:72px 40px}
+.footer-upper{display:flex;justify-content:space-between;gap:48px}
+.footer-brand{max-width:340px}
+.footer .logo .type,.footer .logo .mark{filter:none}
+.footer-logo{display:inline-flex;align-items:center;gap:14px;background:#fff;border-radius:10px;padding:10px 14px}
+.footer-brand p{margin-top:20px;font-size:12px;line-height:1.9;color:rgba(255,255,255,.64)}
+.footer-links{display:flex;gap:56px}
+.footer-col h4{margin:0;font-size:13px;font-weight:700}
+.footer-col ul{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:10px;
+  font-size:12px;color:rgba(255,255,255,.64)}
+.footer-col a:hover{color:#fff}
+.footer-col [aria-disabled="true"]{cursor:default}
+.footer-lower{display:flex;justify-content:space-between;align-items:center;margin-top:48px;padding-top:28px;
+  border-top:1px solid rgba(255,255,255,.14);font-size:11px;color:rgba(255,255,255,.5)}
+.legal{display:flex;gap:20px}
+
+/* ---------- スマホ用の下部CTA（PCでは出さない） ---------- */
+.sp-cta{display:none}
+
+/* ---------- 表示アニメーション ---------- */
+[data-reveal]{opacity:0;transform:translateY(24px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+[data-reveal].is-in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){
+  [data-reveal]{opacity:1;transform:none;transition:none}
+  .clients-track{animation:none}
+}
+
+/* =========================================================
+   スマホ（〜900px）
+   ID指定は使わない。PC版のクラス指定をここで上書きする。
+   ========================================================= */
+@media (max-width:900px){
+  body{font-size:14px}
+  html{scroll-padding-top:64px}
+  .wrap{padding-inline:20px}
+  .sec{padding-block:56px}
+  /* balance：「〜ありません／か？」のように末尾だけが行に残るのを避ける */
+  .sec-ttl{font-size:21px;line-height:1.5;letter-spacing:.02em;text-wrap:balance}
+  .cv-mid h2,.cv-final h2,.bridge p,.recruit-banner h2{text-wrap:balance}
+
+  /* ボタン：指で押せる高さを保ちつつ、横幅いっぱいに */
+  .btn--lg{height:56px;width:100%;min-width:0}
+  .btn-row{gap:12px}
+
+  /* ヘッダー：ナビは畳み、申し込みボタン1つだけ残す */
+  .site-header{height:56px;transition:transform .35s var(--ease),border-color .3s,background .3s}
+  /* 下へ送ると隠れ、上へ戻すと出てくる（下部のCTAと重ならないように） */
+  .site-header.is-hidden{transform:translateY(-100%)}
+  .site-header .wrap{gap:12px}
+  .brand{gap:8px}
+  .brand-sub{display:none}
+  .gnav-links{display:none}
+  .gnav{gap:0}
+  .site-header .btn--ghost{display:none}
+
+  /* FV */
+  .kv{padding-block:48px 56px}
+  .kv-inner{flex-direction:column;align-items:stretch;gap:32px}
+  .kv-ttl{font-size:29px;line-height:1.45}
+  .kv-ttl .product{font-size:36px;margin-top:6px;gap:8px}
+  .kv-ttl .product small{font-size:11px}
+  .scope{gap:8px;font-size:12px}
+  .chip{font-size:13px;padding-bottom:3px}
+  .chip::after{height:5px}
+  .kv-actions{flex-direction:column}
+  .kv-orb--1{width:300px;height:300px;right:-110px;top:-90px}
+  /* 小さい丸は文字に重なるので、スマホでは出さない */
+  .kv-orb--2,.kv-orb--3{display:none}
+
+  /* 導入企業ロゴ */
+  .clients{padding-block:24px}
+  .clients-track{animation-duration:32s}
+  .clients-set{gap:36px;padding-right:36px}
+  .clients-set img{height:40px}
+
+  /* お悩み */
+  .pain .grid{grid-template-columns:1fr;gap:16px;margin-top:32px}
+  .pain-card{padding:24px 20px}
+  .pain-card .ph{height:100px}
+  .pain-card h3{margin-top:18px;font-size:16px}
+  .pain-card p{font-size:13px}
+  .bridge{margin-top:40px}
+  .bridge p{font-size:18px;line-height:1.6}
+  .bridge .arrow{width:56px;height:26px;margin-top:18px}
+
+  /* 解決 */
+  .solution{padding-top:8px}
+  .solution-list{margin-top:32px;border-radius:var(--r)}
+  .solution-row{grid-template-columns:auto 1fr;gap:6px 14px;padding:22px 20px;align-items:start}
+  .solution-row .no{font-size:26px;padding-top:2px}
+  .solution-row h3{font-size:16px}
+  .solution-row p{grid-column:2;font-size:13px;width:auto}
+
+  /* 導入効果：写真を上、文章を下に積む */
+  .carousel{margin-top:32px}
+  .carousel-view{height:auto}
+  /* 高さを中身に持たせたいので absolute をやめる。中央寄せの計算（left:50%）は残す */
+  .carousel-track{position:relative;gap:16px}
+  .carousel-track.is-anim{transition:transform .6s var(--ease)}
+  .voice{flex-basis:300px;height:auto;min-height:420px;flex-direction:column;border-radius:var(--r)}
+  .voice .ph{flex:0 0 150px;width:100%;border-radius:0}
+  .voice-body{padding:20px;gap:12px}
+  .voice h3{font-size:17px}
+  .voice p{font-size:13px;line-height:1.8}
+  .carousel-btn{display:none}
+  .dots{margin-top:16px}
+
+  /* 中間CV */
+  .cv-mid{padding-bottom:56px}
+  .cv-mid-box{padding:36px 20px;border-radius:var(--r-l)}
+  .cv-mid h2{font-size:19px;line-height:1.6}
+  .cv-mid p{font-size:13px;margin-top:12px}
+  .cv-mid .btn-row{flex-direction:column;margin-top:24px}
+
+  /* できること */
+  .feature-rows{gap:48px;margin-top:36px}
+  .feature-row,.feature-row.is-rev{grid-template-columns:1fr;gap:20px}
+  .feature-row.is-rev .feature-fig{order:0}
+  .feature-fig .ph{height:200px;border-radius:var(--r)}
+  .feature-fig .ph::before,.feature-row.is-rev .feature-fig .ph::before{width:120px;height:120px;left:-40px;top:-45px;right:auto;bottom:auto}
+  .feature-head{gap:10px}
+  .feature-head .no{font-size:28px}
+  .feature-head h3{font-size:19px}
+  .feature-txt p{margin-top:12px;font-size:13px;line-height:1.85}
+
+  /* 特徴 */
+  .strength .grid{grid-template-columns:1fr;gap:16px;margin-top:32px}
+  .strength-card{padding:20px 20px 24px}
+  .strength-card .ph{height:150px}
+  .strength-card h3{font-size:16px}
+  .strength-card p{font-size:13px}
+
+  /* 採用面談バナー */
+  .recruit{padding-bottom:56px}
+  .recruit-banner{flex-direction:column;align-items:flex-start;gap:20px;padding:28px 20px;border-radius:var(--r)}
+  .recruit-banner h2{font-size:19px;line-height:1.6}
+  .recruit-banner::after{right:-60px;top:-100px}
+  .recruit-banner .btn{width:100%}
+
+  /* 導入までの流れ：番号を左、文章を右に置いた縦のフローにする */
+  .flow-steps{grid-template-columns:1fr;gap:0;margin-top:32px}
+  .flow-steps::before{display:none}
+  .step{display:grid;grid-template-columns:52px 1fr;gap:0 16px;text-align:left;padding-bottom:28px}
+  .step:last-child{padding-bottom:0}
+  /* 番号どうしをつなぐ縦線。最後の段には引かない */
+  .step::before{content:"";grid-column:1;grid-row:2;justify-self:center;width:2px;margin:10px 0 -28px;
+    background:repeating-linear-gradient(180deg,var(--accent) 0 6px,transparent 6px 12px);opacity:.45}
+  .step:last-child::before{display:none}
+  .step .num{grid-column:1;grid-row:1;width:52px;height:52px;font-size:20px;margin:0}
+  .step h3{grid-column:2;grid-row:1;margin-top:0;align-self:center;font-size:16px}
+  .step p{grid-column:2;grid-row:2;margin-top:6px;font-size:12px;padding-inline:0}
+
+  /* FAQ */
+  .faq-list{margin-top:32px;gap:10px}
+  .faq-item summary{gap:12px;padding:16px;font-size:14px;line-height:1.6}
+  .faq-q,.faq-a-label{width:26px;height:26px;font-size:12px}
+  .faq-a{gap:12px;padding:0 16px 18px;font-size:13px}
+
+  /* 最終CV */
+  .cv-final{padding-block:64px;border-radius:var(--r-l) var(--r-l) 0 0}
+  .cv-final h2{font-size:22px;line-height:1.6}
+  .cv-final p{font-size:13px}
+  .cv-final .btn-row{flex-direction:column;margin-top:28px}
+
+  /* フッター */
+  .footer{padding-block:48px 28px}
+  .footer-upper{flex-direction:column;gap:32px}
+  .footer-links{gap:0;display:grid;grid-template-columns:1fr 1fr;row-gap:28px}
+  .footer-lower{flex-direction:column;align-items:flex-start;gap:14px;margin-top:32px}
+
+  /* 画面下に貼りつく申し込みボタン。FVを過ぎてから出す */
+  .sp-cta{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:40;gap:10px;
+    padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));
+    background:rgba(250,249,247,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border-top:1px solid var(--line);
+    transform:translateY(110%);transition:transform .45s var(--ease)}
+  .sp-cta.is-in{transform:none}
+  .sp-cta .btn{flex:1 1 0;height:48px;padding:0 12px;min-width:0;font-size:13px}
+  /* 下部CTAの分だけ、最後まで読めるよう余白を足す */
+  .footer-lower{padding-bottom:64px}
+}
+</style>
+</head>
+<body>
+
+<!-- ========== ヘッダー ========== -->
+<header class="site-header" id="top">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="MiAI面談 トップへ">
+      <span class="logo">
+        <img class="mark" src="imgs/logo-mark.svg" alt="" width="31" height="31">
+        <img class="type" src="imgs/logo-type.svg" alt="MiAI" width="87" height="32">
+      </span>
+      <span class="brand-sub">AI面談のミアイ</span>
+    </a>
+    <nav class="gnav" aria-label="メインメニュー">
+      <div class="gnav-links">
+        <a href="#feature">機能と特徴</a>
+        <a href="#flow">導入までの流れ</a>
+      </div>
+      <div class="btn-row">
+        <a class="btn btn--ghost btn--sm" aria-disabled="true">資料請求</a>
+        <a class="btn btn--primary btn--sm" aria-disabled="true">無料デモ体験</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- ========== FV ========== -->
+  <section class="kv">
+    <span class="kv-orb kv-orb--1" aria-hidden="true"></span>
+    <span class="kv-orb kv-orb--2" aria-hidden="true"></span>
+    <span class="kv-orb kv-orb--3" aria-hidden="true"></span>
+    <div class="wrap kv-inner">
+      <div class="kv-copy" data-reveal>
+        <h1 class="kv-ttl">
+          組織の<span class="hl">「本音」</span>を、<br>正しく引き出す。
+          <span class="product en">MiAI面談<small>ミアイ</small></span>
+        </h1>
+        <div class="scope">
+          <span class="chip">評価面談</span>
+          <span class="chip en">1on1</span>
+          <span class="chip">キャリア面談</span>
+          <span>など、社内面談全般に対応</span>
+        </div>
+      </div>
+      <div class="kv-actions" data-reveal>
+        <a class="btn btn--primary btn--lg" aria-disabled="true">無料デモ体験</a>
+        <a class="btn btn--ghost btn--lg" aria-disabled="true">資料請求</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 導入企業ロゴ ========== -->
+  <section class="clients" aria-label="導入企業">
+    <div class="clients-track">
+      <div class="clients-set">
+        <img src="imgs/clients/shoei.png" alt="株式会社昭栄美術 企業ロゴ" loading="lazy">
+        <img src="imgs/clients/daiei_kankyo_group.png" alt="株式会社クリエイトナビ（大栄環境） 企業ロゴ" loading="lazy">
+        <img src="imgs/clients/heiwa_dining.png" alt="株式会社平和ダイニング 企業ロゴ" loading="lazy">
+        <img src="imgs/clients/babel_method.png" alt="バベルメソッド株式会社 企業ロゴ" loading="lazy">
+        <img src="imgs/clients/kyoto_tachibana_university.png" alt="学校法人京都橘学園 企業ロゴ" loading="lazy">
+        <img src="imgs/clients/vegas_vegas.png" alt="株式会社ベガスベガス 企業ロゴ" loading="lazy">
+        <img src="imgs/clients/kauche.png" alt="株式会社カウシェ 企業ロゴ" loading="lazy">
+        <img src="imgs/clients/hasegawa.png" alt="株式会社ハセガワ 企業ロゴ" loading="lazy">
+        <img src="imgs/clients/aeonnext_delivery.png" alt="イオンネクストデリバリー株式会社 企業ロゴ" loading="lazy">
+        <img src="imgs/clients/hibiya_kadan.png" alt="株式会社日比谷花壇 企業ロゴ" loading="lazy">
+        <img src="imgs/clients/haruta_law_farm.png" alt="弁護士法人春田法律事務所 企業ロゴ" loading="lazy">
+        <img src="imgs/clients/alfa_ene_formation.png" alt="アルファエネフォーメーション株式会社 企業ロゴ" loading="lazy">
+      </div>
+      <div class="clients-set" aria-hidden="true">
+        <img src="imgs/clients/shoei.png" alt="" loading="lazy">
+        <img src="imgs/clients/daiei_kankyo_group.png" alt="" loading="lazy">
+        <img src="imgs/clients/heiwa_dining.png" alt="" loading="lazy">
+        <img src="imgs/clients/babel_method.png" alt="" loading="lazy">
+        <img src="imgs/clients/kyoto_tachibana_university.png" alt="" loading="lazy">
+        <img src="imgs/clients/vegas_vegas.png" alt="" loading="lazy">
+        <img src="imgs/clients/kauche.png" alt="" loading="lazy">
+        <img src="imgs/clients/hasegawa.png" alt="" loading="lazy">
+        <img src="imgs/clients/aeonnext_delivery.png" alt="" loading="lazy">
+        <img src="imgs/clients/hibiya_kadan.png" alt="" loading="lazy">
+        <img src="imgs/clients/haruta_law_farm.png" alt="" loading="lazy">
+        <img src="imgs/clients/alfa_ene_formation.png" alt="" loading="lazy">
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== お悩み ========== -->
+  <section class="sec pain">
+    <div class="wrap">
+      <h2 class="sec-ttl" data-reveal>社内面談、こんなお悩みありませんか？</h2>
+      <div class="grid">
+        <article class="pain-card" data-reveal>
+          <div class="ph"><img src="imgs/icon-image.svg" alt="" width="24" height="24"></div>
+          <h3>面談の質が担当者によって<br>ばらつく</h3>
+          <p>評価面談・1on1・キャリア面談など、面談の進め方や深掘りの仕方が担当者に依存し、質にムラが出やすい</p>
+        </article>
+        <article class="pain-card" data-reveal>
+          <div class="ph"><img src="imgs/icon-image.svg" alt="" width="24" height="24"></div>
+          <h3>社員が本音を話せず、<br>形式的な面談になりがち</h3>
+          <p>上司や人事が相手だと率直な意見を言いづらく、当たり障りのない会話で終わってしまうことが多い</p>
+        </article>
+        <article class="pain-card" data-reveal>
+          <div class="ph"><img src="imgs/icon-image.svg" alt="" width="24" height="24"></div>
+          <h3>面談の準備・記録・共有に<br>時間がかかる</h3>
+          <p>面談前の準備、実施中のメモ、終了後のレポート作成や関係者への共有など、付帯業務が大きな負担になっている</p>
+        </article>
+      </div>
+      <div class="bridge" data-reveal>
+        <p><span class="hl">MiAI面談</span>で社内面談の悩みをまとめて解決しませんか？</p>
+        <div class="arrow" aria-hidden="true"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 解決 ========== -->
+  <section class="sec solution">
+    <div class="wrap">
+      <h2 class="sec-ttl" data-reveal><em>MiAI面談</em>で、評価面談のあらゆる悩みを解決</h2>
+      <div class="solution-list" data-reveal>
+        <div class="solution-row">
+          <span class="no en">01</span>
+          <h3>面談の質をAIで一定化</h3>
+          <p>AIが評価軸に沿ったヒアリングを実施するため、評価者のスキルに依存せず、一貫した品質の面談を実現できます</p>
+        </div>
+        <div class="solution-row">
+          <span class="no en">02</span>
+          <h3>AIだからこそ、本音を話してもらえる</h3>
+          <p>上司や人事ではなくAIが聞き手になることで、被評価者が率直な意見や不満を安心して話せる環境をつくります</p>
+        </div>
+        <div class="solution-row">
+          <span class="no en">03</span>
+          <h3>評価分析や推移をすぐに資料化</h3>
+          <p>ヒアリング結果をAIが自動で要約・構造化し、評価シートへの反映や推移分析もすぐに資料として見える化できます</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 導入効果（カルーセル） ========== -->
+  <section class="sec usecase">
+    <div class="wrap">
+      <h2 class="sec-ttl" data-reveal>立場ごとの課題を解決する、<em>MiAI面談</em>の導入効果</h2>
+    </div>
+    <div class="carousel" data-carousel data-reveal>
+      <div class="carousel-view">
+        <div class="carousel-track">
+          <article class="voice">
+            <div class="ph"><img src="imgs/icon-image.svg" alt="" width="24" height="24"></div>
+            <div class="voice-body">
+              <span class="role en">MANAGER</span>
+              <h3>一次ヒアリングの自動化で、工数削減と質の平準化を両立。</h3>
+              <p>全社面談の調整や実施にかかっていた膨大な工数が一気に削減できました。面談の質が平準化され、属人化も解消。退職リスクや本音の可視化により、本当にケアが必要な社員へ迅速にアプローチできています。</p>
+            </div>
+          </article>
+          <article class="voice">
+            <div class="ph"><img src="imgs/icon-image.svg" alt="" width="24" height="24"></div>
+            <div class="voice-body">
+              <span class="role en">HR</span>
+              <h3>「聞きづらい」がなくなり、1on1がより深い時間に。</h3>
+              <p>面談の準備や記録に追われていた時間を取り戻す。AIが事前ヒアリングとレポート作成を担うことで、本質的な対話に集中できます。</p>
+            </div>
+          </article>
+          <article class="voice">
+            <div class="ph"><img src="imgs/icon-image.svg" alt="" width="24" height="24"></div>
+            <div class="voice-body">
+              <span class="role en">MEMBER</span>
+              <h3>対話に集中できる、面談へ。</h3>
+              <p>面談の準備や記録に追われていた時間を取り戻す。AIが事前ヒアリングとレポート作成を担うことで、本質的な対話に集中できます。</p>
+            </div>
+          </article>
+        </div>
+        <button class="carousel-btn carousel-btn--prev" type="button" aria-label="前へ"></button>
+        <button class="carousel-btn carousel-btn--next" type="button" aria-label="次へ"></button>
+      </div>
+      <div class="dots" role="tablist" aria-label="スライドの選択"></div>
+    </div>
+  </section>
+
+  <!-- ========== 中間CV ========== -->
+  <section class="cv-mid">
+    <div class="wrap">
+      <div class="cv-mid-box" data-reveal>
+        <h2>各現場の<span class="hl">「言えない・聞けない・時間がない」</span>を、MiAI面談で解消しませんか？</h2>
+        <p>実際の画面で体験できるデモをご用意しています。<br>編集された動画ではわからない、リアルな面接体験をぜひお試しください。</p>
+        <div class="btn-row">
+          <a class="btn btn--primary btn--lg" aria-disabled="true">無料デモ体験</a>
+          <a class="btn btn--ghost btn--lg" aria-disabled="true">資料請求</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== できること ========== -->
+  <section class="sec" id="feature">
+    <div class="wrap">
+      <h2 class="sec-ttl" data-reveal><em>MiAI面談</em>でできること</h2>
+      <div class="feature-rows">
+        <div class="feature-row" data-reveal>
+          <div class="feature-fig"><div class="ph"><img src="imgs/icon-image.svg" alt="" width="24" height="24"></div></div>
+          <div class="feature-txt">
+            <div class="feature-head"><span class="no en">01</span><h3>評価面談前の一次ヒアリング</h3></div>
+            <p>評価面談の前にAIが対象者へ一次ヒアリングを実施。評価軸に対する自己認識や本音・不満を事前に引き出し、限られた面談時間を本質的な対話に充てられます。</p>
+          </div>
+        </div>
+        <div class="feature-row is-rev" data-reveal>
+          <div class="feature-fig"><div class="ph"><img src="imgs/icon-image.svg" alt="" width="24" height="24"></div></div>
+          <div class="feature-txt">
+            <div class="feature-head"><span class="no en">02</span><h3>評価面談レポートの自動作成</h3></div>
+            <p>ヒアリング内容をAIが自動で要約・構造化し、評価シートに沿ったレポートとして出力。面談後のまとめ作業や人事への共有の手間を削減します。</p>
+          </div>
+        </div>
+        <div class="feature-row" data-reveal>
+          <div class="feature-fig"><div class="ph"><img src="imgs/icon-image.svg" alt="" width="24" height="24"></div></div>
+          <div class="feature-txt">
+            <div class="feature-head"><span class="no en">03</span><h3>過去面談から見える成長・コンディションの変遷</h3></div>
+            <p>評価面談・1on1・キャリア面談など、過去の面談データを横断で蓄積・可視化し、個人・組織の成長やコンディションの変化を時系列で把握できます。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 特徴 ========== -->
+  <section class="sec strength">
+    <div class="wrap">
+      <h2 class="sec-ttl" data-reveal><em>MiAI面談</em>の特徴</h2>
+      <div class="grid">
+        <article class="strength-card" data-reveal>
+          <div class="ph"><img src="imgs/icon-image.svg" alt="" width="24" height="24"></div>
+          <h3>訴求ポイント見出し（仮）</h3>
+          <p>訴求内容の説明文が入ります。内容は要検討。</p>
+        </article>
+        <article class="strength-card" data-reveal>
+          <div class="ph"><img src="imgs/icon-image.svg" alt="" width="24" height="24"></div>
+          <h3>訴求ポイント見出し（仮）</h3>
+          <p>訴求内容の説明文が入ります。内容は要検討。</p>
+        </article>
+        <article class="strength-card" data-reveal>
+          <div class="ph"><img src="imgs/icon-image.svg" alt="" width="24" height="24"></div>
+          <h3>訴求ポイント見出し（仮）</h3>
+          <p>訴求内容の説明文が入ります。内容は要検討。</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 採用面談バナー ========== -->
+  <section class="recruit">
+    <div class="wrap">
+      <div class="recruit-banner" data-reveal>
+        <div>
+          <span class="recruit-tag">採用面談にもMiAI</span>
+          <h2>社内面談だけでなく、採用面談にもMiAI</h2>
+        </div>
+        <a class="btn btn--lg" href="https://lp.miai-app.com/" target="_blank" rel="noopener">MiAI面接の詳細はこちら<span class="arw">＞</span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 導入までの流れ ========== -->
+  <section class="sec" id="flow">
+    <div class="wrap">
+      <h2 class="sec-ttl" data-reveal>導入までの流れ</h2>
+      <ol class="flow-steps" style="list-style:none;padding:0" data-reveal>
+        <li class="step">
+          <span class="num en">1</span>
+          <h3>お問い合わせ</h3>
+          <p>フォームより資料請求・デモ体験のお申し込み</p>
+        </li>
+        <li class="step">
+          <span class="num en">2</span>
+          <h3>無料デモ体験</h3>
+          <p>担当者よりご連絡し、実際の画面を体験いただきます</p>
+        </li>
+        <li class="step">
+          <span class="num en">3</span>
+          <h3>ご提案・お見積り</h3>
+          <p>評価面談・1on1など、貴社の活用シーンに合わせてご提案します</p>
+        </li>
+        <li class="step">
+          <span class="num en">4</span>
+          <h3>ご契約・導入開始</h3>
+          <p>初期設定のサポートを行い、運用を開始します</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ========== FAQ ========== -->
+  <section class="sec faq" id="faq">
+    <div class="wrap">
+      <h2 class="sec-ttl" data-reveal>よくあるご質問</h2>
+      <div class="faq-list" data-reveal>
+        <details class="faq-item" open>
+          <summary><span class="faq-q en">Q</span><span class="t">導入までどれくらいの期間がかかりますか？</span><span class="faq-toggle" aria-hidden="true"></span></summary>
+          <div class="faq-a"><span class="faq-a-label en">A</span><p>お申し込みから最短2週間で導入可能です。初期設定のサポートも担当者が伴走いたします。</p></div>
+        </details>
+        <details class="faq-item">
+          <summary><span class="faq-q en">Q</span><span class="t">既存の人事システムとの連携は可能ですか？</span><span class="faq-toggle" aria-hidden="true"></span></summary>
+          <div class="faq-a"><span class="faq-a-label en">A</span><p>回答文が入ります（原稿待ち）。</p></div>
+        </details>
+        <details class="faq-item">
+          <summary><span class="faq-q en">Q</span><span class="t">面談データのセキュリティはどうなっていますか？</span><span class="faq-toggle" aria-hidden="true"></span></summary>
+          <div class="faq-a"><span class="faq-a-label en">A</span><p>回答文が入ります（原稿待ち）。</p></div>
+        </details>
+        <details class="faq-item">
+          <summary><span class="faq-q en">Q</span><span class="t">無料トライアル期間はありますか？</span><span class="faq-toggle" aria-hidden="true"></span></summary>
+          <div class="faq-a"><span class="faq-a-label en">A</span><p>回答文が入ります（原稿待ち）。</p></div>
+        </details>
+        <details class="faq-item">
+          <summary><span class="faq-q en">Q</span><span class="t">対象人数に上限はありますか？</span><span class="faq-toggle" aria-hidden="true"></span></summary>
+          <div class="faq-a"><span class="faq-a-label en">A</span><p>回答文が入ります（原稿待ち）。</p></div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 最終CV ========== -->
+  <section class="cv-final">
+    <div class="wrap" data-reveal>
+      <h2>組織の「見えない声」に耳を傾ける、第一歩として。</h2>
+      <p>評価面談・1on1・キャリア面談など、導入のご相談も、お気軽にお問い合わせください</p>
+      <div class="btn-row">
+        <a class="btn btn--primary btn--lg" aria-disabled="true">無料デモ体験</a>
+        <a class="btn btn--ghost btn--lg" aria-disabled="true">資料請求</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ========== フッター ========== -->
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-upper">
+      <div class="footer-brand">
+        <span class="footer-logo logo">
+          <img class="mark" src="imgs/logo-mark.svg" alt="" width="31" height="31">
+          <img class="type" src="imgs/logo-type.svg" alt="MiAI" width="87" height="32">
+        </span>
+        <p>組織診断AI面談ツール MiAI。AIを用いた本音抽出面談ソリューションで、組織と従業員の本質的な課題解決を支援します。</p>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>サービス</h4>
+          <ul>
+            <li><a href="#feature">機能と特徴</a></li>
+            <li><a href="#flow">導入までの流れ</a></li>
+            <li><a aria-disabled="true">料金</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>会社情報</h4>
+          <ul>
+            <li><a aria-disabled="true">会社概要</a></li>
+            <li><a aria-disabled="true">採用情報</a></li>
+            <li><a aria-disabled="true">お知らせ</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>お問い合わせ</h4>
+          <ul>
+            <li><a aria-disabled="true">資料請求</a></li>
+            <li><a aria-disabled="true">無料デモ体験</a></li>
+            <li><a aria-disabled="true">お問い合わせ窓口</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-lower">
+      <small>© 2026 Company Name. All Rights Reserved.</small>
+      <div class="legal">
+        <a aria-disabled="true">プライバシーポリシー</a>
+        <a aria-disabled="true">利用規約</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- スマホ用：画面下に貼りつく申し込みボタン -->
+<div class="sp-cta" aria-hidden="true">
+  <a class="btn btn--primary" aria-disabled="true">無料デモ体験</a>
+  <a class="btn btn--ghost" aria-disabled="true">資料請求</a>
+</div>
+
+<script>
+/* ヘッダー：スクロールしたら下線を出す。
+   スマホでは、下へ送ると隠し、上へ戻すと出す（画面下のCTAと二重にならないように） */
+(() => {
+  const h = document.querySelector('.site-header');
+  const sp = matchMedia('(max-width:900px)');
+  let last = scrollY;
+  const on = () => {
+    const y = Math.max(scrollY, 0);
+    h.classList.toggle('is-scrolled', y > 8);
+    /* ヘッダーの高さ分を過ぎてから隠す。戻すのは少しでも上へ動いたとき */
+    const hide = sp.matches && y > h.offsetHeight * 2 && y > last;
+    if (hide || y - last < -4 || y <= 8) h.classList.toggle('is-hidden', hide);
+    last = y;
+  };
+  addEventListener('scroll', on, {passive:true});
+  sp.addEventListener('change', () => h.classList.remove('is-hidden'));
+  on();
+})();
+
+/* スマホの下部CTA：FVを過ぎたら出し、最後の申し込みブロックに来たら引っ込める */
+(() => {
+  const bar = document.querySelector('.sp-cta');
+  const kv = document.querySelector('.kv');
+  const last = document.querySelector('.cv-final');
+  const on = () => {
+    const past = scrollY > kv.offsetHeight;
+    const atEnd = last.getBoundingClientRect().top < innerHeight;
+    bar.classList.toggle('is-in', past && !atEnd);
+  };
+  addEventListener('scroll', on, {passive:true});
+  addEventListener('resize', on); on();
+})();
+
+/* 表示アニメーション：画面に入ったら出す */
+(() => {
+  const els = document.querySelectorAll('[data-reveal]');
+  if (!('IntersectionObserver' in window)) { els.forEach(e => e.classList.add('is-in')); return; }
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
+  }), {rootMargin:'0px 0px -10% 0px'});
+  els.forEach(e => io.observe(e));
+})();
+
+/* 導入効果カルーセル：カードを3組並べ、真ん中の組を見せる。端に来たら同じ見た目の位置へ瞬時に戻す */
+(() => {
+  const root = document.querySelector('[data-carousel]');
+  if (!root) return;
+  const track = root.querySelector('.carousel-track');
+  const originals = [...track.children];
+  const n = originals.length;
+  originals.forEach(c => track.appendChild(c.cloneNode(true)));
+  originals.forEach(c => track.insertBefore(c.cloneNode(true), track.firstChild));
+  const cards = [...track.children];
+  cards.forEach((c, i) => { if (i < n || i >= n * 2) c.setAttribute('aria-hidden', 'true'); });
+
+  const dots = root.querySelector('.dots');
+  for (let i = 0; i < n; i++) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.setAttribute('aria-label', `${i + 1}枚目`);
+    b.addEventListener('click', () => go(n + i));
+    dots.appendChild(b);
+  }
+
+  let idx = n, busy = false;
+  const step = () => cards[1].offsetLeft - cards[0].offsetLeft;
+  const place = (anim) => {
+    track.classList.toggle('is-anim', anim);
+    const w = cards[0].offsetWidth;
+    track.style.transform = `translateX(${-(idx * step() + w / 2)}px)`;
+    cards.forEach((c, i) => c.classList.toggle('is-active', i === idx));
+    [...dots.children].forEach((d, i) => d.classList.toggle('is-active', i === idx % n));
+  };
+  const go = (to) => { if (busy || to === idx) return; busy = true; idx = to; place(true); };
+  track.addEventListener('transitionend', e => {
+    if (e.target !== track) return;
+    if (idx < n) idx += n; else if (idx >= n * 2) idx -= n;
+    place(false); busy = false;
+  });
+  root.querySelector('.carousel-btn--prev').addEventListener('click', () => go(idx - 1));
+  root.querySelector('.carousel-btn--next').addEventListener('click', () => go(idx + 1));
+
+  /* 指でのスワイプ（スマホでは矢印を出していないので、これが唯一の送り方） */
+  let x0 = null, y0 = null;
+  track.addEventListener('touchstart', e => {
+    x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
+  }, {passive:true});
+  track.addEventListener('touchend', e => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    const dy = e.changedTouches[0].clientY - y0;
+    /* 縦に流れた指は、ページのスクロールとして扱う */
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) go(dx < 0 ? idx + 1 : idx - 1);
+    x0 = y0 = null;
+  }, {passive:true});
+  addEventListener('resize', () => place(false));
+  place(false);
+})();
+</script>
+</body>
+</html>

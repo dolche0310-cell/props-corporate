@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>スマホ版プレビュー｜MiAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500&family=Lato:wght@400;700&display=swap">
+<style>
+/* PC の画面の真ん中に、スマホ幅の窓をひとつ置くための台。
+   中身は iframe に入れる。CSS で幅を絞るだけでは、メディアクエリが見ているのは
+   「ブラウザの幅」なのでスマホ用の指定が効かない。iframe なら中が本物の
+   390px のビューポートになり、実機と同じ条件で組みが切り替わる。
+
+   見たいページは ?p=ページ名.html で指定する。 */
+:root{
+  --stage:#26262a;      /* 両サイドのダークグレー */
+  --stage-2:#1c1c1f;
+  --chrome:#f2f2f4;
+  --line:rgba(255,255,255,.16);
+  --ease-out-expo:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--stage);color:var(--chrome);
+  font-family:"Noto Sans JP",-apple-system,"Hiragino Kaku Gothic ProN",sans-serif;font-size:13px;
+  display:flex;flex-direction:column;overflow:hidden}   /* スクロールするのは中の画面だけ */
+
+.bar{flex:none;display:flex;align-items:center;gap:20px;height:52px;padding:0 20px;
+  background:var(--stage-2);border-bottom:1px solid var(--line)}
+.bar h1{margin:0;font-family:"Lato",sans-serif;font-weight:700;font-size:12px;letter-spacing:.14em;
+  text-transform:uppercase;color:rgba(255,255,255,.7);white-space:nowrap}
+.note{color:rgba(255,255,255,.4);font-size:11px;letter-spacing:.04em;white-space:nowrap}
+.sizes{display:flex;gap:6px;margin-left:auto}
+.sizes button{appearance:none;border:1px solid var(--line);background:transparent;
+  color:rgba(255,255,255,.66);height:28px;padding:0 12px;border-radius:999px;cursor:pointer;
+  font-family:"Lato",sans-serif;font-size:11px;letter-spacing:.06em;
+  transition:background-color .25s ease,color .25s ease,border-color .25s ease}
+.sizes button:hover{color:#fff;border-color:rgba(255,255,255,.4)}
+.sizes button[aria-pressed="true"]{background:#fff;border-color:#fff;color:#141416}
+
+.stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;
+  padding:20px;overflow:hidden}
+/* 縦は実機の寸法で固定する。ウィンドウの空きに合わせて伸ばすと、見る人の
+   ブラウザの高さで縦横比が変わり、FV の構図の判断ができない。
+   画面に入りきらないときは、寸法は保ったまま全体を縮小して収める。 */
+.device{position:relative;width:var(--w,390px);height:var(--h,844px);flex:none;
+  transform:scale(var(--k,1));transform-origin:center center;
+  border-radius:18px;overflow:hidden;
+  /* 地は台と同じ色。白にすると縮小時の端数で端に白い線が残る。
+     輪郭の細い縁取りも付けない（1px を割ると罫線のように見える） */
+  background:var(--stage);box-shadow:0 24px 60px rgba(0,0,0,.45);
+  transition:width .35s var(--ease-out-expo),height .35s var(--ease-out-expo)}
+.device iframe{display:block;width:100%;height:100%;border:0}
+.caption{flex:none;text-align:center;padding:0 0 14px;color:rgba(255,255,255,.38);
+  font-family:"Lato",sans-serif;font-size:11px;letter-spacing:.12em}
+
+/* 画面が狭いとき（＝スマホから開いたとき）は台を出さず、中身をそのまま見せる */
+@media (max-width:820px){
+  body{overflow:auto}
+  .bar{position:sticky;top:0;z-index:2}
+  .stage{padding:0}
+  .device{width:100%;height:auto;min-height:100vh;border-radius:0;box-shadow:none;transform:none}
+  .device iframe{height:100vh}
+  .sizes{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <h1 id="title">MiAI — SP Preview</h1>
+  <span class="note">中はスクロールできます</span>
+  <div class="sizes" role="group" aria-label="画面幅">
+    <button type="button" data-w="375" data-h="667" data-name="iPhone SE" aria-pressed="false">375</button>
+    <button type="button" data-w="390" data-h="844" data-name="iPhone 14 / 15" aria-pressed="true">390</button>
+    <button type="button" data-w="430" data-h="932" data-name="iPhone 15 Plus" aria-pressed="false">430</button>
+  </div>
+</div>
+
+<div class="stage">
+  <div class="device" id="device" style="--w:390px;--h:844px">
+    <iframe id="frame" title="スマホ版プレビュー"></iframe>
+  </div>
+</div>
+
+<p class="caption" id="cap"></p>
+
+<script>
+(function(){
+  var dev=document.getElementById('device'),
+      stage=document.querySelector('.stage'),
+      cap=document.getElementById('cap'),
+      frame=document.getElementById('frame'),
+      title=document.getElementById('title'),
+      btns=[].slice.call(document.querySelectorAll('.sizes button'));
+
+  /* 見たいページは ?p= で受け取る。他所のURLを読み込ませないよう、
+     同じフォルダの .html だけを通す。 */
+  var q=new URLSearchParams(location.search).get('p') || '';
+  var page=/^[\w.-]+\.html$/.test(q) ? q : '';
+  if(page){ frame.src=page; title.textContent='MiAI — '+page; }
+  else{ frame.srcdoc='<div style="font:14px -apple-system,sans-serif;color:#888;'
+    +'display:grid;place-items:center;height:100%;text-align:center;line-height:2">'
+    +'見たいページを指定してください<br><code>sp-preview.html?p=ページ名.html</code></div>'; }
+
+  var cur=btns.filter(function(b){return b.getAttribute('aria-pressed')==='true';})[0]||btns[1];
+
+  /* 実機の寸法は保ったまま、画面に入らないぶんだけ全体を縮める。
+     窓の中のビューポートは縮小前の寸法なので、組みは実機のまま。 */
+  function fit(){
+    var h=parseInt(cur.dataset.h,10), w=parseInt(cur.dataset.w,10);
+    var k=Math.min(1,(stage.clientHeight-40)/h,(stage.clientWidth-40)/w);
+    dev.style.setProperty('--k',k.toFixed(4));
+    var pct=Math.round(k*100);
+    cap.textContent=cur.dataset.name+'　'+w+' × '+h+(pct<100?'（実寸の '+pct+'%）':'（実寸）');
+  }
+  function set(btn){
+    cur=btn;
+    dev.style.setProperty('--w',btn.dataset.w+'px');
+    dev.style.setProperty('--h',btn.dataset.h+'px');
+    btns.forEach(function(b){ b.setAttribute('aria-pressed',String(b===btn)); });
+    fit();
+  }
+  btns.forEach(function(b){ b.addEventListener('click',function(){ set(b); }); });
+  addEventListener('resize',fit);
+  fit();
+})();
+</script>
+
+</body>
+</html>
