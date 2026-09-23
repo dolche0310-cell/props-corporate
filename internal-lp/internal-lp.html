@@ -301,10 +301,13 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
 /* ---------- 最終CV ---------- */
 .cv-final{position:relative;overflow:hidden;background:var(--accent);color:#fff;text-align:center;
   border-radius:var(--r-xl) var(--r-xl) 0 0;padding-block:104px}
+/* 「解決」セクション(.solution-bg)と同じ、ぼんやり動く背景にする */
 .cv-final::before{content:"";position:absolute;width:560px;height:560px;left:-180px;top:-260px;border-radius:50%;
-  background:radial-gradient(circle,rgba(255,128,104,.65),rgba(255,128,104,0) 70%)}
+  background:radial-gradient(circle,rgba(255,128,104,.65),rgba(255,128,104,0) 70%);
+  animation:solutionDrift1 19s ease-in-out infinite alternate}
 .cv-final::after{content:"";position:absolute;width:420px;height:420px;right:-120px;bottom:-240px;border-radius:50%;
-  background:radial-gradient(circle,rgba(255,128,104,.55),rgba(255,128,104,0) 70%)}
+  background:radial-gradient(circle,rgba(255,128,104,.55),rgba(255,128,104,0) 70%);
+  animation:solutionDrift2 23s ease-in-out infinite alternate}
 .cv-final .wrap{position:relative;z-index:1}
 .cv-final h2{font-size:34px;font-weight:700;line-height:1.5;letter-spacing:.04em}
 .cv-final p{margin-top:16px;font-size:15px;opacity:.92}
@@ -338,6 +341,7 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
   [data-reveal]{opacity:1;transform:none;transition:none}
   .clients-track{animation:none}
   .solution-bg::before,.solution-bg::after{animation:none}
+  .cv-final::before,.cv-final::after{animation:none}
 }
 
 /* =========================================================
