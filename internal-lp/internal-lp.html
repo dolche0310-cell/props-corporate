@@ -104,6 +104,9 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
 .kv-ttl .product small{font-size:14px;font-weight:700;color:var(--ink-2);letter-spacing:.1em}
 .scope{display:flex;align-items:center;flex-wrap:wrap;gap:6px 18px;font-size:14px;color:var(--ink-2)}
 .scope-note{font-size:16px;color:#101010}
+/* 「など、」と「社内面談全般に対応」は元々1つの文なので、.scope の gap 分だけ
+   詰めて隙間を打ち消す(SPで改行させるために2つのspanへ分けたため) */
+.scope-note-2{margin-left:-18px}
 /* ボタンに見えないよう、箱ではなく手書き風の線で見せる */
 .chip{display:inline-block;position:relative;padding:0 2px 4px;color:var(--ink);font-weight:700;font-size:18px}
 .chip::after{content:"";position:absolute;left:-2px;right:-2px;bottom:0;height:6px;
@@ -335,14 +338,19 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
   .kv{padding-block:48px 56px}
   .kv-inner{grid-template-columns:1fr;grid-template-areas:"ttl" "image" "sub";align-items:stretch;gap:32px}
   .kv-ttl{font-size:29px;line-height:1.45;white-space:normal}
-  .kv-ttl .product{font-size:36px;margin-top:6px;gap:8px}
+  .kv-ttl .product{font-size:36px;margin-top:6px;margin-bottom:16px;gap:8px}
   .kv-ttl .product small{font-size:11px}
   .scope{gap:8px;font-size:12px}
-  .chip{font-size:13px;padding-bottom:3px}
-  .chip::after{height:5px}
+  .chip{font-size:18px;padding-bottom:4px}
+  /* 「〜など、」の後で改行する */
+  .scope-note-2{flex-basis:100%;margin-left:0}
   .kv-actions{flex-direction:column;align-items:center;margin-top:28px}
   .kv-actions .btn{width:100%;max-width:260px}
   .kv-image{max-width:280px;margin-inline:auto}
+  /* width:130%で広げた画像が右にはみ出して見切れるので、左右均等にはみ出す形で中央に寄せる。
+     (replaced要素+%widthではmargin:autoによる中央寄せが効かなかったため、
+     はみ出し分(280*0.3=84)の半分を負のmarginで直接引いている) */
+  .kv-image img{margin-left:-42px}
   /* 小さい丸は文字に重なるので、スマホでは出さない */
   .kv-orb--2,.kv-orb--3{display:none}
 
@@ -501,7 +509,7 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
           <span class="chip">評価面談</span>
           <span class="chip en">1on1</span>
           <span class="chip">キャリア面談</span>
-          <span class="scope-note">など、社内面談全般に対応</span>
+          <span class="scope-note">など、</span><span class="scope-note scope-note-2">社内面談全般に対応</span>
         </div>
         <div class="kv-actions">
           <a class="btn btn--primary btn--lg" aria-disabled="true">無料デモ体験</a>
