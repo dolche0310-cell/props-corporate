@@ -97,7 +97,7 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
 .kv-inner{position:relative;display:grid;align-items:center;gap:20px;
   grid-template-columns:1fr minmax(280px,420px);
   grid-template-areas:"ttl image" "sub image"}
-.kv-ttl{grid-area:ttl;font-size:52px;font-weight:700;line-height:1.35;letter-spacing:.04em}
+.kv-ttl{grid-area:ttl;max-width:640px;font-size:52px;font-weight:700;line-height:1.35;letter-spacing:.04em;white-space:nowrap}
 .kv-ttl .hl{display:inline-block;color:var(--accent);background:#fff;border-radius:10px;
   padding:0 .12em;margin:0 .06em;box-shadow:var(--shadow-s)}
 .kv-ttl .product{display:flex;align-items:baseline;gap:12px;margin-top:10px;margin-bottom:36px;font-size:64px;font-weight:800;letter-spacing:.01em;white-space:normal}
@@ -110,7 +110,7 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
   background:var(--accent);opacity:.22;border-radius:6px 8px 5px 7px;transform:rotate(-.6deg)}
 .chip:nth-of-type(2n)::after{transform:rotate(.5deg);border-radius:8px 5px 7px 6px}
 .kv-actions{display:flex;flex-wrap:wrap;gap:16px;margin-top:36px}
-.kv-sub{grid-area:sub}
+.kv-sub{grid-area:sub;max-width:640px}
 .kv-image{grid-area:image}
 .kv-image img{display:block;width:130%;max-width:none;height:auto}
 
@@ -334,7 +334,7 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
   /* FV: lp.miai-app.com と同じ順(見出し→画像→サブタイトル+ボタン)にする */
   .kv{padding-block:48px 56px}
   .kv-inner{grid-template-columns:1fr;grid-template-areas:"ttl" "image" "sub";align-items:stretch;gap:32px}
-  .kv-ttl{font-size:29px;line-height:1.45}
+  .kv-ttl{font-size:29px;line-height:1.45;white-space:normal}
   .kv-ttl .product{font-size:36px;margin-top:6px;gap:8px}
   .kv-ttl .product small{font-size:11px}
   .scope{gap:8px;font-size:12px}
