@@ -143,16 +143,49 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
 .ph{display:grid;place-items:center;background:var(--ph);border-radius:12px;color:var(--muted)}
 .ph img{width:24px;height:24px;opacity:.55}
 
-/* ---------- 解決 ---------- */
-.solution{padding-top:24px}
+/* ---------- 解決 ----------
+   lp.miai-app.com の「導入企業で出ている、実際の数字」セクション同様、
+   オレンジの背景がぼんやり動くデザインにする。参考元はWebGL(canvas)だが、
+   ここでは同じ見た目のねらいを、既存の .kv-orb と同じ手法(円をCSS
+   アニメーションで漂わせる)で軽量に再現している。filter:blur/backdrop-filter は
+   重い上に環境によって描画が不安定になることがあるため使わず、グラデーション
+   自体を多段の stop でなだらかにすることでぼかして見せている。
+   色は参考元(#ED5303)に合わせず、このLPのコーポレートカラー(--accent)に。 */
+.solution{position:relative;overflow:hidden;padding-block:120px;isolation:isolate}
 .solution .ttl-wrap{text-align:center}
-.solution-list{max-width:960px;margin:48px auto 0;background:var(--card);border-radius:var(--r-l);
+.solution-bg{position:absolute;inset:0;z-index:-1;background:var(--accent)}
+.solution-bg::before,.solution-bg::after{content:"";position:absolute;inset:-20%}
+.solution-bg::before{
+  background:
+    radial-gradient(40% 40% at 22% 28%,rgba(255,255,255,.38) 0%,rgba(255,255,255,.22) 32%,rgba(255,255,255,.08) 55%,rgba(255,255,255,0) 75%),
+    radial-gradient(44% 44% at 82% 70%,var(--accent-2) 0%,rgba(255,106,72,.55) 32%,rgba(255,106,72,.18) 55%,rgba(255,106,72,0) 75%);
+  animation:solutionDrift1 19s ease-in-out infinite alternate;
+}
+.solution-bg::after{
+  background:
+    radial-gradient(36% 36% at 78% 18%,rgba(255,255,255,.28) 0%,rgba(255,255,255,.16) 32%,rgba(255,255,255,.05) 55%,rgba(255,255,255,0) 75%),
+    radial-gradient(42% 42% at 18% 78%,rgba(120,10,0,.42) 0%,rgba(120,10,0,.24) 32%,rgba(120,10,0,.08) 55%,rgba(120,10,0,0) 75%);
+  animation:solutionDrift2 23s ease-in-out infinite alternate;
+}
+@keyframes solutionDrift1{
+  0%{transform:translate(-4%,-3%) scale(1)}
+  100%{transform:translate(4%,5%) scale(1.12)}
+}
+@keyframes solutionDrift2{
+  0%{transform:translate(3%,4%) scale(1.08)}
+  100%{transform:translate(-5%,-2%) scale(1)}
+}
+.solution .sec-ttl{color:#fff}
+.solution .sec-ttl em{color:var(--accent);background:#fff;border-radius:10px;
+  padding:0 .12em;margin:0 .06em;box-shadow:var(--shadow-s)}
+.solution-list{max-width:960px;margin:48px auto 0;background:rgba(255,255,255,.16);
+  border:1px solid rgba(255,255,255,.28);border-radius:var(--r-l);
   box-shadow:var(--shadow);overflow:hidden}
 .solution-row{display:grid;grid-template-columns:80px 1fr 420px;gap:28px;align-items:center;padding:30px 44px}
-.solution-row + .solution-row{border-top:1px solid var(--line)}
-.solution-row .no{font-size:36px;font-weight:800;color:var(--accent);line-height:1}
-.solution-row h3{font-size:19px;font-weight:700;line-height:1.5}
-.solution-row p{font-size:14px;color:var(--ink-2)}
+.solution-row + .solution-row{border-top:1px solid rgba(255,255,255,.24)}
+.solution-row .no{font-size:36px;font-weight:800;color:#fff;line-height:1}
+.solution-row h3{font-size:19px;font-weight:700;line-height:1.5;color:#fff}
+.solution-row p{font-size:14px;color:rgba(255,255,255,.82)}
 
 /* ---------- 導入効果（カルーセル） ---------- */
 .usecase{overflow:hidden;background:var(--paper-2)}
@@ -304,6 +337,7 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
 @media (prefers-reduced-motion:reduce){
   [data-reveal]{opacity:1;transform:none;transition:none}
   .clients-track{animation:none}
+  .solution-bg::before,.solution-bg::after{animation:none}
 }
 
 /* =========================================================
@@ -369,7 +403,7 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
   .bridge .arrow{width:56px;height:26px;margin-top:18px}
 
   /* 解決 */
-  .solution{padding-top:8px}
+  .solution{padding-block:56px}
   .solution-list{margin-top:32px;border-radius:var(--r)}
   .solution-row{grid-template-columns:auto 1fr;gap:6px 14px;padding:22px 20px;align-items:start}
   .solution-row .no{font-size:26px;padding-top:2px}
@@ -583,6 +617,7 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
 
   <!-- ========== 解決 ========== -->
   <section class="sec solution">
+    <div class="solution-bg" aria-hidden="true"></div>
     <div class="wrap">
       <h2 class="sec-ttl" data-reveal><em>MiAI面談</em>で、評価面談のあらゆる悩みを解決</h2>
       <div class="solution-list" data-reveal>
