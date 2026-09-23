@@ -95,7 +95,7 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
 .kv-orb--2{width:56px;height:56px;right:34%;top:64px;background:radial-gradient(circle at 30% 30%,#ff7a5c,var(--accent))}
 .kv-orb--3{width:28px;height:28px;left:7%;bottom:88px;background:radial-gradient(circle at 30% 30%,#ff7a5c,var(--accent))}
 .kv-inner{position:relative;display:grid;align-items:center;gap:20px;
-  grid-template-columns:1fr minmax(280px,420px);
+  grid-template-columns:minmax(min-content,640px) minmax(280px,420px);
   grid-template-areas:"ttl image" "sub image"}
 .kv-ttl{grid-area:ttl;max-width:640px;font-size:52px;font-weight:700;line-height:1.35;letter-spacing:.04em;white-space:nowrap}
 .kv-ttl .hl{display:inline-block;color:var(--accent);background:#fff;border-radius:10px;
