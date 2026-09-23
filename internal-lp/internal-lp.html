@@ -94,9 +94,9 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
 .kv-orb{position:absolute;border-radius:50%;pointer-events:none}
 .kv-orb--2{width:56px;height:56px;right:34%;top:64px;background:radial-gradient(circle at 30% 30%,#ff7a5c,var(--accent))}
 .kv-orb--3{width:28px;height:28px;left:7%;bottom:88px;background:radial-gradient(circle at 30% 30%,#ff7a5c,var(--accent))}
-.kv-inner{position:relative;display:flex;align-items:center;justify-content:space-between;gap:48px}
+.kv-inner{position:relative;display:flex;align-items:center;justify-content:space-between;gap:20px}
 .kv-copy{flex:1 1 560px}
-.kv-ttl{font-size:38px;font-weight:700;line-height:1.35;letter-spacing:.04em;white-space:nowrap}
+.kv-ttl{font-size:52px;font-weight:700;line-height:1.35;letter-spacing:.04em}
 .kv-ttl .hl{display:inline-block;color:var(--accent);background:#fff;border-radius:10px;
   padding:0 .12em;margin:0 .06em;box-shadow:var(--shadow-s)}
 .kv-ttl .product{display:flex;align-items:baseline;gap:12px;margin-top:10px;margin-bottom:36px;font-size:64px;font-weight:800;letter-spacing:.01em;white-space:normal}
@@ -110,7 +110,7 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
 .chip:nth-of-type(2n)::after{transform:rotate(.5deg);border-radius:8px 5px 7px 6px}
 .kv-actions{display:flex;flex-wrap:wrap;gap:16px;margin-top:36px}
 .kv-image{flex:1 1 380px;max-width:420px}
-.kv-image img{display:block;width:100%;height:auto}
+.kv-image img{display:block;width:130%;max-width:none;height:auto}
 
 /* ---------- 導入企業ロゴ ---------- */
 /* ロゴ画像の地が白なので、帯も白でそろえる */
@@ -332,7 +332,7 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
   /* FV */
   .kv{padding-block:48px 56px}
   .kv-inner{flex-direction:column;align-items:stretch;gap:32px}
-  .kv-ttl{font-size:29px;line-height:1.45;white-space:normal}
+  .kv-ttl{font-size:29px;line-height:1.45}
   .kv-ttl .product{font-size:36px;margin-top:6px;gap:8px}
   .kv-ttl .product small{font-size:11px}
   .scope{gap:8px;font-size:12px}
@@ -488,7 +488,7 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
     <div class="wrap kv-inner">
       <div class="kv-copy" data-reveal>
         <h1 class="kv-ttl">
-          組織の<span class="hl">「本音」</span>を、正しく引き出す。
+          組織の<span class="hl">「本音」</span>を、<br>正しく引き出す。
           <span class="product en">MiAI面談<small>ミアイ</small></span>
         </h1>
         <div class="scope">
