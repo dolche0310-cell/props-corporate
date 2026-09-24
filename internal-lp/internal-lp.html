@@ -130,7 +130,8 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
 /* ---------- お悩み ---------- */
 .pain .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:56px}
 .pain-card{background:var(--card);border-radius:var(--r);padding:32px;box-shadow:var(--shadow)}
-.pain-card .ph{height:120px}
+.pain-card .ph{height:120px;overflow:hidden}
+.pain-card .ph img{width:100%;height:100%;object-fit:cover;opacity:1}
 .pain-card h3{margin-top:24px;font-size:18px;font-weight:700;line-height:1.55;text-align:center}
 .pain-card p{margin-top:12px;font-size:14px;color:var(--ink-2);line-height:1.8}
 .bridge{margin-top:72px;text-align:center}
@@ -604,17 +605,17 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
       <h2 class="sec-ttl" data-reveal>社内面談、こんなお悩みありませんか？</h2>
       <div class="grid">
         <article class="pain-card" data-reveal>
-          <div class="ph"><img src="imgs/icon-image.svg" alt="" width="24" height="24"></div>
+          <div class="ph"><img src="imgs/pain-01.png" alt="" width="1536" height="1024"></div>
           <h3>面談の質が担当者によって<br>ばらつく</h3>
           <p>評価面談・1on1・キャリア面談など、面談の進め方や深掘りの仕方が担当者に依存し、質にムラが出やすい</p>
         </article>
         <article class="pain-card" data-reveal>
-          <div class="ph"><img src="imgs/icon-image.svg" alt="" width="24" height="24"></div>
+          <div class="ph"><img src="imgs/pain-02.png" alt="" width="1536" height="1024"></div>
           <h3>社員が本音を話せず、<br>形式的な面談になりがち</h3>
           <p>上司や人事が相手だと率直な意見を言いづらく、当たり障りのない会話で終わってしまうことが多い</p>
         </article>
         <article class="pain-card" data-reveal>
-          <div class="ph"><img src="imgs/icon-image.svg" alt="" width="24" height="24"></div>
+          <div class="ph"><img src="imgs/pain-03.png" alt="" width="1536" height="1024"></div>
           <h3>面談の準備・記録・共有に<br>時間がかかる</h3>
           <p>面談前の準備、実施中のメモ、終了後のレポート作成や関係者への共有など、付帯業務が大きな負担になっている</p>
         </article>
