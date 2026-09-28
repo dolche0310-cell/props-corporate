@@ -49,6 +49,7 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
 .sec{padding-block:96px}
 .sec-ttl{font-size:32px;font-weight:700;line-height:1.4;letter-spacing:.04em;text-align:center}
 .sec-ttl em{font-style:normal;color:var(--accent)}
+.brk-sp{display:none}
 .en{font-family:"Inter Tight",sans-serif}
 
 /* ---------- ボタン（プロダクトサイトと同じ：黒の塗り／白のふくらみ） ---------- */
@@ -94,25 +95,24 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
 .kv-orb{position:absolute;border-radius:50%;pointer-events:none}
 .kv-orb--2{width:56px;height:56px;right:34%;top:64px;background:radial-gradient(circle at 30% 30%,#ff7a5c,var(--accent))}
 .kv-orb--3{width:28px;height:28px;left:7%;bottom:88px;background:radial-gradient(circle at 30% 30%,#ff7a5c,var(--accent))}
-.kv-inner{position:relative;display:grid;align-items:center;gap:20px;
+.kv-inner{position:relative;display:grid;align-items:center;row-gap:8px;column-gap:20px;
   grid-template-columns:minmax(min-content,640px) minmax(280px,420px);
-  grid-template-areas:"ttl image" "sub image"}
+  grid-template-areas:"ttl image" "line image" "sub image"}
 .kv-ttl{grid-area:ttl;max-width:640px;font-size:52px;font-weight:700;line-height:1.35;letter-spacing:.04em;white-space:nowrap}
 .kv-ttl .hl{display:inline-block;color:var(--accent);background:#fff;border-radius:10px;
   padding:0 .12em;margin:0 .06em;box-shadow:var(--shadow-s)}
-.kv-ttl .product{display:flex;align-items:baseline;gap:12px;margin-top:10px;margin-bottom:36px;font-size:64px;font-weight:800;letter-spacing:.01em;white-space:normal}
+/* キービジュアル見出し直下の装飾ライン(左：アクセントカラーの太い線／右：グレーの細い線) */
+.kv-divider{grid-area:line;display:flex;align-items:center;max-width:640px;margin:20px 0 4px}
+.kv-divider-accent{flex:0 0 auto;width:72px;height:3px;border-radius:2px;background:var(--accent)}
+.kv-divider-rest{flex:1 1 auto;height:1px;background:var(--line)}
+/* 見出し＋直後のscope-noteを1つのまとまりに見せるため、ここの余白は詰める
+   (ボタンとの間はkv-actionsのmargin-topで広くとって分離する) */
+.kv-ttl .product{display:flex;align-items:baseline;gap:12px;margin-top:10px;margin-bottom:8px;font-size:64px;font-weight:800;letter-spacing:.01em;white-space:normal}
 .kv-ttl .product small{font-size:14px;font-weight:700;color:var(--ink-2);letter-spacing:.1em}
 .scope{display:flex;align-items:center;flex-wrap:wrap;gap:6px 18px;font-size:14px;color:var(--ink-2)}
-.scope-note{font-size:16px;color:#101010}
-/* 「など、」と「社内面談全般に対応」は元々1つの文なので、.scope の gap 分だけ
-   詰めて隙間を打ち消す(SPで改行させるために2つのspanへ分けたため) */
-.scope-note-2{margin-left:-18px}
-/* ボタンに見えないよう、箱ではなく手書き風の線で見せる */
-.chip{display:inline-block;position:relative;padding:0 2px 4px;color:var(--ink);font-weight:700;font-size:18px}
-.chip::after{content:"";position:absolute;left:-2px;right:-2px;bottom:0;height:6px;
-  background:var(--accent);opacity:.22;border-radius:6px 8px 5px 7px;transform:rotate(-.6deg)}
-.chip:nth-of-type(2n)::after{transform:rotate(.5deg);border-radius:8px 5px 7px 6px}
-.kv-actions{display:flex;flex-wrap:wrap;gap:16px;margin-top:36px}
+.scope-note{font-size:18px;color:#101010;letter-spacing:.14em}
+/* 見出し＋scope-noteのまとまりから、ボタンのまとまりをはっきり分離する */
+.kv-actions{display:flex;flex-wrap:wrap;gap:16px;margin-top:56px}
 .kv-sub{grid-area:sub;max-width:640px}
 .kv-image{grid-area:image}
 .kv-image img{display:block;width:130%;max-width:none;height:auto}
@@ -207,6 +207,8 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
 .voice .ph{flex:0 0 280px;border-radius:0}
 /* 実写を入れたカードだけ、写真の比率(1145x1374)に合わせて幅を調整し見切れを防ぐ */
 .voice-photo{flex:0 0 300px;overflow:hidden}
+/* picture要素はデフォルトで高さがコンテンツに依存するため、明示的に100%を与えて img の height:100% を効かせる */
+.voice-photo picture{display:block;width:100%;height:100%}
 .voice-photo img{width:100%;height:100%;object-fit:cover;opacity:1}
 .voice-body{padding:40px 36px;display:flex;flex-direction:column;gap:16px}
 .role{align-self:flex-start;font-size:11px;font-weight:700;letter-spacing:.14em;color:#fff;background:var(--accent);
@@ -250,7 +252,8 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
 .feature-fig .ph::before{content:"";position:absolute;width:200px;height:200px;border-radius:50%;left:-60px;top:-70px;
   background:linear-gradient(135deg,var(--accent-2),var(--accent));opacity:.9}
 .feature-row.is-rev .feature-fig .ph::before{left:auto;right:-60px;top:auto;bottom:-70px}
-.feature-fig .ph img{position:relative}
+.feature-fig .ph img{position:relative;width:100%;height:100%;object-fit:cover;opacity:1}
+.feature-fig .ph:has(img[src$=".svg"]) img{width:24px;height:24px;object-fit:contain}
 .feature-head{display:flex;align-items:center;gap:14px}
 .feature-head .no{font-size:40px;font-weight:800;color:var(--accent);line-height:1}
 .feature-head h3{font-size:26px;font-weight:700;line-height:1.45}
@@ -258,11 +261,13 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
 
 /* ---------- 特徴 ---------- */
 .strength{background:var(--paper-2)}
-.strength .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:56px}
-.strength-card{background:var(--card);border-radius:var(--r);padding:24px 24px 32px;box-shadow:var(--shadow)}
-.strength-card .ph{height:180px}
-.strength-card h3{margin-top:20px;font-size:17px;font-weight:700}
-.strength-card p{margin-top:8px;font-size:14px;color:var(--ink-2)}
+.strength .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;margin-top:56px}
+.strength-item{text-align:center}
+.strength-icon{width:140px;height:140px;margin:0 auto;border-radius:50%;background:var(--accent-soft);
+  display:grid;place-items:center}
+.strength-icon img{width:64px;height:64px}
+.strength-item h3{margin-top:24px;font-size:16px;font-weight:700;line-height:1.6}
+.strength-item p{margin-top:10px;font-size:13px;color:var(--ink-2);line-height:1.75}
 
 /* ---------- 採用面談バナー ---------- */
 .recruit{padding-block:24px 96px;background:var(--paper-2)}
@@ -300,8 +305,8 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
   font-size:14px;font-weight:800}
 .faq-q{background:var(--accent);color:#fff}
 .faq-item summary .t{flex:1 1 auto}
-.faq-toggle{position:relative;flex:0 0 auto;width:16px;height:16px}
-.faq-toggle::before,.faq-toggle::after{content:"";position:absolute;left:0;top:7px;width:16px;height:2px;background:var(--ink);
+.faq-toggle{position:relative;flex:0 0 auto;width:13px;height:13px}
+.faq-toggle::before,.faq-toggle::after{content:"";position:absolute;left:0;top:5.75px;width:13px;height:1.5px;background:var(--ink);
   transition:transform .35s var(--ease)}
 .faq-toggle::after{transform:rotate(90deg)}
 .faq-item[open] .faq-toggle::after{transform:rotate(0)}
@@ -311,36 +316,52 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
 
 /* ---------- 最終CV ---------- */
 .cv-final{position:relative;overflow:hidden;background:var(--accent);color:#fff;text-align:center;
-  border-radius:var(--r-xl) var(--r-xl) 0 0;padding-block:104px}
-/* 「解決」セクション(.solution-bg)と同じ、ぼんやり動く背景にする */
-.cv-final::before{content:"";position:absolute;width:560px;height:560px;left:-180px;top:-260px;border-radius:50%;
-  background:radial-gradient(circle,rgba(255,128,104,.65),rgba(255,128,104,0) 70%);
-  animation:solutionDrift1 11s ease-in-out infinite}
-.cv-final::after{content:"";position:absolute;width:420px;height:420px;right:-120px;bottom:-240px;border-radius:50%;
-  background:radial-gradient(circle,rgba(255,128,104,.55),rgba(255,128,104,0) 70%);
-  animation:solutionDrift2 13.5s ease-in-out infinite}
+  border-radius:var(--r-xl);padding-block:104px}
+/* 「解決」セクション(.solution-bg)と同じメッシュ状グラデーションにして、動きをはっきり見せる */
+.cv-final::before,.cv-final::after{content:"";position:absolute;inset:-20%}
+.cv-final::before{
+  background:
+    radial-gradient(40% 40% at 22% 28%,rgba(255,255,255,.38) 0%,rgba(255,255,255,.22) 32%,rgba(255,255,255,.08) 55%,rgba(255,255,255,0) 75%),
+    radial-gradient(44% 44% at 82% 70%,var(--accent-2) 0%,rgba(255,106,72,.55) 32%,rgba(255,106,72,.18) 55%,rgba(255,106,72,0) 75%);
+  animation:solutionDrift1 11s ease-in-out infinite;
+}
+.cv-final::after{
+  background:
+    radial-gradient(36% 36% at 78% 18%,rgba(255,255,255,.28) 0%,rgba(255,255,255,.16) 32%,rgba(255,255,255,.05) 55%,rgba(255,255,255,0) 75%),
+    radial-gradient(42% 42% at 18% 78%,rgba(120,10,0,.42) 0%,rgba(120,10,0,.24) 32%,rgba(120,10,0,.08) 55%,rgba(120,10,0,0) 75%);
+  animation:solutionDrift2 13.5s ease-in-out infinite;
+}
 .cv-final .wrap{position:relative;z-index:1}
 .cv-final h2{font-size:34px;font-weight:700;line-height:1.5;letter-spacing:.04em}
 .cv-final p{margin-top:16px;font-size:15px;opacity:.92}
 .cv-final .btn-row{justify-content:center;margin-top:40px}
 .cv-final .btn--ghost{color:var(--accent)}
 
-/* ---------- フッター ---------- */
-.footer{background:var(--ink);color:#fff;padding-block:72px 40px}
-.footer-upper{display:flex;justify-content:space-between;gap:48px}
-.footer-brand{max-width:340px}
+/* ---------- フッター（lp.miai-app.com の footer 構成に合わせる：上部CTA＋ぼかしグロー＋3カラム） ---------- */
+/* FAQとフッターを1枚の背景として扱い、ぼかしグローがセクション境界で見切れないようにする */
+.faq-footer-bg{position:relative;overflow:hidden;background:var(--paper-2)}
+.footer{position:relative;background:var(--paper-2);color:var(--ink)}
+.footer-glow{position:absolute;border-radius:50%;filter:blur(70px);opacity:.4;pointer-events:none}
+.footer-glow--left{width:280px;height:280px;left:-90px;top:10px;background:var(--accent)}
+.footer-glow--right{width:280px;height:280px;right:-90px;top:150px;background:var(--accent-2)}
+.footer-cta{position:relative;text-align:center;padding-block:88px 80px}
+.footer-cta h2{font-size:30px;font-weight:700;line-height:1.55}
+.footer-cta p{max-width:520px;margin:16px auto 0;font-size:15px;color:var(--ink-2);line-height:1.9}
+.footer-cta .btn-row{justify-content:center;margin-top:32px}
+.footer-grid{position:relative;display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:32px;
+  padding-top:48px;border-top:1px solid var(--line)}
+.footer-brand{max-width:360px}
 .footer .logo .type,.footer .logo .mark{filter:none}
-.footer-logo{display:inline-flex;align-items:center;gap:14px;background:#fff;border-radius:10px;padding:10px 14px}
-.footer-brand p{margin-top:20px;font-size:12px;line-height:1.9;color:rgba(255,255,255,.64)}
-.footer-links{display:flex;gap:56px}
-.footer-col h4{margin:0;font-size:13px;font-weight:700}
-.footer-col ul{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:10px;
-  font-size:12px;color:rgba(255,255,255,.64)}
-.footer-col a:hover{color:#fff}
+.footer-logo{display:inline-flex;align-items:center;gap:14px}
+.footer-brand p{margin-top:20px;font-size:12px;line-height:1.9;color:var(--ink-2)}
+.footer-copy{margin-top:24px;font-size:11px;color:var(--muted)}
+.footer-col h4{margin:0;font-size:15px;font-weight:700}
+.footer-col ul{list-style:none;margin:20px 0 0;padding:0;display:flex;flex-direction:column;gap:12px;
+  font-size:13px;color:var(--ink-2)}
+.footer-col a:hover{color:var(--accent)}
 .footer-col [aria-disabled="true"]{cursor:default}
-.footer-lower{display:flex;justify-content:space-between;align-items:center;margin-top:48px;padding-top:28px;
-  border-top:1px solid rgba(255,255,255,.14);font-size:11px;color:rgba(255,255,255,.5)}
-.legal{display:flex;gap:20px}
+.footer-legal{position:relative;display:flex;justify-content:center;gap:24px;margin-top:40px;padding-top:20px;
+  border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
 
 /* ---------- スマホ用の下部CTA（PCでは出さない） ---------- */
 .sp-cta{display:none}
@@ -366,6 +387,7 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
   .sec{padding-block:56px}
   /* balance：「〜ありません／か？」のように末尾だけが行に残るのを避ける */
   .sec-ttl{font-size:21px;line-height:1.5;letter-spacing:.02em;text-wrap:balance}
+  .brk-sp{display:inline}
   .cv-mid h2,.cv-final h2,.bridge p,.recruit-banner h2{text-wrap:balance}
 
   /* ボタン：指で押せる高さを保ちつつ、横幅いっぱいに */
@@ -385,16 +407,15 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
 
   /* FV: lp.miai-app.com と同じ順(見出し→画像→サブタイトル+ボタン)にする */
   .kv{padding-block:48px 56px}
-  .kv-inner{grid-template-columns:1fr;grid-template-areas:"ttl" "image" "sub";align-items:stretch;gap:32px}
+  .kv-inner{grid-template-columns:1fr;grid-template-areas:"ttl" "line" "image" "sub";align-items:stretch;gap:0}
+  .kv-divider{margin:16px 0}
+  .kv-divider-accent{width:56px}
   .kv-ttl{font-size:29px;line-height:1.45;white-space:normal}
-  .kv-ttl .product{font-size:36px;margin-top:6px;margin-bottom:16px;gap:8px}
+  .kv-ttl .product{font-size:36px;margin-top:6px;margin-bottom:8px;gap:8px}
   .kv-ttl .product small{font-size:11px}
   .scope{gap:8px;font-size:12px}
-  .chip{font-size:18px;padding-bottom:4px}
-  /* 「〜など、」の後で改行する */
-  .scope-note-2{flex-basis:100%;margin-left:0}
-  .kv-actions{flex-direction:column;align-items:center;margin-top:28px}
-  .kv-actions .btn{width:100%;max-width:260px}
+  .kv-actions{flex-direction:column;align-items:center;margin-top:48px}
+  .kv-actions .btn{width:335px;max-width:100%}
   .kv-image{max-width:280px;margin-inline:auto}
   /* width:130%で広げた画像が右にはみ出して見切れるので、左右均等にはみ出す形で中央に寄せる。
      (replaced要素+%widthではmargin:autoによる中央寄せが効かなかったため、
@@ -432,7 +453,8 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
   .carousel-track.is-anim{transition:transform .6s var(--ease)}
   .voice{flex-basis:300px;height:auto;min-height:420px;flex-direction:column;border-radius:var(--r)}
   .voice .ph{flex:0 0 150px;width:100%;border-radius:0}
-  .voice-photo{flex:0 0 auto;width:100%;aspect-ratio:1145/1374;height:auto}
+  /* 写真カードはカード全幅×高さ200pxに収める。SP用に横長トリミング済みの画像を使うため中央クロップでよい */
+  .voice .ph.voice-photo{flex:0 0 auto;width:100%;height:200px}
   .voice-body{padding:20px;gap:12px}
   .voice h3{font-size:17px}
   .voice p{font-size:13px;line-height:1.8}
@@ -458,11 +480,11 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
   .feature-txt p{margin-top:12px;font-size:13px;line-height:1.85}
 
   /* 特徴 */
-  .strength .grid{grid-template-columns:1fr;gap:16px;margin-top:32px}
-  .strength-card{padding:20px 20px 24px}
-  .strength-card .ph{height:150px}
-  .strength-card h3{font-size:16px}
-  .strength-card p{font-size:13px}
+  .strength .grid{grid-template-columns:1fr;gap:40px;margin-top:32px}
+  .strength-icon{width:110px;height:110px}
+  .strength-icon img{width:50px;height:50px}
+  .strength-item h3{font-size:15px;margin-top:20px}
+  .strength-item p{font-size:12.5px}
 
   /* 採用面談バナー */
   .recruit{padding-bottom:56px}
@@ -491,16 +513,23 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
   .faq-a{gap:12px;padding:0 16px 18px;font-size:13px}
 
   /* 最終CV */
-  .cv-final{padding-block:64px;border-radius:var(--r-l) var(--r-l) 0 0}
+  .cv-final{padding-block:64px;border-radius:var(--r-l)}
   .cv-final h2{font-size:22px;line-height:1.6}
   .cv-final p{font-size:13px}
   .cv-final .btn-row{flex-direction:column;margin-top:28px}
 
   /* フッター */
-  .footer{padding-block:48px 28px}
-  .footer-upper{flex-direction:column;gap:32px}
-  .footer-links{gap:0;display:grid;grid-template-columns:1fr 1fr;row-gap:28px}
-  .footer-lower{flex-direction:column;align-items:flex-start;gap:14px;margin-top:32px}
+  /* SPは横幅に対してグローが大きく文字にかぶって読みにくいため、範囲を狭める */
+  .footer-glow--left,.footer-glow--right{width:160px;height:160px}
+  .footer-glow--left{left:-70px}
+  .footer-glow--right{right:-70px}
+  .footer-cta{padding-block:56px 48px}
+  .footer-cta h2{font-size:22px}
+  .footer-cta p{font-size:13px}
+  .footer-cta .btn-row{flex-direction:column}
+  .footer-grid{grid-template-columns:1fr;gap:32px;padding-top:40px}
+  .footer-brand{max-width:none}
+  .footer-legal{flex-direction:column;align-items:flex-start;gap:10px;margin-top:32px}
 
   /* 画面下に貼りつく申し込みボタン。FVを過ぎてから出す */
   .sp-cta{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:40;gap:10px;
@@ -511,7 +540,7 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
   .sp-cta.is-in{transform:none}
   .sp-cta .btn{flex:1 1 0;height:48px;padding:0 12px;min-width:0;font-size:13px}
   /* 下部CTAの分だけ、最後まで読めるよう余白を足す */
-  .footer-lower{padding-bottom:64px}
+  .footer-legal{padding-bottom:64px}
 }
 </style>
 </head>
@@ -533,7 +562,7 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
         <a href="#flow">導入までの流れ</a>
       </div>
       <div class="btn-row">
-        <a class="btn btn--ghost btn--sm" aria-disabled="true">資料請求</a>
+        <a class="btn btn--ghost btn--sm" href="https://lp.miai-app.com/resources/service-brochure.html">資料請求</a>
         <a class="btn btn--primary btn--sm" aria-disabled="true">無料デモ体験</a>
       </div>
     </nav>
@@ -550,19 +579,19 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
         組織の<span class="hl">「本音」</span>を、<br>正しく引き出す。
         <span class="product en">MiAI面談<small>ミアイ</small></span>
       </h1>
+      <div class="kv-divider" aria-hidden="true" data-reveal>
+        <span class="kv-divider-accent"></span><span class="kv-divider-rest"></span>
+      </div>
       <div class="kv-image" data-reveal>
         <img src="imgs/LP_kv_image.png" alt="" width="1331" height="1182">
       </div>
       <div class="kv-sub" data-reveal>
         <div class="scope">
-          <span class="chip">評価面談</span>
-          <span class="chip en">1on1</span>
-          <span class="chip">キャリア面談</span>
-          <span class="scope-note">など、</span><span class="scope-note scope-note-2">社内面談全般に対応</span>
+          <span class="scope-note">評価面談、1on1、キャリア面談など<br class="brk-sp">さまざまな社内面談に対応</span>
         </div>
         <div class="kv-actions">
           <a class="btn btn--primary btn--lg" aria-disabled="true">無料デモ体験</a>
-          <a class="btn btn--ghost btn--lg" aria-disabled="true">資料請求</a>
+          <a class="btn btn--ghost btn--lg" href="https://lp.miai-app.com/resources/service-brochure.html">資料請求</a>
         </div>
       </div>
     </div>
@@ -605,7 +634,7 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
   <!-- ========== お悩み ========== -->
   <section class="sec pain">
     <div class="wrap">
-      <h2 class="sec-ttl" data-reveal>社内面談、こんなお悩みありませんか？</h2>
+      <h2 class="sec-ttl" data-reveal>社内面談、<br class="brk-sp">こんなお悩みありませんか？</h2>
       <div class="grid">
         <article class="pain-card" data-reveal>
           <div class="ph"><img src="imgs/pain-01.png" alt="" width="1536" height="1024"></div>
@@ -623,10 +652,6 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
           <p>面談前の準備、実施中のメモ、終了後のレポート作成や関係者への共有など、付帯業務が大きな負担になっている</p>
         </article>
       </div>
-      <div class="bridge" data-reveal>
-        <p><span class="hl">MiAI面談</span>で社内面談の悩みをまとめて解決しませんか？</p>
-        <div class="arrow" aria-hidden="true"></div>
-      </div>
     </div>
   </section>
 
@@ -634,21 +659,21 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
   <section class="sec solution">
     <div class="solution-bg" aria-hidden="true"></div>
     <div class="wrap">
-      <h2 class="sec-ttl" data-reveal><em>MiAI面談</em>で、評価面談のあらゆる悩みを解決</h2>
+      <h2 class="sec-ttl" data-reveal><em>MiAI面談</em>で、<br class="brk-sp">社内面談のあらゆる悩みを解決</h2>
       <div class="solution-list" data-reveal>
         <div class="solution-row">
           <span class="no en">01</span>
           <h3>面談の質をAIで一定化</h3>
-          <p>AIが評価軸に沿ったヒアリングを実施するため、評価者のスキルに依存せず、一貫した品質の面談を実現できます</p>
+          <p>AIが評価軸に沿ったヒアリングを実施するため、面談者のスキルに依存せず、一貫した品質の面談を実現できます</p>
         </div>
         <div class="solution-row">
           <span class="no en">02</span>
-          <h3>AIだからこそ、本音を話してもらえる</h3>
-          <p>上司や人事ではなくAIが聞き手になることで、被評価者が率直な意見や不満を安心して話せる環境をつくります</p>
+          <h3>AIだからこそ、本音を話せる</h3>
+          <p>上司や人事ではなくAIが聞き手になることで、社員が率直な意見や不満を安心して話せる環境をつくります</p>
         </div>
         <div class="solution-row">
           <span class="no en">03</span>
-          <h3>評価分析や推移をすぐに資料化</h3>
+          <h3>面談結果や推移をすぐに資料化</h3>
           <p>ヒアリング結果をAIが自動で要約・構造化し、評価シートへの反映や推移分析もすぐに資料として見える化できます</p>
         </div>
       </div>
@@ -658,13 +683,13 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
   <!-- ========== 導入効果（カルーセル） ========== -->
   <section class="sec usecase">
     <div class="wrap">
-      <h2 class="sec-ttl" data-reveal>立場ごとの課題を解決する、<em>MiAI面談</em>の導入効果</h2>
+      <h2 class="sec-ttl" data-reveal>立場ごとの課題を解決する、<br class="brk-sp"><em>MiAI面談</em>の導入効果</h2>
     </div>
     <div class="carousel" data-carousel data-reveal>
       <div class="carousel-view">
         <div class="carousel-track">
           <article class="voice">
-            <div class="ph voice-photo"><img src="imgs/interview_manager.png" alt="" width="1145" height="1374"></div>
+            <div class="ph voice-photo"><picture><source media="(max-width:900px)" srcset="imgs/interview_manager_sp.jpeg"><img src="imgs/interview_manager.png" alt=""></picture></div>
             <div class="voice-body">
               <span class="role en">MANAGER</span>
               <h3>一次ヒアリングの自動化で、工数削減と質の平準化を両立。</h3>
@@ -672,19 +697,19 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
             </div>
           </article>
           <article class="voice">
-            <div class="ph voice-photo"><img src="imgs/interview_HR.png" alt="" width="1145" height="1374"></div>
+            <div class="ph voice-photo"><picture><source media="(max-width:900px)" srcset="imgs/interview_HR_sp.jpeg"><img src="imgs/interview_HR.png" alt=""></picture></div>
             <div class="voice-body">
               <span class="role en">HR</span>
-              <h3>「聞きづらい」がなくなり、1on1がより深い時間に。</h3>
-              <p>面談の準備や記録に追われていた時間を取り戻す。AIが事前ヒアリングとレポート作成を担うことで、本質的な対話に集中できます。</p>
+              <h3>個別の予兆を可視化し、人事業務をスマートに。</h3>
+              <p>AI面談のレポートや蓄積された過去データから、社員のメンタル変化や離職のサインを早期に察知。対人では隠れがちなナイーブな本音もAIが引き出すため、人事が必要な情報を素早くキャッチアップできるようになりました。また、新入社員の定期フォローにかかる工数も大幅に削減でき、より確実で丁寧なケアが可能になりました。</p>
             </div>
           </article>
           <article class="voice">
-            <div class="ph"><img src="imgs/icon-image.svg" alt="" width="24" height="24"></div>
+            <div class="ph voice-photo"><picture><source media="(max-width:900px)" srcset="imgs/interview_member_sp.jpeg"><img src="imgs/interview_member.png" alt=""></picture></div>
             <div class="voice-body">
               <span class="role en">MEMBER</span>
-              <h3>対話に集中できる、面談へ。</h3>
-              <p>面談の準備や記録に追われていた時間を取り戻す。AIが事前ヒアリングとレポート作成を担うことで、本質的な対話に集中できます。</p>
+              <h3>AIだからこそ本音を話せ、その後の面談もスムーズに。</h3>
+              <p>対人では言いづらい悩みも、AI相手なら気を遣わずに打ち明けられます。忙しい上司の都合を気にせず、自分の好きなタイミングでいつでも面談可能。事前ヒアリングをAIと済ませておくことで、上司と実際に面談する時も話したいことを整理した状態で臨め、以前よりスムーズに会話できるようになりました。</p>
             </div>
           </article>
         </div>
@@ -699,11 +724,11 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
   <section class="cv-mid">
     <div class="wrap">
       <div class="cv-mid-box" data-reveal>
-        <h2>各現場の<span class="hl">「言えない・聞けない・時間がない」</span>を、MiAI面談で解消しませんか？</h2>
+        <h2>各現場の<span class="hl">「言えない・聞けない・時間がない」</span>を、<br class="brk-sp">MiAI面談で解消しませんか？</h2>
         <p>実際の画面で体験できるデモをご用意しています。<br>編集された動画ではわからない、リアルな面接体験をぜひお試しください。</p>
         <div class="btn-row">
           <a class="btn btn--primary btn--lg" aria-disabled="true">無料デモ体験</a>
-          <a class="btn btn--ghost btn--lg" aria-disabled="true">資料請求</a>
+          <a class="btn btn--ghost btn--lg" href="https://lp.miai-app.com/resources/service-brochure.html">資料請求</a>
         </div>
       </div>
     </div>
@@ -715,23 +740,23 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
       <h2 class="sec-ttl" data-reveal><em>MiAI面談</em>でできること</h2>
       <div class="feature-rows">
         <div class="feature-row" data-reveal>
-          <div class="feature-fig"><div class="ph"><img src="imgs/icon-image.svg" alt="" width="24" height="24"></div></div>
+          <div class="feature-fig"><div class="ph"><img src="imgs/MiAI_01.png" alt=""></div></div>
           <div class="feature-txt">
-            <div class="feature-head"><span class="no en">01</span><h3>評価面談前の一次ヒアリング</h3></div>
-            <p>評価面談の前にAIが対象者へ一次ヒアリングを実施。評価軸に対する自己認識や本音・不満を事前に引き出し、限られた面談時間を本質的な対話に充てられます。</p>
+            <div class="feature-head"><span class="no en">01</span><h3>面談前の一次ヒアリング</h3></div>
+            <p>面談の前にAIが対象者へ一次ヒアリングを実施。評価軸に対する自己認識や本音・不満を事前に引き出し、限られた面談時間を本質的な対話に充てられます。</p>
           </div>
         </div>
         <div class="feature-row is-rev" data-reveal>
-          <div class="feature-fig"><div class="ph"><img src="imgs/icon-image.svg" alt="" width="24" height="24"></div></div>
+          <div class="feature-fig"><div class="ph"><img src="imgs/MiAI_02.jpeg" alt=""></div></div>
           <div class="feature-txt">
-            <div class="feature-head"><span class="no en">02</span><h3>評価面談レポートの自動作成</h3></div>
+            <div class="feature-head"><span class="no en">02</span><h3>面談レポートの自動作成</h3></div>
             <p>ヒアリング内容をAIが自動で要約・構造化し、評価シートに沿ったレポートとして出力。面談後のまとめ作業や人事への共有の手間を削減します。</p>
           </div>
         </div>
         <div class="feature-row" data-reveal>
-          <div class="feature-fig"><div class="ph"><img src="imgs/icon-image.svg" alt="" width="24" height="24"></div></div>
+          <div class="feature-fig"><div class="ph"><img src="imgs/MiAI_03.png" alt=""></div></div>
           <div class="feature-txt">
-            <div class="feature-head"><span class="no en">03</span><h3>過去面談から見える成長・コンディションの変遷</h3></div>
+            <div class="feature-head"><span class="no en">03</span><h3>過去面談から見える<br>成長・コンディションの変遷</h3></div>
             <p>評価面談・1on1・キャリア面談など、過去の面談データを横断で蓄積・可視化し、個人・組織の成長やコンディションの変化を時系列で把握できます。</p>
           </div>
         </div>
@@ -744,20 +769,23 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
     <div class="wrap">
       <h2 class="sec-ttl" data-reveal><em>MiAI面談</em>の特徴</h2>
       <div class="grid">
-        <article class="strength-card" data-reveal>
-          <div class="ph"><img src="imgs/icon-image.svg" alt="" width="24" height="24"></div>
-          <h3>回答に合わせて、その場で深掘り。追加質問を自動生成</h3>
-          <p>訴求内容の説明文が入ります。内容は要検討。</p>
+        <article class="strength-item" data-reveal>
+          <div class="strength-icon">
+            <img src="imgs/icon_01.svg" alt="">
+          </div>
+          <h3>回答に合わせて、その場で深掘り。<br>追加質問を自動生成</h3>
         </article>
-        <article class="strength-card" data-reveal>
-          <div class="ph"><img src="imgs/icon-image.svg" alt="" width="24" height="24"></div>
-          <h3>対象者1人につき4種類のデータを自動で生成</h3>
-          <p>訴求内容の説明文が入ります。内容は要検討。</p>
+        <article class="strength-item" data-reveal>
+          <div class="strength-icon">
+            <img src="imgs/icon_02.svg" alt="">
+          </div>
+          <h3>対象者を横断の構造化データ既存の<br>人事システムに取り込める</h3>
         </article>
-        <article class="strength-card" data-reveal>
-          <div class="ph"><img src="imgs/icon-image.svg" alt="" width="24" height="24"></div>
+        <article class="strength-item" data-reveal>
+          <div class="strength-icon">
+            <img src="imgs/icon_03.svg" alt="">
+          </div>
           <h3>設問と観点を自社に合わせて設計可能</h3>
-          <p>訴求内容の説明文が入ります。内容は要検討。</p>
         </article>
       </div>
     </div>
@@ -805,6 +833,22 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
     </div>
   </section>
 
+  <!-- ========== 最終CV ========== -->
+  <section class="cv-final">
+    <div class="wrap" data-reveal>
+      <h2>組織の<br class="brk-sp">「見えない声」に耳を傾ける、<br class="brk-sp">第一歩として。</h2>
+      <p>評価面談・1on1・キャリア面談など、導入のご相談も、お気軽にお問い合わせください</p>
+      <div class="btn-row">
+        <a class="btn btn--primary btn--lg" aria-disabled="true">無料デモ体験</a>
+        <a class="btn btn--ghost btn--lg" href="https://lp.miai-app.com/resources/service-brochure.html">資料請求</a>
+      </div>
+    </div>
+  </section>
+
+  </main>
+
+  <!-- FAQ〜フッターは背景（ぼかしグロー）を共有し、セクション境界での見切れを防ぐため1つの背景ラッパーにまとめる -->
+  <div class="faq-footer-bg">
   <!-- ========== FAQ ========== -->
   <section class="sec faq" id="faq">
     <div class="wrap">
@@ -834,71 +878,57 @@ p{text-wrap:pretty}   /* 文末の1文字だけが次の行に落ちるのを防
     </div>
   </section>
 
-  <!-- ========== 最終CV ========== -->
-  <section class="cv-final">
-    <div class="wrap" data-reveal>
-      <h2>組織の「見えない声」に耳を傾ける、第一歩として。</h2>
-      <p>評価面談・1on1・キャリア面談など、導入のご相談も、お気軽にお問い合わせください</p>
+<!-- ========== フッター（lp.miai-app.com の footer 構成：ぼかしグローCTA＋3カラム）========== -->
+<footer class="footer">
+  <span class="footer-glow footer-glow--left" aria-hidden="true"></span>
+  <span class="footer-glow footer-glow--right" aria-hidden="true"></span>
+  <div class="wrap">
+    <div class="footer-cta" data-reveal>
+      <h2>まずは無料デモで、<br class="brk-sp">MiAI面談を体験してください</h2>
+      <p>評価面談・1on1・キャリア面談など、貴社の面談シーンに合わせてご提案します。資料請求だけでもお気軽にどうぞ。</p>
       <div class="btn-row">
         <a class="btn btn--primary btn--lg" aria-disabled="true">無料デモ体験</a>
-        <a class="btn btn--ghost btn--lg" aria-disabled="true">資料請求</a>
+        <a class="btn btn--ghost btn--lg" href="https://lp.miai-app.com/resources/service-brochure.html">資料請求</a>
       </div>
     </div>
-  </section>
-</main>
-
-<!-- ========== フッター ========== -->
-<footer class="footer">
-  <div class="wrap">
-    <div class="footer-upper">
+    <div class="footer-grid">
       <div class="footer-brand">
         <span class="footer-logo logo">
           <img class="mark" src="imgs/logo-mark.svg" alt="" width="31" height="31">
           <img class="type" src="imgs/logo-type.svg" alt="MiAI" width="87" height="32">
         </span>
         <p>組織診断AI面談ツール MiAI。AIを用いた本音抽出面談ソリューションで、組織と従業員の本質的な課題解決を支援します。</p>
+        <small class="footer-copy">© 2026 Company Name. All Rights Reserved.</small>
       </div>
-      <div class="footer-links">
-        <div class="footer-col">
-          <h4>サービス</h4>
-          <ul>
-            <li><a href="#feature">機能と特徴</a></li>
-            <li><a href="#flow">導入までの流れ</a></li>
-            <li><a aria-disabled="true">料金</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h4>会社情報</h4>
-          <ul>
-            <li><a aria-disabled="true">会社概要</a></li>
-            <li><a aria-disabled="true">採用情報</a></li>
-            <li><a aria-disabled="true">お知らせ</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h4>お問い合わせ</h4>
-          <ul>
-            <li><a aria-disabled="true">資料請求</a></li>
-            <li><a aria-disabled="true">無料デモ体験</a></li>
-            <li><a aria-disabled="true">お問い合わせ窓口</a></li>
-          </ul>
-        </div>
+      <div class="footer-col">
+        <h4>Contents</h4>
+        <ul>
+          <li><a href="#feature">機能と特徴</a></li>
+          <li><a href="#flow">導入までの流れ</a></li>
+          <li><a href="#faq">よくあるご質問</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="https://lp.miai-app.com/resources/service-brochure.html">資料請求</a></li>
+          <li><a aria-disabled="true">無料デモ体験</a></li>
+          <li><a aria-disabled="true">お問い合わせ窓口</a></li>
+        </ul>
       </div>
     </div>
-    <div class="footer-lower">
-      <small>© 2026 Company Name. All Rights Reserved.</small>
-      <div class="legal">
-        <a aria-disabled="true">プライバシーポリシー</a>
-        <a aria-disabled="true">利用規約</a>
-      </div>
+    <div class="footer-legal">
+      <a aria-disabled="true">プライバシーポリシー</a>
+      <a aria-disabled="true">利用規約</a>
     </div>
   </div>
 </footer>
+  </div>
 
 <!-- スマホ用：画面下に貼りつく申し込みボタン -->
 <div class="sp-cta" aria-hidden="true">
   <a class="btn btn--primary" aria-disabled="true">無料デモ体験</a>
-  <a class="btn btn--ghost" aria-disabled="true">資料請求</a>
+  <a class="btn btn--ghost" href="https://lp.miai-app.com/resources/service-brochure.html">資料請求</a>
 </div>
 
 <script>
