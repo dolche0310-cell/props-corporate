@@ -423,6 +423,42 @@
     .modal.is-open .box { opacity: 1; transform: none; }
   }
 
+  .arch-h { display: flex; align-items: center; gap: 10px; }
+  .arch-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--ink-2);
+    cursor: pointer;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+  .arch-btn:hover { background: #f1f1f2; color: var(--ink); }
+  .arch-btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .is-archived .arch-btn[aria-expanded="true"] { color: var(--ink); }
+  /* 蓋だけが少し持ち上がって「開いた」ことを示す(ホバーでも僅かに反応) */
+  .arch-ico .lid {
+    transition: transform 0.35s var(--ease-out-expo);
+  }
+  .arch-btn:hover .arch-ico .lid { transform: translateY(-0.8px); }
+  .arch-btn[aria-expanded="true"] .arch-ico .lid { transform: translateY(-2.2px); }
+  /* 開閉は grid-template-rows の 0fr→1fr で高さを測らずに滑らかに動かす */
+  .arch-body {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition: grid-template-rows 0.55s var(--ease-out-expo), opacity 0.35s ease;
+  }
+  .arch-inner { overflow: hidden; min-height: 0; }
+  .is-archived.is-open .arch-body { grid-template-rows: 1fr; opacity: 1; }
+  /* 余白は clip される内側に持たせる。arch-inner に padding を置くと
+     閉じている間もその分の高さが残ってしまう */
+  .arch-inner > :first-child { margin-top: 28px; }
 </style>
 </head>
 <body>
@@ -432,8 +468,8 @@
     </header>
 
     <!-- ============ Corporate Website Design(A案 / B案) ============ -->
-    <section class="designs stage stage-2" aria-label="Corporate Website Design">
-      <h2>Corporate Website Design</h2>
+    <section class="designs stage stage-2 is-archived" aria-label="Corporate Website Design">
+      <h2 class="arch-h">Corporate Website Design<button class="arch-btn" type="button" aria-expanded="false" aria-controls="cwdArchive" aria-label="アーカイブを開く" title="アーカイブ"><svg class="arch-ico" viewBox="0 0 16 16" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path class="lid" d="M3.1 4.6h9.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><rect x="3.1" y="7.2" width="9.8" height="6.1" rx="1.6" stroke="currentColor" stroke-width="1.4"/></svg></button></h2>
       <!-- A案のカラーバリエーション2枚(参考: proto-review の C-1〜C-4 比較UI)。
            名前の右の●が各案の色。2枚とも専用ページへ遷移する。
            カードは 2 列いっぱいに伸ばし、ラップのマージン内で完結させる。 -->
@@ -447,6 +483,10 @@
           </div>
         </section>
 
+      </div>
+      <div class="arch-body" id="cwdArchive"><div class="arch-inner">
+      <div class="carousel">
+
         <section class="card">
           <p class="name">Design A-2<span class="name__dot" style="--dot:#0D0D0D" aria-hidden="true"></span></p>
           <p class="policy">Dark black <span class="hex">#0D0D0D</span></p>
@@ -456,25 +496,39 @@
         </section>
 
       </div>
+      </div></div>
     </section>
 
     <!-- ============ Corporate Logomark & Logotype ============
-         Figma 246:26437。D案は削除済み、3案を正方パネル3列(logo-compare-grid)で並べる。
+         Figma 246:26437。A案のみ常時表示、B・C案と旧B・C案はアーカイブ内。正方パネル3列(logo-compare-grid)で並べる。
          このセクションだけ意図的に他の .logo-grid とは見た目を変えている。
          各パネルはアイソレーション図解のページへ遷移する。 -->
-    <section class="logos stage stage-3" aria-label="Corporate Logomark &amp; Logotype">
-      <h2>Corporate Logomark &amp; Logotype</h2>
+    <section class="logos stage stage-3 is-archived" aria-label="Corporate Logomark &amp; Logotype">
+      <h2 class="arch-h">Corporate Logomark &amp; Logotype<button class="arch-btn" type="button" aria-expanded="false" aria-controls="clmArchive" aria-label="アーカイブを開く" title="アーカイブ"><svg class="arch-ico" viewBox="0 0 16 16" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path class="lid" d="M3.1 4.6h9.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><rect x="3.1" y="7.2" width="9.8" height="6.1" rx="1.6" stroke="currentColor" stroke-width="1.4"/></svg></button></h2>
       <div class="logo-compare-grid">
         <a class="pane pane-logo" href="logo-a.html">
           <img src="assets/logos/mark-a.svg" alt="ロゴマーク案A" width="99" height="99" style="--mark-w: 41.00%">
         </a>
+      </div>
+      <div class="arch-body" id="clmArchive"><div class="arch-inner">
+      <div class="logo-compare-grid">
         <a class="pane pane-logo" href="logo-b.html">
           <img src="assets/logos/mark-b.svg" alt="ロゴマーク案B" width="99" height="99" style="--mark-w: 41.00%">
         </a>
         <a class="pane pane-logo" href="logo-c.html">
           <img src="assets/logos/mark-c.svg" alt="ロゴマーク案C" width="99" height="94" style="--mark-w: 41.00%">
         </a>
+        <a class="pane pane-logo" href="logo-b-old.html">
+          <img src="assets/logos/mark-b-old.svg" alt="ロゴマーク案B(旧デザイン)" width="88" height="88" style="--mark-w: 36.80%">
+        </a>
+        <a class="pane pane-logo" href="logo-c-old.html">
+          <img src="assets/logos/mark-c-old.svg" alt="ロゴマーク案C(旧デザイン)" width="141" height="86" style="--mark-w: 57.70%">
+        </a>
+        <a class="pane pane-logo" href="logo-d-old.html">
+          <img src="assets/logos/mark-d-old.svg" alt="ロゴマーク案D(旧デザイン)" width="155" height="102" style="--mark-w: 81.99%">
+        </a>
       </div>
+      </div></div>
     </section>
 
     <!-- ============ Corporate Logomark ============
@@ -634,6 +688,21 @@
         }
       }
     });
+  })();
+  </script>
+  <script>
+  /* アーカイブの開閉。既定は閉じた状態で、見出し右のアイコンで開く。 */
+  (function () {
+    var btns = document.querySelectorAll(".arch-btn");
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].addEventListener("click", function () {
+        var sec = this.closest(".is-archived");
+        if (!sec) return;
+        var open = sec.classList.toggle("is-open");
+        this.setAttribute("aria-expanded", open ? "true" : "false");
+        this.setAttribute("aria-label", open ? "アーカイブを閉じる" : "アーカイブを開く");
+      });
+    }
   })();
   </script>
 </body>
