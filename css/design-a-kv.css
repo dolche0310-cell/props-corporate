@@ -226,3 +226,33 @@
   .da-nav__link { padding: 16px 0; border-bottom: 1px solid #f1f1f1; font-size: 14px; }
   .da-nav__link:last-child { border-bottom: 0; }
 }
+
+/* ---------- ページを開いたときの「ふわっ」とした登場 ----------
+   図形 → ヘッダー → キャッチコピー(日本語 → 英語) → SCROLL の順に、
+   透明度と、ごく小さな移動・ぼかしの解消で現れる。
+   fill-mode は backwards: 終わったあとは通常のスタイルに戻るので、
+   ヘッダーの出没(transform)や図形の動きと干渉しない */
+@keyframes da-fade-up {
+  from { opacity: 0; transform: translateY(18px); filter: blur(6px); }
+  to   { opacity: 1; transform: none;             filter: blur(0); }
+}
+@keyframes da-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes da-shape-in {
+  from { opacity: 0; transform: scale(.94); }
+  to   { opacity: 1; transform: none; }
+}
+.da-hero__half {
+  animation: da-shape-in 1.9s cubic-bezier(.22, 1, .36, 1) backwards;
+}
+.da-hero__half--l { transform-origin: 0 0; }
+.da-hero__half--r { transform-origin: 100% 0; animation-delay: .12s; }
+.da-header      { animation: da-fade 1.2s cubic-bezier(.22, 1, .36, 1) .35s backwards; }
+.da-hero__ja    { animation: da-fade-up 1.3s cubic-bezier(.22, 1, .36, 1) .55s backwards; }
+.da-hero__en    { animation: da-fade-up 1.5s cubic-bezier(.22, 1, .36, 1) .75s backwards; }
+.da-hero__scroll { animation: da-fade 1.2s ease 1.5s backwards; }
+@media (prefers-reduced-motion: reduce) {
+  .da-hero__half, .da-header, .da-hero__ja, .da-hero__en, .da-hero__scroll { animation: none; }
+}
