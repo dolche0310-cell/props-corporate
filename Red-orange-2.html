@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Abril+Fatface&family=Alata&family=Belanosima:wght@600;700&family=Gugi&family=Inter:wght@400;700&family=Jost:wght@400;500;600&family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=20260819h">
-<link rel="stylesheet" href="css/design-a-kv.css?v=20261007o">
+<link rel="stylesheet" href="css/design-a-kv.css?v=20261008d">
 <style>
   :root { --color-primary: #FF2400; }
 </style>
@@ -71,6 +71,12 @@
               <stop offset=".5" stop-color="#f87a68"/>
               <stop offset="1" stop-color="#ff8a74"/>
             </linearGradient>
+            <!-- SP だけ左下に置く図形 -->
+            <linearGradient id="gSp" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="400" y2="320">
+              <stop offset="0" stop-color="#ee5a56"/>
+              <stop offset=".6" stop-color="#f87a68"/>
+              <stop offset="1" stop-color="#ff8a74"/>
+            </linearGradient>
           </defs>
         </svg>
 
@@ -85,10 +91,15 @@
           <g filter="url(#soft)" fill="#ff7a60" opacity=".4" data-blob="glow"></g>
           <g filter="url(#goo)" fill="url(#gRed)" data-blob="red"></g>
         </svg>
+
+        <!-- SP の左下(キャッチコピーの下が寂しいため)。PC では非表示 -->
+        <svg class="da-hero__bl" viewBox="0 0 400 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g filter="url(#goo)" fill="url(#gSp)" data-blob="spl"></g>
+        </svg>
       </div>
 
       <div class="da-hero__copy">
-        <h1 class="da-hero__ja"><span class="da-hero__ai">AI</span>がいる働き方を、すべての人に。</h1>
+        <h1 class="da-hero__ja"><span class="da-hero__ai">AI</span>がいる働き方を、<br class="da-sp-br">すべての人に。</h1>
         <p class="da-hero__en">An AI-powered way of working for everyone.</p>
       </div>
 
@@ -99,7 +110,7 @@
     <section class="da-about" id="about">
       <div class="da-about__circle">
         <p class="da-eyebrow">ABOUT US</p>
-        <h2 class="da-about__title">AIがいる働き方を、すべての人に。</h2>
+        <h2 class="da-about__title">AIがいる働き方を、<br class="da-sp-br">すべての人に。</h2>
         <div class="da-about__body">
           <p>AIは、はたらくことを根本から変えていきます。</p>
           <p>一人ひとりが、世の中が変化する中でも、充実した仕事や働き方を選べるようになる。</p>
@@ -296,9 +307,9 @@
              31120/28485 の6枚をモノクロに調律したもの。矩形マスクで
              切り替わり、1枚ごとに緩やかなケンバーンズが掛かる。 -->
         <div class="cmp__photo cmp__slides" aria-hidden="true">
-          <div class="cmp__slide is-active"><img src="assets/images/company/office-1.jpg?v=13" alt=""></div>
-          <div class="cmp__slide"><img src="assets/images/company/office-2.jpg?v=13" alt=""></div>
-          <div class="cmp__slide"><img src="assets/images/company/office-3.jpg?v=13" alt=""></div>
+          <div class="cmp__slide is-active"><img src="assets/images/company/office-new-1.jpg?v=1" alt=""></div>
+          <div class="cmp__slide"><img src="assets/images/company/office-new-2.jpg?v=1" alt=""></div>
+          <div class="cmp__slide"><img src="assets/images/company/office-new-3.jpg?v=1" alt=""></div>
           <div class="cmp__slide"><img src="assets/images/company/office-4.jpg?v=13" alt=""></div>
           <div class="cmp__slide"><img src="assets/images/company/office-5.jpg?v=13" alt=""></div>
           <div class="cmp__slide"><img src="assets/images/company/office-6.jpg?v=13" alt=""></div>
@@ -373,6 +384,6 @@
 <script src="js/company-photos.js?v=20260819h"></script>
 <script src="js/main.js?v=20261007b"></script>
 <script src="js/service-stage.js?v=20260819h"></script>
-<script src="js/design-a-kv.js?v=20261007d"></script>
+<script src="js/design-a-kv.js?v=20261008d"></script>
 </body>
 </html>

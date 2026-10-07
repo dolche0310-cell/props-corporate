@@ -119,12 +119,16 @@ body::before {
   }
   /* About が来たら、流動的な図形(pink / red)だけふわっと消す。薄い glow は残す */
   .da-hero__shapes [data-blob="pink"],
+  .da-hero__shapes [data-blob="spl"],
   .da-hero__shapes [data-blob="red"] { transition: opacity 1.4s cubic-bezier(.22, 1, .36, 1); }
   .da-hero__shapes.is-about [data-blob="pink"],
+  .da-hero__shapes.is-about [data-blob="spl"],
   .da-hero__shapes.is-about [data-blob="red"] { opacity: 0; }
   .da-hero__defs { position: absolute; width: 0; height: 0; }
   /* 図形は左右の端に固定し、画面幅に合わせて拡大縮小する(両端が切れない) */
   .da-hero__half { position: absolute; top: 0; width: min(50vw, 760px); height: auto; max-width: none; }
+  /* SP だけの左下の図形 */
+  .da-hero__bl { display: none; }
   .da-hero__half--l { left: 0; }
   .da-hero__half--r { right: 0; }
   .da-hero__copy {
@@ -242,17 +246,22 @@ body::before {
   /* ---------- SP ---------- */
   @media (max-width: 820px) {
     .da-header { top: 16px; height: 56px; padding: 0 24px; }
-    .da-hero { height: clamp(560px, 100svh, 720px); }
+    .da-hero { height: clamp(560px, 100svh, 900px); }
     .da-hero__half { width: 90vw; }
     .da-hero__half--l { left: -30vw; }
     .da-hero__half--r { right: -30vw; }
-    .da-hero__copy { bottom: 110px; }
-    .da-hero__ja { font-size: 26px; white-space: normal; }
+    /* キャッチコピーはファーストビューの中央あたりへ(SCROLL の位置は据え置き) */
+    .da-hero__scroll { bottom: auto; top: calc(clamp(560px, 100svh, 720px) - 36px); transform: translate(-50%, -100%); }
+    .da-hero__copy { bottom: auto; top: 50%; transform: translate(-50%, -50%); }
+    .da-hero__ja { font-size: 28px; white-space: normal; letter-spacing: .04em; }
     .da-hero__en { font-size: 14px; }
     .da-about { padding: 50vh 0 12vh; }
-    .da-about__circle { --d: 150vw; padding-bottom: 40px; }
-    .da-about__title { margin-top: 40px; font-size: 18px; padding: 0 24px; }
-    .da-about__body { padding: 0 24px; font-size: 13px; }
+    .da-about__circle { --d: 150vw; flex-shrink: 0; padding: 0 34px 36px; }
+    .da-about__title { margin-top: 32px; font-size: 18px; letter-spacing: .1em; }
+    .da-about__body { margin-top: 28px; font-size: 12.5px; letter-spacing: .04em; }
+    .da-about__body p { text-wrap: balance; }
+    /* 円は画面より広いので、文字の幅は画面基準で抑える */
+    .da-about__circle > * { max-width: calc(100vw - 56px); }
   }
 
 /* SP: ハンバーガー(開くとピルの下にメニューが出る) */
@@ -325,3 +334,32 @@ body::before {
 /* お知らせのサムネイルは切らずに、枠の中へ全体を収める(余白は枠の地色) */
 .news__list--rows .news__thumb { background: #fff; }
 .news__list--rows .news__thumb img { object-fit: contain; }
+
+/* 句読点での改行は SP だけ */
+.da-sp-br { display: none; }
+@media (max-width: 820px) { .da-sp-br { display: inline; } }
+
+/* SP: 事業内容の動画を、各タイトルの下・本文の上へ(順序だけ入れ替える) */
+@media (max-width: 767px) {
+  .service--brushup .service__text { display: contents; }
+  .service--brushup .service__title { order: 1; margin-bottom: 0; }
+  .service--brushup .service__image { order: 2; }
+  .service--brushup .service__desc { order: 3; margin-bottom: 0; }
+  .service--brushup .service__link { order: 4; align-self: flex-start; }
+  /* 会社概要の背景写真は、スクロールやポインタで動かさず固定する */
+  /* position: relative が要点。スライドは absolute なので、transform を外すと
+     基準が会社概要全体に移って写真が縦に伸びる。写真の枠を基準に戻す */
+  .company--figma .cmp__slides { position: relative; transform: none; transition: none; }
+}
+
+@media (max-width: 820px) {
+  .da-hero__bl {
+    display: block;
+    position: absolute;
+    left: -12vw;
+    bottom: -3vh;
+    width: 76vw;
+    height: auto;
+    animation: da-shape-in 1.9s cubic-bezier(.22, 1, .36, 1) .25s backwards;
+  }
+}
