@@ -26,7 +26,7 @@
       // 左の球: 大きく漂い、本体に近づくと融合する
       [62, 300, 82, 92, 78, .19, .23, 2.0]
     ],
-    'glow':        [[1040, 170, 130, 36, 30, .17, .21, 1.0]]
+    'glow':        [[1040, 170, 130, 110, 90, .3, .36, 1.0]]
   };
 
   var items = [];
@@ -129,4 +129,27 @@
   btn.addEventListener('click', function () { set(!nav.classList.contains('is-open')); });
   nav.querySelectorAll('a').forEach(function (a) { a.addEventListener('click', function () { set(false); }); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') set(false); });
+})();
+
+/* 図形は画面に固定。About の円が上がってきたら流動的な図形(pink / red)を消し、
+   About を抜けて Service に入るあたりで残りの薄い glow も消す */
+(function () {
+  var shapes = document.querySelector('.da-hero__shapes');
+  var about = document.getElementById('about');
+  var circle = about && about.querySelector('.da-about__circle');
+  if (!shapes || !circle) return;
+  var ticking = false;
+  function update() {
+    ticking = false;
+    var vh = window.innerHeight || 800;
+    shapes.classList.toggle('is-about', circle.getBoundingClientRect().top < vh * 0.7);
+    var b = about.getBoundingClientRect().bottom;
+    var o = Math.max(0, Math.min(1, b / (vh * 0.6)));
+    shapes.style.opacity = o.toFixed(3);
+  }
+  window.addEventListener('scroll', function () {
+    if (!ticking) { ticking = true; requestAnimationFrame(update); }
+  }, { passive: true });
+  window.addEventListener('resize', update);
+  update();
 })();

@@ -18,7 +18,23 @@
 .da-header a { color: inherit; text-decoration: none; }
 /* KV + About を一つの地(#f7f7f7)にまとめる。KV の図形が About へはみ出して続くため、
    セクションごとに背景を持たせると図形が隠れる */
-.da-top { position: relative; background: var(--da-bg); }
+.da-top { position: relative; background: none; }
+/* 地は body に持たせる。.da-top 自身に背景色を置くと、Service の暗転(body の下地色を
+   --svc-dark で沈める)に追従せず、About の下端に境界線が出る。
+   Red-orange と同じく、下地そのものを連続的に沈めてシームレスに切り替える */
+body { background-color: var(--da-bg); }
+/* 暗転は body の背景色を毎回塗り替えず、固定の暗幕の不透明度だけで表す
+   (不透明度はコンポジタだけで処理でき、再描画が走らないのでスクロールが滑らか) */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: #171717;
+  opacity: calc(var(--svc-dark, 0) * .88);
+  will-change: opacity;
+  pointer-events: none;
+}
 
 /* ---------- Header (pill) ---------- */
   .da-header {
@@ -59,7 +75,7 @@
   @media (prefers-reduced-motion: reduce) {
     .da-header, .da-header.is-hidden { transition: none; }
   }
-  .da-header__logo img { display: block; height: 30px; width: auto; }
+  .da-header__logo img { display: block; height: 32px; width: auto; }
   .da-nav { display: flex; gap: 48px; }
   .da-nav__link {
     font-family: var(--da-font-en);
@@ -91,14 +107,21 @@
     /* 図形は次のセクションへはみ出して続く。横方向だけ body 側で切る */
     overflow: visible;
   }
+  /* 図形は画面に固定。スクロールしてもその場に留まり、キャッチコピーだけが上へ流れる */
   .da-hero__shapes {
     z-index: 0;
     pointer-events: none;
-    position: absolute;
+    position: fixed;
     inset: 0;
     width: 100%;
     height: 100%;
+    overflow: hidden;
   }
+  /* About が来たら、流動的な図形(pink / red)だけふわっと消す。薄い glow は残す */
+  .da-hero__shapes [data-blob="pink"],
+  .da-hero__shapes [data-blob="red"] { transition: opacity 1.4s cubic-bezier(.22, 1, .36, 1); }
+  .da-hero__shapes.is-about [data-blob="pink"],
+  .da-hero__shapes.is-about [data-blob="red"] { opacity: 0; }
   .da-hero__defs { position: absolute; width: 0; height: 0; }
   /* 図形は左右の端に固定し、画面幅に合わせて拡大縮小する(両端が切れない) */
   .da-hero__half { position: absolute; top: 0; width: min(50vw, 760px); height: auto; max-width: none; }
@@ -111,20 +134,21 @@
     transform: translateX(-50%);
     width: min(1200px, calc(100% - 48px));
   }
+  /* 日本語を大きく(見出し)、英語を小さく下に置く */
   .da-hero__ja {
     font-weight: 700;
-    font-size: clamp(15px, 1.55vw, 22px);
-    letter-spacing: .18em;
-    line-height: 1.6;
-  }
-  .da-hero__en {
-    margin-top: 6px;
-    font-family: var(--da-font-en);
-    font-weight: 400;
     font-size: clamp(30px, 4.4vw, 63px);
-    letter-spacing: .01em;
+    letter-spacing: .06em;
     line-height: 1.25;
     white-space: nowrap;
+  }
+  .da-hero__en {
+    margin-top: 14px;
+    font-family: var(--da-font-en);
+    font-weight: 400;
+    font-size: clamp(15px, 1.55vw, 22px);
+    letter-spacing: .12em;
+    line-height: 1.6;
   }
   .da-hero__scroll {
     position: absolute;
@@ -139,32 +163,60 @@
     font-size: 9px;
     letter-spacing: .12em;
   }
-  .da-hero__scroll i { display: block; width: 1px; height: 28px; background: var(--da-ink); }
+  /* 細いラインの上を小さな円が上下に往復する */
+  .da-hero__scroll i { position: relative; display: block; width: 1px; height: 56px; background: rgba(26, 26, 26, .25); }
+  .da-hero__scroll i::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 7px;
+    height: 7px;
+    margin-left: -3.5px;
+    border-radius: 50%;
+    background: var(--da-ink);
+    animation: da-scroll-dot 2s cubic-bezier(.65, 0, .35, 1) infinite alternate;
+  }
+  @keyframes da-scroll-dot {
+    from { top: 0; }
+    to   { top: calc(100% - 7px); }
+  }
+  @media (prefers-reduced-motion: reduce) { .da-hero__scroll i::after { animation: none; } }
 
   /* ---------- About ---------- */
+  /* 大きな円の中に文字を置く。上の余白は KV のキャッチコピーが画面上部へ流れ切るのを待つ分 */
   .da-about {
     position: relative;
-    height: 665px;
-    overflow: hidden;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    padding: 60vh 0 18vh;
+    overflow-x: clip;
+    color: #fff;
     text-align: center;
   }
-  .da-about__blur { position: absolute; border-radius: 50%; pointer-events: none; }
-  .da-about__blur--l {
-    left: -90px; top: 20px; width: 380px; height: 380px;
-    background: radial-gradient(circle, rgba(255, 110, 90, .55), rgba(255, 130, 110, .35) 55%, rgba(255, 130, 110, 0) 72%);
-    filter: blur(18px);
+  .da-about__circle {
+    --d: min(max(46vw, 640px), 96vw);
+    width: var(--d);
+    aspect-ratio: 1;
+    /* 正円ではなく、KV の流動的な図形に合わせたわずかに歪な円。ゆっくり形が変わる */
+    border-radius: 58% 42% 52% 48% / 46% 56% 44% 54%;
+    animation: da-about-morph 14s ease-in-out infinite alternate;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 8px 60px;
+    background: linear-gradient(135deg, #f2a898 0%, #ee7a64 22%, #e8604a 45%, #dc5e46 68%, #b5503d 100%);
   }
-  .da-about__blur--r1 {
-    right: -30px; top: 330px; width: 260px; height: 260px;
-    background: radial-gradient(circle, rgba(255, 120, 100, .5), rgba(255, 120, 100, 0) 70%);
-    filter: blur(16px);
+  @keyframes da-about-morph {
+    0%   { border-radius: 58% 42% 52% 48% / 46% 56% 44% 54%; }
+    25%  { border-radius: 46% 54% 44% 56% / 55% 45% 57% 43%; }
+    50%  { border-radius: 52% 48% 58% 42% / 44% 54% 46% 56%; }
+    75%  { border-radius: 43% 57% 49% 51% / 57% 43% 53% 47%; }
+    100% { border-radius: 56% 44% 45% 55% / 49% 57% 43% 51%; }
   }
-  .da-about__blur--r2 {
-    right: 130px; top: 470px; width: 340px; height: 200px;
-    background: radial-gradient(ellipse, rgba(255, 120, 100, .4), rgba(255, 120, 100, 0) 70%);
-    filter: blur(20px);
-  }
-  .da-about__inner { position: relative; z-index: 1; padding-top: 54px; }
+  @media (prefers-reduced-motion: reduce) { .da-about__circle { animation: none; } }
   .da-eyebrow {
     font-family: var(--da-font-en);
     font-weight: 500;
@@ -173,17 +225,17 @@
     padding-left: .28em;
   }
   .da-about__title {
-    margin-top: 92px;
+    margin-top: 56px;
     font-weight: 700;
     font-size: 23px;
     letter-spacing: .15em;
   }
   .da-about__body {
     margin-top: 36px;
-    font-size: 14.5px;
-    letter-spacing: .1em;
+    font-size: 14px;
+    letter-spacing: .06em;
     line-height: 2;
-    color: var(--da-ink-2);
+    color: rgba(255, 255, 255, .95);
   }
   .da-about__body p + p { margin-top: 13px; }
 
@@ -195,10 +247,11 @@
     .da-hero__half--l { left: -30vw; }
     .da-hero__half--r { right: -30vw; }
     .da-hero__copy { bottom: 110px; }
-    .da-hero__ja { font-size: 15px; }
-    .da-hero__en { font-size: 26px; white-space: normal; }
-    .da-about { height: auto; padding-bottom: 80px; }
-    .da-about__title { margin-top: 56px; font-size: 18px; padding: 0 24px; }
+    .da-hero__ja { font-size: 26px; white-space: normal; }
+    .da-hero__en { font-size: 14px; }
+    .da-about { padding: 50vh 0 12vh; }
+    .da-about__circle { --d: 150vw; padding-bottom: 40px; }
+    .da-about__title { margin-top: 40px; font-size: 18px; padding: 0 24px; }
     .da-about__body { padding: 0 24px; font-size: 13px; }
   }
 
@@ -256,3 +309,19 @@
 @media (prefers-reduced-motion: reduce) {
   .da-hero__half, .da-header, .da-hero__ja, .da-hero__en, .da-hero__scroll { animation: none; }
 }
+
+/* お知らせ: 記事カード全体をクリック可能にする(タイトルのリンクを全面に広げる) */
+.news__link { color: inherit; text-decoration: none; }
+.news__link::after { content: ""; position: absolute; inset: 0; z-index: 1; }
+/* 代表写真: 人物が右寄りなので、右側を中心にトリミングする */
+.team__photo img { object-position: 72% 20%; }
+
+/* お知らせのサムネイル: 横長のロゴは切らずに全体を収める */
+.news__thumb img[src$="news-logotype-a.svg"] { object-fit: contain; padding: 18px; background: #fff; }
+
+/* KV 日本語キャッチコピーの「AI」だけ少し大きく */
+.da-hero__ai { font-size: 1.14em; }
+
+/* お知らせのサムネイルは切らずに、枠の中へ全体を収める(余白は枠の地色) */
+.news__list--rows .news__thumb { background: #fff; }
+.news__list--rows .news__thumb img { object-fit: contain; }

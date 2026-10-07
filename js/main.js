@@ -381,7 +381,7 @@
       // 0.02 刻みに量子化し、値が変わったときだけ書く。毎フレームの書き込みは
       // body の下地色と全画面メッシュ(blur 80px + overlay)の再合成を毎回誘発し、
       // 特に上方向へ戻るスクロールでガタつきの原因になっていた。
-      p = Math.round(p * 50) / 50;
+      p = Math.round(p * 200) / 200;
       if (p !== lastSvcDark) {
         lastSvcDark = p;
         document.documentElement.style.setProperty('--svc-dark', String(p));

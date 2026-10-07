@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Abril+Fatface&family=Alata&family=Belanosima:wght@600;700&family=Gugi&family=Inter:wght@400;700&family=Jost:wght@400;500;600&family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=20260819h">
-<link rel="stylesheet" href="css/design-a-kv.css?v=20261004b">
+<link rel="stylesheet" href="css/design-a-kv.css?v=20261007o">
 <style>
   :root { --color-primary: #FF2400; }
 </style>
@@ -27,7 +27,7 @@
   </a>
 
 <header class="da-header" id="site-header">
-  <a href="#top" class="da-header__logo"><img src="assets/images/logo-miai.svg" alt="MiAI"></a>
+  <a href="#top" class="da-header__logo"><img src="assets/images/logo-logotype-a.svg" alt="MiAI"></a>
   <nav class="da-nav" id="da-nav">
     <a href="wip.html?p=about&amp;d=a1" class="da-nav__link"><span class="da-nav__link-flip"><span class="da-nav__link-face da-nav__link-face--front">About</span><span class="da-nav__link-face da-nav__link-face--back" aria-hidden="true">About</span></span></a>
     <a href="wip.html?p=service&amp;d=a1" class="da-nav__link"><span class="da-nav__link-flip"><span class="da-nav__link-face da-nav__link-face--front">Service</span><span class="da-nav__link-face da-nav__link-face--back" aria-hidden="true">Service</span></span></a>
@@ -88,8 +88,8 @@
       </div>
 
       <div class="da-hero__copy">
-        <p class="da-hero__ja">AIがいる働き方を、すべての人に。</p>
-        <h1 class="da-hero__en">An AI-powered way of working for everyone.</h1>
+        <h1 class="da-hero__ja"><span class="da-hero__ai">AI</span>がいる働き方を、すべての人に。</h1>
+        <p class="da-hero__en">An AI-powered way of working for everyone.</p>
       </div>
 
       <div class="da-hero__scroll" aria-hidden="true"><span>SCROLL</span><i></i></div>
@@ -97,10 +97,7 @@
 
     <!-- About -->
     <section class="da-about" id="about">
-      <span class="da-about__blur da-about__blur--l" aria-hidden="true"></span>
-      <span class="da-about__blur da-about__blur--r1" aria-hidden="true"></span>
-      <span class="da-about__blur da-about__blur--r2" aria-hidden="true"></span>
-      <div class="da-about__inner">
+      <div class="da-about__circle">
         <p class="da-eyebrow">ABOUT US</p>
         <h2 class="da-about__title">AIがいる働き方を、すべての人に。</h2>
         <div class="da-about__body">
@@ -135,7 +132,7 @@
                   <div class="service__text">
                     <h3 class="service__title">MiAI面接 カスタマイズAI面接官の提供</h3>
                     <p class="service__desc">ノーコードで自社向けにカスタマイズできるAI面接官「MiAI(ミアイ)面接」を開発しています。企業ごとの採用方針に合わせてAI面接を設計可能。自然な対話と高UXで誰でもスムーズに面接完了。24時間対応・同時実施ができ、即時で評価レポートを出力します。</p>
-                    <a class="service__link" href="https://miai.jp/" target="_blank" rel="noopener">
+                    <a class="service__link" href="https://lp.miai-app.com/" target="_blank" rel="noopener">
                       <span class="service__link-label">サービスサイトはこちら</span>
                       <!-- Figma 262:29133。矢印ではなく12x8の角丸矩形を
                            3pxずらして重ねた別窓アイコン -->
@@ -157,11 +154,6 @@
                   <div class="service__text">
                     <h3 class="service__title">法人向けAI活用支援 / AI開発</h3>
                     <p class="service__desc">企業の顧客コミュニケーション・業務効率化分野でのAI技術の活用・システム開発のご支援をしています。企業ごとのAI活用、集客・業務課題に応じてコンサルタントが最適なパッケージをご提案いたします。ホームページよりお問い合わせください。</p>
-                    <a class="service__link" href="https://miai.jp/" target="_blank" rel="noopener">
-                      <span class="service__link-label">サービスサイトはこちら</span>
-                      <!-- Figma 441:23276。01 の面と同じ別窓アイコン -->
-                      <span class="service__link-icon" aria-hidden="true"><svg viewBox="0 0 15 11" width="15" height="11" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11 3.5H1C0.723858 3.5 0.5 3.72386 0.5 4V10C0.5 10.2761 0.723858 10.5 1 10.5H11C11.2761 10.5 11.5 10.2761 11.5 10V4C11.5 3.72386 11.2761 3.5 11 3.5Z" stroke="currentColor"/><path d="M14 0.5H4C3.72 0.5 3.5 0.72 3.5 1V3.5H11C11.28 3.5 11.5 3.72 11.5 4V7.5H14C14.28 7.5 14.5 7.28 14.5 7V1C14.5 0.72 14.28 0.5 14 0.5Z" stroke="currentColor"/></svg></span>
-                    </a>
                   </div>
                   <!-- 02 の面はループ動画。スロットは 01 の面と同じ 471x265、
                        中央トリミング(scale1.2 上寄せ)。
@@ -239,13 +231,24 @@
 
       <div class="news__list news__list--rows">
         <article class="news__item reveal">
+          <time class="news__date" datetime="2026-09-25"><span class="news__date-year">2026</span><span class="news__date-day">09.25</span></time>
+          <div class="news__body">
+            <p class="news__tags"><span>お知らせ</span><span>メディア掲載</span></p>
+            <h3 class="news__title"><a class="news__link" href="https://props-inc.com/news/BmPxO3J4" target="_blank" rel="noopener">【メディア掲載】愛媛新聞にてAI面接官「MiAI（ミアイ）」が紹介されました</a></h3>
+            <p class="news__excerpt">2026年9月22日付の愛媛新聞の連載「本業×デジタル 新分野開拓えひめ企業」で、伊予鉄AIコンサルティング株式会社（愛媛県松山市）の取り組みが紹介されました。同社の取扱サービスの一つとして、AI面接官「MiAI（ミアイ）」が取り上げられています。</p>
+          </div>
+          <div class="news__thumb" aria-hidden="true"><img src="assets/images/news-logotype-a.svg" alt=""></div>
+          <span class="news__arrow" aria-hidden="true"><svg viewBox="0 0 14 12" fill="none" width="14" height="12"><path d="M1 6H13M8.6 1.6L13 6L8.6 10.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </article>
+
+        <article class="news__item reveal">
           <time class="news__date" datetime="2026-04-02"><span class="news__date-year">2026</span><span class="news__date-day">04.02</span></time>
           <div class="news__body">
             <p class="news__tags"><span>お知らせ</span><span>プレスリリース</span></p>
-            <h3 class="news__title">株式会社日比谷花壇がAI面接サービス「MiAI面接」を導入。&quot;人の温度&quot;を守りながら全国採用の公平性と効率性を両立。</h3>
+            <h3 class="news__title"><a class="news__link" href="https://props-inc.com/news/20260403_hibiyakadan" target="_blank" rel="noopener">株式会社日比谷花壇がAI面接サービス「MiAI面接」を導入。&quot;人の温度&quot;を守りながら全国採用の公平性と効率性を両立。</a></h3>
             <p class="news__excerpt">プロップス株式会社（本社：東京都中央区、代表取締役 松元勇人）は、株式会社日比谷花壇（本社：東京都港区、代表取締役社長 宮島 浩彰）がAI面接サービス「MiAI面接」を正式導入したことをお知らせします...</p>
           </div>
-          <div class="news__thumb" aria-hidden="true"></div>
+          <div class="news__thumb" aria-hidden="true"><img src="assets/images/news-hibiyakadan.webp" alt=""></div>
           <span class="news__arrow" aria-hidden="true"><svg viewBox="0 0 14 12" fill="none" width="14" height="12"><path d="M1 6H13M8.6 1.6L13 6L8.6 10.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         </article>
 
@@ -253,10 +256,10 @@
           <time class="news__date" datetime="2025-07-21"><span class="news__date-year">2025</span><span class="news__date-day">07.21</span></time>
           <div class="news__body">
             <p class="news__tags"><span>プレスリリース</span></p>
-            <h3 class="news__title">AIで採用を加速する。ノーコードで自社向けにカスタマイズできるAI面接官「MiAI面接」を正式リリース</h3>
+            <h3 class="news__title"><a class="news__link" href="https://props-inc.com/news/BmPxO3J4" target="_blank" rel="noopener">AIで採用を加速する。ノーコードで自社向けにカスタマイズできるAI面接官「MiAI面接」を正式リリース</a></h3>
             <p class="news__excerpt">採用初期のリードタイムを90%以上削減。24時間365日対応で、企業ごとに求職者一人一人に合わせた面接対話体験を提供。最新の生成AIを活用し採用体験にイノベーションを。採用市場の激化と労働人口減少...</p>
           </div>
-          <div class="news__thumb" aria-hidden="true"></div>
+          <div class="news__thumb" aria-hidden="true"><img src="assets/images/news-miai-release.webp?v=2" alt=""></div>
           <span class="news__arrow" aria-hidden="true"><svg viewBox="0 0 14 12" fill="none" width="14" height="12"><path d="M1 6H13M8.6 1.6L13 6L8.6 10.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         </article>
       </div>
@@ -273,7 +276,7 @@
       </div>
 
       <div class="team__card reveal">
-        <div class="team__photo"></div>
+        <div class="team__photo"><img src="assets/images/ceo.png" alt="代表取締役 松元 勇人"></div>
         <div class="team__info">
           <p class="team__role">代表取締役</p>
           <h3 class="team__name">松元 勇人</h3>
@@ -368,8 +371,8 @@
 </footer>
 
 <script src="js/company-photos.js?v=20260819h"></script>
-<script src="js/main.js?v=20260819h"></script>
+<script src="js/main.js?v=20261007b"></script>
 <script src="js/service-stage.js?v=20260819h"></script>
-<script src="js/design-a-kv.js?v=20261004a"></script>
+<script src="js/design-a-kv.js?v=20261007d"></script>
 </body>
 </html>
