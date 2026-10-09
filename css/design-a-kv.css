@@ -140,6 +140,7 @@ body::before {
   }
   /* 日本語を大きく(見出し)、英語を小さく下に置く */
   .da-hero__ja {
+    font-family: "LINE Seed JP", var(--da-font-ja);
     font-weight: 700;
     font-size: clamp(30px, 4.4vw, 63px);
     letter-spacing: .06em;
@@ -148,7 +149,7 @@ body::before {
   }
   .da-hero__en {
     margin-top: 14px;
-    font-family: var(--da-font-en);
+    font-family: "Afacad Flux", var(--da-font-en);
     font-weight: 400;
     font-size: clamp(15px, 1.55vw, 22px);
     letter-spacing: .12em;
@@ -200,7 +201,7 @@ body::before {
     text-align: center;
   }
   .da-about__circle {
-    --d: min(max(46vw, 640px), 96vw);
+    --d: min(max(52vw, 720px), 96vw);
     width: var(--d);
     aspect-ratio: 1;
     /* 正円ではなく、KV の流動的な図形に合わせたわずかに歪な円。ゆっくり形が変わる */
@@ -253,11 +254,11 @@ body::before {
     /* キャッチコピーはファーストビューの中央あたりへ(SCROLL の位置は据え置き) */
     .da-hero__scroll { bottom: auto; top: calc(clamp(560px, 100svh, 720px) - 36px); transform: translate(-50%, -100%); }
     .da-hero__copy { bottom: auto; top: 50%; transform: translate(-50%, -50%); }
-    .da-hero__ja { font-size: 28px; white-space: normal; letter-spacing: .04em; }
+    .da-hero__ja { font-size: min(28px, 7.4vw); white-space: nowrap; letter-spacing: .04em; }
     .da-hero__en { font-size: 14px; }
     .da-about { padding: 50vh 0 12vh; }
-    .da-about__circle { --d: 150vw; flex-shrink: 0; padding: 0 34px 36px; }
-    .da-about__title { margin-top: 32px; font-size: 18px; letter-spacing: .1em; }
+    .da-about__circle { --d: 168vw; flex-shrink: 0; padding: 0 34px 36px; }
+    .da-about__title { margin-top: 32px; font-size: min(18px, 4.8vw); letter-spacing: .1em; white-space: nowrap; }
     .da-about__body { margin-top: 28px; font-size: 12.5px; letter-spacing: .04em; }
     .da-about__body p { text-wrap: balance; }
     /* 円は画面より広いので、文字の幅は画面基準で抑える */
@@ -274,7 +275,7 @@ body::before {
   }
   .da-burger span { display: block; height: 1.5px; background: var(--da-ink); transition: transform .3s, opacity .3s; }
   .da-burger[aria-expanded="true"] span:nth-child(1) { transform: translateY(3.75px) rotate(45deg); }
-  .da-burger[aria-expanded="true"] span:nth-child(2) { transform: translateY(-3.75px) rotate(-45deg); }
+  .da-burger[aria-expanded="true"] span:nth-child(2) { transform: translateY(-3.75px) rotate(0deg); }
   .da-nav {
     display: flex; flex-direction: column; gap: 0;
     position: absolute; top: calc(100% + 8px); left: 0; right: 0;
@@ -326,13 +327,13 @@ body::before {
 .team__photo img { object-position: 72% 20%; }
 
 /* お知らせのサムネイル: 横長のロゴは切らずに全体を収める */
-.news__thumb img[src$="news-logotype-a.svg"] { object-fit: contain; padding: 18px; background: #fff; }
+.news__thumb img[src$="news-logotype-a.svg"] { object-fit: contain; background: #fff; }
 
 /* KV 日本語キャッチコピーの「AI」だけ少し大きく */
-.da-hero__ai { font-size: 1.14em; }
+.da-hero__ai { font-size: 1.14em; position: relative; top: .06em; letter-spacing: .1em; }
 
 /* お知らせのサムネイルは切らずに、枠の中へ全体を収める(余白は枠の地色) */
-.news__list--rows .news__thumb { background: #fff; }
+.news__list--rows .news__thumb { background: #fff; padding: 14px; box-sizing: border-box; }
 .news__list--rows .news__thumb img { object-fit: contain; }
 
 /* 句読点での改行は SP だけ */
@@ -356,10 +357,38 @@ body::before {
   .da-hero__bl {
     display: block;
     position: absolute;
-    left: -12vw;
+    left: 0;
     bottom: -3vh;
-    width: 76vw;
+    width: 100vw;
     height: auto;
+    /* 図形が枠(viewBox)の端で四角く切れないように */
+    overflow: visible;
     animation: da-shape-in 1.9s cubic-bezier(.22, 1, .36, 1) .25s backwards;
   }
 }
+
+/* 「、」の後ろの空きを詰める(全角の右半分の余白 + 字間のうち半分ほど) */
+.da-comma { margin-right: -.3em; }
+/* About までは戻るボタンを #E15F48 に */
+.to-top.is-on-about { background: #E15F48; }
+/* 代表写真はモノクロ */
+.team__photo img { filter: grayscale(1); }
+
+/* お知らせの上余白 */
+.news--brushup { padding-top: 100px; }
+
+/* お知らせの矢印: More と同じく、矢印が回転しながら抜け、もう1本が回転しながら入る */
+.news__arrow { width: 18px; height: 18px; overflow: hidden; }
+.news__arrow-a { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+.news__arrow-a svg {
+  display: block;
+  transform: rotate(0deg);
+  transition: transform .4s cubic-bezier(.16, .5, .25, 1);
+}
+.news__arrow-a--hover svg { transform: rotate(0deg) translate(-140%); }
+@media (hover: hover) and (pointer: fine) {
+  .news__item:hover .news__arrow { transform: translateY(-50%); }
+  .news__item:hover .news__arrow-a--default svg { transform: rotate(0deg) translate(140%); }
+  .news__item:hover .news__arrow-a--hover svg { transform: rotate(0deg) translate(0); }
+}
+@media (prefers-reduced-motion: reduce) { .news__arrow-a svg { transition: none; } }

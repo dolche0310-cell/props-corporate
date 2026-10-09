@@ -7,9 +7,9 @@
 <meta name="description" content="MiAI株式会社は「人の力を最大化するソフトウェアをつくる」という想いのもと、企業と人のコミュニケーションをサポートするAI技術を開発しています。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Abril+Fatface&family=Alata&family=Belanosima:wght@600;700&family=Gugi&family=Inter:wght@400;700&family=Jost:wght@400;500;600&family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Abril+Fatface&family=LINE+Seed+JP:wght@400;700;800&family=Afacad+Flux:wght@400;500&family=Alata&family=Belanosima:wght@600;700&family=Gugi&family=Inter:wght@400;700&family=Jost:wght@400;500;600&family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=20260819h">
-<link rel="stylesheet" href="css/design-a-kv.css?v=20261008d">
+<link rel="stylesheet" href="css/design-a-kv.css?v=20261009l">
 <style>
   :root { --color-primary: #FF2400; }
 </style>
@@ -51,7 +51,9 @@
             <!-- 近い円同士が首でつながるメタボール -->
             <filter id="goo" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
               <feGaussianBlur in="SourceGraphic" stdDeviation="20" result="b"/>
-              <feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 24 -9"/>
+              <feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 12 -4.5" result="g"/>
+              <!-- 形ははっきり残し、縁だけをごくわずかに柔らかく -->
+              <feGaussianBlur in="g" stdDeviation="2"/>
             </filter>
             <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="26"/></filter>
             <!-- 右の赤い図形: 外周は明るい朱、くびれの中心に向かって濃い赤 -->
@@ -72,7 +74,7 @@
               <stop offset="1" stop-color="#ff8a74"/>
             </linearGradient>
             <!-- SP だけ左下に置く図形 -->
-            <linearGradient id="gSp" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="400" y2="320">
+            <linearGradient id="gSp" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="480" y2="320">
               <stop offset="0" stop-color="#ee5a56"/>
               <stop offset=".6" stop-color="#f87a68"/>
               <stop offset="1" stop-color="#ff8a74"/>
@@ -93,13 +95,13 @@
         </svg>
 
         <!-- SP の左下(キャッチコピーの下が寂しいため)。PC では非表示 -->
-        <svg class="da-hero__bl" viewBox="0 0 400 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg class="da-hero__bl" viewBox="0 0 480 320" fill="none" xmlns="http://www.w3.org/2000/svg">
           <g filter="url(#goo)" fill="url(#gSp)" data-blob="spl"></g>
         </svg>
       </div>
 
       <div class="da-hero__copy">
-        <h1 class="da-hero__ja"><span class="da-hero__ai">AI</span>がいる働き方を、<br class="da-sp-br">すべての人に。</h1>
+        <h1 class="da-hero__ja"><span class="da-hero__ai">AI</span>がいる働き方を<span class="da-comma">、</span><br class="da-sp-br">すべての人に。</h1>
         <p class="da-hero__en">An AI-powered way of working for everyone.</p>
       </div>
 
@@ -110,7 +112,7 @@
     <section class="da-about" id="about">
       <div class="da-about__circle">
         <p class="da-eyebrow">ABOUT US</p>
-        <h2 class="da-about__title">AIがいる働き方を、<br class="da-sp-br">すべての人に。</h2>
+        <h2 class="da-about__title">AIがいる働き方を<span class="da-comma">、</span><br class="da-sp-br">すべての人に。</h2>
         <div class="da-about__body">
           <p>AIは、はたらくことを根本から変えていきます。</p>
           <p>一人ひとりが、世の中が変化する中でも、充実した仕事や働き方を選べるようになる。</p>
@@ -249,7 +251,7 @@
             <p class="news__excerpt">2026年9月22日付の愛媛新聞の連載「本業×デジタル 新分野開拓えひめ企業」で、伊予鉄AIコンサルティング株式会社（愛媛県松山市）の取り組みが紹介されました。同社の取扱サービスの一つとして、AI面接官「MiAI（ミアイ）」が取り上げられています。</p>
           </div>
           <div class="news__thumb" aria-hidden="true"><img src="assets/images/news-logotype-a.svg" alt=""></div>
-          <span class="news__arrow" aria-hidden="true"><svg viewBox="0 0 14 12" fill="none" width="14" height="12"><path d="M1 6H13M8.6 1.6L13 6L8.6 10.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="news__arrow" aria-hidden="true"><span class="news__arrow-a news__arrow-a--default"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M10,18l8-8c-2.2-2.2-8-8-8-8"/><line x1="2.4" y1="10" x2="18" y2="10"/></svg></span><span class="news__arrow-a news__arrow-a--hover"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M10,18l8-8c-2.2-2.2-8-8-8-8"/><line x1="2.4" y1="10" x2="18" y2="10"/></svg></span></span>
         </article>
 
         <article class="news__item reveal">
@@ -260,7 +262,7 @@
             <p class="news__excerpt">プロップス株式会社（本社：東京都中央区、代表取締役 松元勇人）は、株式会社日比谷花壇（本社：東京都港区、代表取締役社長 宮島 浩彰）がAI面接サービス「MiAI面接」を正式導入したことをお知らせします...</p>
           </div>
           <div class="news__thumb" aria-hidden="true"><img src="assets/images/news-hibiyakadan.webp" alt=""></div>
-          <span class="news__arrow" aria-hidden="true"><svg viewBox="0 0 14 12" fill="none" width="14" height="12"><path d="M1 6H13M8.6 1.6L13 6L8.6 10.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="news__arrow" aria-hidden="true"><span class="news__arrow-a news__arrow-a--default"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M10,18l8-8c-2.2-2.2-8-8-8-8"/><line x1="2.4" y1="10" x2="18" y2="10"/></svg></span><span class="news__arrow-a news__arrow-a--hover"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M10,18l8-8c-2.2-2.2-8-8-8-8"/><line x1="2.4" y1="10" x2="18" y2="10"/></svg></span></span>
         </article>
 
         <article class="news__item reveal">
@@ -271,7 +273,7 @@
             <p class="news__excerpt">採用初期のリードタイムを90%以上削減。24時間365日対応で、企業ごとに求職者一人一人に合わせた面接対話体験を提供。最新の生成AIを活用し採用体験にイノベーションを。採用市場の激化と労働人口減少...</p>
           </div>
           <div class="news__thumb" aria-hidden="true"><img src="assets/images/news-miai-release.webp?v=2" alt=""></div>
-          <span class="news__arrow" aria-hidden="true"><svg viewBox="0 0 14 12" fill="none" width="14" height="12"><path d="M1 6H13M8.6 1.6L13 6L8.6 10.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="news__arrow" aria-hidden="true"><span class="news__arrow-a news__arrow-a--default"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M10,18l8-8c-2.2-2.2-8-8-8-8"/><line x1="2.4" y1="10" x2="18" y2="10"/></svg></span><span class="news__arrow-a news__arrow-a--hover"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M10,18l8-8c-2.2-2.2-8-8-8-8"/><line x1="2.4" y1="10" x2="18" y2="10"/></svg></span></span>
         </article>
       </div>
     </div>
@@ -382,8 +384,8 @@
 </footer>
 
 <script src="js/company-photos.js?v=20260819h"></script>
-<script src="js/main.js?v=20261007b"></script>
+<script src="js/main.js?v=20261009l"></script>
 <script src="js/service-stage.js?v=20260819h"></script>
-<script src="js/design-a-kv.js?v=20261008d"></script>
+<script src="js/design-a-kv.js?v=20261009l"></script>
 </body>
 </html>

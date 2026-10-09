@@ -474,6 +474,7 @@
         });
         serviceDigits.forEach(function (n) { n.style.opacity = ''; });
         window.__miaiServiceProgress = 0;
+        servicePin.style.transform = '';
         if (siteHeader) siteHeader.classList.remove('is-pin-locked');
         return;
       }
@@ -483,9 +484,28 @@
       var rect = serviceScroller.getBoundingClientRect();
       var travel = serviceScroller.offsetHeight - servicePin.offsetHeight;
       if (travel <= 0) return;
-      var p = -rect.top / travel;
+      var sPx = -rect.top;
+      var p = sPx / travel;
       p = p < 0 ? 0 : p > 1 ? 1 : p;
-      if (p === svcLastP) return;      /* 無変化なら書かない */
+
+      /* 留まる瞬間と外れる瞬間の「急停止・急発進」をなだらかにする。
+         sticky は速さが 1 → 0、0 → 1 に一瞬で切り替わる。ここでは前後 W/2 ずつの
+         区間で、画面上の位置を「速さが smoothstep で 1⇄0 に変わる曲線」へ
+         置き換える(ピンへの translateY で差分だけ足す)。
+         区間の両端では素の sticky と位置も速さも一致し、位置のずれは残らない。 */
+      var W = 0.8 * (window.innerHeight || 800), h = W / 2, ty = 0;
+      if (sPx > -h && sPx < h) {                     /* 入り: だんだん減速して止まる */
+        var ue = (sPx + h) / W;
+        var yIn = h - W * (ue - ue * ue * ue + ue * ue * ue * ue / 2);
+        ty = yIn - (sPx < 0 ? -sPx : 0);
+      } else if (sPx > travel - h && sPx < travel + h) { /* 出: 止まりからだんだん加速 */
+        var ux = (sPx - (travel - h)) / W;
+        var yOut = -W * (ux * ux * ux - ux * ux * ux * ux / 2);
+        ty = yOut - (sPx > travel ? -(sPx - travel) : 0);
+      }
+      servicePin.style.transform = ty ? 'translate3d(0,' + ty.toFixed(2) + 'px,0)' : '';
+
+      if (p === svcLastP && !ty) return;   /* 無変化なら書かない */
       svcLastP = p;
 
       /* 切替は 22%→78% の区間。区間外は 0/1 に張り付くので、

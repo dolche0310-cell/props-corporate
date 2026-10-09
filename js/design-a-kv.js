@@ -26,14 +26,23 @@
       // 左の球: 大きく漂い、本体に近づくと融合する
       [62, 300, 82, 92, 78, .19, .23, 2.0]
     ],
-    // SP の左下。SCROLL(画面中央)に被らないよう、左寄りに漂う
+    // SP の左下。SCROLL(画面中央 x≈240, y≈147〜243)には被せない。
+    // その帯では x<205 に収め、帯の上(y<140)は右側へ広げる
     'spl': [
-      [120, 215, 78, 28, 24, .25, .31, 0.6],
-      [215, 262, 54, 26, 24, .31, .27, 2.4],
-      [52, 120, 52, 24, 30, .29, .34, 4.1],
-      [150, 120, 40, 20, 24, .34, .26, 1.5]
+      [100, 225, 66, 22, 18, .25, .31, 0.6],
+      [190, 292, 46, 22, 14, .31, .27, 2.4],
+      [48, 130, 52, 24, 26, .29, .34, 4.1],
+      [150, 110, 44, 22, 24, .34, .26, 1.5],
+      [250, 62, 46, 30, 22, .27, .3, 3.2],
+      [345, 120, 40, 26, 30, .23, .28, 5.0]
     ],
-    'glow':        [[1040, 170, 130, 110, 90, .3, .36, 1.0]]
+    // 薄いぼんやりした背景も、複数の円がゆっくり形を変えながら漂う
+    'glow': [
+      [1060, 170, 120, 70, 70, .3, .36, 1.0],
+      [1180, 330, 120, 100, 80, .22, .28, 2.3],
+      [1010, 110, 90, 60, 60, .26, .21, 4.2],
+      [1260, 140, 90, 80, 90, .19, .31, 5.5]
+    ]
   };
 
   var items = [];
@@ -120,10 +129,14 @@
   draw(0, 0);
   if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   var start = performance.now(), last = start;
+  // 図形が見えていない間(About 以降)は描画しない。メタボールのフィルタ(ぼかし2段)は
+  // 重く、見えないのに毎フレーム再計算すると Service のスクロールが引っかかる。
+  var shapesEl = document.querySelector('.da-hero__shapes');
+  function hidden() { return shapesEl && shapesEl.style.opacity === '0.000'; }
   (function loop(now) {
     var dt = Math.min((now - last) / 1000, .1);   // タブ復帰時の飛びを防ぐ
     last = now;
-    draw((now - start) / 1000, dt);
+    if (!hidden() && !document.hidden) draw((now - start) / 1000, dt);
     requestAnimationFrame(loop);
   })(start);
 })();
@@ -153,10 +166,25 @@
     var b = about.getBoundingClientRect().bottom;
     var o = Math.max(0, Math.min(1, b / (vh * 0.6)));
     shapes.style.opacity = o.toFixed(3);
+    shapes.style.visibility = o === 0 ? 'hidden' : '';
   }
   window.addEventListener('scroll', function () {
     if (!ticking) { ticking = true; requestAnimationFrame(update); }
   }, { passive: true });
+  window.addEventListener('resize', update);
+  update();
+})();
+
+/* ページ先頭へ戻るボタン: About を抜けるまでは #E15F48 */
+(function () {
+  var btn = document.getElementById('to-top');
+  var about = document.getElementById('about');
+  if (!btn || !about) return;
+  function update() {
+    var vh = window.innerHeight || 800;
+    btn.classList.toggle('is-on-about', about.getBoundingClientRect().bottom > vh - 72);
+  }
+  window.addEventListener('scroll', update, { passive: true });
   window.addEventListener('resize', update);
   update();
 })();
