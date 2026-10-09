@@ -414,3 +414,9 @@ body::before {
   }
 }
 @media (min-width: 768px) { .company--figma .cmp__en { color: #2e2e2e; } }
+
+/* 見出しの白ぼかしは、見出しの箱(clip-path)で切られると縁が四角く見える。
+   登場後は切り抜きの範囲を十分に広げ、ぼかしがなだらかに消えるところまで見せる */
+@media (min-width: 768px) {
+  .company--figma.is-in .cmp__label { clip-path: inset(-300px -400px -300px -400px); }
+}
