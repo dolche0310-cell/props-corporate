@@ -142,6 +142,7 @@ body::before {
   .da-hero__ja {
     font-family: "LINE Seed JP", var(--da-font-ja);
     font-weight: 700;
+    color: #303030;
     font-size: clamp(30px, 4.4vw, 63px);
     letter-spacing: .06em;
     line-height: 1.25;
