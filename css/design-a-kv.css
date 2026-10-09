@@ -50,7 +50,7 @@ body::before {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: rgba(255, 255, 255, .72);
+    background: rgba(255, 255, 255, .42);
     -webkit-backdrop-filter: blur(14px);
     backdrop-filter: blur(14px);
     border-radius: 999px;
@@ -401,16 +401,16 @@ body::before {
     content: "";
     position: absolute;
     z-index: -1;
-    left: -90px;
-    top: -50px;
-    right: -150px;
-    bottom: -40px;
-    background: rgba(255, 255, 255, .72);
-    -webkit-backdrop-filter: blur(16px);
-    backdrop-filter: blur(16px);
-    -webkit-mask-image: radial-gradient(closest-side, #000 55%, transparent 100%);
-    mask-image: radial-gradient(closest-side, #000 55%, transparent 100%);
+    left: -140px;
+    top: -110px;
+    right: -240px;
+    bottom: -100px;
+    background: rgba(255, 255, 255, .42);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    -webkit-mask-image: radial-gradient(closest-side, #000 0%, rgba(0,0,0,.75) 30%, rgba(0,0,0,.35) 60%, transparent 100%);
+    mask-image: radial-gradient(closest-side, #000 0%, rgba(0,0,0,.75) 30%, rgba(0,0,0,.35) 60%, transparent 100%);
     pointer-events: none;
   }
 }
-@media (min-width: 768px) { .company--figma .cmp__en { color: #4a4a4a; } }
+@media (min-width: 768px) { .company--figma .cmp__en { color: #2e2e2e; } }
