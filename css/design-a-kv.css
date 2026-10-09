@@ -330,7 +330,7 @@ body::before {
 .news__thumb img[src$="news-logotype-a.svg"] { object-fit: contain; background: #fff; }
 
 /* KV 日本語キャッチコピーの「AI」だけ少し大きく */
-.da-hero__ai { font-size: 1.14em; position: relative; top: .06em; letter-spacing: .1em; }
+.da-hero__ai { font-size: 1.14em; position: relative; top: .025em; letter-spacing: .1em; }
 
 /* お知らせのサムネイルは切らずに、枠の中へ全体を収める(余白は枠の地色) */
 .news__list--rows .news__thumb { background: #fff; padding: 14px; box-sizing: border-box; }
