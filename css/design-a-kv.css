@@ -134,8 +134,8 @@ body::before {
   .da-hero__copy {
     position: absolute;
     left: 50%;
-    bottom: 180px;
-    transform: translateX(-50%);
+    top: 50%;
+    transform: translate(-50%, -50%);
     width: min(1200px, calc(100% - 48px));
   }
   /* 日本語を大きく(見出し)、英語を小さく下に置く */
