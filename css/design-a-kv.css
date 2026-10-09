@@ -420,3 +420,7 @@ body::before {
 @media (min-width: 768px) {
   .company--figma.is-in .cmp__label { clip-path: inset(-300px -400px -300px -400px); }
 }
+
+/* ヘッダーのアンカーリンクの着地位置。About は円が画面の上寄りに見える位置へ
+   (セクション上部の余白が長いので、そのまま先頭に合わせると空白が目立つ) */
+#about { scroll-margin-top: -35vh; }
