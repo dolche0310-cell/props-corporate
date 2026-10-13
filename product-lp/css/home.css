@@ -2311,3 +2311,79 @@ $ popup banner
     width: 10px;
   }
 }
+
+/* ---------- ロゴ + タグライン(新ロゴ用) ----------
+   旧 logo.png は「MiAI」の右に「AI面接官のミアイ」が焼き込まれていた。
+   新ロゴ(SVG)には含まれないので、同じ位置にテキストで添える。
+   ロゴ幅の固定指定を外し、横並びで自然な幅にする。 */
+#header .lp_logo,
+#lp_follow .lp_logo,
+#lp_footer .lp_footer_logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: auto;
+}
+
+#header .lp_logo img,
+#lp_follow .lp_logo img,
+#lp_footer .lp_footer_logo img {
+  width: auto;
+  height: 28px;
+  flex: 0 0 auto;
+}
+
+.lp_logo_tagline {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: #101010;
+  white-space: nowrap;
+}
+
+#lp_follow .lp_logo img {
+  height: 24px;
+}
+
+#lp_follow .lp_logo_tagline {
+  font-size: 11px;
+}
+
+#lp_footer .lp_footer_logo img {
+  height: 36px;
+}
+
+#lp_footer .lp_logo_tagline {
+  font-size: 14px;
+}
+
+@media screen and (max-width: 600px) {
+  #header .lp_logo,
+  #lp_follow .lp_logo {
+    width: auto;
+    gap: 7px;
+  }
+
+  #header .lp_logo img,
+  #lp_follow .lp_logo img {
+    height: 20px;
+  }
+
+  #header .lp_logo_tagline,
+  #lp_follow .lp_logo_tagline {
+    font-size: 9px;
+  }
+
+  #lp_footer .lp_footer_logo {
+    width: auto;
+  }
+
+  #lp_footer .lp_footer_logo img {
+    height: 30px;
+  }
+
+  #lp_footer .lp_logo_tagline {
+    font-size: 12px;
+  }
+}
