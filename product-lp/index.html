@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="ja" class="miai-css-pending">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MiAI | AI面接官のミアイ</title>
+  <meta name="description" content="企業のカルチャーや採用基準に合わせてカスタマイズできるAI面接官。あらゆる採用の一次面接をAIがまるごと代行します。">
+  <link rel="canonical" href="https://lp.miai-app.com/">
+  <link rel="icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="https://lp.miai-app.com/assets/apple_touch_icon.png">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="MiAI | AI面接官のミアイ">
+  <meta property="og:description" content="企業のカルチャーや採用基準に合わせてカスタマイズできるAI面接官。あらゆる採用の一次面接をAIがまるごと代行します。">
+  <meta property="og:url" content="https://lp.miai-app.com/">
+  <meta property="og:site_name" content="MiAI面接">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://lp.miai-app.com/assets/ogp.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="MiAI AI面接官のミアイ">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="MiAI | AI面接官のミアイ">
+  <meta name="twitter:description" content="企業のカルチャーや採用基準に合わせてカスタマイズできるAI面接官。あらゆる採用の一次面接をAIがまるごと代行します。">
+  <meta name="twitter:image" content="https://lp.miai-app.com/assets/ogp.jpg">
+  <meta name="twitter:image:alt" content="MiAI AI面接官のミアイ">
+
+  <!-- JSON-LD: Organization + WebSite -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://lp.miai-app.com/#organization",
+        "name": "プロップス株式会社",
+        "url": "https://props-inc.com/",
+        "logo": "https://lp.miai-app.com/assets/logo.png",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "日本橋3-7-7 日本橋アーバンビルヂング4階",
+          "addressLocality": "中央区",
+          "addressRegion": "東京都",
+          "postalCode": "103-0027",
+          "addressCountry": "JP"
+        }
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://lp.miai-app.com/#website",
+        "url": "https://lp.miai-app.com/",
+        "name": "MiAI | AI面接官のミアイ",
+        "description": "企業のカルチャーや採用基準に合わせてカスタマイズできるAI面接官。あらゆる採用の一次面接をAIがまるごと代行します。",
+        "inLanguage": "ja",
+        "publisher": { "@id": "https://lp.miai-app.com/#organization" }
+      },
+      {
+        "@type": "Product",
+        "name": "MiAI 面接官",
+        "description": "企業のカルチャーや採用基準に合わせてカスタマイズできるAI面接官。",
+        "brand": { "@type": "Brand", "name": "MiAI" },
+        "url": "https://lp.miai-app.com/",
+        "image": "https://lp.miai-app.com/assets/ogp.jpg",
+        "manufacturer": { "@id": "https://lp.miai-app.com/#organization" }
+      }
+    ]
+  }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;550;700&family=Noto+Sans+JP:wght@400;500;700&display=swap"
+    rel="stylesheet">
+
+  <!-- CSSが当たるまでの FOUC 防止（下のスクリプトで link 読み込み後に解除） -->
+  <style id="miai-css-pending-hide">
+    html.miai-css-pending body {
+      visibility: hidden;
+    }
+  </style>
+
+  <!-- JS オフ時は通常の link で読み込み、上の非表示を解除 -->
+  <noscript>
+    <link rel="stylesheet" href="css/default.css">
+    <link rel="stylesheet" href="css/lp-chrome.css">
+    <link rel="stylesheet" href="css/home.css">
+    <style>
+      html.miai-css-pending body {
+        visibility: visible !important;
+      }
+    </style>
+  </noscript>
+
+  <!-- CSS（同一タブでは v を共有／リロード時のみ v を更新。legacy navigation を先に見るのは head 同期時に NT2 が空な環境への配慮） -->
+  <script>
+    (function () {
+      "use strict";
+      var STORAGE_KEY = "miai_css_bust_v1";
+      var v;
+      try {
+        var isReload = false;
+        if (typeof performance !== "undefined") {
+          if (performance.navigation && performance.navigation.type === 1) {
+            isReload = true;
+          } else {
+            var nt = performance.getEntriesByType && performance.getEntriesByType("navigation")[0];
+            isReload = !!(nt && nt.type === "reload");
+          }
+        }
+        if (isReload) {
+          v = String(Date.now());
+          sessionStorage.setItem(STORAGE_KEY, v);
+        } else {
+          v = sessionStorage.getItem(STORAGE_KEY);
+          if (!v) {
+            v = String(Date.now());
+            sessionStorage.setItem(STORAGE_KEY, v);
+          }
+        }
+      } catch (e) {
+        v = String(Date.now());
+      }
+      var paths = ["css/default.css", "css/lp-chrome.css", "css/home.css"];
+      var remain = paths.length;
+      var revealed = false;
+      function reveal() {
+        if (revealed) {
+          return;
+        }
+        revealed = true;
+        document.documentElement.classList.remove("miai-css-pending");
+        var hide = document.getElementById("miai-css-pending-hide");
+        if (hide && hide.parentNode) {
+          hide.parentNode.removeChild(hide);
+        }
+      }
+      function one() {
+        remain -= 1;
+        if (remain <= 0) {
+          reveal();
+        }
+      }
+      paths.forEach(function (path) {
+        var link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = path + "?v=" + encodeURIComponent(v);
+        link.onload = one;
+        link.onerror = one;
+        document.head.appendChild(link);
+      });
+      setTimeout(reveal, 6000);
+    })();
+  </script>
+
+  <!-- Micromodal -->
+  <script src="https://unpkg.com/micromodal/dist/micromodal.min.js" defer></script>
+  <!-- GSAP + ScrollTrigger -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+  <!-- Lenis -->
+  <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js" defer></script>
+
+  <script src="js/env.js"></script>
+</head>
+
+<body>
+
+  <!-- Mesh Background -->
+  <div class="mesh_bg" aria-hidden="true">
+    <div class="mesh_base"></div>
+    <div class="mesh_blob mesh_blob_01"></div>
+    <div class="mesh_blob mesh_blob_02"></div>
+    <div class="mesh_blob mesh_blob_03"></div>
+    <div class="mesh_blob mesh_blob_04"></div>
+    <div class="mesh_blob mesh_blob_05"></div>
+    <div class="mesh_blob mesh_blob_06"></div>
+    <div class="mesh_noise"></div>
+  </div>
+
+  <div class="site_frame">
+    <main id="miai_lp">
+
+      <!-- ===== HEADER ===== -->
+      <header class="lp_header" id="header">
+        <div class="flex items_center justify_between lp_header_shell lp_header_inner">
+          <a class="lp_logo" href="#header" aria-label="MiAI トップへ戻る">
+            <img src="assets/logo.png" alt="MiAI AI面接官のミアイ" width="174" height="25">
+          </a>
+          <div class="flex items_center lp_header_right">
+            <nav class="lp_nav" aria-label="メインメニュー">
+              <ul class="flex items_center lp_menu">
+                <li><a class="inline" href="#lp_pitch_first">機能と特徴</a></li>
+                <li><a class="inline" href="#lp_testimonial">導入企業さまの声</a></li>
+                <li><a class="inline" href="https://lp.miai-app.com/resources/index.html">資料一覧</a></li>
+                <li><a class="inline" href="#lp_faq">FAQ</a></li>
+              </ul>
+            </nav>
+            <div class="flex items_center lp_header_actions">
+              <a class="flex items_center justify_center lp_button lp_button_dark"
+                href="https://meetings.hubspot.com/yuto-matsumoto/exhibition02" target="_blank"
+                rel="noopener noreferrer">無料デモ体験</a>
+              <a class="flex items_center justify_center lp_button lp_button_light"
+                href="https://lp.miai-app.com/resources/service-brochure.html" rel="noopener noreferrer">資料請求</a>
+            </div>
+          </div>
+          <div class="flex items_center lp_header_mobile">
+            <button class="lp_hamburger flex flex_col justify_center items_center" type="button"
+              data-micromodal-trigger="modal-menu" aria-label="メニューを開く">
+              <span class="lp_hamburger_line"></span>
+              <span class="lp_hamburger_line"></span>
+              <span class="lp_hamburger_line"></span>
+            </button>
+            <a class="flex items_center justify_center lp_button lp_button_dark lp_mobile_cta"
+              href="https://meetings.hubspot.com/yuto-matsumoto/exhibition02" target="_blank"
+              rel="noopener noreferrer">無料デモ体験</a>
+            <a class="flex items_center justify_center lp_button lp_button_light lp_mobile_cta lp_mobile_cta_sub"
+              href="https://lp.miai-app.com/resources/service-brochure.html" rel="noopener noreferrer">資料請求</a>
+          </div>
+        </div>
+      </header>
+
+      <!-- ===== FOLOW HEADER ===== -->
+      <div id="lp_follow" role="region" aria-label="追随ヘッダー">
+        <div class="flex items_center justify_between lp_follow_shell">
+          <a class="lp_logo" href="#header" aria-label="MiAI トップへ戻る">
+            <img src="assets/logo.png" alt="MiAI AI面接官のミアイ" width="174" height="25">
+          </a>
+          <div class="flex items_center lp_follow_right">
+            <nav class="lp_nav" aria-label="追随メニュー">
+              <ul class="flex items_center lp_menu">
+                <li><a class="inline" href="#lp_pitch_first">機能と特徴</a></li>
+                <li><a class="inline" href="#lp_testimonial">導入企業さまの声</a></li>
+                <li><a class="inline" href="https://lp.miai-app.com/resources/index.html">資料一覧</a></li>
+                <li><a class="inline" href="#lp_faq">FAQ</a></li>
+              </ul>
+            </nav>
+            <div class="flex items_center lp_follow_actions">
+              <a class="flex items_center justify_center font_bold lp_button lp_button_dark"
+                href="https://meetings.hubspot.com/yuto-matsumoto/exhibition02" target="_blank"
+                rel="noopener noreferrer">無料デモ体験</a>
+              <a class="flex items_center justify_center font_bold lp_button lp_button_light"
+                href="https://lp.miai-app.com/resources/service-brochure.html" rel="noopener noreferrer">資料請求</a>
+            </div>
+          </div>
+          <div class="flex items_center lp_header_mobile">
+            <button class="lp_hamburger flex flex_col justify_center items_center" type="button"
+              data-micromodal-trigger="modal-menu" aria-label="メニューを開く">
+              <span class="lp_hamburger_line"></span>
+              <span class="lp_hamburger_line"></span>
+              <span class="lp_hamburger_line"></span>
+            </button>
+            <a class="flex items_center justify_center lp_button lp_button_dark lp_mobile_cta"
+              href="https://meetings.hubspot.com/yuto-matsumoto/exhibition02" target="_blank"
+              rel="noopener noreferrer">無料デモ体験</a>
+            <a class="flex items_center justify_center lp_button lp_button_light lp_mobile_cta lp_mobile_cta_sub"
+              href="https://lp.miai-app.com/resources/service-brochure.html" rel="noopener noreferrer">資料請求</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- =====  MODAL MENU ===== -->
+      <section class="micromodal-slide lp_modal_menu" id="modal-menu" aria-hidden="true">
+        <div class="lp_modal_overlay" tabindex="-1" data-micromodal-close>
+          <div class="lp_modal_container" role="dialog" aria-modal="true" aria-label="メニュー">
+            <div class="flex items_center justify_between lp_modal_head">
+              <a class="lp_modal_logo" href="#header" onclick="MicroModal.close('modal-menu')">
+                <img src="assets/logo.png" alt="MiAI" width="142" height="20" loading="lazy">
+              </a>
+              <button class="lp_modal_close" aria-label="メニューを閉じる" data-micromodal-close>
+                <span class="lp_modal_close_line"></span>
+                <span class="lp_modal_close_line"></span>
+              </button>
+            </div>
+            <nav class="lp_modal_nav" aria-label="モバイルメニュー">
+              <ul class="flex flex_col lp_modal_links">
+                <li>
+                  <a class="flex items_center justify_between lp_modal_link" href="#lp_pitch_first"
+                    onclick="MicroModal.close('modal-menu')">
+                    <span>機能と特徴</span>
+                    <svg width="7" height="12" viewBox="0 0 7 12" fill="none" aria-hidden="true">
+                      <path d="M1 1L5.5 6L1 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    </svg>
+                  </a>
+                </li>
+                <li>
+                  <a class="flex items_center justify_between lp_modal_link" href="#lp_testimonial"
+                    onclick="MicroModal.close('modal-menu')">
+                    <span>導入企業さまの声</span>
+                    <svg width="7" height="12" viewBox="0 0 7 12" fill="none" aria-hidden="true">
+                      <path d="M1 1L5.5 6L1 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    </svg>
+                  </a>
+                </li>
+                <li>
+                  <a class="flex items_center justify_between lp_modal_link" href="https://lp.miai-app.com/resources/index.html"
+                    onclick="MicroModal.close('modal-menu')">
+                    <span>資料一覧</span>
+                    <svg width="7" height="12" viewBox="0 0 7 12" fill="none" aria-hidden="true">
+                      <path d="M1 1L5.5 6L1 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    </svg>
+                  </a>
+                </li>
+                <li>
+                  <a class="flex items_center justify_between lp_modal_link" href="#lp_faq"
+                    onclick="MicroModal.close('modal-menu')">
+                    <span>FAQ</span>
+                    <svg width="7" height="12" viewBox="0 0 7 12" fill="none" aria-hidden="true">
+                      <path d="M1 1L5.5 6L1 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    </svg>
+                  </a>
+                </li>
+              </ul>
+            </nav>
+            <div class="flex flex_col lp_modal_actions">
+              <a class="flex items_center justify_center font_bold lp_modal_button lp_modal_button_dark"
+                href="https://meetings.hubspot.com/yuto-matsumoto/exhibition02" target="_blank"
+                rel="noopener noreferrer" onclick="MicroModal.close('modal-menu')">無料デモ体験</a>
+              <a class="flex items_center justify_center font_bold lp_modal_button lp_modal_button_light"
+                href="https://lp.miai-app.com/resources/service-brochure.html" rel="noopener noreferrer"
+                onclick="MicroModal.close('modal-menu')">資料請求</a>
+            </div>
+            <div class="lp_modal_footer">
+              <span class="block detail">©プロップス株式会社 All rights reserved.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ===== HERO ===== -->
+      <section id="lp_hero">
+        <div class="lp_hero_scale_stage">
+          <div class="lp_shell flex justify_between">
+            <article class="lp_hero_copy flex flex_col">
+              <span class="description hero_lead">DeNAグループ発AIスタートアップ企業</span>
+              <h1 class="heading flex flex_col font_bold">
+                <span class="lp_hero_line1 flex items_center">
+                  <span>求める人材に</span>
+                  <span class="flex items_center">
+                    <em class="lp_hero_em inline_flex">最適化</em>
+                    <span>する</span>
+                  </span>
+                </span>
+                <span class="lp_hero_line2 flex items_center">
+                  <em class="lp_hero_em inline_flex">人間らしい</em>
+                  <span>AI面接</span>
+                  <span class="flex items_center lp_hero_miai">
+                    <span>MiAI</span>
+                    <small class="font_bold">ミアイ</small>
+                  </span>
+                </span>
+              </h1>
+              <span class="lp_hero_divider" aria-hidden="true"></span>
+              <span class="block description hero_price line_mini">新卒も、中途も、アルバイトも<br>1面接 1,000円から。</span>
+              <p class="description hero_body line_p">
+                企業のカルチャーや採用基準に合わせてカスタマイズできるAI面接官。<br>アルバイトから新卒・中途まで、あらゆる採用の一次面接をAIがまるごと代行します。</p>
+              <div class="flex items_center lp_header_actions lp_hero_actions">
+                <a class="flex items_center justify_center lp_button lp_button_dark font_bold"
+                  href="https://meetings.hubspot.com/yuto-matsumoto/exhibition02" target="_blank"
+                  rel="noopener noreferrer">無料デモ体験</a>
+                <a class="flex items_center justify_center lp_button lp_button_light font_bold"
+                  href="https://lp.miai-app.com/resources/service-brochure.html" rel="noopener noreferrer">資料請求</a>
+              </div>
+            </article>
+            <aside class="lp_hero_media" aria-label="MiAIのビジュアル">
+              <img src="assets/hero_visual.png" alt="AI面接官の会話イメージ" width="599" height="492">
+            </aside>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ===== LOGOS ===== -->
+      <section id="lp_logos" class="splide" aria-label="導入企業さまのロゴ">
+        <div class="splide__track">
+          <ul class="splide__list">
+            <li class="splide__slide radius_s hidden">
+              <img src="assets/logo_shoei.png" alt="株式会社昭栄美術 企業ロゴ" width="480" height="220" loading="lazy">
+            </li>
+            <li class="splide__slide radius_s hidden">
+              <img src="assets/logo_daiei_kankyo_group.png" alt="株式会社クリエイトナビ（大栄環境） 企業ロゴ" width="480" height="220"
+                loading="lazy">
+            </li>
+            <li class="splide__slide radius_s hidden">
+              <img src="assets/logo_heiwa_dining.png" alt="株式会社平和ダイニング 企業ロゴ" width="480" height="220" loading="lazy">
+            </li>
+            <li class="splide__slide radius_s hidden">
+              <img src="assets/logo_babel_method.png" alt="バベルメソッド株式会社 企業ロゴ" width="480" height="220" loading="lazy">
+            </li>
+            <li class="splide__slide radius_s hidden">
+              <img src="assets/logo_kyoto_tachibana_university.png" alt="学校法人京都橘学園 企業ロゴ" width="480" height="220"
+                loading="lazy">
+            </li>
+            <li class="splide__slide radius_s hidden">
+              <img src="assets/logo_vegas_vegas.png" alt="株式会社ベガスベガス 企業ロゴ" width="480" height="220" loading="lazy">
+            </li>
+            <li class="splide__slide radius_s hidden">
+              <img src="assets/logo_kauche.png" alt="株式会社カウシェ 企業ロゴ" width="480" height="220" loading="lazy">
+            </li>
+            <li class="splide__slide radius_s hidden">
+              <img src="assets/logo_haruta_law_farm.png" alt="弁護士法人春田法律事務所 企業ロゴ" width="480" height="220"
+                loading="lazy">
+            </li>
+            <li class="splide__slide radius_s hidden">
+              <img src="assets/logo_hasegawa.png" alt="株式会社ハセガワ 企業ロゴ" width="480" height="220" loading="lazy">
+            </li>
+            <li class="splide__slide radius_s hidden">
+              <img src="assets/logo_aeonnext_delivery.png" alt="イオンネクストデリバリー株式会社 企業ロゴ" width="480" height="220"
+                loading="lazy">
+            </li>
+          </ul>
+        </div>
+      </section>
+
+
+      <!-- ===== ISSUES ===== -->
+      <section id="lp_issues">
+        <div class="lp_issues_stage lp_shell">
+          <div class="lp_issues_head">
+            <h2 class="subject lp_issues_subject font_bold line_mini">こんな採用の悩み、ありませんか？</h2>
+          </div>
+          <div class="lp_issues_scale_stage">
+            <div class="lp_issues_canvas">
+              <span class="lp_issues_orbit" aria-hidden="true">
+                <svg viewBox="0 0 970 175" fill="none">
+                  <path
+                    d="M485 1.5C618.868 1.5 740.025 11.2903 827.681 27.1045C871.521 35.0138 906.907 44.4166 931.298 54.8203C943.499 60.0247 952.864 65.4452 959.154 70.9912C965.452 76.5435 968.5 82.0651 968.5 87.5C968.5 92.9349 965.452 98.4565 959.154 104.009C952.864 109.555 943.499 114.975 931.298 120.18C906.907 130.583 871.521 139.986 827.681 147.896C740.025 163.71 618.868 173.5 485 173.5C351.132 173.5 229.975 163.71 142.319 147.896C98.4793 139.986 63.093 130.583 38.7021 120.18C26.5007 114.975 17.1362 109.555 10.8457 104.009C4.54814 98.4565 1.5 92.9349 1.5 87.5C1.5 82.0651 4.54814 76.5435 10.8457 70.9912C17.1362 65.4452 26.5007 60.0247 38.7021 54.8203C63.093 44.4166 98.4793 35.0138 142.319 27.1045C229.975 11.2903 351.132 1.5 485 1.5Z" />
+                </svg>
+              </span>
+              <div class="lp_issue_list">
+                <!-- Issue 1 -->
+                <article class="lp_issue_card lp_issue_card_1">
+                  <span class="lp_issue_cloud" aria-hidden="true">
+                    <svg viewBox="0 0 409 307" fill="none" aria-hidden="true">
+                      <path
+                        d="M383.826 91.3852C382.466 85.3673 380.491 79.4822 377.869 73.7815C359.68 34.2201 314.653 12.5408 260.549 11.6765C243.286 4.15329 224.356 0 204.5 0C184.644 0 167.562 3.75835 150.988 10.5952C96.9947 10.4625 51.6696 31.2516 32.7362 70.3825C29.5736 76.9151 27.2721 83.7099 25.783 90.6892C9.35828 109.28 0 130.701 0 153.5C0 176.299 9.13169 197.186 25.1745 215.615C26.534 221.633 28.5086 227.518 31.1306 233.218C49.3195 272.78 94.3468 294.459 148.451 295.324C165.714 302.843 184.644 306.997 204.5 306.997C224.356 306.997 241.438 303.238 258.012 296.402C312.005 296.534 357.33 275.745 376.264 236.614C379.426 230.082 381.728 223.287 383.217 216.308C399.638 197.716 409 176.299 409 153.5C409 130.701 399.868 109.814 383.826 91.3852Z"
+                        fill="#8b8b8b" />
+                    </svg>
+                  </span>
+                  <div class="lp_issue_card_body">
+                    <h3 class="title font_bold">面接に<br>手が回らない...</h3>
+                    <p class="description line_p">大量の一次面接を、数名で回している。面接の日程調整だけで1日が終わる。その間に、候補者の意欲が下がっていってしまう。</p>
+                  </div>
+                </article>
+                <!-- Issue 2 -->
+                <article class="lp_issue_card lp_issue_card_2">
+                  <span class="lp_issue_cloud" aria-hidden="true">
+                    <svg viewBox="0 0 409 307" fill="none" aria-hidden="true">
+                      <path
+                        d="M383.826 91.3852C382.466 85.3673 380.491 79.4822 377.869 73.7815C359.68 34.2201 314.653 12.5408 260.549 11.6765C243.286 4.15329 224.356 0 204.5 0C184.644 0 167.562 3.75835 150.988 10.5952C96.9947 10.4625 51.6696 31.2516 32.7362 70.3825C29.5736 76.9151 27.2721 83.7099 25.783 90.6892C9.35828 109.28 0 130.701 0 153.5C0 176.299 9.13169 197.186 25.1745 215.615C26.534 221.633 28.5086 227.518 31.1306 233.218C49.3195 272.78 94.3468 294.459 148.451 295.324C165.714 302.843 184.644 306.997 204.5 306.997C224.356 306.997 241.438 303.238 258.012 296.402C312.005 296.534 357.33 275.745 376.264 236.614C379.426 230.082 381.728 223.287 383.217 216.308C399.638 197.716 409 176.299 409 153.5C409 130.701 399.868 109.814 383.826 91.3852Z"
+                        fill="#8b8b8b" />
+                    </svg>
+                  </span>
+                  <div class="lp_issue_card_body">
+                    <h3 class="title font_bold">面接の質が<br>バラバラ...</h3>
+                    <p class="description line_p">人によって聞くことが違い、評価の目線が定まらない。エントリーシートがAIで書かれて区別がつかない中で、評価が更に難しくなっている。
+                    </p>
+                  </div>
+                </article>
+                <!-- Issue 3 -->
+                <article class="lp_issue_card lp_issue_card_3">
+                  <span class="lp_issue_cloud" aria-hidden="true">
+                    <svg viewBox="0 0 409 307" fill="none" aria-hidden="true">
+                      <path
+                        d="M383.826 91.3852C382.466 85.3673 380.491 79.4822 377.869 73.7815C359.68 34.2201 314.653 12.5408 260.549 11.6765C243.286 4.15329 224.356 0 204.5 0C184.644 0 167.562 3.75835 150.988 10.5952C96.9947 10.4625 51.6696 31.2516 32.7362 70.3825C29.5736 76.9151 27.2721 83.7099 25.783 90.6892C9.35828 109.28 0 130.701 0 153.5C0 176.299 9.13169 197.186 25.1745 215.615C26.534 221.633 28.5086 227.518 31.1306 233.218C49.3195 272.78 94.3468 294.459 148.451 295.324C165.714 302.843 184.644 306.997 204.5 306.997C224.356 306.997 241.438 303.238 258.012 296.402C312.005 296.534 357.33 275.745 376.264 236.614C379.426 230.082 381.728 223.287 383.217 216.308C399.638 197.716 409 176.299 409 153.5C409 130.701 399.868 109.814 383.826 91.3852Z"
+                        fill="#8b8b8b" />
+                    </svg>
+                  </span>
+                  <div class="lp_issue_card_body">
+                    <h3 class="title font_bold">いい人材を<br>逃している...</h3>
+                    <p class="description line_p">
+                      すごく良さそうな人だけど、夜間などの応募にすぐに対応できない。人手が足りないから、履歴書で選ぶ必要がある。応募から面接まで日が空いて、結局他社に取られてしまった。</p>
+                  </div>
+                </article>
+              </div>
+            </div>
+          </div>
+          <span class="lp_issues_axis" aria-hidden="true">
+            <svg viewBox="0 0 18 65" fill="none">
+              <path d="M8.66025 65L17.3205 50H0L8.66025 65ZM8.66025 0H7.16025V51.5H8.66025H10.1603V0H8.66025Z" />
+            </svg>
+          </span>
+          <!-- solution -->
+          <div id="lp_solution">
+            <div class="flex flex_col items_center lp_shell lp_solution_inner">
+              <h2 class="subject font_bold">
+                MiAIが、その悩みを
+                <span class="lp_solution_em">解決</span>
+                <span class="lp_solution_suffix">します。</span>
+              </h2>
+              <figure class="lp_solution_image">
+                <img src="assets/laptop.png" alt="MiAI面接官の画面" width="684" height="409">
+              </figure>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ===== PITCH ===== -->
+      <section id="lp_pitch">
+        <div class="flex flex_col lp_pitch_inner">
+          <h2 class="subject align_center font_bold">機能と特徴</h2>
+          <!-- Pitch 1 -->
+          <article id="lp_pitch_first" class="flex items_center justify_center lp_pitch_row">
+            <div class="flex flex_col lp_pitch_text">
+              <h2 class="title line_mini font_bold">違和感のない面接体験</h2>
+              <p class="description line_p">
+                「何を言っても同じことを返してくる」「ゲームみたい」AI面接に対する不満を、MiAIは解決。回答に合わせてその場で深掘り、<br>考え込んでも急かさない、会話を被せない。「AIだけど、印象がいい」面談体験を提供します。
+              </p>
+            </div>
+            <img class="lp_pitch_media radius hidden shadow" src="assets/thumbnail_01.jpg" width="960" height="600"
+              alt="" loading="lazy" decoding="async">
+          </article>
+          <!-- Pitch 2 -->
+          <article class="flex items_center justify_center lp_pitch_row lp_pitch_reverse">
+            <div class="flex flex_col lp_pitch_text">
+              <h2 class="title line_mini font_bold">御社の採用に、とことんフィット</h2>
+              <p class="description line_p">
+                面接で何を聞くか、どう評価するか。すべて御社が自由に設計できます。面接やり慣れた人も、今年からの人も関係ありません。AIが御社の基準で、全候補者を同じ目線で評価。録画・議事録・評価レポートも自動で残ります。
+              </p>
+            </div>
+            <img class="lp_pitch_media radius hidden shadow" src="assets/thumbnail_02.jpg" width="960" height="600"
+              alt="" loading="lazy" decoding="async">
+          </article>
+          <!-- Pitch 3 -->
+          <article class="flex items_center justify_center lp_pitch_row">
+            <div class="flex flex_col lp_pitch_text">
+              <h2 class="title line_mini font_bold">24時間365日、いつでも面接</h2>
+              <p class="description line_p">
+                深夜でも週末でも、候補者の「受けたい」タイミングを逃しません。スマホひとつ、アプリ不要。応募から30秒で面接が始まります。これまでは諦めていた夜間の応募にも、AIがすぐに面接を実施します。</p>
+            </div>
+            <img class="lp_pitch_media radius hidden shadow" src="assets/thumbnail_03.jpg" width="960" height="600"
+              alt="" loading="lazy" decoding="async">
+          </article>
+        </div>
+      </section>
+
+
+      <!-- ===== RESULT ===== -->
+      <section id="lp_result">
+        <div class="lp_result_inner">
+          <div class="lp_result_mesh" aria-hidden="true">
+            <canvas class="block lp_result_mesh_canvas" id="result_mesh_canvas"></canvas>
+          </div>
+          <div class="flex items_center justify_center lp_result_head">
+            <h2 class="subject flex items_center justify_center font_bold">
+              導入企業で出ている、
+              <span class="inline">実際の数字</span>
+            </h2>
+          </div>
+          <div class="lp_result_list">
+            <div class="grid lp_result_list_inner">
+              <!-- Result 1 -->
+              <article class="flex flex_col lp_result_item">
+                <h2 class="heading flex items_end line_mini font_bold">
+                  <span class="inline">30</span>
+                  <small>秒で</small>
+                </h2>
+                <h3 class="title font_bold">応募から30秒で面接開始</h3>
+                <p class="description line_p">応募直後など、最も意欲が高い瞬間にも面接可能。今までに候補者の意欲が最も高い瞬間を逃さない。</p>
+              </article>
+              <!-- Result 2 -->
+              <article class="flex flex_col lp_result_item">
+                <h2 class="heading flex items_end line_mini font_bold">
+                  <span class="inline">+20%</span>
+                </h2>
+                <h3 class="title font_bold">有効応募数が20%改善</h3>
+                <p class="description line_p">今までは、アプローチできなかった層に拡大できるから、母集団が増える。</p>
+              </article>
+              <!-- Result 3 -->
+              <article class="flex flex_col lp_result_item">
+                <h2 class="heading flex items_end line_mini font_bold">
+                  <span class="inline">¥1,000~</span>
+                </h2>
+                <h3 class="title font_bold">面接1回あたり1,000円から</h3>
+                <p class="description line_p">手頃な価格だから、店舗スタッフ職の拠点採用から大規模な選考対応にも効果を発揮。</p>
+              </article>
+            </div>
+          </div>
+
+          <div class="flex flex_col items_center lp_result_cta">
+            <h3 class="title line_mini align_center font_bold">
+              御社の採用に合わせた<br class="br_on_600">AI面接を、
+              <br>
+              無料で体験しませんか？
+            </h3>
+            <p class="description line_p align_center">
+              実際の画面で体験できるデモをご用意しています。
+              <br>
+              編集された動画ではわからない、リアルな面接体験をぜひお試しください。
+            </p>
+            <div class="flex items_center lp_result_actions">
+              <a class="flex items_center justify_center font_bold lp_result_button lp_result_button_dark"
+                href="https://meetings.hubspot.com/yuto-matsumoto/exhibition02" target="_blank"
+                rel="noopener noreferrer">無料デモ体験</a>
+              <a class="flex items_center justify_center font_bold lp_result_button lp_result_button_light"
+                href="https://lp.miai-app.com/resources/service-brochure.html" rel="noopener noreferrer">資料請求</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ===== REASON ===== -->
+      <section id="lp_reason">
+        <div class="lp_reason_inner">
+          <h2 class="subject align_center line_mini font_bold">あらゆる採用シーンで、<br class="br_on_780">すぐに使えます。</h2>
+          <div class="lp_reason_simple">
+            <!-- Reason 1 -->
+            <article class="lp_reason_simple_item hidden">
+              <figure class="lp_reason_simple_thumb" aria-hidden="true">
+                <img src="assets/reason_scene_01.jpg" alt="" width="400" height="300" loading="lazy"
+                  class="lp_reason_simple_thumb_image">
+              </figure>
+              <div class="lp_reason_simple_text">
+                <h3 class="title flex items_end lp_reason_simple_title font_bold line_mini">アルバイト・パート採用</h3>
+                <p class="description line_p lp_reason_simple_description">
+                  1回1,000円〜だから、履歴書で悩むことなく、応募者全員に面接できます。応募サイトから自動返信でURLを送付し、15分後にはレポートが届きます、面接官は結果を見て判断するだけ。面接の工数をほぼゼロにできます。
+                </p>
+              </div>
+            </article>
+            <!-- Reason 2 -->
+            <article class="lp_reason_simple_item hidden">
+              <figure class="lp_reason_simple_thumb" aria-hidden="true">
+                <img src="assets/reason_scene_02.jpg" alt="" width="400" height="300" loading="lazy"
+                  class="lp_reason_simple_thumb_image">
+              </figure>
+              <div class="lp_reason_simple_text">
+                <h3 class="title flex items_end lp_reason_simple_title font_bold line_mini">新卒採用</h3>
+                <p class="description line_p lp_reason_simple_description">
+                  1000件のエントリーに対して、1000件の一次面接。その工数を、AIがまるごと引き受けます。オンライン説明会の最後15分でそのままAI面接を実施すれば、参加者の8〜9割にそのまま受験してもらうことも可能。AIが書いたESでは見えない、一人ひとりの人柄や思考力を対話で引き出します。
+                </p>
+              </div>
+            </article>
+            <!-- Reason 3 -->
+            <article class="lp_reason_simple_item hidden">
+              <figure class="lp_reason_simple_thumb" aria-hidden="true">
+                <img src="assets/reason_scene_03.jpg" alt="" width="400" height="300" loading="lazy"
+                  class="lp_reason_simple_thumb_image">
+              </figure>
+              <div class="lp_reason_simple_text">
+                <h3 class="title flex items_end lp_reason_simple_title font_bold line_mini">中途採用</h3>
+                <p class="description line_p lp_reason_simple_description">
+                  経験もスキルも、御社の基準で深掘り。職種ごとに質問をカスタマイズ。エンジニアの技術経験も、営業の実績も、御社が本当に聞きたいことをAIが聞きます。評価データは二次面接の担当者にそのまま引き継げます。
+                </p>
+              </div>
+            </article>
+            <!-- Reason 4 -->
+            <article class="lp_reason_simple_item hidden">
+              <figure class="lp_reason_simple_thumb" aria-hidden="true">
+                <img src="assets/reason_scene_04.jpg" alt="" width="400" height="300" loading="lazy"
+                  class="lp_reason_simple_thumb_image">
+              </figure>
+              <div class="lp_reason_simple_text">
+                <h3 class="title flex items_end lp_reason_simple_title font_bold line_mini">人材紹介・派遣の一次面談</h3>
+                <p class="description line_p lp_reason_simple_description">
+                  候補者に好きなタイミングで面談を受けてもらい、データを見てフィードバックだけ人間が行う運用も。求人とのマッチング機能で、最適な候補者を素早く見つけられます。</p>
+              </div>
+            </article>
+            <!-- Reason 5 -->
+            <article class="lp_reason_simple_item hidden">
+              <figure class="lp_reason_simple_thumb" aria-hidden="true">
+                <img src="assets/reason_scene_05.jpg" alt="" width="400" height="300" loading="lazy"
+                  class="lp_reason_simple_thumb_image">
+              </figure>
+              <div class="lp_reason_simple_text">
+                <h3 class="title flex items_end lp_reason_simple_title font_bold line_mini">社内面談・1on1</h3>
+                <p class="description line_p lp_reason_simple_description">
+                  3ヶ月に1回、全社員にAI面談を実施して、離職予兆を早期に発見。研修期間中の定期面談や、職場環境の満足度調査にも活用できます。面談内容は自動で記録・レポート化。</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ===== DIALOGUE ===== -->
+      <section id="lp_dialogue">
+        <div class="lp_dialogue_inner">
+          <div class="lp_dialogue_pin">
+            <div class="lp_dialogue_mesh" aria-hidden="true">
+              <canvas class="block lp_result_mesh_canvas" id="dialogue_mesh_canvas"></canvas>
+            </div>
+            <div class="flex flex_col items_center justify_center lp_dialogue_stage">
+              <div class="flex items_center justify_center lp_dialogue_head">
+                <h2 class="subject flex items_center justify_center font_bold">
+                  <span class="block summary font_white">AIなのに、ちゃんと</span>
+                  <span class="inline lp_dialogue_highlight">「対話」</span>
+                  <span class="block font_white">になる理由。</span>
+                </h2>
+              </div>
+              <figure class="lp_dialogue_hero">
+                <img class="lp_dialogue_hero_image" src="assets/hero_visual.png" alt="" width="599" height="492"
+                  loading="lazy">
+              </figure>
+            </div>
+            <div class="flex items_center justify_center lp_dialogue_panel_wrap">
+              <div class="grid lp_dialogue_panel">
+                <div class="grid lp_dialogue_grid width_limit_1280">
+                  <!-- Dialogue 1 -->
+                  <article class="flex flex_col lp_dialogue_item">
+                    <h3 class="heading line_mini align_center font_bold">回答に合わせて、<br
+                        class="br_on_600">その場で深掘り。<br>追加質問を自動生成</h3>
+                    <p class="description line_p">
+                      事前に決められた質問を順番に読み上げるだけのAI面接とは違います。候補者の回答を理解し、その場で深掘り質問を生成。自然な会話のキャッチボールを実現。聞きすぎない。でも、聞くべきことは聞く。
+                    </p>
+                  </article>
+                  <!-- Dialogue 2 -->
+                  <article class="flex flex_col lp_dialogue_item">
+                    <h3 class="heading line_mini align_center font_bold">質問も評価基準も、<br>御社仕様にカスタマイズ</h3>
+                    <p class="description line_p">
+                      面接で聞きたいこと、評価の軸、重視するポイント。すべてノーコードで自由に設計可能。「自社のカルチャーに合う人か」「この職種に必要なスキルがあるか」を、自社の言葉で聞けます。200種類以上の職種別テンプレートもあるので、まずはそこから始めることもできます。
+                    </p>
+                  </article>
+                  <!-- Dialogue 3 -->
+                  <article class="flex flex_col lp_dialogue_item">
+                    <h3 class="heading line_mini align_center font_bold">議事録・評価レポートを<br>自動生成</h3>
+                    <p class="description line_p">
+                      面接の内容は録画と文字起こしで記録。設定した基準に基づき、AIが評価レポートを自動作成。総合点だけでなく、各項目ごとの点数と要約コメント付き。二次面接の担当者への引き継ぎ資料として、そのまま使えます。
+                    </p>
+                  </article>
+                  <!-- Dialogue 4 -->
+                  <article class="flex flex_col lp_dialogue_item">
+                    <h3 class="heading line_mini align_center font_bold">候補者の体験に、<br>とことんこだわる</h3>
+                    <p class="description line_p">
+                      「間を読んで被せて話してくる」AI面接が多い中、MiAIは回答終了ボタン方式を採用。考え込んでも急かされません。文字起こしの誤字で気が散らないよう、受験者側の発言はあえて非表示に。通信が切れても途中から再開でき、リマインド機能で未完了者にも自動で再案内します。
+                    </p>
+                  </article>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ===== TESTIMONIAL ===== -->
+      <section id="lp_testimonial">
+        <div class="lp_testimonial_bg lp_testimonial_bg_left" aria-hidden="true"></div>
+        <div class="lp_testimonial_bg lp_testimonial_bg_right" aria-hidden="true"></div>
+        <div class="lp_testimonial_inner">
+          <div class="lp_testimonial_carousel">
+            <div class="splide is_static" aria-label="導入企業さまの声">
+              <div class="flex items_center justify_between lp_testimonial_headrow">
+                <h2 class="subject font_bold">導入企業さまの声</h2>
+                <a href="https://lp.miai-app.com/interview/index.html" class="lp_testimonial_readmore">一覧を見る</a>
+              </div>
+              <div class="splide__track">
+                <ul class="splide__list">
+                  <!-- Testimonial 1 -->
+                  <li class="splide__slide lp_testimonial_slide">
+                    <article class="flex flex_col lp_testimonial_item">
+                      <a href="https://lp.miai-app.com/interview/hibiya_kadan.html" class="lp_testimonial_card_link"
+                        aria-label="日比谷花壇さまの導入事例を詳しく見る">
+                        <div class="lp_testimonial_card_v2 hidden">
+                          <figure class="lp_testimonial_image_wrap">
+                            <img class="lp_testimonial_image" src="assets/interview/hibiya_kadan/hibiya_kadan_01.jpg"
+                              width="900" height="675" alt="日比谷花壇さま" loading="lazy">
+                            <span class="lp_testimonial_logo">
+                              <img class="lp_testimonial_logo_image" src="assets/logo_hibiya_kadan.png" alt="日比谷花壇さま ロゴ"
+                                width="140" height="24" loading="lazy">
+                            </span>
+                          </figure>
+                          <div class="flex flex_col lp_testimonial_card_v2_body">
+                            <span class="lp_testimonial_tag font_bold">中途採用</span>
+                            <h3 class="title font_bold">「リアル面接では見落としていたかもしれない人材」に出会えました。</h3>
+                            <div class="flex items_center justify_between lp_testimonial_card_footer">
+                              <span class="description">日比谷花壇さま</span>
+                              <span class="lp_testimonial_readmore">詳しく見る</span>
+                            </div>
+                          </div>
+                        </div>
+                      </a>
+                    </article>
+                  </li>
+                  <!-- Testimonial 2 -->
+                  <li class="splide__slide lp_testimonial_slide">
+                    <article class="flex flex_col lp_testimonial_item">
+                      <a href="https://lp.miai-app.com/interview/alpha_enformation.html" class="lp_testimonial_card_link"
+                        aria-label="アルファエネフォメーションさまの導入事例を詳しく見る">
+                        <div class="lp_testimonial_card_v2 hidden">
+                          <figure class="lp_testimonial_image_wrap">
+                            <img class="lp_testimonial_image"
+                              src="assets/interview/alpha_enformation/alpha_enformation_01.jpg" width="900" height="672"
+                              alt="アルファエネフォメーションさま" loading="lazy">
+                            <span class="lp_testimonial_logo">
+                              <img class="lp_testimonial_logo_image" src="assets/logo_alfa_ene_formation.png"
+                                alt="アルファエネフォメーションさま ロゴ" width="140" height="24" loading="lazy">
+                            </span>
+                          </figure>
+                          <div class="flex flex_col lp_testimonial_card_v2_body">
+                            <span class="lp_testimonial_tag font_bold">中途採用</span>
+                            <h3 class="title font_bold">書類選考では出会えなかった3人に、
+                              AIが会わせてくれた</h3>
+                            <div class="flex items_center justify_between lp_testimonial_card_footer">
+                              <span class="description">アルファエネフォメーションさま</span>
+                              <span class="lp_testimonial_readmore">詳しく見る</span>
+                            </div>
+                          </div>
+                        </div>
+                      </a>
+                    </article>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ===== FAQ ===== -->
+      <section id="lp_faq">
+        <div class="lp_faq_inner">
+          <h3 class="title font_bold font_white align_center">よくある質問</h3>
+          <div class="flex flex_col lp_faq_list" role="list">
+            <!-- FAQ 1 -->
+            <article class="lp_faq_item is_active" role="listitem">
+              <h4 class="lp_faq_question">
+                <button type="button" class="lp_faq_button line_mini font_bold" aria-expanded="true"
+                  aria-controls="faq_answer_0" data-faq-index="0">導入にどれくらいの時間がかかりますか？</button>
+              </h4>
+              <div class="grid lp_faq_answer" id="faq_answer_0">
+                <p class="description line_p">
+                  最短即日での導入が可能です。基本的な機能はすぐにご利用いただけます。運用前にコンサルタントにより企業独自の評価基準や質問の整理をご希望の場合は、1〜2週間程度の準備期間をいただくことがあります。
+                </p>
+              </div>
+            </article>
+            <!-- FAQ 2 -->
+            <article class="lp_faq_item" role="listitem">
+              <h4 class="lp_faq_question">
+                <button type="button" class="lp_faq_button line_mini font_bold" aria-expanded="false"
+                  aria-controls="faq_answer_1" data-faq-index="1">応募者はどのようにして面接を受けるのですか？</button>
+              </h4>
+              <div class="grid lp_faq_answer" id="faq_answer_1">
+                <p class="description line_p">
+                  応募者には面接URLをメールなどで送信します。URLにアクセスするだけで、スマートフォンやPCから面接を受けることができます。特別なアプリのインストールや会員登録は不要です。</p>
+              </div>
+            </article>
+            <!-- FAQ 3 -->
+            <article class="lp_faq_item" role="listitem">
+              <h4 class="lp_faq_question">
+                <button type="button" class="lp_faq_button line_mini font_bold" aria-expanded="false"
+                  aria-controls="faq_answer_2" data-faq-index="2">AIの面接官はどのように評価するのですか？</button>
+              </h4>
+              <div class="grid lp_faq_answer" id="faq_answer_2">
+                <p class="description line_p">
+                  AIの評価は応募者の回答内容、声のトーン、言葉の選び方などを総合的に分析し、設定された評価基準に基づいて評価します。納品された動画とAIの評価を見て最終的には人間が評価・判断を下す形になります。
+                </p>
+              </div>
+            </article>
+            <!-- FAQ 4 -->
+            <article class="lp_faq_item" role="listitem">
+              <h4 class="lp_faq_question">
+                <button type="button" class="lp_faq_button line_mini font_bold" aria-expanded="false"
+                  aria-controls="faq_answer_3" data-faq-index="3">どのような種類の採用に利用できますか？</button>
+              </h4>
+              <div class="grid lp_faq_answer" id="faq_answer_3">
+                <p class="description line_p">
+                  新卒採用、中途採用、アルバイト・パート採用、派遣社員の選考など、あらゆる採用シーンでご利用いただけます。職種や業界に合わせたカスタマイズも可能です。</p>
+              </div>
+            </article>
+            <!-- FAQ 5 -->
+            <article class="lp_faq_item" role="listitem">
+              <h4 class="lp_faq_question">
+                <button type="button" class="lp_faq_button line_mini font_bold" aria-expanded="false"
+                  aria-controls="faq_answer_4" data-faq-index="4">面接データのセキュリティは大丈夫ですか？</button>
+              </h4>
+              <div class="grid lp_faq_answer" id="faq_answer_4">
+                <p class="description line_p">
+                  すべてのデータはプライバシーポリシーに基づき厳格に管理し、社内で定めたセキュリティ基準に準拠したシステム運用を行っています。データアクセス権限や利用範囲も明確に定めています。</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ===== FOOTER ===== -->
+      <footer class="lp_footer" id="lp_footer">
+        <div class="lp_footer_glow lp_footer_glow_left" aria-hidden="true"></div>
+        <div class="lp_footer_glow lp_footer_glow_right" aria-hidden="true"></div>
+        <div class="lp_footer_inner">
+          <div class="flex flex_col items_center lp_footer_cta">
+            <h2 class="subject align_center line_mini font_bold">
+              あなたの会社のAI面接を、<br>実際に体験しませんか？
+            </h2>
+            <p class="description line_p">貴社の面接基準やカルチャーに合わせて構築できるAI面接官。<br>応募者にも自然な対話体験を届けるこの仕組みを、ぜひ一度お試しください。</p>
+            <div class="flex items_center justify_center lp_footer_actions">
+              <a class="flex items_center justify_center font_bold lp_footer_button lp_footer_button_dark"
+                href="https://meetings.hubspot.com/yuto-matsumoto/exhibition02" target="_blank"
+                rel="noopener noreferrer">無料デモ体験</a>
+              <a class="flex items_center justify_center font_bold lp_footer_button lp_footer_button_light"
+                href="https://lp.miai-app.com/resources/service-brochure.html" rel="noopener noreferrer">資料請求</a>
+            </div>
+          </div>
+
+          <div class="grid lp_footer_grid">
+            <div class="flex flex_col lp_footer_brand">
+              <a class="lp_footer_logo" href="#header" aria-label="MiAI トップへ戻る">
+                <img src="assets/logo.png" alt="MiAI AI面接官のミアイ" width="174" height="25" loading="lazy">
+              </a>
+              <p class="description line_p">©プロップス株式会社 All rights reserved.</p>
+              <img alt="IAS認証およびISO/IEC 27001:2022認証" class="lp_footer_trademark" height="226" loading="lazy"
+                src="assets/trademark_ias.png" width="566">
+            </div>
+            <nav class="flex flex_col lp_footer_nav" aria-label="フッターメニュー">
+              <h3 class="title font_bold">Contents</h3>
+              <ul class="flex flex_col lp_footer_links">
+                <li><a class="inline" href="#lp_pitch_first">機能と特徴</a></li>
+                <li><a class="inline" href="#lp_testimonial">導入企業さまの声</a></li>
+                <li><a class="inline" href="https://lp.miai-app.com/resources/index.html">資料一覧</a></li>
+                <li><a class="inline" href="#lp_faq">FAQ</a></li>
+              </ul>
+            </nav>
+            <div class="flex flex_col lp_footer_info">
+              <h3 class="title font_bold">Contact</h3>
+              <span class="block summary">プロップス株式会社</span>
+              <span class="block description line_mini">〒103-0027<br>東京都中央区日本橋3-7-7 日本橋アーバンビルヂング４階</span>
+              <a class="block description" href="https://props-inc.com/#home-inquiry" target="_blank"
+                rel="noopener noreferrer">お問い合わせ</a>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+
+    </main>
+  </div>
+
+
+  <!-- ===== Popup Banner ===== -->
+  <div class="lp_popup_banner shadow_l" id="lp_popup_banner" aria-hidden="true">
+    <a class="block lp_popup_banner_link radius_s hidden" href="https://lp.miai-app.com/resources/roadmap-brochure.html"
+      rel="noopener noreferrer" aria-label="2026年 採用DX成功事例集 AI面接 最新動向 資料をダウンロード">
+      <img src="assets/popup_banner_2026_dx.png" alt="2026年 採用DX成功事例集 AI面接 最新動向" width="1080" height="1080"
+        loading="lazy">
+    </a>
+    <button class="flex items_center justify_center lp_popup_banner_close" type="button" aria-label="バナーを閉じる">
+      <span class="lp_popup_banner_close_line"></span>
+      <span class="lp_popup_banner_close_line"></span>
+    </button>
+  </div>
+
+
+  <!-- ===== JavaScript ===== -->
+  <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js" defer></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/@splidejs/splide-extension-auto-scroll@0.5.3/dist/js/splide-extension-auto-scroll.min.js"
+    defer></script>
+  <script src="js/main.js" defer></script>
+
+
+</body>
+
+</html>
