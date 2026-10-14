@@ -7,7 +7,8 @@
 <title>CORPORATE LOGOMARK — Design Patterns</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Inter:wght@500;600&family=BIZ+UDPGothic:wght@700&display=swap" rel="stylesheet" />
+<link href="css/miai-logo.css" rel="stylesheet" />
 <style>
   /* 参考(proto-review-vict0a/logomark-patterns.html)の実測値に合わせた
      単独ページ。モーダルではない。
@@ -256,6 +257,61 @@
   .lm-back:hover { color: var(--ink); }
   .lm-back svg { width: 13px; height: 11px; }
 
+
+  /* --- CSS ロゴ(css/miai-logo.css の見本) ---
+     画像を使わず、CSS だけで組んだロックアップ。プロダクト名だけが文字なので、
+     新規プロダクト・名称変更はエンジニアが文字を差し替えれば済む。 */
+  .lm-css { margin-top: 96px; }
+  .lm-sub {
+    font-family: "Inter", "Noto Sans JP", sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    letter-spacing: 0.03em;
+    line-height: 1.2;
+  }
+  .lm-lead {
+    margin-top: 12px;
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--ink-2);
+  }
+  .lm-css .lm-card { margin-top: 28px; }
+  .lm-card--css {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 227px;
+    padding: 40px 24px;
+  }
+  .lm-css-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    margin-top: 28px;
+  }
+  .lm-css-pair .lm-card { margin-top: 0; min-height: 180px; }
+  .lm-card--dark { background: #262626; }
+  .lm-css-cap {
+    margin-top: 12px;
+    font-family: "Inter", sans-serif;
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  .lm-code {
+    margin-top: 28px;
+    padding: 24px 28px;
+    background: var(--pane);
+    border-radius: 12px;
+    font: 12px/1.9 ui-monospace, "SF Mono", Menlo, monospace;
+    color: var(--ink);
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .lm-code .c { color: var(--ink-2); }
+
   @media (max-width: 860px) {
     .wrap { padding: 88px 24px 120px; }
     .lm-title { font-size: 22px; margin-bottom: 56px; }
@@ -266,6 +322,9 @@
     .lm-item { height: auto; }
     .lm-item img { width: 100%; }
     .lm-lockup { --lockup-mark: 52px; }
+    .lm-css { margin-top: 64px; }
+    .lm-css-pair { grid-template-columns: 1fr; }
+    .lm-card--css .logo--lg { --logo-h: 44px; }
   }
   @media (prefers-reduced-motion: reduce) {
     .lm-spot, .lm-spot-inner, .lm-jump, .lm-back { transition: none; transform: none; }
@@ -299,6 +358,35 @@
     <div class="lm-foot">
       <button class="lm-jump" type="button" id="lm-spotlight">Spotlight</button>
     </div>
+
+    <!-- CSS ロゴ: css/miai-logo.css。画像なし、プロダクト名は文字 -->
+    <section class="lm-css" aria-labelledby="lm-css-title">
+      <h2 class="lm-sub" id="lm-css-title">CSS LOGO</h2>
+      <p class="lm-lead">ロゴマークとロゴタイプを CSS だけで再現したロックアップです(css/miai-logo.css)。プロダクト名は文字なので、新規プロダクトや名称変更は文字を差し替えるだけで対応できます。</p>
+
+      <div class="lm-card lm-card--css">
+        <span class="logo logo--lg"><i class="logo__symbol"></i><i class="logo__word"></i><span class="logo__product">面接</span></span>
+      </div>
+
+      <div class="lm-css-pair">
+        <div>
+          <div class="lm-card lm-card--css lm-card--dark"><span class="logo logo--inverse"><i class="logo__symbol"></i><i class="logo__word"></i><span class="logo__product">面接</span></span></div>
+          <p class="lm-css-cap">Inverse</p>
+        </div>
+        <div>
+          <div class="lm-card lm-card--css"><span class="logo"><i class="logo__symbol"></i><i class="logo__word"></i><span class="logo__product">面談</span></span></div>
+          <p class="lm-css-cap">別プロダクト名</p>
+        </div>
+      </div>
+
+<pre class="lm-code"><span class="c">&lt;!-- プロダクト名は logo__product の文字だけ変える --&gt;</span>
+&lt;span class="logo"&gt;
+  &lt;i class="logo__symbol"&gt;&lt;/i&gt;&lt;i class="logo__word"&gt;&lt;/i&gt;&lt;span class="logo__product"&gt;面接&lt;/span&gt;
+&lt;/span&gt;
+
+<span class="c">/* サイズ: --logo-h(全体の高さ) / 色: --logo-color, --logo-accent */</span>
+.logo--lg { --logo-h: 64px; }   .logo--inverse { --logo-color: #fff; }</pre>
+    </section>
   </div>
 
   <!-- Spotlight: 全画面でセットを1案ずつ送って見る -->
