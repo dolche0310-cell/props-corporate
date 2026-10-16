@@ -150,10 +150,10 @@ body::before {
   }
   .da-hero__en {
     margin-top: 14px;
-    font-family: "Afacad Flux", var(--da-font-en);
+    font-family: "Oxygen", var(--da-font-en);
     font-weight: 400;
     font-size: clamp(15px, 1.55vw, 22px);
-    letter-spacing: .12em;
+    letter-spacing: .18em;
     line-height: 1.6;
   }
   .da-hero__scroll {
@@ -371,7 +371,7 @@ body::before {
 /* 「、」の後ろの空きを詰める(全角の右半分の余白 + 字間のうち半分ほど) */
 .da-comma { margin-right: -.3em; }
 /* About までは戻るボタンを #E15F48 に */
-.to-top.is-on-about { background: #E15F48; }
+.to-top.is-on-about { background: #FF2400; }
 /* 代表写真はモノクロ */
 .team__photo img { filter: grayscale(1); }
 

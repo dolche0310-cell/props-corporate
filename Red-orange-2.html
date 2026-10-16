@@ -7,9 +7,9 @@
 <meta name="description" content="MiAI株式会社は「人の力を最大化するソフトウェアをつくる」という想いのもと、企業と人のコミュニケーションをサポートするAI技術を開発しています。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Abril+Fatface&family=LINE+Seed+JP:wght@400;700;800&family=Afacad+Flux:wght@400;500&family=Alata&family=Belanosima:wght@600;700&family=Gugi&family=Inter:wght@400;700&family=Jost:wght@400;500;600&family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Oxygen:wght@400;700&family=Abril+Fatface&family=LINE+Seed+JP:wght@400;700;800&family=Afacad+Flux:wght@400;500&family=Alata&family=Belanosima:wght@600;700&family=Gugi&family=Inter:wght@400;700&family=Jost:wght@400;500;600&family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=20260819h">
-<link rel="stylesheet" href="css/design-a-kv.css?v=20261009x">
+<link rel="stylesheet" href="css/design-a-kv.css?v=20261011b">
 <style>
   :root { --color-primary: #FF2400; }
 </style>
@@ -55,6 +55,12 @@
               <!-- 形ははっきり残し、縁だけをごくわずかに柔らかく -->
               <feGaussianBlur in="g" stdDeviation="2"/>
             </filter>
+            <!-- 濃いオレンジ図形用: 形はくっきり、縁だけ細くやわらかいグラデーション -->
+            <filter id="gooR" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="11" result="b"/>
+              <feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 45 -20" result="g"/>
+              <feGaussianBlur in="g" stdDeviation="1.2"/>
+            </filter>
             <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="26"/></filter>
             <!-- 右の赤い図形: 外周は明るい朱、くびれの中心に向かって濃い赤 -->
             <linearGradient id="gRed" gradientUnits="userSpaceOnUse" x1="1000" y1="180" x2="1440" y2="760">
@@ -85,23 +91,23 @@
         <!-- 左半分(左端に固定。図形座標は 1440x940 の設計値のまま) -->
         <svg class="da-hero__half da-hero__half--l" viewBox="0 0 720 940" fill="none" xmlns="http://www.w3.org/2000/svg">
           <!-- 図形は js が生成(円・楕円が漂い、近づくと融合し、離れると切れる) -->
-          <g filter="url(#goo)" fill="url(#gPink)" data-blob="pink"></g>
+          <g filter="url(#gooR)" fill="url(#gPink)" data-blob="pink"></g>
         </svg>
 
         <!-- 右半分(右端に固定) -->
         <svg class="da-hero__half da-hero__half--r" viewBox="720 0 720 940" fill="none" xmlns="http://www.w3.org/2000/svg">
           <g filter="url(#soft)" fill="#ff7a60" opacity=".4" data-blob="glow"></g>
-          <g filter="url(#goo)" fill="url(#gRed)" data-blob="red"></g>
+          <g filter="url(#gooR)" fill="url(#gRed)" data-blob="red"></g>
         </svg>
 
         <!-- SP の左下(キャッチコピーの下が寂しいため)。PC では非表示 -->
         <svg class="da-hero__bl" viewBox="0 0 480 320" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <g filter="url(#goo)" fill="url(#gSp)" data-blob="spl"></g>
+          <g filter="url(#gooR)" fill="url(#gSp)" data-blob="spl"></g>
         </svg>
       </div>
 
       <div class="da-hero__copy">
-        <h1 class="da-hero__ja"><span class="da-hero__ai">AI</span>がいる働き方を<span class="da-comma">、</span><br class="da-sp-br">すべての人に。</h1>
+        <h1 class="da-hero__ja"><span class="da-hero__ai">AI</span>のいる働き方を<span class="da-comma">、</span><br class="da-sp-br">すべての人に。</h1>
         <p class="da-hero__en">An AI-powered way of working for everyone.</p>
       </div>
 
@@ -112,13 +118,13 @@
     <section class="da-about" id="about">
       <div class="da-about__circle">
         <p class="da-eyebrow">ABOUT US</p>
-        <h2 class="da-about__title">AIがいる働き方を<span class="da-comma">、</span><br class="da-sp-br">すべての人に。</h2>
+        <h2 class="da-about__title">AIのいる働き方を<span class="da-comma">、</span><br class="da-sp-br">すべての人に。</h2>
         <div class="da-about__body">
           <p>AIは、はたらくことを根本から変えていきます。</p>
           <p>一人ひとりが、世の中が変化する中でも、充実した仕事や働き方を選べるようになる。</p>
           <p>組織が、社員一人ひとりに向き合えるようになる。</p>
           <p>企業が、人という資本をより深く理解できるようになる。</p>
-          <p>私たちは、AIがいる働き方をすべての人に届け、その変化を支えていきます。</p>
+          <p>私たちは、AIのいる働き方をすべての人に届け、その変化を支えていきます。</p>
         </div>
       </div>
     </section>
@@ -239,7 +245,7 @@
           <span class="label__eyebrow">News</span>
           <span class="label__heading">お知らせ</span>
         </div>
-        <button class="news__more" type="button" aria-disabled="true"><span class="news__more-fill" aria-hidden="true"></span><span class="news__more-in"><span class="news__more-text"><span class="news__more-label">More</span><span class="news__more-label news__more-label--hover" aria-hidden="true">More</span></span><span class="news__more-arrow news__more-arrow--default" aria-hidden="true"><svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M10,18l8-8c-2.2-2.2-8-8-8-8"/><line x1="2.4" y1="10" x2="18" y2="10"/></svg></span><span class="news__more-arrow news__more-arrow--hover" aria-hidden="true"><svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M10,18l8-8c-2.2-2.2-8-8-8-8"/><line x1="2.4" y1="10" x2="18" y2="10"/></svg></span></span></button>
+        <a class="news__more" href="news.html"><span class="news__more-fill" aria-hidden="true"></span><span class="news__more-in"><span class="news__more-text"><span class="news__more-label">More</span><span class="news__more-label news__more-label--hover" aria-hidden="true">More</span></span><span class="news__more-arrow news__more-arrow--default" aria-hidden="true"><svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M10,18l8-8c-2.2-2.2-8-8-8-8"/><line x1="2.4" y1="10" x2="18" y2="10"/></svg></span><span class="news__more-arrow news__more-arrow--hover" aria-hidden="true"><svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M10,18l8-8c-2.2-2.2-8-8-8-8"/><line x1="2.4" y1="10" x2="18" y2="10"/></svg></span></span></a>
       </div>
 
       <div class="news__list news__list--rows">
@@ -262,17 +268,6 @@
             <p class="news__excerpt">プロップス株式会社（本社：東京都中央区、代表取締役 松元勇人）は、株式会社日比谷花壇（本社：東京都港区、代表取締役社長 宮島 浩彰）がAI面接サービス「MiAI面接」を正式導入したことをお知らせします...</p>
           </div>
           <div class="news__thumb" aria-hidden="true"><img src="assets/images/news-hibiyakadan.webp" alt=""></div>
-          <span class="news__arrow" aria-hidden="true"><span class="news__arrow-a news__arrow-a--default"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M10,18l8-8c-2.2-2.2-8-8-8-8"/><line x1="2.4" y1="10" x2="18" y2="10"/></svg></span><span class="news__arrow-a news__arrow-a--hover"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M10,18l8-8c-2.2-2.2-8-8-8-8"/><line x1="2.4" y1="10" x2="18" y2="10"/></svg></span></span>
-        </article>
-
-        <article class="news__item reveal">
-          <time class="news__date" datetime="2025-07-21"><span class="news__date-year">2025</span><span class="news__date-day">07.21</span></time>
-          <div class="news__body">
-            <p class="news__tags"><span>プレスリリース</span></p>
-            <h3 class="news__title"><a class="news__link" href="https://props-inc.com/news/BmPxO3J4" target="_blank" rel="noopener">AIで採用を加速する。ノーコードで自社向けにカスタマイズできるAI面接官「MiAI面接」を正式リリース</a></h3>
-            <p class="news__excerpt">採用初期のリードタイムを90%以上削減。24時間365日対応で、企業ごとに求職者一人一人に合わせた面接対話体験を提供。最新の生成AIを活用し採用体験にイノベーションを。採用市場の激化と労働人口減少...</p>
-          </div>
-          <div class="news__thumb" aria-hidden="true"><img src="assets/images/news-miai-release.webp?v=2" alt=""></div>
           <span class="news__arrow" aria-hidden="true"><span class="news__arrow-a news__arrow-a--default"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M10,18l8-8c-2.2-2.2-8-8-8-8"/><line x1="2.4" y1="10" x2="18" y2="10"/></svg></span><span class="news__arrow-a news__arrow-a--hover"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M10,18l8-8c-2.2-2.2-8-8-8-8"/><line x1="2.4" y1="10" x2="18" y2="10"/></svg></span></span>
         </article>
       </div>
@@ -386,6 +381,6 @@
 <script src="js/company-photos.js?v=20260819h"></script>
 <script src="js/main.js?v=20261009x"></script>
 <script src="js/service-stage.js?v=20260819h"></script>
-<script src="js/design-a-kv.js?v=20261009x"></script>
+<script src="js/design-a-kv.js?v=20261011d"></script>
 </body>
 </html>

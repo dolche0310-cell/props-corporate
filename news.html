@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>お知らせ一覧 | MiAI - プロップス株式会社</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Oxygen:wght@400;700&family=Abril+Fatface&family=LINE+Seed+JP:wght@400;700;800&family=Afacad+Flux:wght@400;500&family=Alata&family=Belanosima:wght@600;700&family=Gugi&family=Inter:wght@400;700&family=Jost:wght@400;500;600&family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=20261016g">
+<link rel="stylesheet" href="css/design-a-kv.css?v=20261011b">
+<style>
+  :root { --color-primary: #FF2400; }
+</style>
+</head>
+<body>
+
+  <!-- 画面右下の「先頭へ戻る」。参考(recruit.garage.co.jp)と同じ
+       64x64 / 右下 40px / 角丸4px。hover で色面が左から開き、
+       矢印が白へ抜ける。地の 40px はコンテンツに被らない余白。 -->
+  <a class="to-top" id="to-top" href="#top" aria-label="ページ先頭へ戻る">
+    <span class="to-top__fill" aria-hidden="true"></span>
+    <svg class="to-top__arrow" viewBox="0 0 20 20" width="20" height="20" fill="none" aria-hidden="true">
+      <path d="M10 17V3M4.4 8.6L10 3l5.6 5.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </a>
+
+<header class="da-header" id="site-header">
+  <a href="Red-orange-2.html" class="da-header__logo"><img src="assets/images/logo-logotype-a.svg" alt="MiAI"></a>
+  <nav class="da-nav" id="da-nav">
+    <a href="Red-orange-2.html#about" class="da-nav__link"><span class="da-nav__link-flip"><span class="da-nav__link-face da-nav__link-face--front">About</span><span class="da-nav__link-face da-nav__link-face--back" aria-hidden="true">About</span></span></a>
+    <a href="Red-orange-2.html#service" class="da-nav__link"><span class="da-nav__link-flip"><span class="da-nav__link-face da-nav__link-face--front">Service</span><span class="da-nav__link-face da-nav__link-face--back" aria-hidden="true">Service</span></span></a>
+    <a href="Red-orange-2.html#news" class="da-nav__link"><span class="da-nav__link-flip"><span class="da-nav__link-face da-nav__link-face--front">News</span><span class="da-nav__link-face da-nav__link-face--back" aria-hidden="true">News</span></span></a>
+    <a href="Red-orange-2.html#team" class="da-nav__link"><span class="da-nav__link-flip"><span class="da-nav__link-face da-nav__link-face--front">Team</span><span class="da-nav__link-face da-nav__link-face--back" aria-hidden="true">Team</span></span></a>
+    <a href="Red-orange-2.html#company" class="da-nav__link"><span class="da-nav__link-flip"><span class="da-nav__link-face da-nav__link-face--front">Company</span><span class="da-nav__link-face da-nav__link-face--back" aria-hidden="true">Company</span></span></a>
+    <a href="Red-orange-2.html#contact" class="da-nav__link"><span class="da-nav__link-flip"><span class="da-nav__link-face da-nav__link-face--front">Contact</span><span class="da-nav__link-face da-nav__link-face--back" aria-hidden="true">Contact</span></span></a>
+  </nav>
+  <button type="button" class="da-burger" id="da-burger" aria-label="メニューを開く" aria-expanded="false" aria-controls="da-nav"><span></span><span></span></button>
+</header>
+
+<main id="top">
+  <section class="news news--brushup news--archive" id="news">
+    <div class="wrap">
+      <div class="news__head reveal">
+        <div class="label">
+          <h1 class="label__heading">お知らせ一覧</h1>
+        </div>
+      </div>
+
+      <div class="news__list news__list--rows">
+        <article class="news__item reveal">
+          <time class="news__date" datetime="2026-09-25"><span class="news__date-year">2026</span><span class="news__date-day">09.25</span></time>
+          <div class="news__body">
+            <p class="news__tags"><span>お知らせ</span><span>メディア掲載</span></p>
+            <h3 class="news__title"><a class="news__link" href="https://props-inc.com/news/BmPxO3J4" target="_blank" rel="noopener">【メディア掲載】愛媛新聞にてAI面接官「MiAI（ミアイ）」が紹介されました</a></h3>
+            <p class="news__excerpt">2026年9月22日付の愛媛新聞の連載「本業×デジタル 新分野開拓えひめ企業」で、伊予鉄AIコンサルティング株式会社（愛媛県松山市）の取り組みが紹介されました。同社の取扱サービスの一つとして、AI面接官「MiAI（ミアイ）」が取り上げられています。</p>
+          </div>
+          <div class="news__thumb" aria-hidden="true"><img src="assets/images/news-logotype-a.svg" alt=""></div>
+          <span class="news__arrow" aria-hidden="true"><span class="news__arrow-a news__arrow-a--default"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M10,18l8-8c-2.2-2.2-8-8-8-8"/><line x1="2.4" y1="10" x2="18" y2="10"/></svg></span><span class="news__arrow-a news__arrow-a--hover"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M10,18l8-8c-2.2-2.2-8-8-8-8"/><line x1="2.4" y1="10" x2="18" y2="10"/></svg></span></span>
+        </article>
+        <article class="news__item reveal">
+          <time class="news__date" datetime="2026-04-02"><span class="news__date-year">2026</span><span class="news__date-day">04.02</span></time>
+          <div class="news__body">
+            <p class="news__tags"><span>お知らせ</span><span>プレスリリース</span></p>
+            <h3 class="news__title"><a class="news__link" href="https://props-inc.com/news/20260403_hibiyakadan" target="_blank" rel="noopener">株式会社日比谷花壇がAI面接サービス「MiAI面接」を導入。&quot;人の温度&quot;を守りながら全国採用の公平性と効率性を両立。</a></h3>
+            <p class="news__excerpt">プロップス株式会社（本社：東京都中央区、代表取締役 松元勇人）は、株式会社日比谷花壇（本社：東京都港区、代表取締役社長 宮島 浩彰）がAI面接サービス「MiAI面接」を正式導入したことをお知らせします...</p>
+          </div>
+          <div class="news__thumb" aria-hidden="true"><img src="assets/images/news-hibiyakadan.webp" alt=""></div>
+          <span class="news__arrow" aria-hidden="true"><span class="news__arrow-a news__arrow-a--default"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M10,18l8-8c-2.2-2.2-8-8-8-8"/><line x1="2.4" y1="10" x2="18" y2="10"/></svg></span><span class="news__arrow-a news__arrow-a--hover"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M10,18l8-8c-2.2-2.2-8-8-8-8"/><line x1="2.4" y1="10" x2="18" y2="10"/></svg></span></span>
+        </article>
+        <article class="news__item reveal">
+          <time class="news__date" datetime="2025-07-21"><span class="news__date-year">2025</span><span class="news__date-day">07.21</span></time>
+          <div class="news__body">
+            <p class="news__tags"><span>プレスリリース</span></p>
+            <h3 class="news__title"><a class="news__link" href="https://props-inc.com/news/BmPxO3J4" target="_blank" rel="noopener">AIで採用を加速する。ノーコードで自社向けにカスタマイズできるAI面接官「MiAI面接」を正式リリース</a></h3>
+            <p class="news__excerpt">採用初期のリードタイムを90%以上削減。24時間365日対応で、企業ごとに求職者一人一人に合わせた面接対話体験を提供。最新の生成AIを活用し採用体験にイノベーションを。採用市場の激化と労働人口減少...</p>
+          </div>
+          <div class="news__thumb" aria-hidden="true"><img src="assets/images/news-miai-release.webp?v=2" alt=""></div>
+          <span class="news__arrow" aria-hidden="true"><span class="news__arrow-a news__arrow-a--default"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M10,18l8-8c-2.2-2.2-8-8-8-8"/><line x1="2.4" y1="10" x2="18" y2="10"/></svg></span><span class="news__arrow-a news__arrow-a--hover"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M10,18l8-8c-2.2-2.2-8-8-8-8"/><line x1="2.4" y1="10" x2="18" y2="10"/></svg></span></span>
+        </article>
+      </div>
+
+      <nav class="pager" id="news-pager" aria-label="ページ送り" hidden></nav>
+    </div>
+  </section>
+</main>
+
+<p class="news-marquee" aria-hidden="true"><span class="news-marquee__track"><span>Enabling the AI Shift Across Industries</span><span>Enabling the AI Shift Across Industries</span></span></p>
+
+<div class="wrap">
+  <nav class="breadcrumb breadcrumb--bottom" aria-label="パンくずリスト">
+    <ol class="breadcrumb__list">
+      <li class="breadcrumb__item"><a href="Red-orange-2.html">ホーム</a></li>
+      <li class="breadcrumb__item" aria-current="page">お知らせ一覧</li>
+    </ol>
+  </nav>
+</div>
+
+<footer class="site-footer">
+  <a class="site-footer__link" href="https://props-inc.com/policy" target="_blank" rel="noopener">Privacy Policy</a>
+  <p class="site-footer__copy">©️2025 props, Inc</p>
+</footer>
+
+<script src="js/company-photos.js?v=20260819h"></script>
+<script src="js/main.js?v=20261009x"></script>
+<script src="js/service-stage.js?v=20260819h"></script>
+<script src="js/news-pager.js?v=20261016a"></script>
+<script src="js/design-a-kv.js?v=20261011d"></script>
+</body>
+</html>

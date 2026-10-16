@@ -29,12 +29,11 @@
     // SP の左下。SCROLL(画面中央 x≈240, y≈147〜243)には被せない。
     // その帯では x<205 に収め、帯の上(y<140)は右側へ広げる
     'spl': [
-      [100, 225, 66, 22, 18, .25, .31, 0.6],
-      [190, 292, 46, 22, 14, .31, .27, 2.4],
-      [48, 130, 52, 24, 26, .29, .34, 4.1],
-      [150, 110, 44, 22, 24, .34, .26, 1.5],
-      [250, 62, 46, 30, 22, .27, .3, 3.2],
-      [345, 120, 40, 26, 30, .23, .28, 5.0]
+      [70, 215, 105, 20, 16, .25, .31, 0.6],
+      [150, 85, 78, 20, 16, .29, .26, 2.4],
+      [250, 300, 88, 22, 14, .3, .27, 4.1],
+      [395, 215, 78, 18, 20, .27, .32, 1.5],
+      [20, 70, 60, 14, 14, .24, .3, 3.2]
     ],
     // 薄いぼんやりした背景も、複数の円がゆっくり形を変えながら漂う
     'glow': [
@@ -45,6 +44,11 @@
     ]
   };
 
+  // SP は図形が小さく写るぶん、円が離れて細かくちぎれて見える。
+  // 円を大きく・漂う幅を小さくして、大きな塊でつながったままにする
+  var spMq = window.matchMedia ? matchMedia('(max-width: 820px)') : null;
+  var SP_R = 1.3, SP_A = .6;
+
   var items = [];
   Object.keys(GROUPS).forEach(function (key) {
     var host = document.querySelector('[data-blob="' + key + '"]');
@@ -53,7 +57,7 @@
       var el = document.createElementNS(NS, 'ellipse');
       host.appendChild(el);
       // ox/oy: カーソルに押し出されている量(なめらかに追従させる)
-      items.push({ el: el, svg: host.ownerSVGElement, c: c, ox: 0, oy: 0, sw: 0, glow: key === 'glow' });
+      items.push({ el: el, svg: host.ownerSVGElement, c: c, ox: 0, oy: 0, sw: 0, glow: key === 'glow', spl: key === 'spl' });
     });
   });
 
@@ -82,8 +86,10 @@
     var mu = {};   // svg ごとのカーソル位置(図形座標)
     for (var i = 0; i < items.length; i++) {
       var it = items[i], c = it.c, ph = c[7];
-      var x = c[0] + c[3] * Math.sin(t * c[5] + ph);
-      var y = c[1] + c[4] * Math.cos(t * c[6] + ph * 1.3);
+      var sp = spMq && spMq.matches && !it.glow;
+      var ka = sp ? SP_A : 1, kr = sp ? (it.spl ? 1 : SP_R) : 1;   // 左下は円を直接大きくしてあるのでそのまま
+      var x = c[0] + c[3] * ka * Math.sin(t * c[5] + ph);
+      var y = c[1] + c[4] * ka * Math.cos(t * c[6] + ph * 1.3);
 
       // 目標の押し出し量を、ドリフト位置とカーソルの距離から求める(ガウス型で端がなだらか)
       var tx = 0, ty = 0, ts = 0;
@@ -101,7 +107,7 @@
       it.oy += (ty - it.oy) * f;
       it.sw += (ts - it.sw) * f;
 
-      var sc = 1 + PUSH.swell * it.sw;
+      var sc = (1 + PUSH.swell * it.sw) * kr;
       var rx = c[2] * (1 + .10 * Math.sin(t * .55 + ph * 2.1)) * sc;
       var ry = c[2] * (1 + .10 * Math.cos(t * .47 + ph * 1.7)) * sc;
       var e = it.el;
