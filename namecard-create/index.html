@@ -76,6 +76,13 @@
     <div class="panel__scroll" id="panel-scroll">
       <div class="block">
         <ul class="fields" id="fields"></ul>
+        <div class="size-field">
+          <select id="size" aria-label="用紙サイズ">
+            <option value="jp91">日本標準 91 × 55 mm</option>
+            <option value="us89">欧米サイズ 89 × 51 mm</option>
+            <option value="jp85">小型 85 × 49 mm</option>
+          </select>
+        </div>
       </div>
     </div>
 
@@ -88,29 +95,21 @@
     <h2>入稿データの書き出し</h2>
     <ul class="export-list">
       <li>
-        <div><b>PDF（印刷 → PDFに保存）</b></div>
-        <button type="button" class="btn btn--primary btn--sm" id="ex-pdf">PDFを作成</button>
+        <div><b>入稿用 PDF（CMYK）</b><span class="export-sub">両面2ページ・97×61mm（塗り足し3mm込み）・トンボなし</span></div>
+        <button type="button" class="btn btn--primary btn--sm" id="ex-cmyk">PDFを作成</button>
       </li>
       <li>
-        <div><b>SVG（ベクター）</b></div>
-        <button type="button" class="btn btn--ghost btn--sm" id="ex-svg">SVGを保存</button>
-      </li>
-      <li>
-        <div><b>PNG（350dpi）</b></div>
+        <div><b>PNG（RGB・350dpi）</b></div>
         <button type="button" class="btn btn--ghost btn--sm" id="ex-png">PNGを保存</button>
-      </li>
-      <li>
-        <div><b>JPEG（350dpi）</b></div>
-        <button type="button" class="btn btn--ghost btn--sm" id="ex-jpg">JPEGを保存</button>
       </li>
     </ul>
     <div class="note">
       <b>入稿前チェック</b>
       <ul>
-        <li>塗り足し3mm・トンボは自動で付加されます（プレビューの表示設定に関わらず書き出しには常に含まれます）。</li>
-        <li>PDF書き出し時は、印刷ダイアログで「用紙サイズに合わせる」をオフ、余白なし（100%）で保存してください。</li>
-        <li>色は RGB です。CMYK指定の印刷会社へは、書き出したSVG/PDFをIllustratorで開き、Adobe PDFプリセットから「PDF/X-1a:2001(日本)」を選択して保存し直してから入稿してください。</li>
-        <li>フォントはアウトライン化を推奨します。</li>
+        <li>入稿には「入稿用 PDF（CMYK）」を使ってください。ほかの形式は RGB の確認用です。</li>
+        <li>CMYK PDF は各面を 600dpi の画像にして CMYK へ変換しています。文字は画像になるため、アウトライン化は不要です。</li>
+        <li>RGB→CMYK は ICC プロファイル（Japan Color 等）を使わない簡易変換です。灰色・黒は K 版のみになります。鮮やかな赤や写真は、印刷物では画面より落ち着いた色になります。色にこだわる場合は、Illustrator で開いてプロファイル変換してください。</li>
+        <li>ページは塗り足し 3mm を含む 97×61mm です。TrimBox に仕上がり位置を入れています。</li>
       </ul>
     </div>
     <div class="modal__foot"><button class="btn btn--primary btn--sm" value="close">閉じる</button></div>
@@ -138,8 +137,6 @@
   </form>
 </dialog>
 
-<div class="print-root" id="print-root" aria-hidden="true"></div>
-<style id="print-page"></style>
 
 <script src="app.js"></script>
 </body>

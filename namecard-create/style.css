@@ -114,6 +114,9 @@ button { font: inherit; }
 .fi-icons-row { border-bottom: 1px solid var(--nc-border); padding-bottom: 20px; }
 .fi-icons-row .check { margin-top: 0; }
 
+/* 用紙サイズ：記載内容の項目とは別物なので、上に区切り線を入れて離す */
+.size-field { border-top: 1px solid var(--nc-border); margin-top: 22px; padding-top: 20px; }
+
 /* トグルスイッチ */
 .sw { position: relative; width: 33px; height: 19px; flex: none; }
 .sw input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
@@ -139,6 +142,17 @@ input:focus, select:focus, textarea:focus {
 }
 .fi__body input {
   border-radius: 12px; padding: 13px 16px; font-size: 14px; border-color: #EAEAEA;
+}
+/* 用紙サイズのプルダウン：縦幅は他の入力欄に合わせる。ブラウザ標準の矢印は
+   高さ・位置とも細かく調整できないため、自前のシェブロンアイコンに差し替える
+   （基準位置=右16pxから、矢印だけx軸-5pxで右21pxへ寄せる） */
+#size {
+  padding: 13px 40px 13px 16px; font-size: 14px;
+  appearance: none; -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M3 4.5 6 7.5 9 4.5' stroke='%235C5C5C' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 21px center;
+  background-size: 12px 12px;
 }
 .field--pair { display: flex; flex-direction: row; gap: 8px; }
 .field--pair input { min-width: 0; }
@@ -236,15 +250,13 @@ input[type="range"] { width: 100%; accent-color: var(--nc-btn); }
 .modal--sm { max-width: 380px; }
 .confirm-msg { font-size: 13px; color: var(--nc-sub); line-height: 1.6; }
 
-/* ---------- print（入稿用PDF書き出し） ---------- */
-.print-root { display: none; }
-@media print {
-  /* body の padding-top（固定ヘッダー分のオフセット）が残っていると、
-     カード1面分のページ内に収まらず2ページ目に少しはみ出してしまうため、
-     印刷時は完全にリセットする */
-  html, body { height: auto !important; margin: 0 !important; padding: 0 !important; }
-  body > *:not(.print-root) { display: none !important; }
-  .print-root { display: block; margin: 0; padding: 0; }
-  .print-root svg { display: block; margin: 0; page-break-after: always; page-break-inside: avoid; }
-  .print-root svg:last-child { page-break-after: auto; }
-}
+/* ---------- 写真の行 ---------- */
+.photo-row { display: flex; gap: 8px; }
+.photo-adj { display: grid; gap: 4px; margin-top: 12px; }
+.photo-adj label { display: grid; grid-template-columns: 40px 1fr; align-items: center; gap: 8px; font-size: 12px; color: var(--nc-sub); }
+.photo-adj input[type="range"] { width: 100%; accent-color: var(--nc-btn); }
+.card-wrap svg { touch-action: none; }
+/* プレビューの文字は書き出し(SVG/PDF)と同じ字幅にする。カーニング(palt)は組版の実測にも入っていない */
+.card-wrap svg text { font-feature-settings: normal; }
+.export-sub { display: block; font-size: 11px; color: var(--nc-sub); margin-top: 2px; }
+.fi__body[hidden] { display: none; }

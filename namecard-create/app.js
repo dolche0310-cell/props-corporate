@@ -2,7 +2,7 @@
    名刺データ作成ツール
    デザインベース：Figma props_Rebranding
      おもて 526:23433 / うら 526:23452（縦 55 × 91 mm）
-   入力 → SVG(実寸mm)で組版 → プレビュー / PDF・SVG・PNG 書き出し
+   入力 → SVG(実寸mm)で組版 → プレビュー / PDF・PNG 書き出し
    ・座標系は「mm」。viewBox も mm 単位で持たせ、そのまま入稿サイズになる
    ・Figma のアートボードは 251 × 415px。px÷4.5636 で mm に読み替えている
    ・ロゴ・配色・組み方・裏面はデザイン固定。切り替えられるのは記載内容だけ
@@ -10,78 +10,94 @@
 (() => {
 'use strict';
 
-/* ---------- 名刺サイズ（日本標準 55×91mm・縦固定。用紙サイズの選択UIは廃止） ---------- */
-const CARD = { w: 55, h: 91 };
+/* ---------- 用紙（向きは横で固定） ---------- */
+const SIZES = {
+  jp91: { w: 91, h: 55 },
+  us89: { w: 89, h: 51 },
+  jp85: { w: 85, h: 49 },
+};
 const BLEED = 3;      // 塗り足し（書き出しには含めるが、プレビューには表記しない）
 const MARKM = 5;      // トンボを描くための追加マージン
+/* 書体（デザイン指定。いずれも macOS 標準のシステムフォント。入っていない端末では代替の書体になる） */
+const FONT = {
+  front:   "'Hiragino Kaku Gothic ProN','ヒラギノ角ゴ ProN','Hiragino Sans','Yu Gothic','Noto Sans JP',sans-serif",   // おもて
+  backHead:"'Futura','Futura Medium','Jost','Albert Sans',sans-serif",                                              // うらの見出し
+  backBody:"'Yu Gothic','YuGothic','游ゴシック体','Yu Gothic Medium','Hiragino Sans','Noto Sans JP',sans-serif",    // うらの本文
+};
 
-const GOTHIC = "'Albert Sans','Noto Sans JP','Hiragino Kaku Gothic ProN','Hiragino Sans','Yu Gothic',sans-serif";
+/* デザイン入稿データ（meishi_yoko_A.pdf）の実測。座標・寸法はすべて mm（仕上がり左上が原点）。
+   組版は 91 × 55mm の「デザイン座標」で行い、用紙サイズが違うときは全体を拡縮して中央に置く */
+const DW = 91, DH = 55;
+const PT = 25.4 / 72;   // 1pt = 0.3528mm
+/* 文字の下限。入稿データの文字は 5pt（ラクスルの規定は 6pt 以上。デザイン優先で入稿データどおりにしている） */
+const PT_MIN = 5 * PT;
 
-/* Figma px → mm（251px = 55mm） */
-const PX = 55 / 251;
-
-/* 版面。用紙サイズが変わっても同じ見えになるよう比率で持つ */
+/* おもての版面（mm） */
 const LY = {
-  padL:   28 / 251,   // 左マージン
-  padR:   25 / 251,   // 右マージン（罫線の右端に合わせる）
-  logoT:  24 / 415,   // ロゴ上端
-  logoR:  24 / 251,   // ロゴ右マージン
-  nameT: 163 / 415,   // 氏名ブロックの上端
-  footB:  18 / 415,   // 会社情報ブロックの下端
+  topX: 44.65,    // 役職・氏名・ローマ字の左端
+  contactDX: 0.53, // 連絡先は上の左端より少し内側から始まる
+  topY: 10.22,    // 役職の行の上端（行が増えたら上へ伸ばす）
+  topYMin: 5.3,   // 上段の上端の限界（仕上がりから 3mm 以上内側）
+  topRight: 9,    // 上段の右マージン
+  topMax: 31.4,   // 上段の下端の限界（赤地の終わり 32.2mm の手前）
+  footX: 45.5,    // 会社情報の左端
+  footRight: 9,
+  footBottom: 51.77, // 会社情報の最終行の下端（Web サイトの行）
+  footMin: 33.0,  // 下段の上端の限界（白地の始まりより下）
 };
-const LOGO_W = 43 / 251;   // おもてのロゴマーク幅（カード幅に対する比）
+/* 写真（白いリング + 円形の写真） */
+const PHOTO = { cx: 24.15, cy: 22.72, ring: 15.48, r: 13.35 };
 
-/* 裏面（Figma うら 526:23452 の実測。すべてカード寸法に対する比） */
-/* Figma node 526:23452（うら）実測値（2026-08 リブランディング版レイアウトに合わせて更新） */
+/* うらの版面（mm） */
+const BACK_CIRCLE = { cx: 68.46, cy: 27.5, ring: 27.86, inner: 26.47 };   // 文字の背景の円（仕上がりの右端で切れる）
 const BACK = {
-  markY: 89.466 / 415, markW:  38.304 / 251,
-  typeY: 89.590 / 415, typeW: 104.212 / 251,
-  gapX:    9.452 / 251,   // ロゴマークとロゴタイプの間隔（Figma実測）
-  tagY:    152 / 415,
-  tagSize:  12 * PX,     // 2.63mm
-  tagLH:    22 / 12,     // 行送り 22px / 級数 12px
-  qrX:      92 / 251, qrY: 264 / 415, qrW: 62 / 251,
+  mark: { x: 14.05, y: 24.88, w: 14.31 },                       // MiAI ロゴタイプ
+  head: { x: 54.81, y: 22.47, pt: 8, w: 28.31 },                // 見出し（左端・ベースライン・幅）
+  body: [ { x: 53.74, y: 27.4,  w: 30.31 },                     // 本文3行（左端・ベースライン・幅）
+          { x: 58.09, y: 30.9,  w: 20.95 },
+          { x: 56.63, y: 34.4,  w: 24.53 } ],
+  bodyPt: 5,
+  qr: { cx: 68.46, cy: 45.71, w: 7.19 },                        // QR（中心・一辺）
 };
-/* タグライン（3行）。Figma実測では引用符や「ム」「AI」だけ字送りが広く、
-   区間ごとに分けると不自然に見えるため、各行とも1文にまとめ、
-   字送りはフォントサイズの8%で統一する */
-const TAGLINE = [
-  [{ t: '“うちに合う人”を逃さない。', lsPct: 0.08 }],
-  [{ t: '採用を加速する', lsPct: 0.08 }],
-  [{ t: 'カスタムAI面接', lsPct: 0.08 }],
-];
+/* 裏面の文言（固定） */
+const BACK_HEAD = 'Meet AI, Focus on "I".';
+const BACK_BODY = ['AIが答えをくれる時代だからこそ、', '私たちは「あなた」という', '一人ひとりに向き合いたい。'];
 
-/* 配色（Figma 実測。デザイン固定） */
+/* 配色（デザイン固定） */
 const C = {
-  name:  '#000000',
-  label: '#5C5C5C',
-  meta:  '#8A8A8A',
-  rule:  '#D8D8D8',
-  tag:   '#000000',   // 裏面タグライン
-  bg:    '#FFFFFF',
-  trim:  '#B4B4B4',   // 仕上がり線（プレビュー用・書き出しには含めない）
+  onRed:  '#FFFFFF',
+  org:    '#5F5F5F',   // 会社名
+  foot:   '#5F5F5F',   // 住所など
+  backTx: '#595757',   // 裏面の文字
+  qr:     '#5C5A59',   // 裏面の QR
+  backMark: '#F5F5F5', // 裏面のロゴ
+  photoBg:'#DEDEDF',
+  circle: '#EFEFEF',   // 裏面のグレーの円（写真あり）
+  bg:     '#FFFFFF',
+  trim:   '#B4B4B4',   // 仕上がり線（プレビュー用・書き出しには含めない）
 };
 
-/* 級数（Figma px → mm） */
+/* 級数（mm）。入稿データの pt 指定 */
 const FS = {
-  name:  20 * PX,   // 4.38mm
-  label: 10 * PX,   // 2.19mm
-  meta:  10 * PX,
-  small:  8 * PX,   // 1.75mm
+  lead:  5.5 * PT,
+  name:  11 * PT,
+  label: 5 * PT,   // ローマ字
+  meta:  5 * PT,   // 連絡先
+  small: 5 * PT,   // 会社情報
 };
-
-/* 行間・アキ（Figma 実測 px → mm） */
-const LH = { label: 1.2, name: 1.5, meta: 1.6, small: 1.25 };
+/* 字送り（級数に対する割合）。入稿データの文字幅から逆算 */
+const TRK = { lead: 0.11, name: 0.11, label: 0.055, meta: 0.05, org: 0.08, foot: 0.10 };
+/* 行間（行の高さ = 級数 × lh）とアキ。入稿データのベースライン間隔に合わせてある */
+const LH = { lead: 1.0, name: 1.0, label: 1.0, meta: 1.383, small: 1.10 };
 const GAP = {
-  titleName: 16 * PX,   // 役職 → 氏名
-  contact:   16 * PX,   // ローマ字 → 連絡先
-  compRule:   7 * PX,   // 会社名 → 罫線
-  ruleAddr:   7 * PX,   // 罫線 → 住所
-  item:       4 * PX,   // 小さい行どうし
-  logo:       8 * PX,   // ロゴ下端との最低アキ
-  icon:       1.2,      // アイコン → 値
+  titleName: 1.247,    // 役職 → 氏名
+  nameLabel: 0.99,     // 氏名 → ローマ字
+  contact:   3.086,    // ローマ字 → 連絡先
+  item:      0.5,      // 会社名 → 郵便番号
+  web:       0.44,     // 住所 → Webサイト
+  icon:      1.2,      // アイコン → 値
+  addrLine:  0,        // 住所が2行以上になったときの行間の追加アキ
 };
-const RULE_W = 1 * PX;  // 罫線の太さ
 
 /* 連絡先アイコン（24 × 24 グリッドの線画） */
 const ICONS = {
@@ -113,8 +129,8 @@ const KEYS = Object.keys(DEFS);
 
 /* ---------- 状態 ---------- */
 const state = {
-  lang: 'ja',
-  showIcons: false, side: 'front',
+  size: 'jp91', lang: 'ja',
+  showIcons: false, side: 'front', usePhoto: true, photo: '', photoAspect: 1, photoW: 0, photoPos: { x: 0.5, y: 0, z: 1 },
   guides: true, marks: false, zoom: 1.4,
   fields: {},           // key → { enabled, ja, en, v }
 };
@@ -190,11 +206,10 @@ const capitalize = s => (s ? s[0].toUpperCase() + s.slice(1) : s);
 
 /* ---------- 文字の実測 ---------- */
 const _mc = document.createElement('canvas').getContext('2d');
-const family = () => GOTHIC;   // 書体選択は廃止。常にゴシック体で統一する
 
-function textW(str, size, weight = 400, ls = 0) {
+function textW(str, size, weight = 400, ls = 0, fam = FONT.front) {
   if (!str) return 0;
-  _mc.font = `${weight} ${size}px ${family()}`;
+  _mc.font = `${weight} ${size}px ${fam}`;
   return _mc.measureText(str).width + ls * Math.max(0, [...str].length - 1);
 }
 /** maxW に収まるまで縮める */
@@ -224,11 +239,30 @@ const KINSOKU_NO_END   = '（〈《「『【〔｛［‘“([{';
    「/」を入れておくと、その位置で自動改行される）。「/」自体は印字しない。
    ※他の項目（Webサイトの URL 等）には適用しない。 */
 const ADDR_HINT = /[\/／]/;
+
+/* 住所欄専用：1行に収まらず自動折返しが必要になった場合、番地
+   （数字がハイフンでつながる区画表記／「丁目・番地・番・号」）の直後で
+   改行する。該当パターンが無いフリーテキストはこの限りではなく、
+   通常の折返し（禁則処理つき）にフォールバックする。 */
+const ADDR_BANCHI = /[0-9０-９]+(?:[-－‐‑‒–—―ー][0-9０-９]+)+|[0-9０-９]+(?:丁目|番地|番|号)/;
+
 function wrap(str, maxW, size, weight, ls, useAddrHint = false) {
   if (!str) return [];
-  if (useAddrHint && ADDR_HINT.test(str)) {
-    const parts = str.split(ADDR_HINT).map(s => s.trim()).filter(Boolean);
-    if (parts.length > 1) return parts.flatMap(p => wrapSegment(p, maxW, size, weight, ls));
+  if (useAddrHint) {
+    if (ADDR_HINT.test(str)) {
+      const parts = str.split(ADDR_HINT).map(s => s.trim()).filter(Boolean);
+      if (parts.length > 1) return parts.flatMap(p => wrapSegment(p, maxW, size, weight, ls));
+    } else if (textW(str, size, weight, ls) > maxW) {
+      const m = ADDR_BANCHI.exec(str);
+      if (m) {
+        const cut = m.index + m[0].length;
+        const head = str.slice(0, cut).trim();
+        const tail = str.slice(cut).trim();
+        if (head && tail) {
+          return [...wrapSegment(head, maxW, size, weight, ls), ...wrapSegment(tail, maxW, size, weight, ls)];
+        }
+      }
+    }
   }
   return wrapSegment(str, maxW, size, weight, ls);
 }
@@ -261,7 +295,7 @@ function wrapSegment(str, maxW, size, weight, ls) {
 function svgText(t, x, y, o = {}) {
   const a = [];
   a.push(`x="${n(x)}" y="${n(y)}"`);
-  a.push(`font-family="${esc(family())}"`);
+  a.push(`font-family="${esc(o.family || FONT.front)}"`);
   a.push(`font-size="${n(o.size)}"`);
   if (o.weight && o.weight !== 400) a.push(`font-weight="${o.weight}"`);
   if (o.ls) a.push(`letter-spacing="${n(o.ls)}"`);
@@ -277,7 +311,7 @@ const svgImage = (art, x, y, w) =>
 /** 24×24 のアイコンを size(mm) で描く */
 function svgIcon(name, x, y, size) {
   const s = size / 24;
-  return `<g transform="translate(${n(x)} ${n(y)}) scale(${n(s)})" fill="none" stroke="${C.meta}"` +
+  return `<g transform="translate(${n(x)} ${n(y)}) scale(${n(s)})" fill="none" stroke="${C.onRed}"` +
     ` stroke-width="${ICON_STROKE}" stroke-linecap="round" stroke-linejoin="round">${ICONS[name]}</g>`;
 }
 
@@ -303,25 +337,20 @@ const group = g => KEYS.filter(k => DEFS[k].group === g && state.fields[k].enabl
    2. 組版：行を積み上げる
    行 = { t, size, weight, fill, ls, lh, gap, ind, icon, iconSize }
        gap … 直前に空けるアキ(mm) / ind … 値の字下げ(mm)
-       { rule:true } は罫線
    ============================================================ */
-const lineH = l => (l.rule ? 0 : l.size * l.lh);
+const lineH = l => l.size * l.lh;
 const stackH = ls => ls.reduce((s, l) => s + (l.gap || 0) + lineH(l), 0);
 
 function drawLines(ls, x, y, boxW) {
   let cy = y, out = '';
   for (const l of ls) {
     cy += l.gap || 0;
-    if (l.rule) {
-      out += `<rect x="${n(x)}" y="${n(cy)}" width="${n(boxW)}" height="${n(RULE_W)}" fill="${C.rule}"/>`;
-      continue;
-    }
     const by = cy + l.size * 0.78;
     if (l.icon) {
       // 文字の視覚的な中心（ベースラインの少し上）にアイコンの中心を合わせる
-      out += svgIcon(l.icon, x, by - l.size * 0.30 - l.iconSize / 2, l.iconSize);
+      out += svgIcon(l.icon, x + (l.dx || 0), by - l.size * 0.30 - l.iconSize / 2, l.iconSize);
     }
-    out += svgText(l.t, x + (l.ind || 0), by, { size: l.size, weight: l.weight, fill: l.fill, ls: l.ls });
+    out += svgText(l.t, x + (l.dx || 0) + (l.ind || 0), by, { size: l.size, weight: l.weight, fill: l.fill, ls: l.ls });
     cy += lineH(l);
   }
   return out;
@@ -338,7 +367,7 @@ function pushField(out, key, lang, st, gap, boxW, ind = 0) {
   const size = st.min ? fit(val, avail, st.size, st.weight, st.ls, st.min) : st.size;
   let first = true;
   for (const t of wrap(val, avail, size, st.weight, st.ls, key === 'address')) {
-    out.push({ t, size, weight: st.weight, fill: st.fill, ls: st.ls, lh: st.lh, ind, gap: first ? gap : 0 });
+    out.push({ t, size, weight: st.weight, fill: st.fill, ls: st.ls, lh: st.lh, ind, gap: first ? gap : (key === 'address' ? GAP.addrLine : 0) });
     first = false;
   }
   return out;
@@ -347,8 +376,19 @@ function pushField(out, key, lang, st, gap, boxW, ind = 0) {
 /* --- 氏名の上（部署・役職） --- */
 function leadLines(lang, sc, boxW) {
   const out = [];
-  const st = { size: FS.label * sc, weight: 500, fill: C.label, ls: 0.05, lh: LH.label, min: 1.5 };
-  for (const k of group('lead')) pushField(out, k, lang, st, out.length ? GAP.item : 0, boxW);
+  const size = Math.max(PT_MIN, FS.lead * sc);
+  const st = { size, weight: 700, fill: C.onRed, ls: size * TRK.lead, lh: LH.lead, min: PT_MIN };
+  // 部署と役職は「部署　役職」と1行に並べるのが基本。幅に収まらないときだけ2行（部署 → 役職）にする
+  const keys = group('lead');
+  if (keys.length === 2) {
+    const sep = lang === 'en' ? '  ' : '　';
+    const joined = keys.map(k => valueOf(k, lang)).filter(Boolean).join(sep);
+    if (joined && textW(joined, st.size, st.weight, st.ls) <= boxW) {
+      out.push({ t: joined, size: st.size, weight: st.weight, fill: st.fill, ls: st.ls, lh: st.lh, ind: 0, gap: 0 });
+      return out;
+    }
+  }
+  for (const k of keys) pushField(out, k, lang, st, out.length ? GAP.item : 0, boxW);
   return out;
 }
 
@@ -356,38 +396,39 @@ function leadLines(lang, sc, boxW) {
 function bodyLines(lang, sc, boxW) {
   const out = [];
   pushField(out, 'name', lang, {
-    size: FS.name * sc, weight: 700, fill: C.name, ls: 2 * PX * sc, lh: LH.name, min: 2.6,
-  }, 0, boxW);
+    size: FS.name, weight: 700, fill: C.onRed, ls: FS.name * TRK.name, lh: LH.name, min: 2.6,   // 氏名の級数は行数が増えても変えない
+  }, GAP.titleName, boxW);
+  const rs = Math.max(PT_MIN, FS.label * sc);
   pushField(out, 'reading', lang, {
-    size: FS.label * sc, weight: 500, fill: C.label, ls: 0.02, lh: LH.label, min: 1.5,
-  }, 0, boxW);
+    size: rs, weight: 700, fill: C.onRed, ls: rs * TRK.label, lh: LH.label, min: PT_MIN,
+  }, GAP.nameLabel, boxW);
 
   const cf = group('contact');
   if (cf.length) {
-    const size = FS.meta * sc;
+    const size = Math.max(PT_MIN, FS.meta * sc);
     const iconSize = size * 1.15;
     const ind = cf.some(k => iconOf(k)) ? iconSize + GAP.icon : 0;
-    const st = { size, weight: 500, fill: C.meta, ls: 0.02, lh: LH.meta };
+    const st = { size, weight: 700, fill: C.onRed, ls: size * TRK.meta, lh: LH.meta, min: PT_MIN };
     cf.forEach((k, i) => {
       const at = out.length;
-      pushField(out, k, lang, st, (i === 0 && at) ? GAP.contact : 0, boxW, ind);
+      pushField(out, k, lang, st, (i === 0 && at) ? GAP.contact : 0, boxW - LY.contactDX, ind);
+      for (let j = at; j < out.length; j++) out[j].dx = LY.contactDX;
       if (out[at] && iconOf(k)) { out[at].icon = iconOf(k); out[at].iconSize = iconSize; }
     });
   }
   return out;
 }
 
-/* --- 会社名 → 罫線 → 住所（下端そろえ） --- */
+/* --- 会社名 → 住所（下端そろえ・白地に載せる） --- */
 function footLines(lang, sc, boxW) {
   const out = [];
-  const stC = { size: FS.label * sc, weight: 900, fill: C.label, ls: 0.04, lh: LH.label, min: 1.5 };
+  const size = Math.max(PT_MIN, FS.small * sc);
+  const stC = { size, weight: 700, fill: C.org, ls: size * TRK.org, lh: LH.small, min: PT_MIN };
   for (const k of group('org')) pushField(out, k, lang, stC, out.length ? GAP.item : 0, boxW);
-  if (out.length) out.push({ rule: true, gap: GAP.compRule });
-
-  const stA = { size: FS.small * sc, weight: 500, fill: C.meta, ls: 0.02, lh: LH.small };
-  group('addr').forEach((k, i) => {
-    pushField(out, k, lang, stA, i === 0 ? (out.length ? GAP.ruleAddr : 0) : GAP.item, boxW);
-  });
+  const stA = { size, weight: 400, fill: C.foot, ls: size * TRK.foot, lh: LH.small };
+  // 郵便番号の前だけアキを空け、住所は郵便番号の直下、Webサイトの前に小さなアキ
+  const gapOf = { postal: out.length ? GAP.item : 0, address: 0, web: GAP.web };
+  group('addr').forEach(k => pushField(out, k, lang, stA, out.length ? (gapOf[k] ?? 0) : 0, boxW));
   return out;
 }
 
@@ -396,88 +437,149 @@ function footLines(lang, sc, boxW) {
    ============================================================ */
 let overflow = false;
 
-/* --- 裏面（Figma うら 526:23452・デザイン固定） --- */
-function renderBack(g) {
-  let out = '';
-  // ロゴマーク + ロゴタイプ（間隔はFigma実測を保持しつつ、
-  // 結合した横幅をカード中央に揃える＝タグラインと視覚的な中心を一致させる）
-  const markW = g.w * BACK.markW;
-  const typeW = g.w * BACK.typeW;
-  const gapX  = g.w * BACK.gapX;
-  const markX = g.w / 2 - (markW + gapX + typeW) / 2;
-  const typeX = markX + markW + gapX;
-  out += svgImage(ART.mark, markX, g.h * BACK.markY, markW);
-  out += svgImage(ART.type, typeX, g.h * BACK.typeY, typeW);
+/* 背景のグラデーション（入稿データ meishi_yoko_A.pdf を 20px/mm で描き、濃淡を実測して色を #FF2400 ベースに置き換えたもの）。
+   座標は塗り足しの左上を原点とする px（1mm = 20px）。描くときに mm へ縮めて -3mm ずらす */
+const FRONT_BG = {
+  defs: '<defs><radialGradient id="pf1"><stop offset="0.00" stop-color="#fe8672" stop-opacity="1.000"/><stop offset="0.17" stop-color="#fe8672" stop-opacity="0.878"/><stop offset="0.33" stop-color="#fe8672" stop-opacity="0.613"/><stop offset="0.50" stop-color="#fe8672" stop-opacity="0.325"/><stop offset="0.67" stop-color="#fe8672" stop-opacity="0.133"/><stop offset="0.83" stop-color="#fe8672" stop-opacity="0.045"/><stop offset="1.00" stop-color="#fe8672" stop-opacity="0.011"/></radialGradient><radialGradient id="pf2"><stop offset="0.00" stop-color="#fe2400" stop-opacity="1.000"/><stop offset="0.17" stop-color="#fe2400" stop-opacity="0.878"/><stop offset="0.33" stop-color="#fe2400" stop-opacity="0.613"/><stop offset="0.50" stop-color="#fe2400" stop-opacity="0.325"/><stop offset="0.67" stop-color="#fe2400" stop-opacity="0.133"/><stop offset="0.83" stop-color="#fe2400" stop-opacity="0.045"/><stop offset="1.00" stop-color="#fe2400" stop-opacity="0.011"/></radialGradient><radialGradient id="pf3"><stop offset="0.00" stop-color="#ff8672" stop-opacity="0.771"/><stop offset="0.17" stop-color="#ff8672" stop-opacity="0.677"/><stop offset="0.33" stop-color="#ff8672" stop-opacity="0.472"/><stop offset="0.50" stop-color="#ff8672" stop-opacity="0.250"/><stop offset="0.67" stop-color="#ff8672" stop-opacity="0.102"/><stop offset="0.83" stop-color="#ff8672" stop-opacity="0.035"/><stop offset="1.00" stop-color="#ff8672" stop-opacity="0.009"/></radialGradient><radialGradient id="pf4"><stop offset="0.00" stop-color="#ff8a77" stop-opacity="1.000"/><stop offset="0.17" stop-color="#ff8a77" stop-opacity="0.878"/><stop offset="0.33" stop-color="#ff8a77" stop-opacity="0.613"/><stop offset="0.50" stop-color="#ff8a77" stop-opacity="0.325"/><stop offset="0.67" stop-color="#ff8a77" stop-opacity="0.133"/><stop offset="0.83" stop-color="#ff8a77" stop-opacity="0.045"/><stop offset="1.00" stop-color="#ff8a77" stop-opacity="0.011"/></radialGradient><radialGradient id="pf5"><stop offset="0.00" stop-color="#fb5237" stop-opacity="1.000"/><stop offset="0.17" stop-color="#fb5237" stop-opacity="0.878"/><stop offset="0.33" stop-color="#fb5237" stop-opacity="0.613"/><stop offset="0.50" stop-color="#fb5237" stop-opacity="0.325"/><stop offset="0.67" stop-color="#fb5237" stop-opacity="0.133"/><stop offset="0.83" stop-color="#fb5237" stop-opacity="0.045"/><stop offset="1.00" stop-color="#fb5237" stop-opacity="0.011"/></radialGradient><radialGradient id="pf6"><stop offset="0.00" stop-color="#e32000" stop-opacity="0.656"/><stop offset="0.17" stop-color="#e32000" stop-opacity="0.576"/><stop offset="0.33" stop-color="#e32000" stop-opacity="0.402"/><stop offset="0.50" stop-color="#e32000" stop-opacity="0.213"/><stop offset="0.67" stop-color="#e32000" stop-opacity="0.087"/><stop offset="0.83" stop-color="#e32000" stop-opacity="0.030"/><stop offset="1.00" stop-color="#e32000" stop-opacity="0.007"/></radialGradient><radialGradient id="pf7"><stop offset="0.00" stop-color="#f12200" stop-opacity="1.000"/><stop offset="0.17" stop-color="#f12200" stop-opacity="0.878"/><stop offset="0.33" stop-color="#f12200" stop-opacity="0.613"/><stop offset="0.50" stop-color="#f12200" stop-opacity="0.325"/><stop offset="0.67" stop-color="#f12200" stop-opacity="0.133"/><stop offset="0.83" stop-color="#f12200" stop-opacity="0.045"/><stop offset="1.00" stop-color="#f12200" stop-opacity="0.011"/></radialGradient><radialGradient id="pf8"><stop offset="0.00" stop-color="#ff664d" stop-opacity="0.844"/><stop offset="0.17" stop-color="#ff664d" stop-opacity="0.741"/><stop offset="0.33" stop-color="#ff664d" stop-opacity="0.517"/><stop offset="0.50" stop-color="#ff664d" stop-opacity="0.274"/><stop offset="0.67" stop-color="#ff664d" stop-opacity="0.112"/><stop offset="0.83" stop-color="#ff664d" stop-opacity="0.038"/><stop offset="1.00" stop-color="#ff664d" stop-opacity="0.009"/></radialGradient><radialGradient id="pf9"><stop offset="0.00" stop-color="#ff9b8b" stop-opacity="0.430"/><stop offset="0.17" stop-color="#ff9b8b" stop-opacity="0.377"/><stop offset="0.33" stop-color="#ff9b8b" stop-opacity="0.263"/><stop offset="0.50" stop-color="#ff9b8b" stop-opacity="0.140"/><stop offset="0.67" stop-color="#ff9b8b" stop-opacity="0.057"/><stop offset="0.83" stop-color="#ff9b8b" stop-opacity="0.019"/><stop offset="1.00" stop-color="#ff9b8b" stop-opacity="0.005"/></radialGradient><radialGradient id="pf10"><stop offset="0.00" stop-color="#ff583c" stop-opacity="0.344"/><stop offset="0.17" stop-color="#ff583c" stop-opacity="0.302"/><stop offset="0.33" stop-color="#ff583c" stop-opacity="0.210"/><stop offset="0.50" stop-color="#ff583c" stop-opacity="0.112"/><stop offset="0.67" stop-color="#ff583c" stop-opacity="0.046"/><stop offset="0.83" stop-color="#ff583c" stop-opacity="0.015"/><stop offset="1.00" stop-color="#ff583c" stop-opacity="0.004"/></radialGradient><radialGradient id="pf11"><stop offset="0.00" stop-color="#ff7c66" stop-opacity="0.771"/><stop offset="0.17" stop-color="#ff7c66" stop-opacity="0.677"/><stop offset="0.33" stop-color="#ff7c66" stop-opacity="0.472"/><stop offset="0.50" stop-color="#ff7c66" stop-opacity="0.250"/><stop offset="0.67" stop-color="#ff7c66" stop-opacity="0.102"/><stop offset="0.83" stop-color="#ff7c66" stop-opacity="0.035"/><stop offset="1.00" stop-color="#ff7c66" stop-opacity="0.009"/></radialGradient><radialGradient id="pf12"><stop offset="0.00" stop-color="#f12200" stop-opacity="0.864"/><stop offset="0.17" stop-color="#f12200" stop-opacity="0.758"/><stop offset="0.33" stop-color="#f12200" stop-opacity="0.529"/><stop offset="0.50" stop-color="#f12200" stop-opacity="0.280"/><stop offset="0.67" stop-color="#f12200" stop-opacity="0.115"/><stop offset="0.83" stop-color="#f12200" stop-opacity="0.039"/><stop offset="1.00" stop-color="#f12200" stop-opacity="0.010"/></radialGradient><radialGradient id="pf13"><stop offset="0.00" stop-color="#ff8c79" stop-opacity="1.000"/><stop offset="0.17" stop-color="#ff8c79" stop-opacity="0.878"/><stop offset="0.33" stop-color="#ff8c79" stop-opacity="0.613"/><stop offset="0.50" stop-color="#ff8c79" stop-opacity="0.325"/><stop offset="0.67" stop-color="#ff8c79" stop-opacity="0.133"/><stop offset="0.83" stop-color="#ff8c79" stop-opacity="0.045"/><stop offset="1.00" stop-color="#ff8c79" stop-opacity="0.011"/></radialGradient><radialGradient id="pf14"><stop offset="0.00" stop-color="#f32200" stop-opacity="1.000"/><stop offset="0.17" stop-color="#f32200" stop-opacity="0.878"/><stop offset="0.33" stop-color="#f32200" stop-opacity="0.613"/><stop offset="0.50" stop-color="#f32200" stop-opacity="0.325"/><stop offset="0.67" stop-color="#f32200" stop-opacity="0.133"/><stop offset="0.83" stop-color="#f32200" stop-opacity="0.045"/><stop offset="1.00" stop-color="#f32200" stop-opacity="0.011"/></radialGradient><radialGradient id="pf15"><stop offset="0.00" stop-color="#fca192" stop-opacity="0.375"/><stop offset="0.17" stop-color="#fca192" stop-opacity="0.329"/><stop offset="0.33" stop-color="#fca192" stop-opacity="0.230"/><stop offset="0.50" stop-color="#fca192" stop-opacity="0.122"/><stop offset="0.67" stop-color="#fca192" stop-opacity="0.050"/><stop offset="0.83" stop-color="#fca192" stop-opacity="0.017"/><stop offset="1.00" stop-color="#fca192" stop-opacity="0.004"/></radialGradient></defs>',
+  red: '<clipPath id="pf-red"><rect x="-400" y="-400" width="2800" height="1104.3"/></clipPath><g clip-path="url(#pf-red)"><rect x="-400" y="-400" width="2800" height="1104.3" fill="#ff2400"/><ellipse cx="885" cy="105" rx="749" ry="528" fill="url(#pf1)"/><ellipse cx="389" cy="74" rx="239" ry="577" fill="url(#pf2)"/><ellipse cx="1994" cy="108" rx="1663" ry="995" fill="url(#pf3)"/><ellipse cx="607" cy="9" rx="552" ry="235" fill="url(#pf4)"/><ellipse cx="867" cy="595" rx="645" ry="1151" fill="url(#pf5)"/><ellipse cx="1017" cy="257" rx="557" ry="1110" fill="url(#pf6)"/></g>',
+  circles: '<clipPath id="pfcTR"><circle cx="1803.4" cy="176.5" r="263.4"/></clipPath><g clip-path="url(#pfcTR)"><rect x="1540.0" y="-86.89999999999998" width="526.8" height="526.8" fill="#fe4324"/><ellipse cx="1890" cy="221" rx="781" ry="725" fill="url(#pf7)"/><ellipse cx="1909" cy="116" rx="191" ry="410" fill="url(#pf8)"/><ellipse cx="1710" cy="295" rx="390" ry="285" fill="url(#pf9)"/></g><clipPath id="pfcMR"><circle cx="1643.3" cy="783.5" r="140.6"/></clipPath><g clip-path="url(#pfcMR)"><rect x="1502.7" y="642.9" width="281.2" height="281.2" fill="#ff4728"/><ellipse cx="932" cy="130" rx="129" ry="141" fill="url(#pf10)"/><ellipse cx="1681" cy="734" rx="218" ry="157" fill="url(#pf11)"/><ellipse cx="1596" cy="733" rx="207" ry="139" fill="url(#pf12)"/></g><clipPath id="pfcBL"><circle cx="218.5" cy="1181.5" r="287.9"/></clipPath><g clip-path="url(#pfcBL)"><rect x="-69.39999999999998" y="893.6" width="575.8" height="575.8" fill="#fe4526"/><ellipse cx="266" cy="1090" rx="387" ry="426" fill="url(#pf13)"/><ellipse cx="130" cy="1154" rx="511" ry="615" fill="url(#pf14)"/><ellipse cx="10" cy="1311" rx="1061" ry="384" fill="url(#pf15)"/></g>',
+};
+const BACK_BG = {
+  defs: '<defs><radialGradient id="pb1"><stop offset="0.00" stop-color="#ff7f6a" stop-opacity="1.000"/><stop offset="0.17" stop-color="#ff7f6a" stop-opacity="0.878"/><stop offset="0.33" stop-color="#ff7f6a" stop-opacity="0.613"/><stop offset="0.50" stop-color="#ff7f6a" stop-opacity="0.325"/><stop offset="0.67" stop-color="#ff7f6a" stop-opacity="0.133"/><stop offset="0.83" stop-color="#ff7f6a" stop-opacity="0.045"/><stop offset="1.00" stop-color="#ff7f6a" stop-opacity="0.011"/></radialGradient><radialGradient id="pb2"><stop offset="0.00" stop-color="#ef2200" stop-opacity="1.000"/><stop offset="0.17" stop-color="#ef2200" stop-opacity="0.878"/><stop offset="0.33" stop-color="#ef2200" stop-opacity="0.613"/><stop offset="0.50" stop-color="#ef2200" stop-opacity="0.325"/><stop offset="0.67" stop-color="#ef2200" stop-opacity="0.133"/><stop offset="0.83" stop-color="#ef2200" stop-opacity="0.045"/><stop offset="1.00" stop-color="#ef2200" stop-opacity="0.011"/></radialGradient><radialGradient id="pb3"><stop offset="0.00" stop-color="#ff4f32" stop-opacity="1.000"/><stop offset="0.17" stop-color="#ff4f32" stop-opacity="0.878"/><stop offset="0.33" stop-color="#ff4f32" stop-opacity="0.613"/><stop offset="0.50" stop-color="#ff4f32" stop-opacity="0.325"/><stop offset="0.67" stop-color="#ff4f32" stop-opacity="0.133"/><stop offset="0.83" stop-color="#ff4f32" stop-opacity="0.045"/><stop offset="1.00" stop-color="#ff4f32" stop-opacity="0.011"/></radialGradient><radialGradient id="pb4"><stop offset="0.00" stop-color="#ff9c8c" stop-opacity="0.673"/><stop offset="0.17" stop-color="#ff9c8c" stop-opacity="0.591"/><stop offset="0.33" stop-color="#ff9c8c" stop-opacity="0.412"/><stop offset="0.50" stop-color="#ff9c8c" stop-opacity="0.218"/><stop offset="0.67" stop-color="#ff9c8c" stop-opacity="0.089"/><stop offset="0.83" stop-color="#ff9c8c" stop-opacity="0.030"/><stop offset="1.00" stop-color="#ff9c8c" stop-opacity="0.007"/></radialGradient><radialGradient id="pb5"><stop offset="0.00" stop-color="#ff8b78" stop-opacity="0.528"/><stop offset="0.17" stop-color="#ff8b78" stop-opacity="0.463"/><stop offset="0.33" stop-color="#ff8b78" stop-opacity="0.323"/><stop offset="0.50" stop-color="#ff8b78" stop-opacity="0.171"/><stop offset="0.67" stop-color="#ff8b78" stop-opacity="0.070"/><stop offset="0.83" stop-color="#ff8b78" stop-opacity="0.024"/><stop offset="1.00" stop-color="#ff8b78" stop-opacity="0.006"/></radialGradient><radialGradient id="pb6"><stop offset="0.00" stop-color="#ff4a2c" stop-opacity="0.198"/><stop offset="0.17" stop-color="#ff4a2c" stop-opacity="0.173"/><stop offset="0.33" stop-color="#ff4a2c" stop-opacity="0.121"/><stop offset="0.50" stop-color="#ff4a2c" stop-opacity="0.064"/><stop offset="0.67" stop-color="#ff4a2c" stop-opacity="0.026"/><stop offset="0.83" stop-color="#ff4a2c" stop-opacity="0.009"/><stop offset="1.00" stop-color="#ff4a2c" stop-opacity="0.002"/></radialGradient><radialGradient id="pb7"><stop offset="0.00" stop-color="#ff8672" stop-opacity="0.184"/><stop offset="0.17" stop-color="#ff8672" stop-opacity="0.161"/><stop offset="0.33" stop-color="#ff8672" stop-opacity="0.113"/><stop offset="0.50" stop-color="#ff8672" stop-opacity="0.060"/><stop offset="0.67" stop-color="#ff8672" stop-opacity="0.024"/><stop offset="0.83" stop-color="#ff8672" stop-opacity="0.008"/><stop offset="1.00" stop-color="#ff8672" stop-opacity="0.002"/></radialGradient><radialGradient id="pb8"><stop offset="0.00" stop-color="#e22000" stop-opacity="0.556"/><stop offset="0.17" stop-color="#e22000" stop-opacity="0.488"/><stop offset="0.33" stop-color="#e22000" stop-opacity="0.340"/><stop offset="0.50" stop-color="#e22000" stop-opacity="0.180"/><stop offset="0.67" stop-color="#e22000" stop-opacity="0.074"/><stop offset="0.83" stop-color="#e22000" stop-opacity="0.025"/><stop offset="1.00" stop-color="#e22000" stop-opacity="0.006"/></radialGradient><radialGradient id="pb9"><stop offset="0.00" stop-color="#fe2400" stop-opacity="1.000"/><stop offset="0.17" stop-color="#fe2400" stop-opacity="0.878"/><stop offset="0.33" stop-color="#fe2400" stop-opacity="0.613"/><stop offset="0.50" stop-color="#fe2400" stop-opacity="0.325"/><stop offset="0.67" stop-color="#fe2400" stop-opacity="0.133"/><stop offset="0.83" stop-color="#fe2400" stop-opacity="0.045"/><stop offset="1.00" stop-color="#fe2400" stop-opacity="0.011"/></radialGradient><radialGradient id="pb10"><stop offset="0.00" stop-color="#ff836e" stop-opacity="0.491"/><stop offset="0.17" stop-color="#ff836e" stop-opacity="0.431"/><stop offset="0.33" stop-color="#ff836e" stop-opacity="0.301"/><stop offset="0.50" stop-color="#ff836e" stop-opacity="0.159"/><stop offset="0.67" stop-color="#ff836e" stop-opacity="0.065"/><stop offset="0.83" stop-color="#ff836e" stop-opacity="0.022"/><stop offset="1.00" stop-color="#ff836e" stop-opacity="0.005"/></radialGradient><radialGradient id="pb11"><stop offset="0.00" stop-color="#fd2400" stop-opacity="0.673"/><stop offset="0.17" stop-color="#fd2400" stop-opacity="0.591"/><stop offset="0.33" stop-color="#fd2400" stop-opacity="0.412"/><stop offset="0.50" stop-color="#fd2400" stop-opacity="0.218"/><stop offset="0.67" stop-color="#fd2400" stop-opacity="0.089"/><stop offset="0.83" stop-color="#fd2400" stop-opacity="0.030"/><stop offset="1.00" stop-color="#fd2400" stop-opacity="0.007"/></radialGradient><radialGradient id="pb12"><stop offset="0.00" stop-color="#e12000" stop-opacity="0.740"/><stop offset="0.17" stop-color="#e12000" stop-opacity="0.650"/><stop offset="0.33" stop-color="#e12000" stop-opacity="0.454"/><stop offset="0.50" stop-color="#e12000" stop-opacity="0.240"/><stop offset="0.67" stop-color="#e12000" stop-opacity="0.098"/><stop offset="0.83" stop-color="#e12000" stop-opacity="0.033"/><stop offset="1.00" stop-color="#e12000" stop-opacity="0.008"/></radialGradient></defs>',
+  body: '<rect x="-400" y="-400" width="2800" height="2000" fill="#ff2400"/><ellipse cx="2041" cy="609" rx="3518" ry="706" fill="url(#pb1)"/><ellipse cx="922" cy="431" rx="1306" ry="2152" fill="url(#pb2)"/><ellipse cx="503" cy="880" rx="416" ry="723" fill="url(#pb3)"/><ellipse cx="875" cy="1321" rx="677" ry="1240" fill="url(#pb4)"/><ellipse cx="1658" cy="47" rx="1505" ry="716" fill="url(#pb5)"/><ellipse cx="323" cy="-100" rx="435" ry="2766" fill="url(#pb6)"/><clipPath id="pbcTL"><circle cx="-31.7" cy="173.2" r="274.8"/></clipPath><g clip-path="url(#pbcTL)"><rect x="-306.5" y="-101.60000000000002" width="549.6" height="549.6" fill="#ff5134"/><ellipse cx="158" cy="190" rx="581" ry="508" fill="url(#pb7)"/><ellipse cx="-19" cy="112" rx="120" ry="289" fill="url(#pb8)"/><ellipse cx="152" cy="398" rx="326" ry="241" fill="url(#pb9)"/></g><clipPath id="pbcBOT"><circle cx="958.6" cy="1129.2" r="332.6"/></clipPath><g clip-path="url(#pbcBOT)"><rect x="626.0" y="796.6" width="665.2" height="665.2" fill="#fc3d1e"/><ellipse cx="1098" cy="1032" rx="848" ry="717" fill="url(#pb10)"/><ellipse cx="791" cy="935" rx="479" ry="374" fill="url(#pb11)"/><ellipse cx="911" cy="1065" rx="231" ry="227" fill="url(#pb12)"/></g>',
+};
+const BG_PX = 1 / 20, BLEED_SHIFT = -3;
 
-  // タグライン（3行・中央ぞろえ。行ごとに字送りの異なる区間をつなげて配置する）
-  const k = g.w / CARD.w;
-  const size = BACK.tagSize * k;
-  const lh = size * BACK.tagLH;
-  const lead = (lh - size) / 2 + size * 0.78;   // 行ボックス上端 → ベースライン
-  const cx = g.w / 2;
-  TAGLINE.forEach((segs, i) => {
-    const y = g.h * BACK.tagY + i * lh + lead;
-    // lsPct はフォントサイズに対する割合（例: 0.08 = 8%）、ls は Figma実測のmm固定値
-    const lsOf = s => s.lsPct != null ? size * s.lsPct : s.ls * k;
-    const widths = segs.map(s => textW(s.t, size, 500, lsOf(s)));
-    const total = widths.reduce((a, b) => a + b, 0);
-    let x = cx - total / 2;
-    segs.forEach((s, j) => {
-      out += svgText(s.t, x, y, { size, weight: 500, fill: C.tag, ls: lsOf(s) });
-      x += widths[j];
-    });
+/* 写真なしバージョンの背景（同じ手順でデザイン画像から実測。円の位置・大きさ・赤地の高さが写真ありと異なる） */
+const FRONT_BG_NP = {
+  defs: '<defs><radialGradient id="nq1"><stop offset="0.00" stop-color="#ff5a3f" stop-opacity="0.584"/><stop offset="0.17" stop-color="#ff5a3f" stop-opacity="0.513"/><stop offset="0.33" stop-color="#ff5a3f" stop-opacity="0.358"/><stop offset="0.50" stop-color="#ff5a3f" stop-opacity="0.190"/><stop offset="0.67" stop-color="#ff5a3f" stop-opacity="0.077"/><stop offset="0.83" stop-color="#ff5a3f" stop-opacity="0.026"/><stop offset="1.00" stop-color="#ff5a3f" stop-opacity="0.006"/></radialGradient><radialGradient id="nq2"><stop offset="0.00" stop-color="#ff664d" stop-opacity="0.453"/><stop offset="0.17" stop-color="#ff664d" stop-opacity="0.398"/><stop offset="0.33" stop-color="#ff664d" stop-opacity="0.278"/><stop offset="0.50" stop-color="#ff664d" stop-opacity="0.147"/><stop offset="0.67" stop-color="#ff664d" stop-opacity="0.060"/><stop offset="0.83" stop-color="#ff664d" stop-opacity="0.020"/><stop offset="1.00" stop-color="#ff664d" stop-opacity="0.005"/></radialGradient><radialGradient id="nq3"><stop offset="0.00" stop-color="#ff7d67" stop-opacity="0.754"/><stop offset="0.17" stop-color="#ff7d67" stop-opacity="0.662"/><stop offset="0.33" stop-color="#ff7d67" stop-opacity="0.462"/><stop offset="0.50" stop-color="#ff7d67" stop-opacity="0.245"/><stop offset="0.67" stop-color="#ff7d67" stop-opacity="0.100"/><stop offset="0.83" stop-color="#ff7d67" stop-opacity="0.034"/><stop offset="1.00" stop-color="#ff7d67" stop-opacity="0.008"/></radialGradient><radialGradient id="nq4"><stop offset="0.00" stop-color="#ff4425" stop-opacity="0.752"/><stop offset="0.17" stop-color="#ff4425" stop-opacity="0.660"/><stop offset="0.33" stop-color="#ff4425" stop-opacity="0.461"/><stop offset="0.50" stop-color="#ff4425" stop-opacity="0.244"/><stop offset="0.67" stop-color="#ff4425" stop-opacity="0.100"/><stop offset="0.83" stop-color="#ff4425" stop-opacity="0.034"/><stop offset="1.00" stop-color="#ff4425" stop-opacity="0.008"/></radialGradient><radialGradient id="nq5"><stop offset="0.00" stop-color="#da1f00" stop-opacity="0.714"/><stop offset="0.17" stop-color="#da1f00" stop-opacity="0.627"/><stop offset="0.33" stop-color="#da1f00" stop-opacity="0.437"/><stop offset="0.50" stop-color="#da1f00" stop-opacity="0.232"/><stop offset="0.67" stop-color="#da1f00" stop-opacity="0.095"/><stop offset="0.83" stop-color="#da1f00" stop-opacity="0.032"/><stop offset="1.00" stop-color="#da1f00" stop-opacity="0.008"/></radialGradient><radialGradient id="nq6"><stop offset="0.00" stop-color="#ff7e68" stop-opacity="0.423"/><stop offset="0.17" stop-color="#ff7e68" stop-opacity="0.371"/><stop offset="0.33" stop-color="#ff7e68" stop-opacity="0.259"/><stop offset="0.50" stop-color="#ff7e68" stop-opacity="0.137"/><stop offset="0.67" stop-color="#ff7e68" stop-opacity="0.056"/><stop offset="0.83" stop-color="#ff7e68" stop-opacity="0.019"/><stop offset="1.00" stop-color="#ff7e68" stop-opacity="0.005"/></radialGradient><radialGradient id="nq7"><stop offset="0.00" stop-color="#e22000" stop-opacity="1.000"/><stop offset="0.17" stop-color="#e22000" stop-opacity="0.878"/><stop offset="0.33" stop-color="#e22000" stop-opacity="0.613"/><stop offset="0.50" stop-color="#e22000" stop-opacity="0.325"/><stop offset="0.67" stop-color="#e22000" stop-opacity="0.133"/><stop offset="0.83" stop-color="#e22000" stop-opacity="0.045"/><stop offset="1.00" stop-color="#e22000" stop-opacity="0.011"/></radialGradient><radialGradient id="nq8"><stop offset="0.00" stop-color="#ff674e" stop-opacity="0.623"/><stop offset="0.17" stop-color="#ff674e" stop-opacity="0.547"/><stop offset="0.33" stop-color="#ff674e" stop-opacity="0.382"/><stop offset="0.50" stop-color="#ff674e" stop-opacity="0.202"/><stop offset="0.67" stop-color="#ff674e" stop-opacity="0.083"/><stop offset="0.83" stop-color="#ff674e" stop-opacity="0.028"/><stop offset="1.00" stop-color="#ff674e" stop-opacity="0.007"/></radialGradient><radialGradient id="nq9"><stop offset="0.00" stop-color="#ff836f" stop-opacity="0.336"/><stop offset="0.17" stop-color="#ff836f" stop-opacity="0.295"/><stop offset="0.33" stop-color="#ff836f" stop-opacity="0.206"/><stop offset="0.50" stop-color="#ff836f" stop-opacity="0.109"/><stop offset="0.67" stop-color="#ff836f" stop-opacity="0.045"/><stop offset="0.83" stop-color="#ff836f" stop-opacity="0.015"/><stop offset="1.00" stop-color="#ff836f" stop-opacity="0.004"/></radialGradient><radialGradient id="nq10"><stop offset="0.00" stop-color="#c71c00" stop-opacity="1.000"/><stop offset="0.17" stop-color="#c71c00" stop-opacity="0.878"/><stop offset="0.33" stop-color="#c71c00" stop-opacity="0.613"/><stop offset="0.50" stop-color="#c71c00" stop-opacity="0.325"/><stop offset="0.67" stop-color="#c71c00" stop-opacity="0.133"/><stop offset="0.83" stop-color="#c71c00" stop-opacity="0.045"/><stop offset="1.00" stop-color="#c71c00" stop-opacity="0.011"/></radialGradient><radialGradient id="nq11"><stop offset="0.00" stop-color="#f92300" stop-opacity="0.469"/><stop offset="0.17" stop-color="#f92300" stop-opacity="0.412"/><stop offset="0.33" stop-color="#f92300" stop-opacity="0.287"/><stop offset="0.50" stop-color="#f92300" stop-opacity="0.152"/><stop offset="0.67" stop-color="#f92300" stop-opacity="0.062"/><stop offset="0.83" stop-color="#f92300" stop-opacity="0.021"/><stop offset="1.00" stop-color="#f92300" stop-opacity="0.005"/></radialGradient><radialGradient id="nq12"><stop offset="0.00" stop-color="#ff8a76" stop-opacity="0.337"/><stop offset="0.17" stop-color="#ff8a76" stop-opacity="0.296"/><stop offset="0.33" stop-color="#ff8a76" stop-opacity="0.207"/><stop offset="0.50" stop-color="#ff8a76" stop-opacity="0.109"/><stop offset="0.67" stop-color="#ff8a76" stop-opacity="0.045"/><stop offset="0.83" stop-color="#ff8a76" stop-opacity="0.015"/><stop offset="1.00" stop-color="#ff8a76" stop-opacity="0.004"/></radialGradient><radialGradient id="nq13"><stop offset="0.00" stop-color="#ff6c53" stop-opacity="1.000"/><stop offset="0.17" stop-color="#ff6c53" stop-opacity="0.878"/><stop offset="0.33" stop-color="#ff6c53" stop-opacity="0.613"/><stop offset="0.50" stop-color="#ff6c53" stop-opacity="0.325"/><stop offset="0.67" stop-color="#ff6c53" stop-opacity="0.133"/><stop offset="0.83" stop-color="#ff6c53" stop-opacity="0.045"/><stop offset="1.00" stop-color="#ff6c53" stop-opacity="0.011"/></radialGradient><radialGradient id="nq14"><stop offset="0.00" stop-color="#e82100" stop-opacity="0.842"/><stop offset="0.17" stop-color="#e82100" stop-opacity="0.739"/><stop offset="0.33" stop-color="#e82100" stop-opacity="0.516"/><stop offset="0.50" stop-color="#e82100" stop-opacity="0.273"/><stop offset="0.67" stop-color="#e82100" stop-opacity="0.112"/><stop offset="0.83" stop-color="#e82100" stop-opacity="0.038"/><stop offset="1.00" stop-color="#e82100" stop-opacity="0.009"/></radialGradient><radialGradient id="nq15"><stop offset="0.00" stop-color="#ea3618" stop-opacity="0.856"/><stop offset="0.17" stop-color="#ea3618" stop-opacity="0.752"/><stop offset="0.33" stop-color="#ea3618" stop-opacity="0.525"/><stop offset="0.50" stop-color="#ea3618" stop-opacity="0.278"/><stop offset="0.67" stop-color="#ea3618" stop-opacity="0.114"/><stop offset="0.83" stop-color="#ea3618" stop-opacity="0.039"/><stop offset="1.00" stop-color="#ea3618" stop-opacity="0.010"/></radialGradient><radialGradient id="nq16"><stop offset="0.00" stop-color="#d21e00" stop-opacity="1.000"/><stop offset="0.17" stop-color="#d21e00" stop-opacity="0.878"/><stop offset="0.33" stop-color="#d21e00" stop-opacity="0.613"/><stop offset="0.50" stop-color="#d21e00" stop-opacity="0.325"/><stop offset="0.67" stop-color="#d21e00" stop-opacity="0.133"/><stop offset="0.83" stop-color="#d21e00" stop-opacity="0.045"/><stop offset="1.00" stop-color="#d21e00" stop-opacity="0.011"/></radialGradient><radialGradient id="nq17"><stop offset="0.00" stop-color="#ff816d" stop-opacity="0.275"/><stop offset="0.17" stop-color="#ff816d" stop-opacity="0.242"/><stop offset="0.33" stop-color="#ff816d" stop-opacity="0.169"/><stop offset="0.50" stop-color="#ff816d" stop-opacity="0.089"/><stop offset="0.67" stop-color="#ff816d" stop-opacity="0.037"/><stop offset="0.83" stop-color="#ff816d" stop-opacity="0.012"/><stop offset="1.00" stop-color="#ff816d" stop-opacity="0.003"/></radialGradient><radialGradient id="nq18"><stop offset="0.00" stop-color="#fd2400" stop-opacity="0.514"/><stop offset="0.17" stop-color="#fd2400" stop-opacity="0.451"/><stop offset="0.33" stop-color="#fd2400" stop-opacity="0.315"/><stop offset="0.50" stop-color="#fd2400" stop-opacity="0.167"/><stop offset="0.67" stop-color="#fd2400" stop-opacity="0.068"/><stop offset="0.83" stop-color="#fd2400" stop-opacity="0.023"/><stop offset="1.00" stop-color="#fd2400" stop-opacity="0.006"/></radialGradient></defs>',
+  red: '<clipPath id="nq-red"><rect x="-400" y="-400" width="2800" height="1133"/></clipPath><g clip-path="url(#nq-red)"><rect x="-400" y="-400" width="2800" height="1133" fill="#ff2400"/><ellipse cx="462" cy="624" rx="414" ry="554" fill="url(#nq1)"/><ellipse cx="715" cy="669" rx="616" ry="1384" fill="url(#nq2)"/><ellipse cx="734" cy="7" rx="752" ry="483" fill="url(#nq3)"/><ellipse cx="1869" cy="332" rx="448" ry="891" fill="url(#nq4)"/><ellipse cx="974" cy="210" rx="699" ry="1253" fill="url(#nq5)"/><ellipse cx="1574" cy="112" rx="871" ry="716" fill="url(#nq6)"/></g>',
+  circles: '<clipPath id="nqcbig"><circle cx="463.6" cy="169.9" r="279.6"/></clipPath><g clip-path="url(#nqcbig)"><rect x="184.0" y="-109.70000000000002" width="559.2" height="559.2" fill="#ff3a1a"/><ellipse cx="508" cy="366" rx="300" ry="896" fill="url(#nq7)"/><ellipse cx="543" cy="369" rx="265" ry="278" fill="url(#nq8)"/><ellipse cx="553" cy="225" rx="502" ry="203" fill="url(#nq9)"/></g><clipPath id="nqcTR"><circle cx="1853.8" cy="95.2" r="279.9"/></clipPath><g clip-path="url(#nqcTR)"><rect x="1573.9" y="-184.7" width="559.8" height="559.8" fill="#ff3716"/><ellipse cx="1787" cy="86" rx="171" ry="244" fill="url(#nq10)"/><ellipse cx="1703" cy="0" rx="375" ry="3000" fill="url(#nq11)"/><ellipse cx="1766" cy="190" rx="309" ry="317" fill="url(#nq12)"/></g><clipPath id="nqcMR"><circle cx="1680.6" cy="795.4" r="147.4"/></clipPath><g clip-path="url(#nqcMR)"><rect x="1533.1999999999998" y="648.0" width="294.8" height="294.8" fill="#ff3817"/><ellipse cx="1700" cy="759" rx="228" ry="159" fill="url(#nq13)"/><ellipse cx="1650" cy="749" rx="212" ry="167" fill="url(#nq14)"/><ellipse cx="579" cy="786" rx="324" ry="858" fill="url(#nq15)"/></g><clipPath id="nqcBL"><circle cx="223.1" cy="1146.9" r="335.0"/></clipPath><g clip-path="url(#nqcBL)"><rect x="-111.9" y="811.9000000000001" width="670.0" height="670.0" fill="#ff3716"/><ellipse cx="186" cy="1069" rx="226" ry="248" fill="url(#nq16)"/><ellipse cx="392" cy="1050" rx="598" ry="775" fill="url(#nq17)"/><ellipse cx="70" cy="917" rx="448" ry="451" fill="url(#nq18)"/></g>',
+  w: 1938, split: 733,
+};
+const BACK_BG_NP = {
+  defs: '<defs><radialGradient id="nr1"><stop offset="0.00" stop-color="#ff755f" stop-opacity="0.751"/><stop offset="0.17" stop-color="#ff755f" stop-opacity="0.659"/><stop offset="0.33" stop-color="#ff755f" stop-opacity="0.460"/><stop offset="0.50" stop-color="#ff755f" stop-opacity="0.244"/><stop offset="0.67" stop-color="#ff755f" stop-opacity="0.100"/><stop offset="0.83" stop-color="#ff755f" stop-opacity="0.034"/><stop offset="1.00" stop-color="#ff755f" stop-opacity="0.008"/></radialGradient><radialGradient id="nr2"><stop offset="0.00" stop-color="#ff5033" stop-opacity="0.497"/><stop offset="0.17" stop-color="#ff5033" stop-opacity="0.436"/><stop offset="0.33" stop-color="#ff5033" stop-opacity="0.304"/><stop offset="0.50" stop-color="#ff5033" stop-opacity="0.161"/><stop offset="0.67" stop-color="#ff5033" stop-opacity="0.066"/><stop offset="0.83" stop-color="#ff5033" stop-opacity="0.022"/><stop offset="1.00" stop-color="#ff5033" stop-opacity="0.006"/></radialGradient><radialGradient id="nr3"><stop offset="0.00" stop-color="#ff806b" stop-opacity="0.682"/><stop offset="0.17" stop-color="#ff806b" stop-opacity="0.599"/><stop offset="0.33" stop-color="#ff806b" stop-opacity="0.418"/><stop offset="0.50" stop-color="#ff806b" stop-opacity="0.221"/><stop offset="0.67" stop-color="#ff806b" stop-opacity="0.090"/><stop offset="0.83" stop-color="#ff806b" stop-opacity="0.031"/><stop offset="1.00" stop-color="#ff806b" stop-opacity="0.008"/></radialGradient><radialGradient id="nr4"><stop offset="0.00" stop-color="#ff7d68" stop-opacity="0.430"/><stop offset="0.17" stop-color="#ff7d68" stop-opacity="0.377"/><stop offset="0.33" stop-color="#ff7d68" stop-opacity="0.263"/><stop offset="0.50" stop-color="#ff7d68" stop-opacity="0.140"/><stop offset="0.67" stop-color="#ff7d68" stop-opacity="0.057"/><stop offset="0.83" stop-color="#ff7d68" stop-opacity="0.019"/><stop offset="1.00" stop-color="#ff7d68" stop-opacity="0.005"/></radialGradient><radialGradient id="nr5"><stop offset="0.00" stop-color="#ff2400" stop-opacity="0.479"/><stop offset="0.17" stop-color="#ff2400" stop-opacity="0.421"/><stop offset="0.33" stop-color="#ff2400" stop-opacity="0.293"/><stop offset="0.50" stop-color="#ff2400" stop-opacity="0.155"/><stop offset="0.67" stop-color="#ff2400" stop-opacity="0.064"/><stop offset="0.83" stop-color="#ff2400" stop-opacity="0.022"/><stop offset="1.00" stop-color="#ff2400" stop-opacity="0.005"/></radialGradient><radialGradient id="nr6"><stop offset="0.00" stop-color="#c61d01" stop-opacity="0.435"/><stop offset="0.17" stop-color="#c61d01" stop-opacity="0.382"/><stop offset="0.33" stop-color="#c61d01" stop-opacity="0.266"/><stop offset="0.50" stop-color="#c61d01" stop-opacity="0.141"/><stop offset="0.67" stop-color="#c61d01" stop-opacity="0.058"/><stop offset="0.83" stop-color="#c61d01" stop-opacity="0.020"/><stop offset="1.00" stop-color="#c61d01" stop-opacity="0.005"/></radialGradient><radialGradient id="nr7"><stop offset="0.00" stop-color="#ff2a07" stop-opacity="0.637"/><stop offset="0.17" stop-color="#ff2a07" stop-opacity="0.560"/><stop offset="0.33" stop-color="#ff2a07" stop-opacity="0.390"/><stop offset="0.50" stop-color="#ff2a07" stop-opacity="0.207"/><stop offset="0.67" stop-color="#ff2a07" stop-opacity="0.085"/><stop offset="0.83" stop-color="#ff2a07" stop-opacity="0.029"/><stop offset="1.00" stop-color="#ff2a07" stop-opacity="0.007"/></radialGradient><radialGradient id="nr8"><stop offset="0.00" stop-color="#fe2400" stop-opacity="0.760"/><stop offset="0.17" stop-color="#fe2400" stop-opacity="0.667"/><stop offset="0.33" stop-color="#fe2400" stop-opacity="0.466"/><stop offset="0.50" stop-color="#fe2400" stop-opacity="0.247"/><stop offset="0.67" stop-color="#fe2400" stop-opacity="0.101"/><stop offset="0.83" stop-color="#fe2400" stop-opacity="0.034"/><stop offset="1.00" stop-color="#fe2400" stop-opacity="0.008"/></radialGradient><radialGradient id="nr9"><stop offset="0.00" stop-color="#ff5c42" stop-opacity="0.717"/><stop offset="0.17" stop-color="#ff5c42" stop-opacity="0.630"/><stop offset="0.33" stop-color="#ff5c42" stop-opacity="0.439"/><stop offset="0.50" stop-color="#ff5c42" stop-opacity="0.233"/><stop offset="0.67" stop-color="#ff5c42" stop-opacity="0.095"/><stop offset="0.83" stop-color="#ff5c42" stop-opacity="0.032"/><stop offset="1.00" stop-color="#ff5c42" stop-opacity="0.008"/></radialGradient><radialGradient id="nr10"><stop offset="0.00" stop-color="#ff2805" stop-opacity="1.000"/><stop offset="0.17" stop-color="#ff2805" stop-opacity="0.878"/><stop offset="0.33" stop-color="#ff2805" stop-opacity="0.613"/><stop offset="0.50" stop-color="#ff2805" stop-opacity="0.325"/><stop offset="0.67" stop-color="#ff2805" stop-opacity="0.133"/><stop offset="0.83" stop-color="#ff2805" stop-opacity="0.045"/><stop offset="1.00" stop-color="#ff2805" stop-opacity="0.011"/></radialGradient><radialGradient id="nr11"><stop offset="0.00" stop-color="#d91f00" stop-opacity="0.734"/><stop offset="0.17" stop-color="#d91f00" stop-opacity="0.645"/><stop offset="0.33" stop-color="#d91f00" stop-opacity="0.450"/><stop offset="0.50" stop-color="#d91f00" stop-opacity="0.238"/><stop offset="0.67" stop-color="#d91f00" stop-opacity="0.097"/><stop offset="0.83" stop-color="#d91f00" stop-opacity="0.033"/><stop offset="1.00" stop-color="#d91f00" stop-opacity="0.008"/></radialGradient></defs>',
+  body: '<rect x="-400" y="-400" width="2800" height="2000" fill="#ff2400"/><ellipse cx="848" cy="338" rx="624" ry="2090" fill="url(#nr1)"/><ellipse cx="510" cy="517" rx="854" ry="548" fill="url(#nr2)"/><ellipse cx="625" cy="275" rx="552" ry="686" fill="url(#nr3)"/><ellipse cx="1766" cy="1152" rx="1385" ry="1867" fill="url(#nr4)"/><ellipse cx="1071" cy="298" rx="1868" ry="1524" fill="url(#nr5)"/><ellipse cx="997" cy="193" rx="906" ry="1242" fill="url(#nr6)"/><clipPath id="nrcTL"><circle cx="-78.8" cy="123.5" r="274.0"/></clipPath><g clip-path="url(#nrcTL)"><rect x="-352.8" y="-150.5" width="548.0" height="548.0" fill="#ff4729"/><ellipse cx="89" cy="270" rx="248" ry="127" fill="url(#nr7)"/><ellipse cx="105" cy="353" rx="372" ry="185" fill="url(#nr8)"/></g><clipPath id="nrcBOT"><circle cx="956.7" cy="1138.0" r="356.6"/></clipPath><g clip-path="url(#nrcBOT)"><rect x="600.1" y="781.4" width="713.2" height="713.2" fill="#fd2d0b"/><ellipse cx="1057" cy="1097" rx="641" ry="522" fill="url(#nr9)"/><ellipse cx="773" cy="919" rx="412" ry="323" fill="url(#nr10)"/><ellipse cx="909" cy="1067" rx="285" ry="272" fill="url(#nr11)"/></g>',
+  w: 1936,
+};
+
+/** 写真の表示サイズ(mm)と位置(0〜1)。円を必ず覆う（object-fit: cover 相当 × 拡大率） */
+function photoBox() {
+  const r = PHOTO.r, a = state.photoAspect || 1, z = state.photoPos.z || 1;
+  const w = (a >= 1 ? r * 2 * a : r * 2) * z, h = (a >= 1 ? r * 2 : r * 2 / a) * z;
+  const cl = v => Math.min(1, Math.max(0, v));
+  return { w, h, r, px: cl(state.photoPos.x), py: cl(state.photoPos.y) };
+}
+
+/* --- 写真（白いリング + 円形の写真。未設定のときは人型のプレースホルダー） --- */
+function photoSVG() {
+  const cx = PHOTO.cx, cy = PHOTO.cy, R = PHOTO.ring, r = PHOTO.r;
+  let o = `<circle cx="${n(cx)}" cy="${n(cy)}" r="${n(R)}" fill="#FFFFFF"/>` +
+    `<clipPath id="nc-ph"><circle cx="${n(cx)}" cy="${n(cy)}" r="${n(r)}"/></clipPath>` +
+    `<circle cx="${n(cx)}" cy="${n(cy)}" r="${n(r)}" fill="${C.photoBg}"/>`;
+  if (state.photo) {
+    const d = photoBox();
+    o += `<image href="${state.photo}" x="${n(cx - r - d.px * (d.w - 2 * r))}" y="${n(cy - r - d.py * (d.h - 2 * r))}"` +
+      ` width="${n(d.w)}" height="${n(d.h)}" preserveAspectRatio="none" clip-path="url(#nc-ph)"/>`;
+  } else {
+    o += `<g clip-path="url(#nc-ph)" fill="#C3C5C9">` +
+      `<circle cx="${n(cx)}" cy="${n(cy - r * 0.18)}" r="${n(r * 0.34)}"/>` +
+      `<ellipse cx="${n(cx)}" cy="${n(cy + r * 0.98)}" rx="${n(r * 0.66)}" ry="${n(r * 0.6)}"/></g>`;
+  }
+  return o;
+}
+
+/** 指定の幅(mm)にぴったり収まる級数を求める（字送りは級数の割合 lsEm） */
+function sizeForWidth(str, w, weight, lsEm, fam) {
+  const perEm = textW(str, 100, weight, 100 * lsEm, fam) / 100;
+  return w / perEm;
+}
+
+/* --- 裏面（デザイン固定。位置・寸法は入稿データの実測） --- */
+function renderBack() {
+  const bc = BACK_CIRCLE;
+  let o;
+  if (state.usePhoto) {
+    o = BACK_BG.defs + `<g transform="translate(${BLEED_SHIFT} ${BLEED_SHIFT}) scale(${BG_PX})">${BACK_BG.body}</g>` +
+      `<circle cx="${bc.cx}" cy="${bc.cy}" r="${bc.ring}" fill="#FFFFFF"/>` +
+      `<circle cx="${bc.cx}" cy="${bc.cy}" r="${bc.inner}" fill="${C.circle}"/>`;
+  } else {
+    const S = DW / BACK_BG_NP.w;
+    o = BACK_BG_NP.defs + `<g transform="scale(${n(S * 1000) / 1000})">${BACK_BG_NP.body}</g>` +
+      `<circle cx="${bc.cx}" cy="${bc.cy}" r="${bc.ring}" fill="#FFFFFF"/>`;
+  }
+  o += svgImage(ART.type, BACK.mark.x, BACK.mark.y, BACK.mark.w);
+  // 見出し・本文は左端とベースラインを入稿データの位置に置き、幅が入稿データと同じになるよう字送りを決める
+  const fitLS = (str, w, size, weight, fam) => (w - textW(str, size, weight, 0, fam)) / [...str].length;
+  const hs = BACK.head.pt * PT;
+  o += svgText(BACK_HEAD, BACK.head.x, BACK.head.y,
+    { size: hs, weight: 500, fill: C.backTx, ls: fitLS(BACK_HEAD, BACK.head.w, hs, 500, FONT.backHead), family: FONT.backHead });
+  const bs = BACK.bodyPt * PT;
+  BACK_BODY.forEach((t, i) => {
+    const b = BACK.body[i];
+    o += svgText(t, b.x, b.y, { size: bs, weight: 700, fill: C.backTx, ls: fitLS(t, b.w, bs, 700, FONT.backBody), family: FONT.backBody });
   });
+  const q = BACK.qr;
+  o += svgImage(ART.qr, q.cx - q.w / 2, q.cy - q.w / 2, q.w);
+  return o;
+}
 
-  // QRコード
-  out += svgImage(ART.qr, g.w * BACK.qrX, g.h * BACK.qrY, g.w * BACK.qrW);
-  return out;
+/* --- おもて --- */
+function renderFront(lang) {
+  let o;
+  if (state.usePhoto) {
+    o = FRONT_BG.defs +
+      `<rect x="-20" y="-20" width="${DW + 40}" height="${DH + 40}" fill="${C.bg}"/>` +
+      `<g transform="translate(${BLEED_SHIFT} ${BLEED_SHIFT}) scale(${BG_PX})">${FRONT_BG.red}${FRONT_BG.circles}</g>` +
+      photoSVG();
+  } else {
+    const fs = DW / FRONT_BG_NP.w;
+    o = FRONT_BG_NP.defs +
+      `<rect x="-20" y="-20" width="${DW + 40}" height="${DH + 40}" fill="${C.bg}"/>` +
+      `<g transform="scale(${n(fs * 1000) / 1000})">${FRONT_BG_NP.red}${FRONT_BG_NP.circles}</g>`;
+  }
+
+  const topX = LY.topX, topW = DW - topX - LY.topRight;
+  const footX = LY.footX, footW = DW - footX - LY.footRight;
+  let topY = LY.topY;
+
+  /* 収まるまで自動で詰める（重なり防止） */
+  let sc = 1, lead, body, foot, fits = false;
+  for (let k = 0; k < 18; k++) {
+    lead = leadLines(lang, sc, topW);
+    body = bodyLines(lang, sc, topW);
+    foot = footLines(lang, sc, footW);
+    // 行が増えたら上段ごと上へ伸ばす（氏名は縮めない）。限界を超えるときだけ他の文字を詰める
+    const h = stackH(lead) + stackH(body);
+    topY = Math.min(LY.topY, LY.topMax - h);
+    if (topY >= LY.topYMin && LY.footBottom - stackH(foot) >= LY.footMin) { fits = true; break; }
+    sc *= 0.96;
+  }
+  overflow = !fits;
+  o += drawLines(lead, topX, topY, topW);
+  o += drawLines(body, topX, topY + stackH(lead), topW);
+  o += drawLines(foot, footX, LY.footBottom - stackH(foot), footW);
+  return o;
+}
+
+function designXform() {
+  const g = geom();
+  const s = Math.max(g.w / DW, g.h / DH);
+  return { s, ox: (g.w - DW * s) / 2, oy: (g.h - DH * s) / 2 };
 }
 
 function renderFace(lang, side) {
   const g = geom();
   overflow = false;
-
-  let out = `<rect x="${-g.bleed}" y="${-g.bleed}" width="${g.w + g.bleed * 2}" height="${g.h + g.bleed * 2}" fill="${C.bg}"/>`;
-  if (side === 'back') return out + renderBack(g);
-
-  const padL = g.w * LY.padL, padR = g.w * LY.padR;
-  const boxW = g.w - padL - padR;
-
-  /* --- ロゴ（右上・固定） --- */
-  const lw = g.w * LOGO_W, lh = lw / ART.mark.aspect;
-  out += svgImage(ART.mark, g.w - g.w * LY.logoR - lw, g.h * LY.logoT, lw);
-  const logoBottom = g.h * LY.logoT + lh;
-
-  /* --- 収まるまで自動で詰める（重なり防止） --- */
-  const footBottom = g.h - g.h * LY.footB;
-  let sc = 1, lead, body, foot, nameTop = 0, leadTop = 0, footTop = 0, fits = false;
-
-  for (let k = 0; k < 18; k++) {
-    lead = leadLines(lang, sc, boxW);
-    body = bodyLines(lang, sc, boxW);
-    foot = footLines(lang, sc, boxW);
-
-    nameTop = g.h * LY.nameT;
-    leadTop = nameTop - (lead.length ? stackH(lead) + GAP.titleName : 0);
-
-    // 上に伸びすぎたら氏名ブロックごと下へ逃がす
-    const minTop = logoBottom + GAP.logo;
-    if (leadTop < minTop) { const d = minTop - leadTop; leadTop += d; nameTop += d; }
-
-    footTop = footBottom - stackH(foot);
-    if (nameTop + stackH(body) <= footTop - 2.5) { fits = true; break; }
-    sc *= 0.96;
-  }
-  overflow = !fits;
-
-  out += drawLines(lead, padL, leadTop, boxW);
-  out += drawLines(body, padL, nameTop, boxW);
-  out += drawLines(foot, padL, footTop, boxW);
-  return out;
+  const inner = side === 'back' ? renderBack() : renderFront(lang);
+  // 用紙が 91 × 55mm 以外のときは、デザインを拡縮して中央に置く（はみ出しは裁ち落とし）
+  const { s, ox, oy } = designXform();
+  return `<g transform="translate(${n(ox)} ${n(oy)}) scale(${n(s)})">${inner}</g>`;
 }
 
 function geom() {
-  return { w: CARD.w, h: CARD.h, bleed: BLEED };
+  const s = SIZES[state.size] || SIZES.jp91;
+  return { w: s.w, h: s.h, bleed: BLEED };
 }
 
 function trimMarks(g, m) {
@@ -529,9 +631,9 @@ function buildSVG(side, opt = {}) {
    ============================================================ */
 const el = {};
 function cacheEls() {
-  ['fields', 'card-wrap', 'guides', 'marks',
+  ['fields', 'size', 'card-wrap', 'guides', 'marks',
    'zoom-in', 'zoom-out', 'zoom-out-label', 'side-back', 'warn', 'export-modal',
-   'print-root', 'print-page', 'btn-export', 'btn-save', 'btn-list', 'list-modal', 'card-list',
+   'btn-export', 'btn-save', 'btn-list', 'list-modal', 'card-list',
    'confirm-modal',
    'stage', 'btn-settings', 'settings-pop'].forEach(id => el[id] = $('#' + id));
 }
@@ -583,8 +685,48 @@ function fieldRow(key) {
   return li;
 }
 
+/* 写真の行（アップロード / 外す）。長辺 1600px に縮小して保持する（拡大しても 350ppi を保ちやすくする） */
+function photoRow() {
+  const li = document.createElement('li');
+  li.className = 'fi fi-photo';
+  li.innerHTML = `
+    <div class="fi__head">
+      <label class="sw"><input type="checkbox" id="photo-on" ${state.usePhoto ? 'checked' : ''}><span></span></label>
+      <span class="fi__label">写真</span>
+    </div>
+    <div class="fi__body"${state.usePhoto ? '' : ' hidden'}><div class="photo-row">
+      <button type="button" class="btn btn--ghost btn--sm" id="photo-pick">${state.photo ? '写真を差し替える' : '写真を選ぶ'}</button>
+      <input type="file" id="photo-file" accept="image/*" hidden>
+    </div>${state.photo ? `
+    <div class="photo-adj">
+      <label><span>拡大</span><input type="range" data-pp="z" min="1" max="3" step="0.01" value="${state.photoPos.z}" aria-label="写真の拡大"></label>
+      <label><span>左右</span><input type="range" data-pp="x" min="0" max="1" step="0.01" value="${state.photoPos.x}" aria-label="写真の左右位置"></label>
+      <label><span>上下</span><input type="range" data-pp="y" min="0" max="1" step="0.01" value="${state.photoPos.y}" aria-label="写真の上下位置"></label>
+      <p class="hint">プレビュー上の写真をドラッグしても動かせます。</p>
+    </div>` : ''}</div>`;
+  return li;
+}
+function loadPhoto(file) {
+  const rd = new FileReader();
+  rd.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, 1600 / Math.max(img.width, img.height));
+      const cv = document.createElement('canvas');
+      cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k);
+      cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+      state.photo = cv.toDataURL('image/jpeg', 0.9);
+      state.photoAspect = cv.width / cv.height;
+      state.photoPos = { x: 0.5, y: 0, z: 1 };
+      renderFields(); update();
+    };
+    img.src = rd.result;
+  };
+  rd.readAsDataURL(file);
+}
 function renderFields() {
   el.fields.innerHTML = '';
+  el.fields.appendChild(photoRow());
   for (const k of KEYS) {
     if (k === 'reading' && state.lang === 'en') continue;   // 英語表記ではローマ字表記欄は不要
     el.fields.appendChild(fieldRow(k));
@@ -628,8 +770,9 @@ function formatPhoneJP(digits) {
   const d = digits.slice(0, 11);
   const join = (...parts) => parts.filter(Boolean).join('-');
   let m;
-  if ((m = d.match(/^(0[789]0)(\d{0,4})(\d{0,4})$/))) return join(m[1], m[2], m[3]);
-  if ((m = d.match(/^(0120|0800)(\d{0,3})(\d{0,3})$/))) return join(m[1], m[2], m[3]);
+  if ((m = d.match(/^(0120)(\d{0,3})(\d{0,3})$/))) return join(m[1], m[2], m[3]);          // フリーダイヤル 0120-xxx-xxx
+  if ((m = d.match(/^(0800)(\d{0,3})(\d{0,4})$/))) return join(m[1], m[2], m[3]);          // 0800-xxx-xxxx（11桁）
+  if ((m = d.match(/^(0[5789]0)(\d{0,4})(\d{0,4})$/))) return join(m[1], m[2], m[3]);      // 携帯・PHS・IP電話 0x0-xxxx-xxxx（11桁）
   if ((m = d.match(/^(0[36])(\d{0,4})(\d{0,4})$/))) return join(m[1], m[2], m[3]);
   if ((m = d.match(/^(0\d{0,2})(\d{0,3})(\d{0,4})$/))) return join(m[1], m[2], m[3]);
   return d;
@@ -642,8 +785,14 @@ function formatPostalJP(digits) {
 }
 
 function bindFields() {
+  el.fields.addEventListener('click', e => {
+    if (e.target.id === 'photo-pick') $('#photo-file').click();
+  });
   el.fields.addEventListener('change', e => {
     const t = e.target;
+    if (t.id === 'photo-on') { state.usePhoto = t.checked; renderFields(); update(); return; }
+    if (t.dataset.pp) return;
+    if (t.id === 'photo-file') { if (t.files[0]) loadPhoto(t.files[0]); return; }
     if (t.id === 'show-icons') { state.showIcons = t.checked; update(); return; }
     if (t.dataset.act !== 'toggle') return;
     const li = t.closest('.fi');
@@ -653,6 +802,7 @@ function bindFields() {
   });
   el.fields.addEventListener('input', e => {
     const t = e.target;
+    if (t.dataset.pp) { state.photoPos[t.dataset.pp] = parseFloat(t.value); update(); return; }
     if (!t.dataset.k) return;
     const li = t.closest('.fi');
     const key = li.dataset.key;
@@ -660,7 +810,7 @@ function bindFields() {
     let val = t.value;
     if (t.type === 'tel') {
       // 数字だけ入力した場合にも、自動でハイフンを入れて表示する（電話番号・郵便番号）
-      const digits = val.replace(/[^\d]/g, '');
+      const digits = val.replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0)).replace(/[^\d]/g, '');   // 全角数字も受け付ける
       if (digits) {
         val = key === 'postal' ? formatPostalJP(digits) : formatPhoneJP(digits);
         if (val !== t.value) {
@@ -698,7 +848,22 @@ function bindFields() {
 }
 
 /* --- プレビュー更新 --- */
+/* 写真の縦横比は保存値に頼らず、画像そのものから測り直す（古い保存データや差し替え後のずれ防止） */
+let _aspectOf = '';
+function syncPhotoAspect() {
+  if (!state.photo || _aspectOf === state.photo) return;
+  _aspectOf = state.photo;
+  const src = state.photo, im = new Image();
+  im.onload = () => {
+    if (state.photo !== src || !im.height) return;
+    state.photoAspect = im.width / im.height;
+    state.photoW = im.width;
+    update();
+  };
+  im.src = src;
+}
 function update() {
+  syncPhotoAspect();
   const svg = buildSVG(state.side, { guides: state.guides, marks: state.marks });
   el['card-wrap'].innerHTML = svg;
   const g = geom();
@@ -708,8 +873,14 @@ function update() {
   node.setAttribute('width', Math.round(px));
   node.setAttribute('height', Math.round(px * (g.h + pad * 2) / (g.w + pad * 2)));
 
-  el.warn.hidden = !overflow;
-  if (overflow) el.warn.textContent = '文字量がカードに収まりきっていません。表示する要素を減らしてください。';
+  const msgs = [];
+  if (overflow) msgs.push('文字量がカードに収まりきっていません（6pt 未満には縮めません）。表示する要素を減らしてください。');
+  if (state.usePhoto && state.photo && state.photoW) {
+    const ppi = state.photoW / (photoBox().w / 25.4);
+    if (ppi < 300) msgs.push(`写真の解像度が低めです（原寸で約 ${Math.round(ppi)}ppi）。入稿規定は 350〜400ppi です。拡大を下げるか、より大きな写真を使ってください。`);
+  }
+  el.warn.hidden = !msgs.length;
+  el.warn.textContent = msgs.join(' ');
   save();
 }
 function syncSeg(sel, key, val) {
@@ -729,59 +900,158 @@ function download(blob, name) {
 const baseName = () => 'namecard_' + (valueOf('name', state.lang) || 'untitled').replace(/\s+/g, '');
 const sides = () => ['front', 'back'];   // 常に両面を書き出す（「裏面も書き出す」の切替は廃止）
 
-function exportSVG() {
-  // 入稿用データなので、プレビューのトンボ表示設定に関わらず常にトンボを付けて書き出す
-  sides().forEach(s => {
-    const svg = buildSVG(s, { guides: false, marks: true });
-    download(new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n' + svg], { type: 'image/svg+xml' }),
-      `${baseName()}_${s === 'front' ? 'omote' : 'ura'}.svg`);
+/**
+ * 1面をキャンバスに描く（文字はキャンバスの fillText で描く）。
+ * SVG を画像として読み込むと Webフォントが使えず別の書体に置き換わるため、
+ * 文字だけ SVG から抜き出し、読み込み済みのフォントで直接描き込む。
+ * @param {'front'|'back'} side
+ * @param {{dpi:number, marks:boolean}} o
+ */
+async function renderCanvas(side, { dpi, marks }) {
+  const g = geom();
+  const pad = g.bleed + (marks ? MARKM : 0);
+  const mmW = g.w + pad * 2, mmH = g.h + pad * 2;
+  const ppm = dpi / 25.4;   // 1mm あたりのピクセル数
+  const doc = new DOMParser().parseFromString(buildSVG(side, { guides: false, marks }), 'image/svg+xml');
+  const texts = [...doc.querySelectorAll('text')].map(t => ({
+    t: t.textContent, x: +t.getAttribute('x'), y: +t.getAttribute('y'),
+    size: +t.getAttribute('font-size'), weight: +(t.getAttribute('font-weight') || 400),
+    ls: +(t.getAttribute('letter-spacing') || 0), fill: t.getAttribute('fill'),
+    anchor: t.getAttribute('text-anchor') || 'start',
+    family: t.getAttribute('font-family') || FONT.front,
+  }));
+  doc.querySelectorAll('text').forEach(t => t.remove());
+  const svgText = new XMLSerializer().serializeToString(doc.documentElement);
+  // 使う書体を読み込んでおく
+  await Promise.all([...new Set(texts.map(t => `${t.weight} 20px ${t.family}|${t.t}`))]
+    .map(k => { const [f, txt] = k.split('|'); return document.fonts.load(f, txt).catch(() => {}); }));
+  const img = await new Promise((ok, ng) => {
+    const im = new Image();
+    im.onload = () => ok(im);
+    im.onerror = () => ng(new Error('SVGの読み込みに失敗しました'));
+    im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgText);
   });
+  const cv = document.createElement('canvas');
+  cv.width = Math.round(mmW * ppm); cv.height = Math.round(mmH * ppm);
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);
+  ctx.drawImage(img, 0, 0, cv.width, cv.height);
+  const hasLS = 'letterSpacing' in ctx;
+  for (const t of texts) {
+    ctx.font = `${t.weight} ${t.size * ppm}px ${t.family}`;
+    ctx.fillStyle = t.fill;
+    ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+    const ls = t.ls * ppm;
+    let w;
+    if (hasLS) { ctx.letterSpacing = ls + 'px'; w = ctx.measureText(t.t).width; }
+    else w = ctx.measureText(t.t).width + ls * [...t.t].length;
+    let x = (t.x + pad) * ppm;
+    if (t.anchor === 'middle') x -= w / 2;
+    const y = (t.y + pad) * ppm;
+    if (hasLS) ctx.fillText(t.t, x, y);
+    else { for (const ch of t.t) { ctx.fillText(ch, x, y); x += ctx.measureText(ch).width + ls; } }
+  }
+  if (hasLS) ctx.letterSpacing = '0px';
+  return { cv, mmW, mmH };
 }
 
 /** PNG / JPEG 共通のラスター書き出し */
-function exportRaster(mime, ext, quality) {
-  const dpi = 350;
-  sides().forEach(side => {
-    const g = geom();
-    const pad = g.bleed + (state.marks ? MARKM : 0);
-    const mmW = g.w + pad * 2, mmH = g.h + pad * 2;
-    const svg = buildSVG(side, { guides: false, marks: state.marks });
-    const url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml;charset=utf-8' }));
-    const img = new Image();
-    img.onload = () => {
-      const cv = document.createElement('canvas');
-      cv.width = Math.round(mmW / 25.4 * dpi);
-      cv.height = Math.round(mmH / 25.4 * dpi);
-      const ctx = cv.getContext('2d');
-      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height);
-      ctx.drawImage(img, 0, 0, cv.width, cv.height);
-      cv.toBlob(b => download(b, `${baseName()}_${side === 'front' ? 'omote' : 'ura'}_350dpi.${ext}`), mime, quality);
-      URL.revokeObjectURL(url);
-    };
-    img.onerror = () => { URL.revokeObjectURL(url); alert(ext.toUpperCase() + 'の書き出しに失敗しました。'); };
-    img.src = url;
-  });
+async function exportRaster(mime, ext, quality) {
+  try {
+    for (const side of sides()) {
+      const { cv } = await renderCanvas(side, { dpi: 350, marks: state.marks });
+      const b = await new Promise(r => cv.toBlob(r, mime, quality));
+      download(b, `${baseName()}_${side === 'front' ? 'omote' : 'ura'}_350dpi.${ext}`);
+    }
+  } catch (e) { alert(ext.toUpperCase() + 'の書き出しに失敗しました。'); }
 }
 const exportPNG = () => exportRaster('image/png', 'png');
-const exportJPG = () => exportRaster('image/jpeg', 'jpg', 0.95);
 
-function exportPDF() {
-  // 入稿用PDFなので、プレビューのトンボ表示設定に関わらず常に塗り足し3mm＋トンボ付きで書き出す
-  const g = geom();
-  const pad = g.bleed + MARKM;
-  const W = g.w + pad * 2, H = g.h + pad * 2;
-  el['print-page'].textContent = `@page { size: ${n(W)}mm ${n(H)}mm; margin: 0; }`;
-  el['print-root'].innerHTML = sides()
-    .map(s => buildSVG(s, { guides: false, marks: true })).join('');
-  el['export-modal'].close();
-  setTimeout(() => window.print(), 120);
+/* ============================================================
+   CMYK PDF（入稿用）
+   各面を 600dpi の画像にして CMYK に変換し、PDF に埋め込む。
+   ・ページは仕上がり + 塗り足し 3mm（91×55mm なら 97×61mm）。トンボは付けない
+   ・TrimBox で仕上がり位置を示す
+   ・文字は画像になるのでアウトライン化の必要がない
+   ・RGB→CMYK は ICC プロファイルを使わない簡易変換（灰色・黒は K 版のみになる）
+   ============================================================ */
+function rgbaToCMYK(px) {
+  const out = new Uint8Array((px.length / 4) * 4);
+  for (let i = 0, o = 0; i < px.length; i += 4, o += 4) {
+    const r = px[i], g = px[i + 1], b = px[i + 2];
+    const mx = Math.max(r, g, b);
+    if (mx === 0) { out[o + 3] = 255; continue; }       // 純黒は K のみ
+    const k = 255 - mx, d = mx;                          // d = 255 - k
+    out[o]     = Math.round(255 * (d - r) / d);
+    out[o + 1] = Math.round(255 * (d - g) / d);
+    out[o + 2] = Math.round(255 * (d - b) / d);
+    out[o + 3] = k;
+  }
+  return out;
+}
+async function deflate(bytes) {
+  if (typeof CompressionStream === 'undefined') return null;
+  const cs = new CompressionStream('deflate');
+  const w = cs.writable.getWriter();
+  w.write(bytes); w.close();
+  return new Uint8Array(await new Response(cs.readable).arrayBuffer());
+}
+async function buildCMYKPdf(pages) {
+  const enc = new TextEncoder();
+  const chunks = []; let len = 0; const offs = [];
+  const put = d => { const u = typeof d === 'string' ? enc.encode(d) : d; chunks.push(u); len += u.length; };
+  const obj = (id, body) => { offs[id] = len; put(`${id} 0 obj\n${body}\nendobj\n`); };
+  const MM = 72 / 25.4;
+  put('%PDF-1.4\n%\xE2\xE3\xCF\xD3\n');
+  const kids = pages.map((_, i) => `${3 + i * 3} 0 R`).join(' ');
+  obj(1, '<< /Type /Catalog /Pages 2 0 R >>');
+  obj(2, `<< /Type /Pages /Kids [${kids}] /Count ${pages.length} >>`);
+  const bleed = BLEED * MM;
+  for (let i = 0; i < pages.length; i++) {
+    const p = pages[i], id = 3 + i * 3;
+    const W = p.mmW * MM, H = p.mmH * MM, f = v => v.toFixed(3);
+    obj(id, `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${f(W)} ${f(H)}] /BleedBox [0 0 ${f(W)} ${f(H)}]` +
+      ` /TrimBox [${f(bleed)} ${f(bleed)} ${f(W - bleed)} ${f(H - bleed)}]` +
+      ` /Resources << /XObject << /Im0 ${id + 1} 0 R >> >> /Contents ${id + 2} 0 R >>`);
+    const body = p.data;
+    offs[id + 1] = len;
+    put(`${id + 1} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${p.w} /Height ${p.h} /ColorSpace /DeviceCMYK` +
+      ` /BitsPerComponent 8${p.packed ? ' /Filter /FlateDecode' : ''} /Length ${body.length} >>\nstream\n`);
+    put(body); put('\nendstream\nendobj\n');
+    const cs = `q ${f(W)} 0 0 ${f(H)} 0 0 cm /Im0 Do Q`;
+    obj(id + 2, `<< /Length ${cs.length} >>\nstream\n${cs}\nendstream`);
+  }
+  const n = 3 + pages.length * 3;
+  const xref = len;
+  let x = `xref\n0 ${n}\n0000000000 65535 f \n`;
+  for (let i = 1; i < n; i++) x += String(offs[i] ?? 0).padStart(10, '0') + ' 00000 n \n';
+  put(x + `trailer\n<< /Size ${n} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`);
+  return new Blob(chunks, { type: 'application/pdf' });
+}
+async function exportCMYKPDF() {
+  const btn = $('#ex-cmyk'), label = btn.textContent;
+  btn.disabled = true; btn.textContent = '作成中…';
+  try {
+    const pages = [];
+    for (const side of sides()) {
+      const { cv, mmW, mmH } = await renderCanvas(side, { dpi: 600, marks: false });
+      const px = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data;
+      const raw = rgbaToCMYK(px);
+      const packed = await deflate(raw);
+      pages.push({ w: cv.width, h: cv.height, mmW, mmH, data: packed || raw, packed: !!packed });
+    }
+    download(await buildCMYKPdf(pages), `${baseName()}_CMYK.pdf`);
+  } catch (e) {
+    console.error(e);
+    alert('CMYK PDFの書き出しに失敗しました。');
+  } finally { btn.disabled = false; btn.textContent = label; }
 }
 
 /* ---------- 編集中の状態（リロードしても続きから） ---------- */
 const KEY = 'nc-builder-v4';
 function snapshot() {
-  const { lang, showIcons, fields } = state;
-  return { lang, showIcons, fields };
+  const { size, lang, showIcons, usePhoto, photo, photoAspect, photoPos, fields } = state;
+  return { size, lang, showIcons, usePhoto, photo, photoAspect, photoPos, fields };
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(snapshot())); } catch (e) {} }
 function restore(data) {
@@ -802,7 +1072,9 @@ function restore(data) {
     }
   }
   if (state.lang !== 'en') state.lang = 'ja';
+  if (!SIZES[state.size]) state.size = 'jp91';
 
+  el.size.value = state.size;
   syncSeg('#seg-lang', 'lang', state.lang);
   renderFields();   // #show-icons はここで再生成され、state.showIcons から復元される
 }
@@ -921,13 +1193,38 @@ function svgArt(b64) {
   return art;
 }
 
+/** 黒いQR画像を指定色に染め、白地を透明にする */
+function tintQR(b64, hex) {
+  const im = new Image();
+  im.onload = () => {
+    const cv = document.createElement('canvas');
+    cv.width = im.width; cv.height = im.height;
+    const cx = cv.getContext('2d');
+    cx.drawImage(im, 0, 0);
+    const d = cx.getImageData(0, 0, cv.width, cv.height), px = d.data;
+    const t = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
+    for (let i = 0; i < px.length; i += 4) {
+      const lum = (px[i] + px[i + 1] + px[i + 2]) / 765;
+      // 明るい部分（QRの白地）は透明にして、背景の円の色をそのまま見せる
+      for (let c = 0; c < 3; c++) px[i + c] = t[c];
+      px[i + 3] = Math.round(px[i + 3] * (1 - lum));
+    }
+    cx.putImageData(d, 0, 0);
+    ART.qr = { href: cv.toDataURL('image/png'), aspect: 1 };
+    update();
+  };
+  im.src = 'data:image/png;base64,' + b64;
+}
+
 function init() {
   cacheEls();
   resetFields();
+  el.size.value = state.size;
 
   ART.mark = svgArt(MARK_B64);
-  ART.type = svgArt(LOGOTYPE_B64);
+  ART.type = svgArt(btoa(atob(LOGOTYPE_B64).replace(/fill="black"/g, 'fill="'+C.backMark+'"')));   // 裏面は赤地なので白抜き
   ART.qr   = { href: 'data:image/png;base64,' + QR_B64, aspect: 1 };
+  tintQR(QR_B64, C.qr);   // QR は入稿データのグレーに染める（読み込み後に再描画）
 
   let saved = null;
   try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
@@ -945,6 +1242,8 @@ function init() {
     state.side = b.dataset.side; syncSeg('#seg-side', 'side', state.side); update();
   });
 
+  el.size.addEventListener('change', () => { state.size = el.size.value; update(); });
+
   // 「連絡先にアイコンを表示する」は #fields 内で再生成されるため、変更は bindFields() 側の委譲で拾う
 
   // 表示設定（歯車 → ポップオーバー）
@@ -959,6 +1258,32 @@ function init() {
   document.addEventListener('click', () => showPop(false));
   document.addEventListener('keydown', e => { if (e.key === 'Escape') showPop(false); });
 
+  // 写真をプレビュー上でドラッグして位置を動かす
+  let drag = null;
+  el['card-wrap'].addEventListener('pointerdown', e => {
+    if (state.side !== 'front' || !state.usePhoto || !state.photo) return;
+    const svg = el['card-wrap'].firstElementChild, rc = svg.getBoundingClientRect();
+    const vb = svg.viewBox.baseVal, mm = vb.width / rc.width;
+    const { s, ox, oy } = designXform();
+    const dx = ((vb.x + (e.clientX - rc.left) * mm) - ox) / s - PHOTO.cx;
+    const dy = ((vb.y + (e.clientY - rc.top) * mm) - oy) / s - PHOTO.cy;
+    if (Math.hypot(dx, dy) > PHOTO.r) return;
+    drag = { x: e.clientX, y: e.clientY, px: state.photoPos.x, py: state.photoPos.y, k: mm / s };
+    el['card-wrap'].setPointerCapture(e.pointerId);
+    el['card-wrap'].style.cursor = 'grabbing';
+  });
+  el['card-wrap'].addEventListener('pointermove', e => {
+    if (!drag) return;
+    const d = photoBox();
+    // ドラッグした向きに写真が動く = 位置の割合は逆向きに増減
+    if (d.w > 2 * d.r) state.photoPos.x = Math.min(1, Math.max(0, drag.px - (e.clientX - drag.x) * drag.k / (d.w - 2 * d.r)));
+    if (d.h > 2 * d.r) state.photoPos.y = Math.min(1, Math.max(0, drag.py - (e.clientY - drag.y) * drag.k / (d.h - 2 * d.r)));
+    $$('[data-pp="x"],[data-pp="y"]').forEach(i => { i.value = state.photoPos[i.dataset.pp]; });
+    update();
+  });
+  const endDrag = () => { drag = null; el['card-wrap'].style.cursor = ''; };
+  el['card-wrap'].addEventListener('pointerup', endDrag);
+  el['card-wrap'].addEventListener('pointercancel', endDrag);
   // プレビュー操作
   el.guides.addEventListener('change', () => { state.guides = el.guides.checked; update(); });
   el.marks.addEventListener('change', () => { state.marks = el.marks.checked; update(); });
@@ -975,10 +1300,8 @@ function init() {
 
   // 書き出し
   el['btn-export'].addEventListener('click', () => el['export-modal'].showModal());
-  $('#ex-pdf').addEventListener('click', exportPDF);
-  $('#ex-svg').addEventListener('click', exportSVG);
+  $('#ex-cmyk').addEventListener('click', exportCMYKPDF);
   $('#ex-png').addEventListener('click', exportPNG);
-  $('#ex-jpg').addEventListener('click', exportJPG);
 
   // 保存（ツール内）と登録済一覧
   el['btn-save'].addEventListener('click', saveEntry);
