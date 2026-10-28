@@ -333,7 +333,11 @@
     <div class="wrap">
       <div class="contact__card reveal">
         <h2 class="contact__heading">Contact us</h2>
-        <form class="contact__form" id="contact-form" novalidate>
+        <form class="contact__form" id="contact-form" data-endpoint="" novalidate><!-- data-endpoint: terraform output contact_endpoint の URL を設定 -->
+        <div class="field" style="position:absolute;left:-9999px" aria-hidden="true">
+          <label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+        </div>
+
         <div class="field">
           <span class="field__label">お名前 <span class="field__required">*</span></span>
           <label class="sr-only" for="field-name">お名前</label>
@@ -379,7 +383,7 @@
 </footer>
 
 <script src="js/company-photos.js?v=20260819h"></script>
-<script src="js/main.js?v=20261009x"></script>
+<script src="js/main.js?v=20261028b"></script>
 <script src="js/service-stage.js?v=20260819h"></script>
 <script src="js/design-a-kv.js?v=20261011d"></script>
 </body>

@@ -183,10 +183,24 @@
         form.reportValidity();
         return;
       }
-      // NOTE: no backend is wired up yet — this only confirms client-side.
-      // Replace with a real submission (fetch/mailer) once an endpoint exists.
-      note.hidden = false;
-      form.reset();
+      var btn = form.querySelector('button[type="submit"]');
+      var payload = {};
+      new FormData(form).forEach(function (v, k) { payload[k] = v; });
+      btn.disabled = true;
+      note.hidden = true;
+      fetch(form.getAttribute('data-endpoint') || '/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).then(function (res) {
+        if (!res.ok) throw new Error('send_failed');
+        note.textContent = 'お問い合わせありがとうございます。内容を確認のうえご連絡いたします。';
+        note.hidden = false;
+        form.reset();
+      }).catch(function () {
+        note.textContent = '送信に失敗しました。時間をおいて再度お試しください。';
+        note.hidden = false;
+      }).then(function () { btn.disabled = false; });
     });
   }
 
