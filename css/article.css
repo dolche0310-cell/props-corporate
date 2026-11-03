@@ -1,0 +1,68 @@
+/* 下層の記事ページ(お知らせ詳細・プライバシーポリシー)。
+   Studio から移行したページ用。トークンは style.css のものを使う。 */
+.article { padding: 120px 0 56px; }
+@media (min-width: 768px) { .article { padding: 200px 0 96px; } }
+.article__inner { max-width: 860px; }
+.article__head { margin-bottom: 40px; }
+.article__title {
+  margin: 0 0 16px;
+  font-family: var(--font-jp);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.6;
+  color: var(--color-text-heading);
+}
+@media (min-width: 768px) { .article__title { font-size: 32px; } }
+.article__date {
+  display: block;
+  font-family: var(--font-en, var(--font-jp));
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+.article__cover {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 0 40px;
+  border-radius: 8px;
+}
+.article__body {
+  font-family: var(--font-jp);
+  font-size: 15px;
+  line-height: 2;
+  letter-spacing: .02em;
+  color: var(--color-ink);
+}
+@media (min-width: 768px) { .article__body { font-size: 16px; } }
+.article__body p { margin: 0 0 1.5em; }
+.article__body h2 {
+  margin: 2.4em 0 .8em;
+  padding-bottom: .5em;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.6;
+  color: var(--color-text-heading);
+}
+@media (min-width: 768px) { .article__body h2 { font-size: 20px; } }
+.article__body a {
+  color: var(--color-primary-dark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}
+.article__body a:hover { color: var(--color-primary); }
+.article__body figure { margin: 2em 0; }
+.article__body img { display: block; max-width: 100%; height: auto; border-radius: 8px; }
+.article__table { margin: 1.5em 0 2em; overflow-x: auto; }
+.article__table table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 1.7; }
+.article__table th,
+.article__table td { padding: 12px 16px; border: 1px solid var(--color-border); text-align: left; vertical-align: top; }
+.article__table th { background: var(--color-light-bg); font-weight: 700; }
+.article__table p { margin: 0; }
+.article__back { margin: 56px 0 0; font-size: 14px; }
+.article__back a { color: var(--color-ink); text-decoration: underline; text-underline-offset: 3px; }
+.article__back a:hover { color: var(--color-primary); }
+/* PC のコンテンツ幅は 920px(.wrap は border-box なので左右の余白ぶんを足す) */
+.article--policy .article__inner { max-width: calc(920px + 2 * clamp(20px, 6.4vw, 92px)); }
+.article--policy .article__body h2 { font-size: 16px; border-bottom: 0; padding-bottom: 0; margin-top: 2em; }

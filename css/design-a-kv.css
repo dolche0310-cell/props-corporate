@@ -97,6 +97,11 @@ body::before {
   @media (prefers-reduced-motion: reduce) {
     .da-nav__link-face, .da-nav__link:hover .da-nav__link-face { transition: none; }
   }
+  /* 821〜1040px: ロゴとメニューがくっつかないよう、余白とメニュー間隔を詰める */
+  @media (max-width: 1040px) {
+    .da-header { padding: 0 36px; }
+    .da-nav { gap: 28px; }
+  }
 
   /* ---------- KV ---------- */
   .da-hero {

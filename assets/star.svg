@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 196 190" width="196" height="190" fill="none" stroke-linejoin="miter" stroke-miterlimit="10">
+  <path d="M62.2,147.5 L117.2,34.6 L139.0,158.3 L48.7,71.1 L173.0,88.5 Z" stroke="#1a1208" stroke-width="18"/>
+  <path d="M62.2,147.5 L117.2,34.6 L139.0,158.3 L48.7,71.1 L173.0,88.5 Z" stroke="#e8a317" stroke-width="12"/>
+  <path d="M62.2,147.5 L117.2,34.6 L139.0,158.3 L48.7,71.1 L173.0,88.5 Z" stroke="#ffd24a" stroke-width="7"/>
+  <path d="M62.2,147.5 L117.2,34.6 L139.0,158.3 L48.7,71.1 L173.0,88.5 Z" stroke="#fff0a8" stroke-width="2.5"/>
+  <polygon points="86.7,124.2 82.4,126.5 41.9,168.4 95.2,140.1" fill="#1a1208" stroke="none"/>
+  <polygon points="88.2,126.9 75.6,133.5 48.7,161.4 93.8,137.5" fill="#e8a317" stroke="none"/>
+  <polygon points="89.3,129.1 70.0,139.3 54.3,155.6 92.6,135.2" fill="#ffd24a" stroke="none"/>
+  <polygon points="90.4,131.0 65.0,144.6 59.3,150.4 91.6,133.3" fill="#fff0a8" stroke="none"/>
+</svg>
