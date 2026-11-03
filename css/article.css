@@ -2,7 +2,8 @@
    Studio から移行したページ用。トークンは style.css のものを使う。 */
 .article { padding: 120px 0 56px; }
 @media (min-width: 768px) { .article { padding: 200px 0 96px; } }
-.article__inner { max-width: 860px; }
+/* PC のコンテンツ幅は 920px(.wrap は border-box なので左右の余白ぶんを足す) */
+.article__inner { max-width: calc(920px + 2 * clamp(20px, 6.4vw, 92px)); }
 .article__head { margin-bottom: 40px; }
 .article__title {
   margin: 0 0 16px;
@@ -61,8 +62,17 @@
 .article__table th { background: var(--color-light-bg); font-weight: 700; }
 .article__table p { margin: 0; }
 .article__back { margin: 56px 0 0; font-size: 14px; }
-.article__back a { color: var(--color-ink); text-decoration: underline; text-underline-offset: 3px; }
-.article__back a:hover { color: var(--color-primary); }
-/* PC のコンテンツ幅は 920px(.wrap は border-box なので左右の余白ぶんを足す) */
-.article--policy .article__inner { max-width: calc(920px + 2 * clamp(20px, 6.4vw, 92px)); }
+.article__back .news__more { margin-bottom: 0; }
+.article__back .news__more-in { flex-direction: row-reverse; }
+/* 「戻る」ボタン: 左向きの矢印をテキストの左に置く。
+   お知らせ一覧の矢印と同じく、文字は動かさず矢印だけが入れ替わる
+   (左へ抜け、同じ矢印が右から入る) */
+.article__back .news__more-arrow svg { transform: rotate(180deg); }
+.article__back .news__more-arrow--hover svg { transform: rotate(180deg) translate(-140%); }
+@media (hover: hover) and (pointer: fine) {
+  .article__back .news__more:hover .news__more-text { transform: none; }
+  .article__back .news__more:hover .news__more-label { transform: none; }
+  .article__back .news__more:hover .news__more-arrow--default svg { transform: rotate(180deg) translate(140%); }
+  .article__back .news__more:hover .news__more-arrow--hover svg { transform: rotate(180deg) translate(0); }
+}
 .article--policy .article__body h2 { font-size: 16px; border-bottom: 0; padding-bottom: 0; margin-top: 2em; }
